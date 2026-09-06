@@ -172,6 +172,7 @@ export default function AdminModals(props: any) {
   } = props;
 
   const [openMobileAccordion, setOpenMobileAccordion] = React.useState<"items" | "status" | "timeline" | "">("items");
+  const [mobileCrudStep, setMobileCrudStep] = React.useState<number>(1);
 
   return (
     <>
@@ -180,17 +181,26 @@ export default function AdminModals(props: any) {
         <div className={styles.modalOverlay}>
           <div className={styles.unsavedModal} style={{ maxWidth: "800px", maxHeight: "90vh", display: "flex", flexDirection: "column", padding: "24px 24px 20px 24px", backgroundColor: "#f3f4f6", border: "1px solid #e5e7eb", borderRadius: "12px", boxShadow: "0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04)" }}>
             <div className={styles.modalHeader} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", width: "100%", borderBottom: "1px solid #e5e7eb", paddingBottom: "14px", marginBottom: "14px", flexShrink: 0, backgroundColor: "#f3f4f6" }}>
-              <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" style={{ width: "22px", height: "22px", color: "#111827" }}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 10.5V6a3.75 3.75 0 1 0-7.5 0v4.5m11.356-1.993 1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 0 1-1.12-1.243l1.264-12A1.125 1.125 0 0 1 5.513 7.5h12.974c.576 0 1.059.435 1.119 1.007ZM8.625 10.5a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm7.5 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" />
-                </svg>
-                <h3 style={{ fontSize: "1.2rem", fontWeight: 700, margin: 0, color: "#111827" }}>
-                  {isEditing ? "Edit Product Details" : "Add new product to Catalog"}
-                </h3>
+              <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" style={{ width: "22px", height: "22px", color: "#111827" }}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 10.5V6a3.75 3.75 0 1 0-7.5 0v4.5m11.356-1.993 1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 0 1-1.12-1.243l1.264-12A1.125 1.125 0 0 1 5.513 7.5h12.974c.576 0 1.059.435 1.119 1.007ZM8.625 10.5a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm7.5 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" />
+                  </svg>
+                  <h3 style={{ fontSize: "1.2rem", fontWeight: 700, margin: 0, color: "#111827" }}>
+                    {isEditing ? "Edit Product Details" : "Add new product to Catalog"}
+                  </h3>
+                </div>
+                <div className={styles.showOnMobile} style={{ display: "flex", alignItems: "center", gap: "6px", marginLeft: "32px" }}>
+                    <span style={{ fontSize: "0.75rem", fontWeight: 600, color: mobileCrudStep === 1 ? "#000" : "#9ca3af" }}>Details</span>
+                    <span style={{ fontSize: "0.75rem", color: "#d1d5db" }}>/</span>
+                    <span style={{ fontSize: "0.75rem", fontWeight: 600, color: mobileCrudStep === 2 ? "#000" : "#9ca3af" }}>Variants</span>
+                    <span style={{ fontSize: "0.75rem", color: "#d1d5db" }}>/</span>
+                    <span style={{ fontSize: "0.75rem", fontWeight: 600, color: mobileCrudStep === 3 ? "#000" : "#9ca3af" }}>Images</span>
+                </div>
               </div>
               <button
                 type="button"
-                onClick={() => { setShowCrudModal(false); resetForm(); }}
+                onClick={() => { setShowCrudModal(false); resetForm(); setMobileCrudStep(1); }}
                 style={{ background: "transparent", border: "none", cursor: "pointer", color: "#9ca3af", padding: "4px", display: "inline-flex", alignItems: "center", borderRadius: "50%", transition: "all 0.2s" }}
                 onMouseEnter={(e) => e.currentTarget.style.color = "#000"}
                 onMouseLeave={(e) => e.currentTarget.style.color = "#9ca3af"}
@@ -209,7 +219,10 @@ export default function AdminModals(props: any) {
                   </div>
                 )}
 
-                {/* Card 1: Product details */}
+                
+                {/* Desktop View (All cards visible) */}
+                <div className={styles.hideOnMobile}>
+{/* Card 1: Product details */}
                 <div style={{ backgroundColor: "#ffffff", border: "1px solid #e5e7eb", borderRadius: "10px", padding: "18px", marginBottom: "14px", boxShadow: "0 1px 3px rgba(0,0,0,0.05)" }}>
                   <h4 style={{ fontSize: "0.92rem", fontWeight: 700, color: "#111827", textTransform: "uppercase", letterSpacing: "0.03em", margin: "0 0 14px 0" }}>Product details</h4>
 
@@ -607,10 +620,153 @@ export default function AdminModals(props: any) {
                 </div>
               </div>
 
-              <div className={styles.modalActionRow} style={{ borderTop: "1px solid #e5e7eb", paddingTop: "14px", display: "flex", justifyContent: "flex-end", gap: "10px", flexShrink: 0, backgroundColor: "#f3f4f6" }}>
+              
+                </div>
+
+                {/* Mobile View (Slider) */}
+                <div className={styles.showOnMobile}>
+                  
+                  {/* Step 1: Details */}
+                  <div style={{ display: mobileCrudStep === 1 ? 'block' : 'none' }}>
+                    <div style={{ backgroundColor: "#ffffff", border: "1px solid #e5e7eb", borderRadius: "10px", padding: "18px", marginBottom: "14px", boxShadow: "0 1px 3px rgba(0,0,0,0.05)" }}>
+                      <h4 style={{ fontSize: "0.92rem", fontWeight: 700, color: "#111827", textTransform: "uppercase", letterSpacing: "0.03em", margin: "0 0 14px 0" }}>Product details</h4>
+                      <div className={styles.inputGroup} style={{ marginBottom: "14px" }}>
+                        <label className={styles.inputLabel}>PerfumeName *</label>
+                        <input type="text" value={name} onChange={(e) => setName(e.target.value)} className={styles.textInput} style={{ padding: "8px 12px", fontSize: "0.85rem" }} required={mobileCrudStep === 1} />
+                      </div>
+                      <div className={styles.inputGroup} style={{ marginBottom: "14px" }}>
+                        <label className={styles.inputLabel}>Description *</label>
+                        <div style={{ backgroundColor: "#ffffff" }}>
+                          <ReactQuill theme="snow" value={description} onChange={setDescription} style={{ height: "150px", marginBottom: "40px" }} />
+                        </div>
+                      </div>
+                      <div className={styles.inputGroup}>
+                        <label className={styles.inputLabel}>Additional Information *</label>
+                        <div style={{ backgroundColor: "#ffffff" }}>
+                          <ReactQuill theme="snow" value={additionalInformation} onChange={setAdditionalInformation} style={{ height: "150px", marginBottom: "40px" }} />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Step 2: Variants (Card Layout) */}
+                  <div style={{ display: mobileCrudStep === 2 ? 'block' : 'none' }}>
+                    <div style={{ backgroundColor: "#ffffff", border: "1px solid #e5e7eb", borderRadius: "10px", padding: "18px", marginBottom: "14px", boxShadow: "0 1px 3px rgba(0,0,0,0.05)" }}>
+                      <h4 style={{ fontSize: "0.92rem", fontWeight: 700, color: "#111827", textTransform: "uppercase", letterSpacing: "0.03em", margin: "0 0 14px 0" }}>Product Variants & Sizing</h4>
+                      
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                        {options.map((opt: any, index: number) => (
+                          <div key={index} style={{ border: '1px solid #e5e7eb', borderRadius: '8px', padding: '16px', backgroundColor: '#fafafa', position: 'relative' }}>
+                                <button type="button" onClick={() => { if (options.length > 1) { setOptions(options.filter((_: any, idx: number) => idx !== index)); } }} style={{ position: 'absolute', top: '12px', right: '12px', background: 'none', border: 'none', color: options.length <= 1 ? '#fca5a5' : '#ef4444', cursor: options.length <= 1 ? 'not-allowed' : 'pointer', fontSize: '1rem' }} title="Remove Variant">✕</button>
+                            <h5 style={{ margin: '0 0 12px 0', fontSize: '0.9rem', color: '#374151', fontWeight: 600 }}>Variant {index + 1}</h5>
+                            
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                                <div>
+                                  <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: '#4b5563', marginBottom: '4px' }}>Size *</label>
+                                  <input type="text" value={opt.size} placeholder="e.g. 50ml" onChange={(e) => { const updated = [...options]; updated[index].size = e.target.value; setOptions(updated); }} required={mobileCrudStep === 2} className={styles.textInput} style={{ padding: "8px", fontSize: "0.85rem", width: "100%", boxSizing: "border-box" }} />
+                                </div>
+                                <div>
+                                  <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: '#4b5563', marginBottom: '4px' }}>Quantity *</label>
+                                  <input type="number" value={opt.quantity} min="0" onChange={(e) => { const updated = [...options]; updated[index].quantity = e.target.value === "" ? "" : (parseInt(e.target.value) || 0); setOptions(updated); }} required={mobileCrudStep === 2} className={styles.textInput} style={{ padding: "8px", fontSize: "0.85rem", width: "100%", boxSizing: "border-box" }} />
+                                </div>
+                              </div>
+                              
+                              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                                <div>
+                                  <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: '#4b5563', marginBottom: '4px' }}>Price (₹) *</label>
+                                  <input type="number" value={opt.price} min="1" onChange={(e) => { const updated = [...options]; updated[index].price = e.target.value === "" ? "" : (parseFloat(e.target.value) || 0); setOptions(updated); }} required={mobileCrudStep === 2} className={styles.textInput} style={{ padding: "8px", fontSize: "0.85rem", width: "100%", boxSizing: "border-box" }} />
+                                </div>
+                                <div>
+                                  <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: '#4b5563', marginBottom: '4px' }}>Strike Price</label>
+                                  <input type="number" value={opt.strikePrice || ""} min="0" placeholder="Optional" onChange={(e) => { const updated = [...options]; updated[index].strikePrice = e.target.value === "" ? "" : (parseFloat(e.target.value) || 0); setOptions(updated); }} className={styles.textInput} style={{ padding: "8px", fontSize: "0.85rem", width: "100%", boxSizing: "border-box" }} />
+                                </div>
+                              </div>
+                              
+                              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                                <div>
+                                  <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: '#4b5563', marginBottom: '4px' }}>Making Price *</label>
+                                  <input type="number" value={opt.makingPrice} min="0" onChange={(e) => { const updated = [...options]; updated[index].makingPrice = e.target.value === "" ? "" : (parseInt(e.target.value) || 0); setOptions(updated); }} required={mobileCrudStep === 2} className={styles.textInput} style={{ padding: "8px", fontSize: "0.85rem", width: "100%", boxSizing: "border-box" }} />
+                                </div>
+                                <div style={{ position: 'relative', zIndex: openCategoryIndex === index ? 60 : 1 }}>
+                                  <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: '#4b5563', marginBottom: '4px' }}>Category *</label>
+                                  <div className={styles.selectInput} style={{ padding: "8px", fontSize: "0.85rem", width: "100%", height: "35px", boxSizing: "border-box", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "space-between", backgroundColor: '#fff' }} onClick={() => setOpenCategoryIndex(openCategoryIndex === index ? null : index)}>
+                                    <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{opt.category && opt.category.length > 0 ? opt.category.join(", ") : "Select..."}</span>
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" style={{ width: "12px", height: "12px", flexShrink: 0 }}><path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" /></svg>
+                                  </div>
+                                  {openCategoryIndex === index && (
+                                    <>
+                                      <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, zIndex: 40 }} onClick={(e) => { e.stopPropagation(); setOpenCategoryIndex(null); }} />
+                                      <div style={{ position: "absolute", top: "100%", left: 0, right: 0, zIndex: 50, backgroundColor: "#fff", border: "1px solid #d1d5db", borderRadius: "6px", boxShadow: "0 4px 6px -1px rgba(0,0,0,0.1)", maxHeight: "200px", overflowY: "auto", marginTop: "4px" }}>
+                                        {allCategories.map((cat: string) => {
+                                          const isSelected = opt.category && opt.category.includes(cat);
+                                          return (
+                                            <div key={cat} onClick={(e) => { e.stopPropagation(); const updated = [...options]; if (!updated[index].category) updated[index].category = []; if (isSelected) { updated[index].category = updated[index].category.filter((c: any) => c !== cat); } else { updated[index].category.push(cat); } setOptions(updated); }} style={{ padding: "10px 12px", cursor: "pointer", backgroundColor: isSelected ? "#4b5563" : "#fff", color: isSelected ? "#fff" : "#374151", fontSize: "0.85rem", borderBottom: '1px solid #f3f4f6' }}>
+                                              {cat}
+                                            </div>
+                                          );
+                                        })}
+                                      </div>
+                                    </>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+
+                      <button type="button" onClick={() => { setOptions([...options, { size: "", quantity: "", price: "", strikePrice: "", makingPrice: "", category: [] }]); }} style={{ marginTop: "16px", display: "inline-flex", alignItems: "center", justifyContent: 'center', gap: "6px", padding: "10px", fontSize: "0.85rem", fontWeight: 600, color: "#000000", backgroundColor: "#f3f4f6", border: "1px solid #d1d5db", borderRadius: "8px", cursor: "pointer", width: '100%' }}>
+                        + Add Another Variant
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Step 3: Images */}
+                  <div style={{ display: mobileCrudStep === 3 ? 'block' : 'none' }}>
+                    <div style={{ backgroundColor: "#ffffff", border: "1px solid #e5e7eb", borderRadius: "10px", padding: "18px", marginBottom: "14px", boxShadow: "0 1px 3px rgba(0,0,0,0.05)" }}>
+                      <h4 style={{ fontSize: "0.92rem", fontWeight: 700, color: "#111827", textTransform: "uppercase", letterSpacing: "0.03em", margin: "0 0 14px 0" }}>Product Images</h4>
+                      <div className={styles.inputGroup} style={{ marginBottom: "14px" }}>
+                        <label className={styles.inputLabel} style={{ marginBottom: "6px" }}>Perfume Images (Upload 3 to 6 images) *</label>
+                        <label style={{ display: "block" }}>
+                          <input type="file" accept="image/*" multiple style={{ display: "none" }} onChange={handleMultipleFilesUpload} disabled={uploading} />
+                          <div style={{ border: "2px dashed #d1d5db", borderRadius: "8px", padding: "20px 12px", textAlign: "center", backgroundColor: "#fafafa", cursor: uploading ? "not-allowed" : "pointer" }}>
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" style={{ width: "28px", height: "28px", color: "#9ca3af", margin: "0 auto 8px auto" }}><path strokeLinecap="round" strokeLinejoin="round" d="M12 16.5V9.75m0 0 3 3m-3-3-3 3M6.75 19.5a4.5 4.5 0 0 1-1.41-8.775 5.25 5.25 0 0 1 10.233-2.33 3 3 0 0 1 3.758 3.848A3.752 3.752 0 0 1 18 19.5H6.75Z" /></svg>
+                            <span style={{ display: "block", fontSize: "0.9rem", fontWeight: 600, color: "#111827" }}>{uploading ? "Uploading Images..." : "Tap to Select Images"}</span>
+                            <span style={{ display: "block", fontSize: "0.75rem", color: "#6b7280", marginTop: "4px" }}>JPG or PNG files • 3 to 6 images</span>
+                          </div>
+                        </label>
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: "8px" }}>
+                          <span style={{ fontSize: "0.75rem", color: images.length >= 3 ? "#10b981" : "#ef4444", fontWeight: 600 }}>{images.length >= 3 ? `✓ Met requirement (${images.length} uploaded)` : `✗ Need ${3 - images.length} more image(s)`}</span>
+                          <span style={{ fontSize: "0.75rem", color: "#6b7280" }}>Max: 6</span>
+                        </div>
+                      </div>
+
+                      {images.length > 0 && (
+                        <div style={{ backgroundColor: "#f9fafb", padding: "12px", borderRadius: "8px", border: "1px solid #e5e7eb" }}>
+                          <label className={styles.inputLabel} style={{ marginBottom: "10px", display: "block", fontSize: "0.75rem", color: "#4b5563" }}>Tap an image to set as FRONT COVER</label>
+                          <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "10px" }}>
+                            {images.map((url: string, index: number) => {
+                              const isCover = imageFront === url;
+                              return (
+                                <div key={index} style={{ position: "relative", borderRadius: "8px", border: isCover ? "2px solid #000000" : "1px solid #e5e7eb", padding: "3px", backgroundColor: "#ffffff", display: "flex", flexDirection: "column", alignItems: "center", cursor: "pointer" }} onClick={() => setImageFront(url)}>
+                                  <img src={url} alt={`Uploaded perfume ${index + 1}`} style={{ width: "100%", height: "80px", objectFit: "cover", borderRadius: "5px" }} />
+                                  <span style={{ fontSize: "0.6rem", fontWeight: 700, color: isCover ? "#000000" : "#9ca3af", textTransform: "uppercase", marginTop: "4px", paddingBottom: "2px" }}>{isCover ? "★ Cover" : "Set Cover"}</span>
+                                  <button type="button" onClick={(e) => { e.stopPropagation(); handleRemoveImage(index); }} style={{ position: "absolute", top: "-6px", right: "-6px", backgroundColor: "#ef4444", color: "#ffffff", border: "none", borderRadius: "50%", width: "20px", height: "20px", fontSize: "0.75rem", fontWeight: 700, display: "flex", alignItems: "center", justifyContent: "center" }}>✕</button>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                </div>
+<div className={styles.modalActionRow} style={{ borderTop: "1px solid #e5e7eb", paddingTop: "14px", display: "flex", justifyContent: "flex-end", gap: "10px", flexShrink: 0, backgroundColor: "#f3f4f6" }}>
                 <button
                   type="button"
-                  onClick={() => { setShowCrudModal(false); resetForm(); }}
+                  onClick={() => { setShowCrudModal(false); resetForm(); setMobileCrudStep(1); }}
                   className={styles.secondaryActionBtn}
                   style={{ padding: "8px 16px", fontSize: "0.85rem" }}
                 >
