@@ -179,7 +179,7 @@ export default function AdminModals(props: any) {
       {/* CRUD Product Modal Overlay */}
       {showCrudModal && (
         <div className={styles.modalOverlay}>
-          <div className={styles.unsavedModal} style={{ maxWidth: "800px", maxHeight: "90vh", display: "flex", flexDirection: "column", padding: "24px 24px 20px 24px", backgroundColor: "#f3f4f6", border: "1px solid #e5e7eb", borderRadius: "12px", boxShadow: "0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04)" }}>
+          <div className={`${styles.unsavedModal} ${styles.mobileModalOverride}`} style={{ maxWidth: "800px", maxHeight: "90vh", display: "flex", flexDirection: "column", padding: "24px 24px 20px 24px", backgroundColor: "#f3f4f6", border: "1px solid #e5e7eb", borderRadius: "12px", boxShadow: "0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04)" }}>
             <div className={styles.modalHeader} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", width: "100%", borderBottom: "1px solid #e5e7eb", paddingBottom: "14px", marginBottom: "14px", flexShrink: 0, backgroundColor: "#f3f4f6" }}>
               <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
                 <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
@@ -211,8 +211,8 @@ export default function AdminModals(props: any) {
               </button>
             </div>
 
-            <form onSubmit={handleSubmit} style={{ width: "100%", display: "flex", flexDirection: "column", flex: 1, overflow: "hidden" }}>
-              <div style={{ flex: 1, overflowY: "auto", paddingRight: "6px", marginBottom: "14px" }}>
+            <form onSubmit={handleSubmit} style={{ width: "100%", display: "flex", flexDirection: "column", flex: 1, overflow: "hidden", minHeight: 0 }}>
+              <div style={{ flex: 1, overflowY: "auto", paddingRight: "6px", marginBottom: "14px", minHeight: 0 }}>
                 {error && showCrudModal && (
                   <div className={styles.errorBanner} style={{ marginBottom: "14px", padding: "12px", borderRadius: "6px", backgroundColor: "#fef2f2", color: "#dc2626", fontSize: "0.85rem", borderLeft: "4px solid #ef4444" }}>
                     {error}
@@ -654,7 +654,7 @@ export default function AdminModals(props: any) {
                     <div style={{ backgroundColor: "#ffffff", border: "1px solid #e5e7eb", borderRadius: "10px", padding: "18px", marginBottom: "14px", boxShadow: "0 1px 3px rgba(0,0,0,0.05)" }}>
                       <h4 style={{ fontSize: "0.92rem", fontWeight: 700, color: "#111827", textTransform: "uppercase", letterSpacing: "0.03em", margin: "0 0 14px 0" }}>Product Variants & Sizing</h4>
                       
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', maxHeight: '50vh', overflowY: 'auto', paddingRight: '4px' }}>
                         {options.map((opt: any, index: number) => (
                           <div key={index} style={{ border: '1px solid #e5e7eb', borderRadius: '8px', padding: '16px', backgroundColor: '#fafafa', position: 'relative' }}>
                                 <button type="button" onClick={() => { if (options.length > 1) { setOptions(options.filter((_: any, idx: number) => idx !== index)); } }} style={{ position: 'absolute', top: '12px', right: '12px', background: 'none', border: 'none', color: options.length <= 1 ? '#fca5a5' : '#ef4444', cursor: options.length <= 1 ? 'not-allowed' : 'pointer', fontSize: '1rem' }} title="Remove Variant">✕</button>
@@ -763,7 +763,7 @@ export default function AdminModals(props: any) {
                   </div>
 
                 </div>
-              <div className={styles.modalActionRow} style={{ borderTop: "1px solid #e5e7eb", paddingTop: "14px", display: "flex", justifyContent: "flex-end", gap: "10px", flexShrink: 0, backgroundColor: "#f3f4f6" }}>
+              <div className={`${styles.modalActionRow} ${styles.mobileFooterOverride}`} style={{ borderTop: "1px solid #e5e7eb", paddingTop: "14px", display: "flex", justifyContent: "flex-end", gap: "10px", flexShrink: 0, backgroundColor: "#f3f4f6" }}>
                 {/* Desktop Buttons */}
                 <div className={styles.hideOnMobile} style={{ display: 'flex', gap: '10px' }}>
                     <button

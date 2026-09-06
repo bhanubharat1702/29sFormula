@@ -2054,3 +2054,18 @@
     display: flex !important; /* flex because we need it to be flex-column */
   }
 }
+
+@media (max-width: 768px) {
+  .mobileModalOverride {
+    max-height: 95vh !important;
+    height: auto !important;
+    width: calc(100vw - 32px) !important;
+    max-width: 480px !important;
+    border-radius: 16px !important;
+    padding: 16px 16px 20px 16px !important;
+    box-sizing: border-box !important;
+  }
+  .mobileFooterOverride {
+    padding-bottom: 24px !important;
+  }
+}
