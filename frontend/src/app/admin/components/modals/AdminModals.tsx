@@ -763,22 +763,59 @@ export default function AdminModals(props: any) {
                   </div>
 
                 </div>
-<div className={styles.modalActionRow} style={{ borderTop: "1px solid #e5e7eb", paddingTop: "14px", display: "flex", justifyContent: "flex-end", gap: "10px", flexShrink: 0, backgroundColor: "#f3f4f6" }}>
-                <button
-                  type="button"
-                  onClick={() => { setShowCrudModal(false); resetForm(); setMobileCrudStep(1); }}
-                  className={styles.secondaryActionBtn}
-                  style={{ padding: "8px 16px", fontSize: "0.85rem" }}
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className={styles.primaryActionBtn}
-                  style={{ padding: "8px 16px", fontSize: "0.85rem" }}
-                >
-                  {isEditing ? "Save Changes" : "Create Product"}
-                </button>
+              <div className={styles.modalActionRow} style={{ borderTop: "1px solid #e5e7eb", paddingTop: "14px", display: "flex", justifyContent: "flex-end", gap: "10px", flexShrink: 0, backgroundColor: "#f3f4f6" }}>
+                {/* Desktop Buttons */}
+                <div className={styles.hideOnMobile} style={{ display: 'flex', gap: '10px' }}>
+                    <button
+                      type="button"
+                      onClick={() => { setShowCrudModal(false); resetForm(); setMobileCrudStep(1); }}
+                      className={styles.secondaryActionBtn}
+                      style={{ padding: "8px 16px", fontSize: "0.85rem" }}
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="submit"
+                      className={styles.primaryActionBtn}
+                      style={{ padding: "8px 16px", fontSize: "0.85rem" }}
+                    >
+                      {isEditing ? "Save Changes" : "Create Product"}
+                    </button>
+                </div>
+
+                {/* Mobile Slider Navigation Buttons */}
+                <div className={styles.showOnMobile} style={{ display: 'flex', width: '100%', gap: '10px' }}>
+                    <button
+                        type="button"
+                        onClick={() => {
+                            if (mobileCrudStep === 1) { setShowCrudModal(false); resetForm(); setMobileCrudStep(1); }
+                            else { setMobileCrudStep(mobileCrudStep - 1); }
+                        }}
+                        className={styles.secondaryActionBtn}
+                        style={{ padding: "12px 16px", fontSize: "0.95rem", flex: '1', textAlign: 'center' }}
+                    >
+                        {mobileCrudStep === 1 ? "Cancel" : "Back"}
+                    </button>
+                    
+                    {mobileCrudStep < 3 ? (
+                        <button
+                            type="button"
+                            onClick={() => setMobileCrudStep(mobileCrudStep + 1)}
+                            className={styles.primaryActionBtn}
+                            style={{ padding: "12px 16px", fontSize: "0.95rem", flex: '2', textAlign: 'center' }}
+                        >
+                            Next Step
+                        </button>
+                    ) : (
+                        <button
+                            type="submit"
+                            className={styles.primaryActionBtn}
+                            style={{ padding: "12px 16px", fontSize: "0.95rem", flex: '2', textAlign: 'center' }}
+                        >
+                            {isEditing ? "Save Changes" : "Create Product"}
+                        </button>
+                    )}
+                </div>
               </div>
             </form>
           </div>
