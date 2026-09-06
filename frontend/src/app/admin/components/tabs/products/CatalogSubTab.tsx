@@ -65,20 +65,20 @@ export default function CatalogSubTab({
     <>
           {activeTab === "products" && activeSubTab === "all" && (
             <div className={styles.viewContainer} style={{ gap: "16px", marginTop: "-12px" }}>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px", flexWrap: "wrap", gap: "15px" }}>
+              <div className={styles.hideOnMobile} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px", flexWrap: "wrap", gap: "15px" }}>
                 <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" style={{ width: "22px", height: "22px", color: "#000" }}>
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className={styles.hideOnMobile} style={{ width: "22px", height: "22px", color: "#000" }}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="m21 7.5-9-5.25L3 7.5m18 0-9 5.25m9-5.25v9l-9 5.25M3 7.5l9 5.25M3 7.5v9l9 5.25m0-9v9" />
                   </svg>
                   <h1 className={styles.pageHeading} style={{ margin: 0, fontSize: "1.25rem" }}>Products</h1>
                 </div>
                 <button
+                  className={`${styles.addPerfumeBtn} ${styles.hideOnMobile}`}
                   onClick={() => {
                     setIsEditing(false);
                     resetForm();
                     setShowCrudModal(true);
                   }}
-                  className={styles.addPerfumeBtn}
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" style={{ width: "14px", height: "14px" }}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
@@ -91,8 +91,11 @@ export default function CatalogSubTab({
 
               {/* Centered Table Panel */}
               <div className={styles.tablePanelFull}>
-                <div className={styles.dashboardCard}>
-                  <h2 className={styles.cardHeaderTitle}>All Products</h2>
+                {/* Desktop Layout (Hidden on Mobile to prevent empty padded card) */}
+                <div className={`${styles.dashboardCard} ${styles.hideOnMobile}`}>
+                  
+                  <div className={styles.hideOnMobile}>
+                    <h2 className={styles.cardHeaderTitle}>All Products</h2>
 
                   {loading ? (
                     <div className={styles.loadingState}>
@@ -323,7 +326,141 @@ export default function CatalogSubTab({
                       </table>
                     </div>
                   )}
-                </div>
+                  </div> {/* End of hideOnMobile */}
+                </div> {/* End of desktop dashboardCard */}
+                  
+                  {/* Mobile Layout */}
+                  <div className={styles.showOnMobile} style={{ width: '100%', flexDirection: 'column', backgroundColor: '#ffffff', border: '1px solid #e5e7eb', borderRadius: '16px', overflow: 'hidden' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '24px 20px 16px', borderBottom: '1px solid #f3f4f6' }}>
+                        <div>
+                            <h2 style={{ fontSize: '1.1rem', fontWeight: 700, color: '#000', margin: '0 0 4px 0', letterSpacing: '-0.02em' }}>All Products</h2>
+                            <span style={{ fontSize: '0.85rem', color: '#a1a1aa', fontWeight: 400 }}>
+                                {filteredProducts.length} products · {filteredProducts.reduce((acc: number, p: any) => acc + (p.quantity || 0), 0)} units in stock
+                            </span>
+                        </div>
+                        <button
+                            onClick={() => {
+                                setIsEditing(false);
+                                resetForm();
+                                setShowCrudModal(true);
+                            }}
+                            style={{ background: '#000', color: '#fff', border: 'none', borderRadius: '12px', padding: '10px 14px', fontSize: '0.85rem', fontWeight: 400, display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer', flexShrink: 0 }}
+                        >
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                            Add product
+                        </button>
+                    </div>
+
+                    <div style={{ padding: '0 20px' }}>
+                        {loading ? (
+                            <div className={styles.loadingState} style={{ padding: '40px 0' }}>
+                                <div className={styles.spinner} />
+                                <p>Loading database inventory...</p>
+                            </div>
+                        ) : filteredProducts.length === 0 ? (
+                            <div className={styles.emptyState} style={{ padding: '40px 0' }}>
+                                <p>No products cataloged.</p>
+                            </div>
+                        ) : (
+                            filteredProducts.map((product: any) => {
+                                const hasVariants = (product.options && product.options.length > 0) || (product.variants && product.variants.length > 0);
+                                const variantsList = product.options && product.options.length > 0 ? product.options : (product.variants || []);
+                                const isExpanded = expandedProducts.has(product._id!);
+                                
+                                let minPrice = Number(product.price);
+                                let maxPrice = Number(product.price);
+                                if (hasVariants && variantsList.length > 0) {
+                                    const prices = variantsList.map((v: any) => Number(v.price)).filter((p: number) => !isNaN(p));
+                                    if (prices.length > 0) {
+                                        minPrice = Math.min(...prices);
+                                        maxPrice = Math.max(...prices);
+                                    }
+                                }
+
+                                const cats = Array.isArray(product.category) ? product.category : [product.category].filter(Boolean);
+                                const catLabel = cats.length > 0 ? cats[0] : "Uncategorized";
+                                const totalQty = product.quantity !== undefined ? product.quantity : (hasVariants ? variantsList.reduce((acc: number, v: any) => acc + (Number(v.quantity) || 0), 0) : 0);
+                                const qtyColor = totalQty <= 3 ? "#fce8e8" : totalQty <= 10 ? "#fef3c7" : "#e6f4ea";
+                                const qtyTextColor = totalQty <= 3 ? "#991b1b" : totalQty <= 10 ? "#92400e" : "#166534";
+
+                                return (
+                                    <div key={product._id} style={{ display: 'flex', flexDirection: 'column' }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', padding: '20px 0', borderBottom: (hasVariants && isExpanded) ? 'none' : '1px solid #f3f4f6' }}>
+                                            <div style={{ width: '70px', height: '70px', borderRadius: '0px', border: '1px solid #f3f4f6', backgroundColor: '#fafafa', display: 'flex', justifyContent: 'center', alignItems: 'center', overflow: 'hidden', flexShrink: 0 }}>
+                                                {product.imageFront ? (
+                                                    <img src={product.imageFront} alt={product.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                                ) : (
+                                                    <div style={{ width: '24px', height: '24px', backgroundColor: '#e5e7eb', borderRadius: '4px' }} />
+                                                )}
+                                            </div>
+                                            <div style={{ marginLeft: '16px', flex: 1 }}>
+                                                <h3 style={{ fontSize: '1.05rem', fontWeight: 700, color: '#000', margin: '0 0 4px 0' }}>{product.name}</h3>
+                                                <span style={{ fontSize: '0.85rem', color: '#9ca3af', display: 'block', marginBottom: '8px' }}>{catLabel}</span>
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                                    <span style={{ fontSize: '0.85rem', fontWeight: 400, color: '#000' }}>
+                                                        {minPrice === maxPrice ? `₹${minPrice.toLocaleString("en-IN")}` : `₹${minPrice.toLocaleString("en-IN")} - ₹${maxPrice.toLocaleString("en-IN")}`}
+                                                    </span>
+                                                    <span style={{ padding: '2px 8px', borderRadius: '12px', fontSize: '0.75rem', fontWeight: 400, backgroundColor: qtyColor, color: qtyTextColor }}>
+                                                        {totalQty}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', justifyContent: 'space-between', height: '70px' }}>
+                                                <div style={{ display: 'flex', gap: '8px' }}>
+                                                    <button onClick={() => handleEdit(product)} style={{ width: '36px', height: '36px', borderRadius: '12px', backgroundColor: 'transparent', border: 'none', display: 'flex', justifyContent: 'center', alignItems: 'center', cursor: 'pointer' }}>
+                                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#000" strokeWidth="2.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" /><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" /></svg>
+                                                    </button>
+                                                    <button onClick={() => setDeleteTargetId(product._id!)} style={{ width: '36px', height: '36px', borderRadius: '12px', backgroundColor: 'transparent', border: 'none', display: 'flex', justifyContent: 'center', alignItems: 'center', cursor: 'pointer' }}>
+                                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ef4444" strokeWidth="2"><polyline points="3 6 5 6 21 6" /><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" /></svg>
+                                                    </button>
+                                                </div>
+                                                {hasVariants && (
+                                                    <span onClick={() => toggleExpand(product._id!)} style={{ fontSize: '0.8rem', color: '#9ca3af', display: 'flex', alignItems: 'center', gap: '4px', fontWeight: 600, cursor: 'pointer' }}>
+                                                        {variantsList.length} sizes
+                                                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" style={{ transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s' }}><path d="M6 9l6 6 6-6"/></svg>
+                                                    </span>
+                                                )}
+                                            </div>
+                                        </div>
+
+                                        {hasVariants && isExpanded && (
+                                            <div style={{ backgroundColor: '#ffffff', border: '1px solid #f3f4f6', borderRadius: '16px', padding: '16px', marginBottom: '20px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                                                {variantsList.map((v: any, i: number) => {
+                                                    const vQty = Number(v.quantity) || 0;
+                                                    const vQtyColor = vQty <= 3 ? "#fce8e8" : vQty <= 10 ? "#fcf0c2" : "#fff8e7"; // adjusting slightly for screenshot
+                                                    const vQtyTextColor = vQty <= 3 ? "#dc2626" : vQty <= 10 ? "#d97706" : "#4b5563"; // using similar colors
+                                                    
+                                                    // In screenshot: 9 left has yellow/orange pill, 2 left has pink/red pill
+                                                    const pillBg = vQty <= 3 ? "#fff1f2" : vQty <= 10 ? "#fffbeb" : "#f3f4f6";
+                                                    const pillText = vQty <= 3 ? "#e11d48" : vQty <= 10 ? "#d97706" : "#4b5563";
+
+                                                    return (
+                                                        <div key={i} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingBottom: i === variantsList.length - 1 ? '0' : '16px', borderBottom: i === variantsList.length - 1 ? 'none' : '1px solid #f3f4f6' }}>
+                                                            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                                                <span style={{ padding: '6px 12px', backgroundColor: '#f3f4f6', borderRadius: '8px', fontSize: '0.85rem', fontWeight: 700, color: '#4b5563', minWidth: '60px', textAlign: 'center' }}>{v.size}</span>
+                                                                <span style={{ fontSize: '1rem', fontWeight: 400, color: '#000' }}>₹{Number(v.price).toLocaleString("en-IN")}</span>
+                                                            </div>
+                                                            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                                                <span style={{ padding: '4px 10px', borderRadius: '12px', fontSize: '0.75rem', fontWeight: 400, backgroundColor: pillBg, color: pillText }}>
+                                                                    {vQty} left
+                                                                </span>
+                                                                <div style={{ display: 'flex', gap: '4px' }}>
+                                                                    <button onClick={(e) => { e.stopPropagation(); handleEdit(product); }} style={{ width: '32px', height: '32px', borderRadius: '8px', backgroundColor: '#fff', border: '1px solid #e5e7eb', display: 'flex', justifyContent: 'center', alignItems: 'center', cursor: 'pointer' }}>
+                                                                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" strokeWidth="2.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" /><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" /></svg>
+                                                                    </button>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    );
+                                                })}
+                                            </div>
+                                        )}
+                                    </div>
+                                );
+                            })
+                        )}
+                    </div>
+                  </div>
               </div>
             </div>
           )}
