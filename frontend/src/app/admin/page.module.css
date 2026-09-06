@@ -2049,16 +2049,22 @@
   display: none !important;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 900px) {
   .showOnMobile {
     display: flex !important; /* flex because we need it to be flex-column */
   }
 }
 
-@media (max-width: 768px) {
+@media (max-width: 900px) {
+  .modalOverlay {
+    align-items: flex-start !important;
+    overflow-y: auto !important;
+    padding: 24px 0 !important;
+  }
   .mobileModalOverride {
-    max-height: 95vh !important;
+    max-height: none !important;
     height: auto !important;
+    margin: auto !important;
     width: calc(100vw - 32px) !important;
     max-width: 480px !important;
     border-radius: 16px !important;
@@ -2066,6 +2072,6 @@
     box-sizing: border-box !important;
   }
   .mobileFooterOverride {
-    padding-bottom: 24px !important;
+    padding-bottom: 16px !important;
   }
 }

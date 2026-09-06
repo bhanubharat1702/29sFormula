@@ -829,12 +829,12 @@ export default function AdminModals(props: any) {
                       {images.length > 0 && (
                         <div style={{ backgroundColor: "#f9fafb", padding: "12px", borderRadius: "8px", border: "1px solid #e5e7eb" }}>
                           <label className={styles.inputLabel} style={{ marginBottom: "10px", display: "block", fontSize: "0.75rem", color: "#4b5563" }}>Tap an image to set as FRONT COVER</label>
-                          <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "10px" }}>
+                          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(85px, 1fr))", gap: "8px" }}>
                             {images.map((url: string, index: number) => {
                               const isCover = imageFront === url;
                               return (
                                 <div key={index} style={{ position: "relative", borderRadius: "8px", border: isCover ? "2px solid #000000" : "1px solid #e5e7eb", padding: "3px", backgroundColor: "#ffffff", display: "flex", flexDirection: "column", alignItems: "center", cursor: "pointer" }} onClick={() => setImageFront(url)}>
-                                  <img src={url} alt={`Uploaded perfume ${index + 1}`} style={{ width: "100%", height: "80px", objectFit: "cover", borderRadius: "5px" }} />
+                                  <img src={url} alt={`Uploaded perfume ${index + 1}`} style={{ width: "100%", height: "60px", objectFit: "cover", borderRadius: "5px" }} />
                                   <span style={{ fontSize: "0.6rem", fontWeight: 700, color: isCover ? "#000000" : "#9ca3af", textTransform: "uppercase", marginTop: "4px", paddingBottom: "2px" }}>{isCover ? "★ Cover" : "Set Cover"}</span>
                                   <button type="button" onClick={(e) => { e.stopPropagation(); handleRemoveImage(index); }} style={{ position: "absolute", top: "-6px", right: "-6px", backgroundColor: "#ef4444", color: "#ffffff", border: "none", borderRadius: "50%", width: "20px", height: "20px", fontSize: "0.75rem", fontWeight: 700, display: "flex", alignItems: "center", justifyContent: "center" }}>✕</button>
                                 </div>
