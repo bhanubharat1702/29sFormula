@@ -1441,8 +1441,8 @@ export default function AdminModals(props: any) {
                 </div>
               </div>
 
-              {/* Order History Table */}
-              <div style={{ marginTop: "10px" }}>
+              {/* Order History Table (Desktop View) */}
+              <div className={styles.hideOnMobile} style={{ marginTop: "10px" }}>
                 <p style={{ margin: "0 0 10px 0", fontSize: "0.85rem", color: "#111827", textTransform: "uppercase", fontWeight: 700, borderBottom: "1px solid #eaeaea", paddingBottom: "5px" }}>Order History</p>
                 <div style={{ maxHeight: "250px", overflowY: "auto", border: "1px solid #eaeaea", borderRadius: "8px" }}>
                   <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "0.8rem", textAlign: "left" }}>
@@ -1490,6 +1490,50 @@ export default function AdminModals(props: any) {
                     </tbody>
                   </table>
                 </div>
+              </div>
+
+              {/* Order History Accordion (Mobile View) */}
+              <div className={styles.showOnMobile} style={{ marginTop: "10px" }}>
+                <details style={{ width: "100%", backgroundColor: "#f9fafb", borderRadius: "8px", border: "1px solid #eaeaea", padding: "12px" }}>
+                  <summary className={styles.mobileAccordionSummary} style={{ fontSize: "0.9rem", color: "#111827", textTransform: "uppercase", fontWeight: 700, cursor: "pointer", outline: "none", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                    Order History
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" style={{ width: "16px", height: "16px" }}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
+                    </svg>
+                  </summary>
+                  <div style={{ marginTop: "12px", maxHeight: "250px", overflowY: "auto", borderTop: "1px solid #eaeaea", paddingTop: "12px", display: "flex", flexDirection: "column", gap: "8px" }}>
+                    {orders.filter((o: any) => o.customerEmail === selectedCustomer.email).length === 0 ? (
+                      <div style={{ padding: "10px", textAlign: "center", color: "#9ca3af", fontStyle: "italic", fontSize: "0.8rem" }}>No orders found.</div>
+                    ) : (
+                      orders
+                        .filter((o: any) => o.customerEmail === selectedCustomer.email)
+                        .sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+                        .map((order: any) => (
+                          <div key={order._id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "12px", backgroundColor: "#fff", border: "1px solid #eaeaea", borderRadius: "8px" }}>
+                            <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+                              <span style={{ fontSize: "0.85rem", color: "#111827", fontWeight: 600 }}>{order.orderId}</span>
+                              <span style={{ fontSize: "0.75rem", color: "#6b7280" }}>{new Date(order.createdAt).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}</span>
+                            </div>
+                            <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "4px" }}>
+                              <span style={{ fontSize: "0.85rem", color: "#111827", fontWeight: 700 }}>₹{order.totalAmount.toLocaleString("en-IN")}.00</span>
+                              <span style={{
+                                display: "inline-block",
+                                padding: "2px 6px",
+                                borderRadius: "12px",
+                                fontSize: "0.6rem",
+                                fontWeight: 700,
+                                textTransform: "uppercase",
+                                backgroundColor: order.status === "Delivered" ? "#eaf7ee" : order.status === "Shipped" ? "#eff6ff" : "#fef3c7",
+                                color: order.status === "Delivered" ? "#15803d" : order.status === "Shipped" ? "#1d4ed8" : "#b45309"
+                              }}>
+                                {order.status}
+                              </span>
+                            </div>
+                          </div>
+                        ))
+                    )}
+                  </div>
+                </details>
               </div>
             </div>
             <div style={{ marginTop: "30px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>

@@ -2795,30 +2795,31 @@ const getSearchResults = () => {
       </div>
       {deleteDiscountConfirmId && (
         <div className={styles.modalOverlay}>
-          <div className={styles.unsavedModal}>
-            <div className={styles.modalHeader}>
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="#dc2626" className={styles.warningIcon}>
+          <div className={`${styles.unsavedModal} ${styles.mobileAlertModalOverride}`}>
+            <div className={`${styles.modalHeader} ${styles.mobileAlertHeader}`}>
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="#dc2626" className={`${styles.warningIcon} ${styles.mobileAlertIcon}`} style={{ width: "24px", height: "24px", marginRight: "10px" }}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
               </svg>
               <h3>Confirm Coupon Deletion</h3>
             </div>
-            <p className={styles.modalBody}>
+            <p className={`${styles.modalBody} ${styles.mobileAlertDescription}`}>
               Are you sure you want to permanently revoke this discount coupon? Customers will no longer be able to apply it during checkout.
             </p>
-            <div className={styles.modalFooter}>
+            <div className={`${styles.modalActionRow} ${styles.mobileAlertActionRow}`}>
               <button 
                 type="button" 
-                className={styles.modalCancelBtn}
-                onClick={() => setDeleteDiscountConfirmId(null)}
-              >
-                Cancel
-              </button>
-              <button 
-                type="button" 
-                className={styles.modalConfirmBtn}
+                className={`${styles.modalConfirmBtn} ${styles.primaryActionBtn}`}
+                style={{ backgroundColor: "#ef4444", borderColor: "#ef4444" }}
                 onClick={() => handleDeleteDiscount(deleteDiscountConfirmId)}
               >
                 Yes, Revoke Coupon
+              </button>
+              <button 
+                type="button" 
+                className={`${styles.modalCancelBtn} ${styles.secondaryActionBtn}`}
+                onClick={() => setDeleteDiscountConfirmId(null)}
+              >
+                Cancel
               </button>
             </div>
           </div>
@@ -2827,18 +2828,18 @@ const getSearchResults = () => {
 
       {deleteOrderTargetId && (
         <div className={styles.modalOverlay}>
-          <div className={styles.unsavedModal}>
-            <div className={styles.modalHeader}>
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="#dc2626" className={styles.warningIcon}>
+          <div className={`${styles.unsavedModal} ${styles.mobileAlertModalOverride}`}>
+            <div className={`${styles.modalHeader} ${styles.mobileAlertHeader}`}>
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="#dc2626" className={`${styles.warningIcon} ${styles.mobileAlertIcon}`} style={{ width: "24px", height: "24px", marginRight: "10px" }}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
               </svg>
               <h3>Confirm Delete Order</h3>
             </div>
 
-            <p style={{ margin: "0 0 20px 0", color: "#6b7280", fontSize: "0.95rem" }}>
+            <p className={`${styles.modalDescription} ${styles.mobileAlertDescription}`} style={{ margin: "0 0 20px 0" }}>
                 Are you sure you want to cancel this order? This action cannot be undone.
               </p>
-              <div style={{ marginBottom: "20px", textAlign: "left" }}>
+              <div style={{ marginBottom: "20px", textAlign: "left", width: "100%" }}>
                 <label style={{ display: "block", marginBottom: "8px", fontWeight: 600, color: "#374151" }}>Reason for Cancellation <span style={{color: "#ef4444"}}>*</span></label>
                 <textarea
                   value={cancelReasonInput}
@@ -2857,7 +2858,7 @@ const getSearchResults = () => {
                   required
                 />
               </div>
-              <div style={{ display: "flex", gap: "12px", justifyContent: "flex-end" }}>
+              <div className={`${styles.modalActionRow} ${styles.mobileAlertActionRow}`}>
               <button
                 onClick={() => {
                   if (deleteOrderTargetId && cancelReasonInput.trim()) {
@@ -2868,13 +2869,13 @@ const getSearchResults = () => {
                 }}
                 disabled={isDeletingOrder}
                 className={styles.primaryActionBtn}
-                style={{ backgroundColor: "#dc2626", color: "#fff", opacity: isDeletingOrder ? 0.7 : 1 }}
+                style={{ backgroundColor: "#ef4444", borderColor: "#ef4444", opacity: isDeletingOrder ? 0.7 : 1 }}
               >
                 {isDeletingOrder ? "Deleting..." : "Delete Order"}
               </button>
               <button
                 onClick={() => setDeleteOrderTargetId(null)}
-                className={styles.cancelActionBtn}
+                className={styles.secondaryActionBtn}
                 disabled={isDeletingOrder}
               >
                 Cancel
@@ -2887,19 +2888,19 @@ const getSearchResults = () => {
       {/* Unsaved changes confirmation modal overlay */}
       {showUnsavedModal && (
         <div className={styles.modalOverlay}>
-          <div className={styles.unsavedModal}>
-            <div className={styles.modalHeader}>
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="#dc2626" className={styles.warningIcon}>
+          <div className={`${styles.unsavedModal} ${styles.mobileAlertModalOverride}`}>
+            <div className={`${styles.modalHeader} ${styles.mobileAlertHeader}`}>
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="#dc2626" className={`${styles.warningIcon} ${styles.mobileAlertIcon}`} style={{ width: "24px", height: "24px", marginRight: "10px" }}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
               </svg>
               <h3>Unsaved Changes Detected</h3>
             </div>
 
-            <p className={styles.modalDescription}>
+            <p className={`${styles.modalDescription} ${styles.mobileAlertDescription}`}>
               You have modified storefront settings without saving. The following adjustments will be lost if you leave:
             </p>
 
-            <ul className={styles.changesList}>
+            <ul className={styles.changesList} style={{ width: "100%", boxSizing: "border-box" }}>
               {getChangedFieldsList().map((field, idx) => (
                 <li key={idx} className={styles.changeItem}>
                   <span className={styles.bullet}>•</span>
@@ -2908,14 +2909,14 @@ const getSearchResults = () => {
               ))}
             </ul>
 
-            <div className={styles.modalActionRow}>
+            <div className={`${styles.modalActionRow} ${styles.mobileAlertActionRow}`}>
               <button onClick={handleSaveAndContinue} className={styles.primaryActionBtn}>
                 Save & Continue
               </button>
-              <button onClick={handleDiscardAndContinue} className={styles.secondaryActionBtn}>
+              <button onClick={handleDiscardAndContinue} className={styles.secondaryActionBtn} style={{ color: "#ef4444", borderColor: "#ef4444" }}>
                 Discard Changes
               </button>
-              <button onClick={handleCancelNavigation} className={styles.cancelActionBtn}>
+              <button onClick={handleCancelNavigation} className={styles.secondaryActionBtn}>
                 Cancel
               </button>
             </div>

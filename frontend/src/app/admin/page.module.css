@@ -360,6 +360,42 @@
   }
 }
 
+/* Discounts Tab Layout */
+.discountsGrid {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: 25px;
+  margin-top: 10px;
+}
+
+@media (max-width: 900px) {
+  .discountsGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.couponCard {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 20px;
+  border: 2px dashed #d1d5db;
+  border-radius: 10px;
+  background-color: #f8fafc;
+  position: relative;
+}
+
+@media (max-width: 480px) {
+  .couponCard {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  .couponCard > button {
+    width: 100%;
+  }
+}
+
 .statBox {
   background-color: #ffffff;
   border: 1px solid #f1f1f1;
@@ -2053,6 +2089,13 @@
   .showOnMobile {
     display: flex !important; /* flex because we need it to be flex-column */
   }
+}
+
+.mobileAccordionSummary {
+  list-style: none;
+}
+.mobileAccordionSummary::-webkit-details-marker {
+  display: none;
 }
 
 @media (max-width: 900px) {
