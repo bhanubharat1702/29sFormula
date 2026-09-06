@@ -2075,3 +2075,59 @@
     padding-bottom: 16px !important;
   }
 }
+
+@media (max-width: 768px) {
+  .mobileAlertModalOverride {
+    position: absolute !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    border-radius: 24px 24px 0 0 !important;
+    padding: 32px 24px 40px 24px !important;
+    margin: 0 !important;
+    animation: slideUpAlert 0.4s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  }
+  .mobileAlertActionRow {
+    flex-direction: column-reverse !important;
+    gap: 12px !important;
+    width: 100% !important;
+    justify-content: stretch !important;
+  }
+  .mobileAlertActionRow button {
+    width: 100% !important;
+    padding: 16px !important;
+    font-size: 1.05rem !important;
+    border-radius: 14px !important;
+  }
+  .mobileAlertHeader {
+    flex-direction: column !important;
+    align-items: center !important;
+    text-align: center !important;
+    gap: 12px !important;
+    margin-bottom: 12px !important;
+  }
+  .mobileAlertHeader h3 {
+    font-size: 1.4rem !important;
+  }
+  .mobileAlertIcon {
+    width: 48px !important;
+    height: 48px !important;
+    margin: 0 !important;
+    background-color: #fef2f2;
+    padding: 10px;
+    border-radius: 50%;
+  }
+  .mobileAlertDescription {
+    text-align: center !important;
+    margin-bottom: 32px !important;
+    font-size: 0.95rem !important;
+    color: #6b7280 !important;
+  }
+}
+
+@keyframes slideUpAlert {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}

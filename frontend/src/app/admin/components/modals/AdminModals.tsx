@@ -442,7 +442,7 @@ export default function AdminModals(props: any) {
                                 style={{ padding: "6px 8px", fontSize: "0.8rem", width: "100%", boxSizing: "border-box" }}
                               />
                             </td>
-                            <td style={{ padding: "8px 4px", position: "relative", zIndex: openCategoryIndex === index ? 60 : 1 }}>
+                            <td style={{ padding: "8px 4px", position: "relative", zIndex: openCategoryIndex === index ? 99999 : 1 }}>
                               <div
                                 className={styles.selectInput}
                                 style={{ padding: "6px 8px", fontSize: "0.8rem", width: "100%", height: "34px", boxSizing: "border-box", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "space-between" }}
@@ -469,7 +469,7 @@ export default function AdminModals(props: any) {
                                     top: "100%",
                                     left: "4px",
                                     right: "4px",
-                                    zIndex: 50,
+                                    zIndex: 99999,
                                     backgroundColor: "#fff",
                                     border: "1px solid #d1d5db",
                                     borderRadius: "6px",
@@ -738,10 +738,10 @@ export default function AdminModals(props: any) {
                     <div style={{ backgroundColor: "#ffffff", border: "1px solid #e5e7eb", borderRadius: "10px", padding: "18px", marginBottom: "14px", boxShadow: "0 1px 3px rgba(0,0,0,0.05)" }}>
                       <h4 style={{ fontSize: "0.92rem", fontWeight: 700, color: "#111827", textTransform: "uppercase", letterSpacing: "0.03em", margin: "0 0 14px 0" }}>Product Variants & Sizing</h4>
                       
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', maxHeight: '50vh', overflowY: 'auto', paddingRight: '4px' }}>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', paddingRight: '4px' }}>
                         {options.map((opt: any, index: number) => (
-                          <div key={index} style={{ border: '1px solid #e5e7eb', borderRadius: '8px', padding: '16px', backgroundColor: '#fafafa', position: 'relative' }}>
-                                <button type="button" onClick={() => { if (options.length > 1) { setOptions(options.filter((_: any, idx: number) => idx !== index)); } }} style={{ position: 'absolute', top: '12px', right: '12px', background: 'none', border: 'none', color: options.length <= 1 ? '#fca5a5' : '#ef4444', cursor: options.length <= 1 ? 'not-allowed' : 'pointer', fontSize: '1rem' }} title="Remove Variant">✕</button>
+                          <div key={index} style={{ border: '1px solid #e5e7eb', borderRadius: '8px', padding: '16px', backgroundColor: '#fafafa', position: 'relative', zIndex: openCategoryIndex === index ? 99999 : 1 }}>
+                                <button type="button" onClick={() => { if (options.length > 1) { setOptions(options.filter((_: any, idx: number) => idx !== index)); } }} style={{ position: 'absolute', top: '12px', right: '12px', background: 'none', border: 'none', color: options.length <= 1 ? '#fca5a5' : '#ef4444', cursor: options.length <= 1 ? 'not-allowed' : 'pointer', fontSize: '1rem', zIndex: 2 }} title="Remove Variant">✕</button>
                             <h5 style={{ margin: '0 0 12px 0', fontSize: '0.9rem', color: '#374151', fontWeight: 600 }}>Variant {index + 1}</h5>
                             
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
@@ -772,7 +772,7 @@ export default function AdminModals(props: any) {
                                   <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: '#4b5563', marginBottom: '4px' }}>Making Price *</label>
                                   <input type="number" value={opt.makingPrice} min="0" onChange={(e) => { const updated = [...options]; updated[index].makingPrice = e.target.value === "" ? "" : (parseInt(e.target.value) || 0); setOptions(updated); }} required={mobileCrudStep === 2} className={styles.textInput} style={{ padding: "8px", fontSize: "0.85rem", width: "100%", boxSizing: "border-box" }} />
                                 </div>
-                                <div style={{ position: 'relative', zIndex: openCategoryIndex === index ? 60 : 1 }}>
+                                <div style={{ position: 'relative', zIndex: openCategoryIndex === index ? 99999 : 1 }}>
                                   <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: '#4b5563', marginBottom: '4px' }}>Category *</label>
                                   <div className={styles.selectInput} style={{ padding: "8px", fontSize: "0.85rem", width: "100%", height: "35px", boxSizing: "border-box", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "space-between", backgroundColor: '#fff' }} onClick={() => setOpenCategoryIndex(openCategoryIndex === index ? null : index)}>
                                     <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{opt.category && opt.category.length > 0 ? opt.category.join(", ") : "Select..."}</span>
@@ -781,7 +781,7 @@ export default function AdminModals(props: any) {
                                   {openCategoryIndex === index && (
                                     <>
                                       <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, zIndex: 40 }} onClick={(e) => { e.stopPropagation(); setOpenCategoryIndex(null); }} />
-                                      <div style={{ position: "absolute", top: "100%", left: 0, right: 0, zIndex: 50, backgroundColor: "#fff", border: "1px solid #d1d5db", borderRadius: "6px", boxShadow: "0 4px 6px -1px rgba(0,0,0,0.1)", maxHeight: "200px", overflowY: "auto", marginTop: "4px" }}>
+                                      <div style={{ position: "absolute", top: "100%", left: 0, right: 0, zIndex: 99999, backgroundColor: "#fff", border: "1px solid #d1d5db", borderRadius: "6px", boxShadow: "0 4px 6px -1px rgba(0,0,0,0.1)", maxHeight: "200px", overflowY: "auto", marginTop: "4px" }}>
                                         {allCategories.map((cat: string) => {
                                           const isSelected = opt.category && opt.category.includes(cat);
                                           return (
@@ -1257,37 +1257,19 @@ export default function AdminModals(props: any) {
       {/* Custom Delete Category Confirmation Modal */}
       {deleteCategoryTarget && (
         <div className={styles.modalOverlay}>
-          <div className={styles.unsavedModal} style={{ maxWidth: "480px" }}>
-            <div className={styles.modalHeader} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", width: "100%", borderBottom: "1px solid #e5e7eb", paddingBottom: "12px", marginBottom: "20px" }}>
-              <div style={{ display: "flex", alignItems: "center" }}>
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="#ef4444" style={{ width: "24px", height: "24px", marginRight: "10px" }}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="m14.74 9-.34 9m-4.78 0L9 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
-                </svg>
-                <h3 style={{ fontSize: "1.2rem", fontWeight: 700, margin: 0 }}>Delete Category?</h3>
-              </div>
-              <button
-                type="button"
-                onClick={() => setDeleteCategoryTarget(null)}
-                style={{ background: "transparent", border: "none", cursor: "pointer", color: "#6b7280", padding: "4px" }}
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" style={{ width: "20px", height: "20px" }}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" />
-                </svg>
-              </button>
+          <div className={`${styles.unsavedModal} ${styles.mobileAlertModalOverride}`}>
+            <div className={`${styles.modalHeader} ${styles.mobileAlertHeader}`}>
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="#ef4444" className={styles.mobileAlertIcon} style={{ width: "24px", height: "24px" }}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="m14.74 9-.34 9m-4.78 0L9 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
+              </svg>
+              <h3>Delete Category?</h3>
             </div>
 
-            <p className={styles.modalDescription} style={{ fontSize: "0.9rem", color: "#4b5563", lineHeight: "1.5", margin: "15px 0" }}>
+            <p className={`${styles.modalDescription} ${styles.mobileAlertDescription}`}>
               Are you sure you want to delete the category <strong>&quot;{deleteCategoryTarget}&quot;</strong>? All products currently in this category will have their category cleared, but they will not be deleted and can still be found in <strong>&quot;All Products&quot;</strong>.
             </p>
 
-            <div className={styles.modalActionRow} style={{ display: "flex", justifyContent: "flex-end", gap: "10px", marginTop: "20px" }}>
-              <button
-                onClick={() => setDeleteCategoryTarget(null)}
-                className={styles.secondaryActionBtn}
-                disabled={deleteCategoryLoading}
-              >
-                Cancel
-              </button>
+            <div className={`${styles.modalActionRow} ${styles.mobileAlertActionRow}`}>
               <button
                 onClick={handleDeleteCategoryConfirm}
                 className={styles.primaryActionBtn}
@@ -1295,6 +1277,13 @@ export default function AdminModals(props: any) {
                 disabled={deleteCategoryLoading}
               >
                 {deleteCategoryLoading ? "Deleting..." : "Delete Category"}
+              </button>
+              <button
+                onClick={() => setDeleteCategoryTarget(null)}
+                className={styles.secondaryActionBtn}
+                disabled={deleteCategoryLoading}
+              >
+                Cancel
               </button>
             </div>
           </div>
@@ -1304,19 +1293,19 @@ export default function AdminModals(props: any) {
       {/* Custom Delete Confirmation Modal */}
       {deleteTargetId && (
         <div className={styles.modalOverlay}>
-          <div className={styles.unsavedModal}>
-            <div className={styles.modalHeader}>
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="#ef4444" style={{ width: "24px", height: "24px", marginRight: "10px" }}>
+          <div className={`${styles.unsavedModal} ${styles.mobileAlertModalOverride}`}>
+            <div className={`${styles.modalHeader} ${styles.mobileAlertHeader}`}>
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="#ef4444" className={styles.mobileAlertIcon} style={{ width: "24px", height: "24px", marginRight: "10px" }}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="m14.74 9-.34 9m-4.78 0L9 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
               </svg>
               <h3>Delete Perfume?</h3>
             </div>
 
-            <p className={styles.modalDescription}>
+            <p className={`${styles.modalDescription} ${styles.mobileAlertDescription}`}>
               Are you sure you want to delete this perfume from your inventory catalog? This action is permanent and cannot be undone.
             </p>
 
-            <div className={styles.modalActionRow}>
+            <div className={`${styles.modalActionRow} ${styles.mobileAlertActionRow}`}>
               <button
                 onClick={async () => {
                   if (deleteTargetId) {
@@ -1347,19 +1336,19 @@ export default function AdminModals(props: any) {
       {/* Custom Alert Overlay Modal */}
       {customAlert && (
         <div className={styles.modalOverlay}>
-          <div className={styles.unsavedModal}>
-            <div className={styles.modalHeader}>
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="#000000" style={{ width: "24px", height: "24px", marginRight: "10px" }}>
+          <div className={`${styles.unsavedModal} ${styles.mobileAlertModalOverride}`}>
+            <div className={`${styles.modalHeader} ${styles.mobileAlertHeader}`}>
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="#000000" className={styles.mobileAlertIcon} style={{ width: "24px", height: "24px", marginRight: "10px" }}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z" />
               </svg>
               <h3>{customAlert.title}</h3>
             </div>
 
-            <p className={styles.modalDescription}>
+            <p className={`${styles.modalDescription} ${styles.mobileAlertDescription}`}>
               {customAlert.message}
             </p>
 
-            <div className={styles.modalActionRow}>
+            <div className={`${styles.modalActionRow} ${styles.mobileAlertActionRow}`}>
               <button
                 onClick={() => setCustomAlert(null)}
                 className={styles.primaryActionBtn}
@@ -1374,19 +1363,19 @@ export default function AdminModals(props: any) {
       {/* Custom Reset Confirmation Modal */}
       {showResetConfirmModal && (
         <div className={styles.modalOverlay}>
-          <div className={styles.unsavedModal}>
-            <div className={styles.modalHeader}>
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="#ef4444" style={{ width: "24px", height: "24px", marginRight: "10px" }}>
+          <div className={`${styles.unsavedModal} ${styles.mobileAlertModalOverride}`}>
+            <div className={`${styles.modalHeader} ${styles.mobileAlertHeader}`}>
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="#ef4444" className={styles.mobileAlertIcon} style={{ width: "24px", height: "24px", marginRight: "10px" }}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99" />
               </svg>
               <h3>Reset Customize Settings?</h3>
             </div>
 
-            <p className={styles.modalDescription}>
+            <p className={`${styles.modalDescription} ${styles.mobileAlertDescription}`}>
               Are you sure you want to reset all storefront layout options, text copies, theme color, and banner configurations back to factory system defaults?
             </p>
 
-            <div className={styles.modalActionRow}>
+            <div className={`${styles.modalActionRow} ${styles.mobileAlertActionRow}`}>
               <button
                 onClick={handleResetToDefaults}
                 className={styles.primaryActionBtn}
@@ -1511,24 +1500,27 @@ export default function AdminModals(props: any) {
         </div>
       )}
 
+      {/* Delete Customer Confirmation Modal */}
       {deleteCustomerTargetId && (
         <div className={styles.modalOverlay}>
-          <div className={styles.unsavedModal}>
-            <div className={styles.modalHeader}>
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="#ef4444" style={{ width: "24px", height: "24px", marginRight: "10px" }}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="m14.74 9-.34 9m-4.78 0L9 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
+          <div className={`${styles.unsavedModal} ${styles.mobileAlertModalOverride}`}>
+            <div className={`${styles.modalHeader} ${styles.mobileAlertHeader}`}>
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="#ef4444" className={styles.mobileAlertIcon} style={{ width: "24px", height: "24px", marginRight: "10px" }}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
               </svg>
               <h3>Confirm Delete Customer</h3>
             </div>
-            <p className={styles.modalDescription}>
+
+            <p className={`${styles.modalDescription} ${styles.mobileAlertDescription}`}>
               Are you sure you want to remove this customer from the directory? Historical orders will not be deleted.
             </p>
-            <div className={styles.modalActionRow}>
+
+            <div className={`${styles.modalActionRow} ${styles.mobileAlertActionRow}`}>
               <button
                 onClick={() => handleDeleteCustomer(deleteCustomerTargetId)}
-                disabled={isDeletingCustomer}
                 className={styles.primaryActionBtn}
                 style={{ backgroundColor: "#ef4444", borderColor: "#ef4444", opacity: isDeletingCustomer ? 0.7 : 1 }}
+                disabled={isDeletingCustomer}
               >
                 {isDeletingCustomer ? "Deleting..." : "Delete Customer"}
               </button>
@@ -2184,17 +2176,17 @@ export default function AdminModals(props: any) {
       {/* Delete Review Confirmation Modal */}
       {deleteReviewTarget && (
         <div className={styles.modalOverlay}>
-          <div className={styles.unsavedModal}>
-            <div className={styles.modalHeader}>
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="#ef4444" style={{ width: "24px", height: "24px", marginRight: "10px" }}>
+          <div className={`${styles.unsavedModal} ${styles.mobileAlertModalOverride}`}>
+            <div className={`${styles.modalHeader} ${styles.mobileAlertHeader}`}>
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="#ef4444" className={styles.mobileAlertIcon} style={{ width: "24px", height: "24px", marginRight: "10px" }}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
               </svg>
               <h3>Confirm Deletion</h3>
             </div>
-            <p style={{ fontSize: "0.9rem", color: "#4b5563", marginTop: "10px", marginBottom: "20px" }}>
+            <p className={`${styles.modalDescription} ${styles.mobileAlertDescription}`}>
               Are you sure you want to permanently delete this review? This action cannot be undone.
             </p>
-            <div className={styles.modalActionRow}>
+            <div className={`${styles.modalActionRow} ${styles.mobileAlertActionRow}`}>
               <button
                 onClick={handleDeleteAdminReviewConfirm}
                 disabled={isDeletingReview}
