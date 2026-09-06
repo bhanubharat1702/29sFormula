@@ -1815,6 +1815,7 @@ export default function AdminDashboard() {
     setIsEditing(false);
     setEditId(null);
     setCategoriesDropdownOpen(false);
+    setError(null);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -2938,6 +2939,7 @@ const getSearchResults = () => {
           additionalInformation={additionalInformation}
           editReviewTarget={editReviewTarget}
           error={error}
+          setError={setError}
           executeReturnStatusUpdate={executeReturnStatusUpdate}
           existingProductIdsToAssign={existingProductIdsToAssign}
           handleAddCategorySubmit={handleAddCategorySubmit}

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import styles from "../../page.module.css";
 import CustomCheckbox from "@/components/CustomCheckbox/CustomCheckbox";
 import dynamic from 'next/dynamic';
@@ -27,6 +27,7 @@ export default function AdminModals(props: any) {
     additionalInformation,
     editReviewTarget,
     error,
+    setError,
     executeReturnStatusUpdate,
     existingProductIdsToAssign,
     file,
@@ -172,7 +173,75 @@ export default function AdminModals(props: any) {
   } = props;
 
   const [openMobileAccordion, setOpenMobileAccordion] = React.useState<"items" | "status" | "timeline" | "">("items");
-  const [mobileCrudStep, setMobileCrudStep] = React.useState<number>(1);
+  const [mobileCrudStep, setMobileCrudStep] = useState(1);
+  const [visibleError, setVisibleError] = useState<string | null>(null);
+  const [fadeOutError, setFadeOutError] = useState(false);
+
+  useEffect(() => {
+    if (error && showCrudModal && window.innerWidth <= 768) {
+      const highlightElement = (el: HTMLElement | null) => {
+        if (!el) return;
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        if (el.tagName === 'INPUT') {
+            (el as HTMLInputElement).focus({ preventScroll: true });
+        }
+        const originalBoxShadow = el.style.boxShadow;
+        el.style.boxShadow = '0 0 0 2px #ef4444';
+        setTimeout(() => el.style.boxShadow = originalBoxShadow, 2500);
+      };
+
+      if (error.includes('Name') || error.includes('Description') || error.includes('Additional Information')) {
+        setMobileCrudStep(1);
+        setTimeout(() => {
+          const isQuillEmpty = (html: string) => !html || html.replace(/<[^>]*>?/gm, '').trim() === '';
+          if (!name) {
+            highlightElement(document.getElementById('mobile-name'));
+          } else if (isQuillEmpty(description)) {
+            highlightElement(document.getElementById('mobile-description'));
+          } else if (isQuillEmpty(additionalInformation)) {
+            highlightElement(document.getElementById('mobile-additional-info'));
+          }
+        }, 250);
+      } else if (error.includes('variant') || error.includes('sizes') || error.includes('Quantity') || error.includes('Category') || error.includes('Price')) {
+        setMobileCrudStep(2);
+        setTimeout(() => {
+          const variantInputs = document.querySelectorAll('#mobile-step-2 input');
+          for (let i = 0; i < variantInputs.length; i++) {
+            const input = variantInputs[i] as HTMLInputElement;
+            if (!input.value && input.type !== 'checkbox' && input.type !== 'radio') {
+              highlightElement(input);
+              break;
+            }
+          }
+        }, 250);
+      } else if (error.includes('images') || error.includes('cover image')) {
+        setMobileCrudStep(3);
+      }
+    }
+    
+    // Smooth auto-hide error logic
+    if (error && showCrudModal) {
+      setVisibleError(error);
+      setFadeOutError(false);
+      
+      const fadeTimer = setTimeout(() => {
+        setFadeOutError(true);
+      }, 4500);
+      
+      const removeTimer = setTimeout(() => {
+        setVisibleError(null);
+        if (setError) setError(null);
+      }, 5000);
+      
+      return () => {
+        clearTimeout(fadeTimer);
+        clearTimeout(removeTimer);
+      };
+    } else if (!showCrudModal) {
+      setVisibleError(null);
+      setFadeOutError(false);
+    }
+  }, [error, showCrudModal]);
 
   return (
     <>
@@ -213,9 +282,24 @@ export default function AdminModals(props: any) {
 
             <form onSubmit={handleSubmit} style={{ width: "100%", display: "flex", flexDirection: "column", flex: 1, overflow: "hidden", minHeight: 0 }}>
               <div style={{ flex: 1, overflowY: "auto", paddingRight: "6px", marginBottom: "14px", minHeight: 0 }}>
-                {error && showCrudModal && (
-                  <div className={styles.errorBanner} style={{ marginBottom: "14px", padding: "12px", borderRadius: "6px", backgroundColor: "#fef2f2", color: "#dc2626", fontSize: "0.85rem", borderLeft: "4px solid #ef4444" }}>
-                    {error}
+                {visibleError && showCrudModal && (
+                  <div className={styles.errorBanner} style={{ 
+                      position: "sticky",
+                      top: 0,
+                      zIndex: 100,
+                      marginBottom: fadeOutError ? 0 : "14px", 
+                      padding: fadeOutError ? 0 : "12px", 
+                      borderRadius: "6px", 
+                      backgroundColor: "#fef2f2", 
+                      color: "#dc2626", 
+                      fontSize: "0.85rem", 
+                      borderLeft: fadeOutError ? "0px solid #ef4444" : "4px solid #ef4444",
+                      opacity: fadeOutError ? 0 : 1,
+                      maxHeight: fadeOutError ? 0 : "100px",
+                      overflow: "hidden",
+                      transition: "all 0.5s ease-out"
+                  }}>
+                    {visibleError}
                   </div>
                 )}
 
@@ -627,22 +711,22 @@ export default function AdminModals(props: any) {
                 <div className={styles.showOnMobile}>
                   
                   {/* Step 1: Details */}
-                  <div style={{ display: mobileCrudStep === 1 ? 'block' : 'none' }}>
+                  <div id="mobile-step-1" style={{ display: mobileCrudStep === 1 ? 'block' : 'none' }}>
                     <div style={{ backgroundColor: "#ffffff", border: "1px solid #e5e7eb", borderRadius: "10px", padding: "18px", marginBottom: "14px", boxShadow: "0 1px 3px rgba(0,0,0,0.05)" }}>
                       <h4 style={{ fontSize: "0.92rem", fontWeight: 700, color: "#111827", textTransform: "uppercase", letterSpacing: "0.03em", margin: "0 0 14px 0" }}>Product details</h4>
                       <div className={styles.inputGroup} style={{ marginBottom: "14px" }}>
                         <label className={styles.inputLabel}>PerfumeName *</label>
-                        <input type="text" value={name} onChange={(e) => setName(e.target.value)} className={styles.textInput} style={{ padding: "8px 12px", fontSize: "0.85rem" }} required={mobileCrudStep === 1} />
+                        <input id="mobile-name" type="text" value={name} onChange={(e) => setName(e.target.value)} className={styles.textInput} style={{ padding: "8px 12px", fontSize: "0.85rem" }} required={mobileCrudStep === 1} />
                       </div>
                       <div className={styles.inputGroup} style={{ marginBottom: "14px" }}>
                         <label className={styles.inputLabel}>Description *</label>
-                        <div style={{ backgroundColor: "#ffffff" }}>
+                        <div id="mobile-description" style={{ backgroundColor: "#ffffff" }}>
                           <ReactQuill theme="snow" value={description} onChange={setDescription} style={{ height: "150px", marginBottom: "40px" }} />
                         </div>
                       </div>
                       <div className={styles.inputGroup}>
                         <label className={styles.inputLabel}>Additional Information *</label>
-                        <div style={{ backgroundColor: "#ffffff" }}>
+                        <div id="mobile-additional-info" style={{ backgroundColor: "#ffffff" }}>
                           <ReactQuill theme="snow" value={additionalInformation} onChange={setAdditionalInformation} style={{ height: "150px", marginBottom: "40px" }} />
                         </div>
                       </div>
@@ -650,7 +734,7 @@ export default function AdminModals(props: any) {
                   </div>
 
                   {/* Step 2: Variants (Card Layout) */}
-                  <div style={{ display: mobileCrudStep === 2 ? 'block' : 'none' }}>
+                  <div id="mobile-step-2" style={{ display: mobileCrudStep === 2 ? 'block' : 'none' }}>
                     <div style={{ backgroundColor: "#ffffff", border: "1px solid #e5e7eb", borderRadius: "10px", padding: "18px", marginBottom: "14px", boxShadow: "0 1px 3px rgba(0,0,0,0.05)" }}>
                       <h4 style={{ fontSize: "0.92rem", fontWeight: 700, color: "#111827", textTransform: "uppercase", letterSpacing: "0.03em", margin: "0 0 14px 0" }}>Product Variants & Sizing</h4>
                       
@@ -811,6 +895,7 @@ export default function AdminModals(props: any) {
                             type="submit"
                             className={styles.primaryActionBtn}
                             style={{ padding: "12px 16px", fontSize: "0.95rem", flex: '2', textAlign: 'center' }}
+                            formNoValidate
                         >
                             {isEditing ? "Save Changes" : "Create Product"}
                         </button>

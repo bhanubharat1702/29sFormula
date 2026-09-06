@@ -87,7 +87,7 @@ export default function CatalogSubTab({
                 </button>
               </div>
 
-              {error && !showCrudModal && <div className={styles.errorBanner} style={{ marginBottom: "20px" }}>{error}</div>}
+              {error && !showCrudModal && !error.includes("Please") && <div className={styles.errorBanner} style={{ marginBottom: "20px" }}>{error}</div>}
 
               {/* Centered Table Panel */}
               <div className={styles.tablePanelFull}>
