@@ -171,6 +171,8 @@ export default function AdminModals(props: any) {
     val,
   } = props;
 
+  const [openMobileAccordion, setOpenMobileAccordion] = React.useState<"items" | "status" | "timeline" | "">("items");
+
   return (
     <>
       {/* CRUD Product Modal Overlay */}
@@ -1270,7 +1272,7 @@ export default function AdminModals(props: any) {
           <div className={styles.modalContent} onClick={(e) => e.stopPropagation()} style={{ width: "100%", maxWidth: "900px", background: "#fff", borderRadius: "8px", padding: "30px", maxHeight: "90vh", overflowY: "auto", display: "flex", flexDirection: "column" }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingBottom: "12px", marginBottom: "20px" }}>
               <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-                <span style={{ fontSize: "1.1rem", fontWeight: 400, margin: 0, color: "#000", fontFamily: "monospace" }}>{selectedOrder.orderId}</span>
+                <span style={{ fontSize: "1.1rem", fontWeight: 400, margin: 0, color: "#000" }}>{selectedOrder.orderId}</span>
                 <span style={{
                   display: "inline-block",
                   padding: "4px 8px",
@@ -1287,7 +1289,7 @@ export default function AdminModals(props: any) {
               <button onClick={() => setSelectedOrder(null)} style={{ background: "none", border: "none", fontSize: "1.2rem", cursor: "pointer", color: "#6b7280" }}>✕</button>
             </div>
 
-            <div style={{ display: "flex", gap: "40px", textAlign: "left", alignItems: "stretch" }}>
+            <div className={styles.hideOnMobile} style={{ display: "flex", gap: "40px", textAlign: "left", alignItems: "stretch" }}>
               
               {/* LEFT COLUMN: Items Purchased & Total */}
               <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: "20px" }}>
@@ -1566,11 +1568,243 @@ export default function AdminModals(props: any) {
                     </div>
                   </div>
                 </div>
+
               </div>
             </div>
+
+            {/* MOBILE ACCORDION LAYOUT */}
+              <div className={styles.showOnMobile} style={{ width: "100%", display: "flex", flexDirection: "column", gap: "15px" }}>
+                
+                {/* User Info Card */}
+                <div style={{ backgroundColor: "#f9fafb", padding: "16px", borderRadius: "8px", display: "flex", flexDirection: "column", gap: "8px" }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "4px" }}>
+                    <span style={{ fontSize: "1.3rem", color: "#111827", fontWeight: 400 }}>
+                      {selectedOrder.customerName ? selectedOrder.customerName.charAt(0).toUpperCase() + selectedOrder.customerName.slice(1).toLowerCase() : "N/A"}
+                    </span>
+                  </div>
+                  <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6b7280" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+                    <span style={{ fontSize: "0.85rem", color: "#4b5563" }}>{selectedOrder.customerEmail}</span>
+                  </div>
+                  <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6b7280" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
+                    <span style={{ fontSize: "0.85rem", color: "#4b5563" }}>{selectedOrder.customerPhone}</span>
+                  </div>
+                  <div style={{ display: "flex", alignItems: "flex-start", gap: "8px" }}>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6b7280" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginTop: "3px", flexShrink: 0 }}><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+                    <span style={{ fontSize: "0.85rem", color: "#4b5563", lineHeight: "1.4" }}>
+                      {typeof selectedOrder.shippingAddress === 'string' 
+                        ? selectedOrder.shippingAddress 
+                        : (selectedOrder.shippingAddress 
+                            ? `${selectedOrder.shippingAddress.fullName || ''}, ${selectedOrder.shippingAddress.address || ''}, ${selectedOrder.shippingAddress.city || ''}, ${selectedOrder.shippingAddress.state || ''} ${selectedOrder.shippingAddress.zip || ''}`.replace(/(^[,\s]+)|([,\s]+$)/g, '')
+                            : "N/A"
+                          )
+                      }
+                    </span>
+                  </div>
+                </div>
+
+                {/* ACCORDIONS */}
+                <div style={{ border: "1px solid #e5e7eb", borderRadius: "8px", overflow: "hidden" }}>
+                  
+                  {/* Items Accordion */}
+                  <div className={styles.mobileAccordionItem}>
+                    <div 
+                      className={styles.mobileAccordionHeader} 
+                      onClick={() => setOpenMobileAccordion(openMobileAccordion === "items" ? "" : "items")}
+                    >
+                      <h3 style={{ fontSize: "0.9rem", fontWeight: 400, margin: 0, color: "#111" }}>Items Purchased</h3>
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ transform: openMobileAccordion === "items" ? "rotate(180deg)" : "rotate(0deg)", transition: "transform 0.2s" }}><path d="M6 9l6 6 6-6"/></svg>
+                    </div>
+                    {openMobileAccordion === "items" && (
+                      <div className={styles.mobileAccordionContent}>
+                        <div style={{ display: "flex", flexDirection: "column", gap: "12px", maxHeight: "40vh", overflowY: "auto", paddingRight: "5px" }}>
+                          {selectedOrder.cartItems.map((item: any, idx: number) => (
+                            <div key={idx} style={{ display: "flex", alignItems: "center", gap: "15px", borderBottom: "1px solid #f3f4f6", paddingBottom: "10px" }}>
+                              {item.image && (
+                                <img src={item.image} alt={item.name} style={{ width: "45px", height: "45px", objectFit: "cover", borderRadius: "4px", border: "1px solid #eaeaea" }} onError={(e) => { e.currentTarget.style.display = 'none'; }} />
+                              )}
+                              <div style={{ flex: 1 }}>
+                                <h4 style={{ margin: 0, fontSize: "0.85rem", fontWeight: 400, color: "#111" }}>{item.name}</h4>
+                                <div style={{ display: "flex", alignItems: "center", marginTop: "4px", gap: "6px" }}>
+                                  <span style={{ fontSize: "0.75rem", color: "#6b7280" }}>Size: {item.size || 'Standard'}</span>
+                                  <span style={{ fontSize: "0.75rem", color: "#cbd5e1" }}>|</span>
+                                  <span style={{ fontSize: "0.75rem", color: "#6b7280" }}>Qty: {item.quantity}</span>
+                                </div>
+                              </div>
+                              <span style={{ fontSize: "0.85rem", fontWeight: 400, color: "#111" }}>₹{(item.price * item.quantity).toLocaleString("en-IN")}</span>
+                            </div>
+                          ))}
+                        </div>
+                        
+                        <div style={{ borderTop: "1px solid #eaeaea", paddingTop: "15px", display: "flex", flexDirection: "column", gap: "8px", marginTop: "15px" }}>
+                          {(() => {
+                            const originalTotal = selectedOrder.cartItems.reduce((acc: number, item: any) => acc + (item.price * item.quantity), 0);
+                            const discount = originalTotal - selectedOrder.totalAmount;
+                            return (
+                              <>
+                                {discount > 0 && (
+                                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                                    <span style={{ fontSize: "0.85rem", color: "#6b7280" }}>Subtotal</span>
+                                    <span style={{ fontSize: "0.85rem", color: "#111" }}>₹{originalTotal.toLocaleString("en-IN")}</span>
+                                  </div>
+                                )}
+                                {discount > 0 && (
+                                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                                    <span style={{ fontSize: "0.85rem", color: "#10b981", display: "flex", alignItems: "center", gap: "6px" }}>
+                                      Discount
+                                    </span>
+                                    <span style={{ fontSize: "0.85rem", color: "#10b981", fontWeight: 400 }}>-₹{discount.toLocaleString("en-IN")}</span>
+                                  </div>
+                                )}
+                                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: discount > 0 ? "4px" : "0" }}>
+                                  <span style={{ fontSize: "0.85rem", color: "#111", fontWeight: 400 }}>
+                                    Paid via {selectedOrder.paymentMethod === "Razorpay" ? "Online" : selectedOrder.paymentMethod}
+                                  </span>
+                                  <span style={{ fontSize: "1.1rem", fontWeight: 400, color: "#000" }}>₹{selectedOrder.totalAmount.toLocaleString("en-IN")}</span>
+                                </div>
+                              </>
+                            );
+                          })()}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Status Accordion */}
+                  <div className={styles.mobileAccordionItem}>
+                    <div 
+                      className={styles.mobileAccordionHeader} 
+                      onClick={() => setOpenMobileAccordion(openMobileAccordion === "status" ? "" : "status")}
+                    >
+                      <h3 style={{ fontSize: "0.9rem", fontWeight: 400, margin: 0, color: "#111" }}>Update Status</h3>
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ transform: openMobileAccordion === "status" ? "rotate(180deg)" : "rotate(0deg)", transition: "transform 0.2s" }}><path d="M6 9l6 6 6-6"/></svg>
+                    </div>
+                    {openMobileAccordion === "status" && (
+                      <div className={styles.mobileAccordionContent}>
+                        <div style={{ display: "flex", flexDirection: "column", gap: "15px" }}>
+                          <div>
+                            <label style={{ display: "block", fontSize: "0.8rem", fontWeight: 400, color: "#4b5563", marginBottom: "6px" }}>Order Status</label>
+                            {!["Return Approved", "Return Rejected"].includes(selectedOrder.status) ? (
+                              <select
+                                value={selectedOrder.status}
+                                onChange={(e) => handleUpdateOrderStatus(selectedOrder._id, e.target.value)}
+                                style={{ width: "100%", padding: "10px", border: "1px solid #d1d5db", borderRadius: "6px", fontSize: "0.9rem", background: "#fff" }}
+                              >
+                                <option value="Processing">Processing</option>
+                                <option value="Shipped">Shipped</option>
+                                <option value="Delivered">Delivered</option>
+                                <option value="Return Requested">Return Requested</option>
+                                <option value="Returned">Returned</option>
+                                <option value="Cancelled">Cancelled</option>
+                              </select>
+                            ) : (
+                              <div style={{ padding: "10px", backgroundColor: "#f3f4f6", borderRadius: "6px", fontSize: "0.9rem", color: "#6b7280" }}>
+                                Status locked ({selectedOrder.status})
+                              </div>
+                            )}
+                          </div>
+                          
+                          {selectedOrder.paymentMethod !== "COD" && ["Return Requested", "Returned", "Return Approved", "Cancelled"].includes(selectedOrder.status) && (
+                            <div>
+                              <label style={{ display: "block", fontSize: "0.8rem", fontWeight: 400, color: "#4b5563", marginBottom: "6px" }}>Refund Status</label>
+                              <select
+                                value={selectedOrder.refundStatus || "Not Refunded"}
+                                onChange={(e) => handleUpdateRefundStatus(selectedOrder._id, e.target.value)}
+                                style={{ width: "100%", padding: "10px", border: "1px solid #d1d5db", borderRadius: "6px", fontSize: "0.9rem", background: "#fff" }}
+                              >
+                                <option value="Not Refunded">Not Refunded</option>
+                                <option value="Refunded">Refunded</option>
+                              </select>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Timeline Accordion */}
+                  <div className={styles.mobileAccordionItem} style={{ borderBottom: "none" }}>
+                    <div 
+                      className={styles.mobileAccordionHeader} 
+                      onClick={() => setOpenMobileAccordion(openMobileAccordion === "timeline" ? "" : "timeline")}
+                    >
+                      <h3 style={{ fontSize: "0.9rem", fontWeight: 400, margin: 0, color: "#111" }}>Order Timeline</h3>
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ transform: openMobileAccordion === "timeline" ? "rotate(180deg)" : "rotate(0deg)", transition: "transform 0.2s" }}><path d="M6 9l6 6 6-6"/></svg>
+                    </div>
+                    {openMobileAccordion === "timeline" && (
+                      <div className={styles.mobileAccordionContent}>
+                        <div style={{ maxHeight: "40vh", overflowY: "auto", paddingRight: "5px", paddingLeft: "10px" }}>
+                          <div style={{ display: "flex", flexDirection: "column", gap: "16px", position: "relative" }}>
+                            <div style={{ position: "absolute", left: "4px", top: "4px", bottom: "4px", width: "2px", backgroundColor: "#e5e7eb", zIndex: 0 }}></div>
+                            {(() => {
+                              const allEvents: any[] = [];
+                              const statusIndex = ["Processing", "Shipped", "Delivered"].indexOf(selectedOrder.status);
+                              
+                              allEvents.push({ event: "Order Placed", date: selectedOrder.createdAt || new Date().toISOString(), color: "#10b981" });
+                              
+                              const hasEvent = (match: string) => selectedOrder.timeline?.some((e: any) => e.event.toLowerCase().includes(match.toLowerCase()));
+
+                              if (statusIndex >= 0 || selectedOrder.status === "Cancelled" || selectedOrder.returnRequest) {
+                                if (!hasEvent("processing")) allEvents.push({ event: "Processing", date: selectedOrder.createdAt, color: "#10b981" });
+                              }
+                              if (statusIndex >= 1 || selectedOrder.returnRequest) {
+                                if (!hasEvent("shipped")) allEvents.push({ event: "Shipped", date: selectedOrder.updatedAt, color: "#10b981" });
+                              }
+                              if (statusIndex >= 2 || selectedOrder.returnRequest) {
+                                if (!hasEvent("delivered")) allEvents.push({ event: "Delivered", date: selectedOrder.updatedAt, color: "#10b981" });
+                              }
+
+                              if (selectedOrder.timeline && selectedOrder.timeline.length > 0) {
+                                selectedOrder.timeline.forEach((e: any) => {
+                                  if (e.event === "Order Placed") return;
+                                  let color = "#10b981"; 
+                                  if (e.event.toLowerCase().includes("cancelled") || e.event.toLowerCase().includes("rejected") || e.event.toLowerCase().includes("failed")) color = "#ef4444"; 
+                                  else if (e.event.toLowerCase().includes("return request") || e.event.toLowerCase().includes("pending")) color = "#f59e0b"; 
+                                  
+                                  allEvents.push({ event: e.event, date: e.date || selectedOrder.updatedAt, color });
+                                });
+                              }
+
+                              if (selectedOrder.returnRequest && !hasEvent("return request")) {
+                                allEvents.push({ event: "Return Requested", date: selectedOrder.returnRequest.createdAt, color: "#f59e0b" });
+                                if (selectedOrder.returnRequest.status !== "Pending") {
+                                   allEvents.push({ event: `Return ${selectedOrder.returnRequest.status}`, date: selectedOrder.returnRequest.updatedAt, color: selectedOrder.returnRequest.status === "Approved" ? "#10b981" : "#ef4444" });
+                                }
+                              }
+                              
+                              if (selectedOrder.refundStatus === "Refunded" && !hasEvent("refund")) {
+                                allEvents.push({ event: "Refund Processed", date: selectedOrder.updatedAt, color: "#10b981" });
+                              } else if (selectedOrder.refundStatus === "Pending" && !hasEvent("refund")) {
+                                 allEvents.push({ event: "Refund Pending", date: selectedOrder.updatedAt, color: "#f59e0b" });
+                              }
+
+                              allEvents.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+
+                              return allEvents.map((event, idx) => (
+                                <div key={idx} style={{ display: "flex", gap: "12px", position: "relative", zIndex: 1 }}>
+                                  <div style={{ width: "10px", height: "10px", borderRadius: "50%", backgroundColor: event.color, marginTop: "4px", flexShrink: 0, boxShadow: `0 0 0 3px #fff, 0 0 0 4px ${event.color}` }}></div>
+                                  <div>
+                                    <p style={{ margin: 0, fontSize: "0.85rem", fontWeight: 400, color: "#111827" }}>{event.event}</p>
+                                    <p style={{ margin: "2px 0 0 0", fontSize: "0.75rem", color: "#6b7280" }}>
+                                      {new Date(event.date).toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" })}
+                                    </p>
+                                  </div>
+                                </div>
+                              ));
+                            })()}
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                </div>
+              </div>
           </div>
         </div>
       )}
+
 
 
       {/* Edit Category Modal */}
@@ -1586,7 +1820,7 @@ export default function AdminModals(props: any) {
             
             <div style={{ flex: 1, overflowY: "auto", padding: "0 5px", marginTop: "15px", display: "flex", flexDirection: "column", gap: "20px" }}>
               <div>
-                <label style={{ display: "block", fontSize: "0.85rem", fontWeight: 600, marginBottom: "8px", color: "#374151" }}>Category Name</label>
+                <label style={{ display: "block", fontSize: "0.85rem", fontWeight: 400, marginBottom: "8px", color: "#374151" }}>Category Name</label>
                 <input
                   type="text"
                   value={renameCategoryNewName}
@@ -1597,7 +1831,7 @@ export default function AdminModals(props: any) {
               </div>
 
               <div>
-                <label style={{ display: "block", fontSize: "0.85rem", fontWeight: 600, marginBottom: "8px", color: "#374151" }}>
+                <label style={{ display: "block", fontSize: "0.85rem", fontWeight: 400, marginBottom: "8px", color: "#374151" }}>
                   Products in Category
                 </label>
                 <div style={{ display: "flex", flexDirection: "column", gap: "8px", maxHeight: "300px", overflowY: "auto", border: "1px solid #e5e7eb", borderRadius: "6px", padding: "10px", backgroundColor: "#fafafa" }}>
@@ -1635,7 +1869,7 @@ export default function AdminModals(props: any) {
                             style={{ '--checkbox-color': '#4f46e5' } as React.CSSProperties}
                           />
                           <div style={{ display: "flex", flexDirection: "column", flex: 1 }}>
-                            <span style={{ fontSize: "0.85rem", fontWeight: 600, color: "#000" }}>{product.name}</span>
+                            <span style={{ fontSize: "0.85rem", fontWeight: 400, color: "#000" }}>{product.name}</span>
                             <span style={{ fontSize: "0.75rem", color: "#6b7280" }}>
                               {Array.isArray(product.category) ? product.category.join(", ") : (product.category || "None")}
                             </span>
@@ -1716,7 +1950,7 @@ export default function AdminModals(props: any) {
 
             <div style={{ marginTop: "15px", display: "flex", flexDirection: "column", gap: "15px" }}>
               <div>
-                <label style={{ display: "block", fontSize: "0.85rem", fontWeight: 600, marginBottom: "8px", color: "#374151" }}>Author</label>
+                <label style={{ display: "block", fontSize: "0.85rem", fontWeight: 400, marginBottom: "8px", color: "#374151" }}>Author</label>
                 <input
                   type="text"
                   value={editReviewTarget.author || ""}
@@ -1726,7 +1960,7 @@ export default function AdminModals(props: any) {
               </div>
 
               <div>
-                <label style={{ display: "block", fontSize: "0.85rem", fontWeight: 600, marginBottom: "8px", color: "#374151" }}>Location</label>
+                <label style={{ display: "block", fontSize: "0.85rem", fontWeight: 400, marginBottom: "8px", color: "#374151" }}>Location</label>
                 <input
                   type="text"
                   value={editReviewTarget.location || ""}
@@ -1736,7 +1970,7 @@ export default function AdminModals(props: any) {
               </div>
 
               <div>
-                <label style={{ display: "block", fontSize: "0.85rem", fontWeight: 600, marginBottom: "8px", color: "#374151" }}>Rating (1-5)</label>
+                <label style={{ display: "block", fontSize: "0.85rem", fontWeight: 400, marginBottom: "8px", color: "#374151" }}>Rating (1-5)</label>
                 <input
                   type="number"
                   min="1"
@@ -1748,7 +1982,7 @@ export default function AdminModals(props: any) {
               </div>
 
               <div>
-                <label style={{ display: "block", fontSize: "0.85rem", fontWeight: 600, marginBottom: "8px", color: "#374151" }}>Title</label>
+                <label style={{ display: "block", fontSize: "0.85rem", fontWeight: 400, marginBottom: "8px", color: "#374151" }}>Title</label>
                 <input
                   type="text"
                   value={editReviewTarget.title || ""}
@@ -1758,7 +1992,7 @@ export default function AdminModals(props: any) {
               </div>
 
               <div>
-                <label style={{ display: "block", fontSize: "0.85rem", fontWeight: 600, marginBottom: "8px", color: "#374151" }}>Comment</label>
+                <label style={{ display: "block", fontSize: "0.85rem", fontWeight: 400, marginBottom: "8px", color: "#374151" }}>Comment</label>
                 <textarea
                   value={editReviewTarget.comment || ""}
                   onChange={(e) => setEditReviewTarget({ ...editReviewTarget, comment: e.target.value })}
@@ -1818,7 +2052,7 @@ export default function AdminModals(props: any) {
               padding: "20px 24px",
               borderBottom: "1px solid #f1f5f9"
             }}>
-              <h3 style={{ margin: 0, fontSize: "1.1rem", fontWeight: 700, color: "#1e293b", display: "flex", alignItems: "center", gap: "8px" }}>
+              <h3 style={{ margin: 0, fontSize: "1.1rem", fontWeight: 400, color: "#1e293b", display: "flex", alignItems: "center", gap: "8px" }}>
                 {returnStatusAction.newStatus === "Approved" ? (
                   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="#10b981" style={{ width: "20px", height: "20px" }}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -1856,7 +2090,7 @@ export default function AdminModals(props: any) {
               </p>
               
               <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
-                <label style={{ fontSize: "0.82rem", fontWeight: 700, color: "#475569" }}>
+                <label style={{ fontSize: "0.82rem", fontWeight: 400, color: "#475569" }}>
                   {returnStatusAction.newStatus === "Approved" ? "Note to Customer (Optional)" : "Reason for Rejection (Required)"}
                 </label>
                 <textarea
@@ -1897,7 +2131,7 @@ export default function AdminModals(props: any) {
                   borderRadius: "6px",
                   border: "1px solid #cbd5e1",
                   fontSize: "0.85rem",
-                  fontWeight: 600,
+                  fontWeight: 400,
                   backgroundColor: "#ffffff",
                   color: "#475569",
                   cursor: "pointer"
@@ -1914,7 +2148,7 @@ export default function AdminModals(props: any) {
                   borderRadius: "6px",
                   border: "none",
                   fontSize: "0.85rem",
-                  fontWeight: 600,
+                  fontWeight: 400,
                   backgroundColor: returnStatusAction.newStatus === "Approved" ? "#10b981" : "#ef4444",
                   color: "#ffffff",
                   cursor: (returnStatusAction.newStatus === "Rejected" && !returnStatusNotes.trim()) ? "not-allowed" : "pointer",

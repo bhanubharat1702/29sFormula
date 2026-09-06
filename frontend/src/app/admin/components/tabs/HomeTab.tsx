@@ -89,6 +89,7 @@ export default function HomeTab({
   const [hoveredBarIndex, setHoveredBarIndex] = useState<number | null>(null);
   const [isMobile, setIsMobile] = useState(false);
   const [mobileFilter, setMobileFilter] = useState("All");
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth <= 600);
@@ -493,8 +494,8 @@ export default function HomeTab({
                         <h1 className={styles.mobileTitle}>Latest Orders</h1>
                         <div className={styles.mobileSubtitle}>{dashboardStats?.recentOrders?.length || 0} orders</div>
                       </div>
-                      <button className={styles.mobileRefreshBtn} onClick={() => {}}>
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" style={{ width: "20px", height: "20px" }}>
+                      <button className={styles.mobileRefreshBtn} onClick={() => { setIsRefreshing(true); setTimeout(() => setIsRefreshing(false), 1000); }}>
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" style={{ width: "20px", height: "20px" }} className={isRefreshing ? styles.spinAnimation : ""}>
                           <path strokeLinecap="round" strokeLinejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99" />
                         </svg>
                       </button>
@@ -542,7 +543,7 @@ export default function HomeTab({
                               onClick={() => setSelectedOrder(order)}
                             >
                               <td style={{ padding: '12px 16px', fontSize: '12px', color: '#374151', verticalAlign: 'top' }}>
-                                #{order.orderId ? (order.orderId.length > 12 ? order.orderId.substring(0, 4) + '...' + order.orderId.slice(-6) : order.orderId) : `ORD-${order._id.substring(order._id.length - 4).toUpperCase()}`}
+                                {order.orderId ? (order.orderId.length > 12 ? order.orderId.substring(0, 4) + '...' + order.orderId.slice(-6) : order.orderId) : `ORD-${order._id.substring(order._id.length - 4).toUpperCase()}`}
                               </td>
                               <td style={{ padding: '12px 16px', fontSize: '14px', color: '#000', textTransform: 'capitalize', verticalAlign: 'top' }}>
                                 {order.customerName ? order.customerName.toLowerCase() : "N/A"}
@@ -586,7 +587,7 @@ export default function HomeTab({
                                     <div>
                                       <div className={styles.mobileCustomerName}>{order.customerName ? order.customerName.toLowerCase() : "N/A"}</div>
                                       <div className={styles.mobileOrderMeta}>
-                                        #{order.orderId ? (order.orderId.length > 12 ? order.orderId.substring(0, 4) + '...' + order.orderId.slice(-6) : order.orderId) : `ORD-${order._id.substring(order._id.length - 4).toUpperCase()}`} · {new Date(order.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                                        {order.orderId ? (order.orderId.length > 12 ? order.orderId.substring(0, 4) + '...' + order.orderId.slice(-6) : order.orderId) : `ORD-${order._id.substring(order._id.length - 4).toUpperCase()}`} · {new Date(order.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                                       </div>
                                     </div>
                                     <div style={{ textAlign: 'right' }}>

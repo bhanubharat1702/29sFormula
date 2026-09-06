@@ -45,6 +45,7 @@ export default function ActiveOrdersSubTab({
   handleDeleteOrder
 }: ActiveOrdersSubTabProps) {
   const [openActionDropdownId, setOpenActionDropdownId] = React.useState<string | null>(null);
+  const [isRefreshing, setIsRefreshing] = React.useState(false);
   const activeSubTab = "all" as string;
 
   return (
@@ -152,7 +153,7 @@ export default function ActiveOrdersSubTab({
                     </div>
                   )}
                   <button
-                    onClick={fetchOrders}
+                    onClick={() => { setIsRefreshing(true); fetchOrders(); setTimeout(() => setIsRefreshing(false), 1000); }}
                     className={styles.addPerfumeBtn}
                     title="Reload Orders"
                   >
@@ -177,8 +178,8 @@ export default function ActiveOrdersSubTab({
                     </h1>
                     <div className={styles.mobileSubtitle}>{orders.length} orders</div>
                   </div>
-                  <button className={styles.mobileRefreshBtn} onClick={fetchOrders}>
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" style={{ width: "20px", height: "20px" }}>
+                  <button className={styles.mobileRefreshBtn} onClick={() => { setIsRefreshing(true); fetchOrders(); setTimeout(() => setIsRefreshing(false), 1000); }}>
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" style={{ width: "20px", height: "20px" }} className={isRefreshing ? styles.spinAnimation : ""}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99" />
                     </svg>
                   </button>
@@ -257,9 +258,10 @@ export default function ActiveOrdersSubTab({
                           )}
                         </thead>
                         <tbody>
-                          {orders
-                            .filter(o => !o.deletedByAdmin)
-                            .filter(o => {
+                          {(() => {
+  const filteredOrders = orders
+    .filter(o => !o.deletedByAdmin)
+    .filter(o => {
                               if (activeSubTab === "returns") {
                                 return o.status === "Return Requested" || 
                                        (o.returnRequest && o.returnRequest.status === "Pending");
@@ -288,14 +290,26 @@ export default function ActiveOrdersSubTab({
                               o.customerName.toLowerCase().includes(searchQuery.toLowerCase()) ||
                               o.customerEmail.toLowerCase().includes(searchQuery.toLowerCase())
                             )
-                            .map((order, idx, arr) => {
+                            ;
+  if (filteredOrders.length === 0) {
+    return (
+      <tr>
+        <td colSpan={10} style={{ padding: "40px 0" }}>
+          <div className={styles.emptyState} style={{ border: "none", boxShadow: "none", background: "transparent" }}>
+            <p>No orders found matching this criteria.</p>
+          </div>
+        </td>
+      </tr>
+    );
+  }
+  return filteredOrders.map((order, idx, arr) => {
                               const openUpwards = arr.length > 0 && idx >= arr.length - 2;
                               if (activeSubTab === "returns") {
                                 return (
                                   <React.Fragment key={order._id}>
                                 <tr className={styles.desktopRow} style={{ borderBottom: '1px solid #f9fafb', cursor: 'pointer' }} onClick={() => setSelectedOrder(order)}>
                                     <td>
-                                      <span style={{ fontSize: '12px', color: '#374151' }}>#{order.orderId ? (order.orderId.length > 12 ? order.orderId.substring(0, 4) + '...' + order.orderId.slice(-6) : order.orderId) : order._id.substring(order._id.length - 4)}</span>
+                                      <span style={{ fontSize: '12px', color: '#374151' }}>{order.orderId ? (order.orderId.length > 12 ? order.orderId.substring(0, 4) + '...' + order.orderId.slice(-6) : order.orderId) : order._id.substring(order._id.length - 4)}</span>
                                     </td>
                                     <td>
                                       <span style={{ fontSize: '14px', color: '#000', textTransform: 'capitalize' }}>{order.customerName ? order.customerName.toLowerCase() : "N/A"}</span>
@@ -423,7 +437,7 @@ export default function ActiveOrdersSubTab({
                                           <div>
                                             <div className={styles.mobileCustomerName}>{order.customerName ? order.customerName.toLowerCase() : "N/A"}</div>
                                             <div className={styles.mobileOrderMeta}>
-                                              #{order.orderId ? (order.orderId.length > 12 ? order.orderId.substring(0, 4) + '...' + order.orderId.slice(-6) : order.orderId) : `ORD-${order._id.substring(order._id.length - 4).toUpperCase()}`} · {new Date(order.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                                              {order.orderId ? (order.orderId.length > 12 ? order.orderId.substring(0, 4) + '...' + order.orderId.slice(-6) : order.orderId) : `ORD-${order._id.substring(order._id.length - 4).toUpperCase()}`} · {new Date(order.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                                             </div>
                                           </div>
                                           <div style={{ textAlign: 'right' }}>
@@ -464,7 +478,7 @@ export default function ActiveOrdersSubTab({
                                 <tr className={styles.desktopRow} style={{ borderBottom: '1px solid #f9fafb', cursor: 'pointer' }} onClick={() => setSelectedOrder(order)}>
                                   <td>
                                     <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
-                                      <span style={{ fontSize: '12px', color: '#374151' }}>#{order.orderId ? (order.orderId.length > 12 ? order.orderId.substring(0, 4) + '...' + order.orderId.slice(-6) : order.orderId) : order._id.substring(order._id.length - 4)}</span>
+                                      <span style={{ fontSize: '12px', color: '#374151' }}>{order.orderId ? (order.orderId.length > 12 ? order.orderId.substring(0, 4) + '...' + order.orderId.slice(-6) : order.orderId) : order._id.substring(order._id.length - 4)}</span>
                                       {order.returnRequest?.returnType === "Replacement" && order.returnRequest?.status === "Approved" && (
                                         <span style={{ fontSize: "0.65rem", fontWeight: 700, padding: "2px 6px", borderRadius: "8px", backgroundColor: "#e0e7ff", color: "#4338ca", width: "fit-content" }}>EXCHANGE</span>
                                       )}
@@ -574,7 +588,7 @@ export default function ActiveOrdersSubTab({
                                           <div>
                                             <div className={styles.mobileCustomerName}>{order.customerName ? order.customerName.toLowerCase() : "N/A"}</div>
                                             <div className={styles.mobileOrderMeta}>
-                                              #{order.orderId ? (order.orderId.length > 12 ? order.orderId.substring(0, 4) + '...' + order.orderId.slice(-6) : order.orderId) : `ORD-${order._id.substring(order._id.length - 4).toUpperCase()}`} · {new Date(order.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                                              {order.orderId ? (order.orderId.length > 12 ? order.orderId.substring(0, 4) + '...' + order.orderId.slice(-6) : order.orderId) : `ORD-${order._id.substring(order._id.length - 4).toUpperCase()}`} · {new Date(order.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                                             </div>
                                           </div>
                                           <div style={{ textAlign: 'right' }}>
@@ -607,7 +621,7 @@ export default function ActiveOrdersSubTab({
                                   </tr>
                                 </React.Fragment>
                               );
-                            })}
+                            });})()}
                         </tbody>
                       </table>
                     </div>

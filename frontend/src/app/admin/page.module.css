@@ -1854,7 +1854,7 @@
 
 .mobileOrderAmount {
   font-size: 16px;
-  font-weight: 700;
+  font-weight: 400;
   color: #000;
   text-align: right;
   margin-bottom: 8px;
@@ -1867,7 +1867,7 @@
   padding: 4px 10px;
   border-radius: 9999px;
   font-size: 12px;
-  font-weight: 600;
+  font-weight: 400;
 }
 
 .mobileStatusDot {
@@ -1897,7 +1897,7 @@
 }
 
 .mobileProductWeight {
-  font-weight: 600;
+  font-weight: 400;
   color: #111827;
 }
 
@@ -2003,5 +2003,54 @@
   }
   .dashboardCard {
     padding: 16px !important;
+  }
+}
+
+.spinAnimation {
+  animation: spin 1s linear infinite;
+}
+
+/* Mobile Accordion Styles */
+.mobileAccordionItem {
+  border-bottom: 1px solid #e5e7eb;
+}
+.mobileAccordionItem:last-child {
+  border-bottom: none;
+}
+.mobileAccordionHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px;
+  background-color: #ffffff;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+.mobileAccordionHeader:active {
+  background-color: #f9fafb;
+}
+.mobileAccordionContent {
+  padding: 0 16px 16px 16px;
+  background-color: #ffffff;
+  animation: slideDown 0.2s ease-out;
+}
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.showOnMobile {
+  display: none !important;
+}
+
+@media (max-width: 768px) {
+  .showOnMobile {
+    display: flex !important; /* flex because we need it to be flex-column */
   }
 }
