@@ -495,7 +495,7 @@ export default function CheckoutDrawer({ isOpen, onClose, cartItems, primaryColo
           <button onClick={onClose} className={styles.closeBtn}>✕</button>
         </div>
 
-        <form onSubmit={handleSubmit} className={styles.formContainer} autoComplete="off">
+        <form onSubmit={handleSubmit} className={styles.formContainer}>
           {error && <div className={styles.errorAlert}>{error}</div>}
 
           <div className={styles.scrollContent}>
@@ -623,7 +623,6 @@ export default function CheckoutDrawer({ isOpen, onClose, cartItems, primaryColo
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   className={styles.input}
-                  autoComplete="new-password"
                 />
               </div>
               <div className={styles.inputRow}>
@@ -635,7 +634,6 @@ export default function CheckoutDrawer({ isOpen, onClose, cartItems, primaryColo
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     className={styles.input}
-                    autoComplete="new-password"
                   />
                 </div>
                 <div className={styles.inputGroup}>
@@ -646,7 +644,6 @@ export default function CheckoutDrawer({ isOpen, onClose, cartItems, primaryColo
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
                     className={styles.input}
-                    autoComplete="new-password"
                   />
                 </div>
               </div>
@@ -691,7 +688,6 @@ export default function CheckoutDrawer({ isOpen, onClose, cartItems, primaryColo
                   value={address}
                   onChange={(e) => setAddress(e.target.value)}
                   className={styles.input}
-                  autoComplete="new-password"
                 />
               </div>
               <div className={styles.inputRow}>
@@ -703,7 +699,6 @@ export default function CheckoutDrawer({ isOpen, onClose, cartItems, primaryColo
                     value={city}
                     onChange={(e) => setCity(e.target.value)}
                     className={styles.input}
-                    autoComplete="new-password"
                   />
                 </div>
                 <div className={styles.inputGroup}>
@@ -714,7 +709,6 @@ export default function CheckoutDrawer({ isOpen, onClose, cartItems, primaryColo
                     value={stateVal}
                     onChange={(e) => setStateVal(e.target.value)}
                     className={styles.input}
-                    autoComplete="new-password"
                   />
                 </div>
               </div>
@@ -726,7 +720,6 @@ export default function CheckoutDrawer({ isOpen, onClose, cartItems, primaryColo
                   value={pinCode}
                   onChange={(e) => setPinCode(e.target.value)}
                   className={styles.input}
-                  autoComplete="new-password"
                 />
               </div>
             </div>
