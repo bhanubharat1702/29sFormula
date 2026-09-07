@@ -62,6 +62,9 @@ export default function CheckoutDrawer({ isOpen, onClose, cartItems, primaryColo
   const [searchError, setSearchError] = useState<string | null>(null);
   const [searchSuccess, setSearchSuccess] = useState<string | null>(null);
   const [isSuccessExiting, setIsSuccessExiting] = useState(false);
+  const [otpSent, setOtpSent] = useState(false);
+  const [otpValue, setOtpValue] = useState("");
+  const [isVerifyingOtp, setIsVerifyingOtp] = useState(false);
   const [isFetchingLocation, setIsFetchingLocation] = useState(false);
 
   const [couponCode, setCouponCode] = useState("");
@@ -238,8 +241,8 @@ export default function CheckoutDrawer({ isOpen, onClose, cartItems, primaryColo
   };
 
   const handleAutofill = async () => {
-    if (!searchQuery.trim()) {
-      setSearchError("Please enter your email or phone number.");
+    if (!searchQuery.trim() || !searchQuery.includes('@')) {
+      setSearchError("Please enter a valid email address.");
       return;
     }
     setIsSearching(true);
@@ -247,11 +250,47 @@ export default function CheckoutDrawer({ isOpen, onClose, cartItems, primaryColo
     setSearchSuccess(null);
 
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:5001'}/api/customers/search?query=${encodeURIComponent(searchQuery.trim())}`);
-      if (!res.ok) {
-        throw new Error("Customer not found. Please fill in your details manually.");
-      }
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:5001'}/api/customers/request-autofill-otp`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: searchQuery.trim() })
+      });
       const data = await res.json();
+      
+      if (!res.ok) {
+        throw new Error(data.error || "Failed to request OTP.");
+      }
+
+      setOtpSent(true);
+      setSearchSuccess("OTP sent successfully! Please check your email.");
+      setTimeout(() => setSearchSuccess(null), 4000);
+    } catch (err: any) {
+      setSearchError(err.message);
+    } finally {
+      setIsSearching(false);
+    }
+  };
+
+  const handleVerifyOtp = async () => {
+    if (!otpValue.trim() || otpValue.trim().length !== 6) {
+      setSearchError("Please enter a valid 6-digit OTP.");
+      return;
+    }
+    setIsVerifyingOtp(true);
+    setSearchError(null);
+    setSearchSuccess(null);
+
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:5001'}/api/customers/verify-autofill-otp`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: searchQuery.trim(), otp: otpValue.trim() })
+      });
+      const data = await res.json();
+      
+      if (!res.ok) {
+        throw new Error(data.error || "Invalid OTP.");
+      }
 
       if (data.name) setName(data.name);
       if (data.email) setEmail(data.email);
@@ -284,12 +323,13 @@ export default function CheckoutDrawer({ isOpen, onClose, cartItems, primaryColo
         }, 500);
       }, 4000);
 
-
+      // Hide OTP block after successful verification
+      setTimeout(() => setIsReturningCustomer(false), 2000);
 
     } catch (err: any) {
       setSearchError(err.message);
     } finally {
-      setIsSearching(false);
+      setIsVerifyingOtp(false);
     }
   };
 
@@ -455,7 +495,7 @@ export default function CheckoutDrawer({ isOpen, onClose, cartItems, primaryColo
           <button onClick={onClose} className={styles.closeBtn}>✕</button>
         </div>
 
-        <form onSubmit={handleSubmit} className={styles.formContainer}>
+        <form onSubmit={handleSubmit} className={styles.formContainer} autoComplete="off">
           {error && <div className={styles.errorAlert}>{error}</div>}
 
           <div className={styles.scrollContent}>
@@ -472,35 +512,95 @@ export default function CheckoutDrawer({ isOpen, onClose, cartItems, primaryColo
 
               {isReturningCustomer && (
                 <div style={{ marginTop: "12px", display: "flex", flexDirection: "column", gap: "8px" }}>
-                  <p style={{ fontSize: "0.85rem", color: "#6b7280", margin: 0 }}>Enter your email or phone number to quickly load your shipping details.</p>
-                  <div style={{ display: "flex", gap: "8px" }}>
-                    <input
-                      ref={autofillInputRef}
-                      type="text"
-                      placeholder="Email or Phone Number"
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      className={styles.input}
-                      style={{ flex: 1 }}
-                    />
-                    <button
-                      type="button"
-                      onClick={handleAutofill}
-                      disabled={isSearching}
-                      style={{
-                        backgroundColor: "#000",
-                        color: "white",
-                        border: "none",
-                        borderRadius: "4px",
-                        padding: "0 16px",
-                        fontWeight: 600,
-                        cursor: isSearching ? "not-allowed" : "pointer",
-                        opacity: isSearching ? 0.7 : 1
-                      }}
-                    >
-                      {isSearching ? "Searching..." : "Autofill"}
-                    </button>
-                  </div>
+                  {!otpSent ? (
+                    <>
+                      <p style={{ fontSize: "0.85rem", color: "#6b7280", margin: 0 }}>Enter your registered email address to verify and load your shipping details.</p>
+                      <div className={styles.inputRow}>
+                        <input
+                          ref={autofillInputRef}
+                          type="email"
+                          placeholder="Email Address"
+                          value={searchQuery}
+                          onChange={(e) => setSearchQuery(e.target.value)}
+                          className={styles.input}
+                          style={{ flex: 1 }}
+                        />
+                        <button
+                          type="button"
+                          onClick={handleAutofill}
+                          disabled={isSearching}
+                          style={{
+                            backgroundColor: "#000",
+                            color: "white",
+                            border: "none",
+                            borderRadius: "4px",
+                            padding: "10px 16px",
+                            fontWeight: 400,
+                            cursor: isSearching ? "not-allowed" : "pointer",
+                            opacity: isSearching ? 0.7 : 1,
+                            minWidth: "100px"
+                          }}
+                        >
+                          {isSearching ? "Sending..." : "Get OTP"}
+                        </button>
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <p style={{ fontSize: "0.85rem", color: "#6b7280", margin: 0 }}>Enter the 6-digit verification code sent to <strong>{searchQuery}</strong>.</p>
+                      <div style={{ display: "flex", gap: "8px", flexDirection: "column" }}>
+                      <div className={styles.inputRow}>
+                          <input
+                            type="text"
+                            placeholder="6-digit OTP"
+                            value={otpValue}
+                            onChange={(e) => setOtpValue(e.target.value)}
+                            maxLength={6}
+                            className={styles.input}
+                            style={{ flex: 1, letterSpacing: "2px", textAlign: "center", fontWeight: "normal" }}
+                          />
+                          <button
+                            type="button"
+                            onClick={handleVerifyOtp}
+                            disabled={isVerifyingOtp}
+                            style={{
+                              backgroundColor: "#000",
+                              color: "white",
+                              border: "none",
+                              borderRadius: "4px",
+                              padding: "10px 16px",
+                              fontWeight: 400,
+                              cursor: isVerifyingOtp ? "not-allowed" : "pointer",
+                              opacity: isVerifyingOtp ? 0.7 : 1,
+                              minWidth: "120px"
+                            }}
+                          >
+                            {isVerifyingOtp ? "Verifying..." : "Verify & Autofill"}
+                          </button>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setOtpSent(false);
+                            setOtpValue("");
+                            setSearchError(null);
+                          }}
+                          style={{
+                            background: "none",
+                            border: "none",
+                            color: "#4b5563",
+                            fontSize: "0.8rem",
+                            cursor: "pointer",
+                            textDecoration: "underline",
+                            alignSelf: "flex-start",
+                            padding: 0
+                          }}
+                        >
+                          Change Email Address
+                        </button>
+                      </div>
+                    </>
+                  )}
                   {searchError && <p style={{ color: "#ef4444", fontSize: "0.85rem", margin: 0 }}>{searchError}</p>}
                   {searchSuccess && (
                     <div className={`${styles.successAlert} ${isSuccessExiting ? styles.slideOut : ''}`}>
@@ -523,6 +623,7 @@ export default function CheckoutDrawer({ isOpen, onClose, cartItems, primaryColo
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   className={styles.input}
+                  autoComplete="new-password"
                 />
               </div>
               <div className={styles.inputRow}>
@@ -534,6 +635,7 @@ export default function CheckoutDrawer({ isOpen, onClose, cartItems, primaryColo
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     className={styles.input}
+                    autoComplete="new-password"
                   />
                 </div>
                 <div className={styles.inputGroup}>
@@ -544,6 +646,7 @@ export default function CheckoutDrawer({ isOpen, onClose, cartItems, primaryColo
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
                     className={styles.input}
+                    autoComplete="new-password"
                   />
                 </div>
               </div>
@@ -588,6 +691,7 @@ export default function CheckoutDrawer({ isOpen, onClose, cartItems, primaryColo
                   value={address}
                   onChange={(e) => setAddress(e.target.value)}
                   className={styles.input}
+                  autoComplete="new-password"
                 />
               </div>
               <div className={styles.inputRow}>
@@ -599,6 +703,7 @@ export default function CheckoutDrawer({ isOpen, onClose, cartItems, primaryColo
                     value={city}
                     onChange={(e) => setCity(e.target.value)}
                     className={styles.input}
+                    autoComplete="new-password"
                   />
                 </div>
                 <div className={styles.inputGroup}>
@@ -609,6 +714,7 @@ export default function CheckoutDrawer({ isOpen, onClose, cartItems, primaryColo
                     value={stateVal}
                     onChange={(e) => setStateVal(e.target.value)}
                     className={styles.input}
+                    autoComplete="new-password"
                   />
                 </div>
               </div>
@@ -620,6 +726,7 @@ export default function CheckoutDrawer({ isOpen, onClose, cartItems, primaryColo
                   value={pinCode}
                   onChange={(e) => setPinCode(e.target.value)}
                   className={styles.input}
+                  autoComplete="new-password"
                 />
               </div>
             </div>
