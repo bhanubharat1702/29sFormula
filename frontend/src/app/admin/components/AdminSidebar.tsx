@@ -19,6 +19,8 @@ interface AdminSidebarProps {
   setSelectedCategoryView: (val: string | null) => void;
   handleNavigationTrigger: (tab: any) => void;
   setIsMobileMenuOpen?: (val: boolean) => void;
+  brandLogoType?: string;
+  brandLogoValue?: string;
 }
 
 export default function AdminSidebar({
@@ -37,13 +39,21 @@ export default function AdminSidebar({
   setActiveSubTab,
   setSelectedCategoryView,
   handleNavigationTrigger,
-  setIsMobileMenuOpen
+  setIsMobileMenuOpen,
+  brandLogoType,
+  brandLogoValue
 }: AdminSidebarProps) {
   return (
       <aside className={`${styles.sidebar} ${isMobileMenuOpen ? styles.sidebarOpen : ''}`}>
         <div className={styles.sidebarTop}>
           <div className={styles.brandRow}>
-            <span className={styles.brandName}>29sFORMULA</span>
+            <span className={styles.brandName} style={{ display: 'flex', alignItems: 'center' }}>
+              {brandLogoType === "image" && brandLogoValue ? (
+                <img src={brandLogoValue} alt="Brand Logo" style={{ maxHeight: "30px", maxWidth: "150px", objectFit: "contain" }} />
+              ) : (
+                brandLogoValue || "29sFORMULA"
+              )}
+            </span>
           </div>
 
           <nav className={styles.navMenu}>

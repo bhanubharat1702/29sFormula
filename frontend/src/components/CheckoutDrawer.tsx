@@ -58,6 +58,7 @@ export default function CheckoutDrawer({ isOpen, onClose, cartItems, primaryColo
   const [loggedInUser, setLoggedInUser] = useState<any>(null);
   const [isReturningCustomer, setIsReturningCustomer] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [brandLogoValue, setBrandLogoValue] = useState<string>("29sFORMULA");
   const [isSearching, setIsSearching] = useState(false);
   const [searchError, setSearchError] = useState<string | null>(null);
   const [searchSuccess, setSearchSuccess] = useState<string | null>(null);
@@ -143,6 +144,19 @@ export default function CheckoutDrawer({ isOpen, onClose, cartItems, primaryColo
       zIndex: 10000
     });
   };
+
+  useEffect(() => {
+    if (isOpen) {
+      fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:5001'}/api/settings`, { cache: 'no-store' })
+        .then(res => res.json())
+        .then(data => {
+          if (data && data.brandLogoValue) {
+            setBrandLogoValue(data.brandLogoValue);
+          }
+        })
+        .catch(err => console.error("Error querying settings for checkout drawer:", err));
+    }
+  }, [isOpen]);
 
   const handleApplyCoupon = async () => {
     setCouponError(null);
@@ -384,7 +398,7 @@ export default function CheckoutDrawer({ isOpen, onClose, cartItems, primaryColo
           key: "rzp_test_TQPDhHLa4xiz9t", // Test API Key
           amount: initData.amount,
           currency: initData.currency,
-          name: "29sFORMULA",
+          name: brandLogoValue || "29sFORMULA",
           description: "Fine Artisan Perfumery",
           order_id: initData.order_id,
           handler: async function (response: any) {

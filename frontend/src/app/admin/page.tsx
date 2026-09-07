@@ -2304,7 +2304,13 @@ const getSearchResults = () => {
           transition: 'all 0.3s ease'
         }}
       >
-        <span className={styles.brandName} style={{ opacity: isMobileMenuOpen ? 0 : 1, transition: 'opacity 0.3s' }}>29sFORMULA</span>
+        <span className={styles.brandName} style={{ opacity: isMobileMenuOpen ? 0 : 1, transition: 'opacity 0.3s', display: 'flex', alignItems: 'center' }}>
+          {brandLogoType === "image" && brandLogoValue ? (
+            <img src={brandLogoValue} alt="Brand Logo" style={{ maxHeight: "24px", maxWidth: "120px", objectFit: "contain" }} />
+          ) : (
+            brandLogoValue || "29sFORMULA"
+          )}
+        </span>
         <button className={styles.hamburgerBtn} onClick={() => {
           if (!isMobileMenuOpen) {
             // Open the dropdown for the active tab, close others
@@ -2344,6 +2350,8 @@ const getSearchResults = () => {
         setSelectedCategoryView={setSelectedCategoryView}
         handleNavigationTrigger={handleNavigationTrigger}
         setIsMobileMenuOpen={setIsMobileMenuOpen}
+        brandLogoType={brandLogoType}
+        brandLogoValue={brandLogoValue}
       />
 
       {/* 2. Main Page Content Wrapper */}

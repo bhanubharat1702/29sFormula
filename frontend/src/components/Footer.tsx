@@ -17,6 +17,8 @@ export default function Footer() {
   const [contactUsText, setContactUsText] = useState<string>("");
   const [returnPolicyText, setReturnPolicyText] = useState<string>("");
   const [shippingPolicyText, setShippingPolicyText] = useState<string>("");
+  const [brandLogoType, setBrandLogoType] = useState<string>("text");
+  const [brandLogoValue, setBrandLogoValue] = useState<string>("29sFORMULA");
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => { setMounted(true); }, []);
@@ -35,6 +37,8 @@ export default function Footer() {
         if (data.contactUsText) setContactUsText(data.contactUsText);
         if (data.returnPolicyText) setReturnPolicyText(data.returnPolicyText);
         if (data.shippingPolicyText) setShippingPolicyText(data.shippingPolicyText);
+        if (data.brandLogoType) setBrandLogoType(data.brandLogoType);
+        if (data.brandLogoValue) setBrandLogoValue(data.brandLogoValue);
       })
       .catch(err => console.warn("Failed to load policies for footer:", err));
   }, []);
@@ -154,10 +158,20 @@ export default function Footer() {
 
       {/* 12. Sub-Footer / Copyright Section */}
       <section className={styles.subFooterSection}>
-        <div className={styles.subFooterLogo}>29sFORMULA</div>
+        <div className={styles.subFooterLogo}>
+          {brandLogoType === "image" && brandLogoValue ? (
+            <img src={brandLogoValue} alt="Brand Logo" style={{ maxHeight: "120px", maxWidth: "90%", objectFit: "contain" }} />
+          ) : (
+            <span style={{ 
+              fontSize: `min(25vw, calc(140vw / ${Math.max(1, (brandLogoValue || "29sFORMULA").length)}))`
+            }}>
+              {brandLogoValue || "29sFORMULA"}
+            </span>
+          )}
+        </div>
         <div className={styles.subFooterDivider}></div>
         <div className={styles.subFooterCopyright}>
-          <p>© 2026, 29sFORMULA, ALL RIGHTS RESERVED</p>
+          <p>© {new Date().getFullYear()}, {brandLogoType === "text" ? brandLogoValue : "29sFORMULA"}, ALL RIGHTS RESERVED</p>
           <p>OWNED BY 29S FORMULA LLP</p>
         </div>
       </section>

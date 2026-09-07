@@ -615,10 +615,10 @@ export default function Home() {
 
   
   const totalArrivalsPages = Math.ceil(arrivals.length / itemsPerPage);
-  const displayedArrivals = isMobile ? arrivals.slice((arrivalsPage - 1) * itemsPerPage, arrivalsPage * itemsPerPage) : arrivals;
+  const displayedArrivals = isMobile ? arrivals.slice((arrivalsPage - 1) * itemsPerPage, arrivalsPage * itemsPerPage) : arrivals.slice(0, 4);
 
   const totalBestSellersPages = Math.ceil(bestSellers.length / itemsPerPage);
-  const displayedBestSellers = isMobile ? bestSellers.slice((bestSellersPage - 1) * itemsPerPage, bestSellersPage * itemsPerPage) : bestSellers;
+  const displayedBestSellers = isMobile ? bestSellers.slice((bestSellersPage - 1) * itemsPerPage, bestSellersPage * itemsPerPage) : bestSellers.slice(0, 4);
 
   // Touch Handlers for Swipe
   const minSwipeDistance = 50;

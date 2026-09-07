@@ -48,12 +48,43 @@ router.get("/api/storefront/shop", async (req, res) => {
 
 router.get("/api/storefront/home", async (req, res) => {
   try {
-    const [settings, arrivals, bestSellers, reviews] = await Promise.all([
+    const [settings, arrivals, reviews] = await Promise.all([
       Settings.findOne().lean(),
       Product.find({ category: "Latest Arrivals" }).sort({ createdAt: -1 }).lean(),
-      Product.find({ category: "Best Seller" }).sort({ createdAt: -1 }).lean(),
       Review.find({}).sort({ createdAt: -1 }).lean()
     ]);
+
+    // Aggregate to find true best sellers based on order quantity
+    const salesAggregation = await Order.aggregate([
+      { $unwind: "$cartItems" },
+      {
+        $group: {
+          _id: "$cartItems.productId",
+          salesCount: { $sum: "$cartItems.quantity" }
+        }
+      },
+      { $sort: { salesCount: -1 } },
+      { $limit: 4 }
+    ]);
+
+    const topSellingIds = salesAggregation.map(item => item._id);
+    let bestSellers = await Product.find({ _id: { $in: topSellingIds } }).lean();
+
+    // Sort to match aggregation order
+    bestSellers.sort((a, b) => {
+      const indexA = topSellingIds.findIndex(id => id.toString() === a._id.toString());
+      const indexB = topSellingIds.findIndex(id => id.toString() === b._id.toString());
+      return indexA - indexB;
+    });
+
+    // Fill remaining if less than 4 products have been sold
+    if (bestSellers.length < 4) {
+      const additional = await Product.find({ 
+        category: "Best Seller", 
+        _id: { $nin: topSellingIds } 
+      }).sort({ createdAt: -1 }).limit(4 - bestSellers.length).lean();
+      bestSellers = [...bestSellers, ...additional];
+    }
 
     const allProducts = [...arrivals, ...bestSellers];
     const productIds = [...new Set(allProducts.map(p => p._id))];

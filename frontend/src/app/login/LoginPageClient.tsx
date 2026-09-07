@@ -19,6 +19,8 @@ export default function LoginPageClient({ initialColor }: { initialColor: string
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [primaryColor, setPrimaryColor] = useState<string>(initialColor);
   const [sessionExpired, setSessionExpired] = useState<boolean>(false);
+  const [brandLogoType, setBrandLogoType] = useState<string>("text");
+  const [brandLogoValue, setBrandLogoValue] = useState<string>("29sFORMULA");
   const googleClientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "";
 
   useEffect(() => {
@@ -27,6 +29,8 @@ export default function LoginPageClient({ initialColor }: { initialColor: string
       .then(data => {
         if (data) {
           if (data.primaryColor) setPrimaryColor(data.primaryColor);
+          if (data.brandLogoType) setBrandLogoType(data.brandLogoType);
+          if (data.brandLogoValue) setBrandLogoValue(data.brandLogoValue);
           if (typeof document !== "undefined") document.documentElement.style.setProperty("--primary-brand-color", data.primaryColor);
         }
       })
@@ -159,7 +163,9 @@ export default function LoginPageClient({ initialColor }: { initialColor: string
   return (
     <div suppressHydrationWarning className={styles.loginContainer} style={{ backgroundColor: primaryColor }}>
       {/* Background branding texture */}
-      <div className={styles.brandBgPattern}>29sFORMULA</div>
+      {brandLogoType === "text" && (
+        <div className={styles.brandBgPattern}>{brandLogoValue || "29sFORMULA"}</div>
+      )}
 
       <div className={styles.loginCard}>
         {/* Back Link */}
@@ -169,8 +175,12 @@ export default function LoginPageClient({ initialColor }: { initialColor: string
 
         {/* Branding header */}
         <div className={styles.loginHeader}>
-          <h1 className={styles.logoText}>29sFORMULA</h1>
-          <p className={styles.subtitle}>Sign in to your premium account</p>
+          {brandLogoType === "image" && brandLogoValue ? (
+            <img src={brandLogoValue} alt="Brand Logo" style={{ maxHeight: "60px", maxWidth: "200px", objectFit: "contain", margin: "0 auto 10px auto" }} />
+          ) : (
+            <h1 className={styles.logoText}>{brandLogoValue || "29sFORMULA"}</h1>
+          )}
+          <p className={styles.subtitle}>Sign in to your account</p>
         </div>
 
         {success ? (
@@ -250,7 +260,7 @@ export default function LoginPageClient({ initialColor }: { initialColor: string
             <div id="google-signin-btn" className={styles.googleBtnContainer}></div>
 
             <div className={styles.registerPrompt}>
-              <span>New to 29sFormula?</span>
+              <span>New to {brandLogoType === "text" ? (brandLogoValue || "29sFormula") : "our store"}?</span>
               <Link href="/register" className={styles.signUpLink}>
                 Create an account
               </Link>

@@ -12,14 +12,20 @@ export default function RegisterPageClient({ initialColor }: { initialColor: str
   const [success, setSuccess] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [primaryColor, setPrimaryColor] = useState<string>(initialColor);
+  const [brandLogoType, setBrandLogoType] = useState<string>("text");
+  const [brandLogoValue, setBrandLogoValue] = useState<string>("29sFORMULA");
 
   useEffect(() => {
     fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:5001'}/api/settings`, { cache: 'no-store' })
       .then(res => res.json())
       .then(data => {
-        if (data && data.primaryColor) {
-          setPrimaryColor(data.primaryColor);
-              if (typeof document !== "undefined") document.documentElement.style.setProperty("--primary-brand-color", data.primaryColor);
+        if (data) {
+          if (data.primaryColor) {
+            setPrimaryColor(data.primaryColor);
+            if (typeof document !== "undefined") document.documentElement.style.setProperty("--primary-brand-color", data.primaryColor);
+          }
+          if (data.brandLogoType) setBrandLogoType(data.brandLogoType);
+          if (data.brandLogoValue) setBrandLogoValue(data.brandLogoValue);
         }
       })
       .catch(err => console.error("Error querying settings:", err));
@@ -60,7 +66,9 @@ export default function RegisterPageClient({ initialColor }: { initialColor: str
 
   return (
     <div suppressHydrationWarning className={styles.loginContainer} style={{ backgroundColor: primaryColor }}>
-      <div className={styles.brandBgPattern}>29sFORMULA</div>
+      {brandLogoType === "text" && (
+        <div className={styles.brandBgPattern}>{brandLogoValue || "29sFORMULA"}</div>
+      )}
 
       <div className={styles.loginCard}>
         <Link href="/" className={styles.backHomeBtn}>
@@ -68,7 +76,11 @@ export default function RegisterPageClient({ initialColor }: { initialColor: str
         </Link>
 
         <div className={styles.loginHeader}>
-          <h1 className={styles.logoText}>29sFORMULA</h1>
+          {brandLogoType === "image" && brandLogoValue ? (
+            <img src={brandLogoValue} alt="Brand Logo" style={{ maxHeight: "60px", maxWidth: "200px", objectFit: "contain", margin: "0 auto 10px auto" }} />
+          ) : (
+            <h1 className={styles.logoText}>{brandLogoValue || "29sFORMULA"}</h1>
+          )}
           <p className={styles.subtitle}>Create your premium account</p>
         </div>
 

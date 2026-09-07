@@ -183,7 +183,7 @@
   color: #000000;
   text-align: center;
   line-height: 0.85;
-  margin: 40px 0; /* Creates 40px margin above and below the logo text */
+  margin: 10px 0;
   width: 100%;
   white-space: nowrap; /* Ensures it stays on a single line */
   user-select: none;
@@ -192,7 +192,7 @@
 .subFooterDivider {
   width: 80%; /* Centered divider, aligned to matches footer padding constraints */
   border-top: 1px solid #e5e5e5;
-  margin: 30px auto 15px auto;
+  margin: 15px auto 10px auto;
 }
 
 .subFooterCopyright {
@@ -221,7 +221,7 @@
   }
   .subFooterDivider {
     width: 90%;
-    margin: 20px auto 12px auto;
+    margin: 10px auto 10px auto;
   }
   .subFooterCopyright {
     margin-left: 5%;
