@@ -32,7 +32,7 @@ router.post("/api/customers/request-autofill-otp", async (req, res) => {
     await Otp.findOneAndUpdate(
       { email: customer.email }, // Use consistent email formatting
       { otp: otpCode, createdAt: Date.now() },
-      { upsert: true, new: true }
+      { upsert: true, returnDocument: 'after' }
     );
 
     // Send email
@@ -42,13 +42,13 @@ router.post("/api/customers/request-autofill-otp", async (req, res) => {
         port: port,
         secure: secure,
         requireTLS: !secure,
+        family: 4, // Force IPv4 to prevent ENETUNREACH on cloud containers without IPv6
         auth: {
           user: emailUser,
           pass: emailPass,
         },
         tls: {
-          rejectUnauthorized: false, // Bypass SSL certificate verification issues on cloud platforms
-          ciphers: "SSLv3",
+          rejectUnauthorized: false,
         },
         connectionTimeout: 10000, // 10s connection timeout
         greetingTimeout: 10000,
