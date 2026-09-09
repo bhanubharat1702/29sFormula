@@ -1,8 +1,8 @@
 import express from "express";
 import Customer from "../models/Customer.js";
 import Otp from "../models/Otp.js";
-import nodemailer from "nodemailer";
 import dotenv from "dotenv";
+import { sendEmail } from "../utils/emailService.js";
 
 dotenv.config();
 
@@ -13,9 +13,6 @@ const generateOtp = () => Math.floor(100000 + Math.random() * 900000).toString()
 
 router.post("/api/customers/request-autofill-otp", async (req, res) => {
   try {
-    const emailUser = process.env.EMAIL_USER;
-    const emailPass = process.env.EMAIL_PASS;
-    
     const { email } = req.body;
     if (!email) {
       return res.status(400).json({ error: "Email is required" });
@@ -35,61 +32,25 @@ router.post("/api/customers/request-autofill-otp", async (req, res) => {
       { upsert: true, returnDocument: 'after' }
     );
 
-    // Send email
-    if (emailUser && emailPass) {
-      const createTransporter = (port, secure) => nodemailer.createTransport({
-        host: "smtp.gmail.com",
-        port: port,
-        secure: secure,
-        requireTLS: !secure,
-        family: 4, // Force IPv4 to prevent ENETUNREACH on cloud containers without IPv6
-        auth: {
-          user: emailUser,
-          pass: emailPass,
-        },
-        tls: {
-          rejectUnauthorized: false,
-        },
-        connectionTimeout: 10000, // 10s connection timeout
-        greetingTimeout: 10000,
-        socketTimeout: 15000,     // 15s socket timeout
-      });
-
-      const mailOptions = {
-        from: `"29sFORMULA" <${emailUser}>`,
-        replyTo: emailUser,
-        to: customer.email,
-        subject: "Your 29sFORMULA Verification Code",
-        text: `Hello ${customer.name || 'Customer'},\n\nPlease use the verification code below to autofill your checkout details. This code will expire in 5 minutes.\n\nCode: ${otpCode}\n\nIf you didn't request this code, you can safely ignore this email.`,
-        html: `
-          <div style="font-family: Arial, sans-serif; padding: 20px; max-width: 600px; margin: 0 auto; border: 1px solid #ddd; border-radius: 8px;">
-            <h2 style="color: #333; text-align: center;">Your Verification Code</h2>
-            <p style="color: #555; font-size: 16px;">Hello ${customer.name || 'Customer'},</p>
-            <p style="color: #555; font-size: 16px;">Please use the verification code below to autofill your checkout details. This code will expire in 5 minutes.</p>
-            <div style="text-align: center; margin: 30px 0;">
-              <span style="display: inline-block; padding: 15px 30px; font-size: 28px; font-weight: bold; background-color: #f4f4f4; border-radius: 8px; letter-spacing: 4px; color: #111;">
-                ${otpCode}
-              </span>
-            </div>
-            <p style="color: #777; font-size: 14px; text-align: center;">If you didn't request this code, you can safely ignore this email.</p>
+    // Send email via Resend
+    await sendEmail({
+      to: customer.email,
+      subject: "Your 29sFORMULA Verification Code",
+      text: `Hello ${customer.name || 'Customer'},\n\nPlease use the verification code below to autofill your checkout details. This code will expire in 5 minutes.\n\nCode: ${otpCode}\n\nIf you didn't request this code, you can safely ignore this email.`,
+      html: `
+        <div style="font-family: Arial, sans-serif; padding: 20px; max-width: 600px; margin: 0 auto; border: 1px solid #ddd; border-radius: 8px;">
+          <h2 style="color: #333; text-align: center;">Your Verification Code</h2>
+          <p style="color: #555; font-size: 16px;">Hello ${customer.name || 'Customer'},</p>
+          <p style="color: #555; font-size: 16px;">Please use the verification code below to autofill your checkout details. This code will expire in 5 minutes.</p>
+          <div style="text-align: center; margin: 30px 0;">
+            <span style="display: inline-block; padding: 15px 30px; font-size: 28px; font-weight: bold; background-color: #f4f4f4; border-radius: 8px; letter-spacing: 4px; color: #111;">
+              ${otpCode}
+            </span>
           </div>
-        `
-      };
-
-      try {
-        // Try Port 587 (STARTTLS) first
-        const transporter587 = createTransporter(587, false);
-        await transporter587.sendMail(mailOptions);
-      } catch (err587) {
-        console.warn("Port 587 email dispatch failed/blocked. Attempting fallback to Port 465 (SSL)...", err587.message);
-        // Fallback to Port 465 (Direct SSL) if Port 587 is blocked
-        const transporter465 = createTransporter(465, true);
-        await transporter465.sendMail(mailOptions);
-      }
-    } else {
-      console.error("Email credentials (EMAIL_USER / EMAIL_PASS) not configured on backend server environment.");
-      return res.status(500).json({ error: "Email service not configured on server. Please contact support." });
-    }
+          <p style="color: #777; font-size: 14px; text-align: center;">If you didn't request this code, you can safely ignore this email.</p>
+        </div>
+      `
+    });
 
     res.json({ success: true, message: "OTP sent successfully" });
   } catch (error) {

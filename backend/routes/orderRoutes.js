@@ -6,29 +6,13 @@ import ReturnRequest from "../models/ReturnRequest.js";
 import Customer from "../models/Customer.js";
 import { Product, ProductVariant } from "../models/Product.js";
 import { invalidateProductsCache } from "../utils/cache.js";
-import nodemailer from "nodemailer";
+import { sendEmail } from "../utils/emailService.js";
 import Razorpay from "razorpay";
 
 const router = express.Router();
 
 const sendReturnUpdateEmail = async (order, customerEmail, customerName, returnStatus, adminNotes) => {
-  const emailUser = process.env.EMAIL_USER;
-  const emailPass = process.env.EMAIL_PASS;
-
-  if (!emailUser || !emailPass) {
-    console.warn("Skipping return update email: EMAIL_USER or EMAIL_PASS not configured.");
-    return;
-  }
-
   try {
-    const transporter = nodemailer.createTransport({
-      service: "gmail",
-      auth: {
-        user: emailUser,
-        pass: emailPass,
-      },
-    });
-
     let subject = `Update on your Return Request - ${order.orderId}`;
     let heading = "Return Request Update";
     let message = "";
@@ -57,8 +41,7 @@ const sendReturnUpdateEmail = async (order, customerEmail, customerName, returnS
       }
     }
 
-    const mailOptions = {
-      from: `"29sFORMULA" <${emailUser}>`,
+    await sendEmail({
       to: customerEmail,
       subject: subject,
       html: `
@@ -74,16 +57,14 @@ const sendReturnUpdateEmail = async (order, customerEmail, customerName, returnS
           <p style="font-size: 15px; line-height: 1.6; color: #444;">${message}</p>
           
           <div style="text-align: center; margin: 40px 0;">
-            <a href="http://localhost:3000/track?order_id=${order.orderId}" style="display: inline-block; padding: 14px 35px; background-color: #000; color: #fff; text-decoration: none; font-size: 13px; letter-spacing: 1.5px; text-transform: uppercase;">Track Your Order</a>
+            <a href="https://29sformula.com/track?order_id=${order.orderId}" style="display: inline-block; padding: 14px 35px; background-color: #000; color: #fff; text-decoration: none; font-size: 13px; letter-spacing: 1.5px; text-transform: uppercase;">Track Your Order</a>
           </div>
           
           <hr style="border: none; border-top: 1px solid #eaeaea; margin-top: 40px; margin-bottom: 30px;" />
           <p style="font-size: 13px; line-height: 1.6; color: #888; text-align: center;">If you have any further questions, please contact our support team.</p>
         </div>
       `,
-    };
-
-    await transporter.sendMail(mailOptions);
+    });
     console.log(`Return update email sent for ${order.orderId}`);
   } catch (error) {
     console.error("Error sending return update email:", error);
@@ -91,23 +72,7 @@ const sendReturnUpdateEmail = async (order, customerEmail, customerName, returnS
 };
 
 const sendOrderUpdateEmail = async (order, customerEmail, customerName) => {
-  const emailUser = process.env.EMAIL_USER;
-  const emailPass = process.env.EMAIL_PASS;
-
-  if (!emailUser || !emailPass) {
-    console.warn("Skipping order update email: EMAIL_USER or EMAIL_PASS not configured.");
-    return;
-  }
-
   try {
-    const transporter = nodemailer.createTransport({
-      service: "gmail",
-      auth: {
-        user: emailUser,
-        pass: emailPass,
-      },
-    });
-
     let subject = `Order Update - ${order.orderId}`;
     let heading = "An Update on Your Order";
     let message = `The status of your order is now: <strong style="font-weight: 600; color: #111;">${order.status}</strong>`;
@@ -126,8 +91,7 @@ const sendOrderUpdateEmail = async (order, customerEmail, customerName) => {
       message = "Your recent order has been cancelled. If this was a mistake or you require assistance, our concierge is here to help.";
     }
 
-    const mailOptions = {
-      from: `"29sFORMULA" <${emailUser}>`,
+    await sendEmail({
       to: customerEmail,
       subject: subject,
       html: `
@@ -151,14 +115,14 @@ const sendOrderUpdateEmail = async (order, customerEmail, customerName) => {
           </div>
           
           <div style="text-align: center; margin: 40px 0;">
-            <a href="http://localhost:3000/track?order_id=${order.orderId}" style="display: inline-block; padding: 14px 35px; background-color: #000; color: #fff; text-decoration: none; font-size: 13px; letter-spacing: 1.5px; text-transform: uppercase;">Track Your Order</a>
+            <a href="https://29sformula.com/track?order_id=${order.orderId}" style="display: inline-block; padding: 14px 35px; background-color: #000; color: #fff; text-decoration: none; font-size: 13px; letter-spacing: 1.5px; text-transform: uppercase;">Track Your Order</a>
           </div>
           
           <hr style="border: none; border-top: 1px solid #eaeaea; margin-top: 40px; margin-bottom: 30px;" />
           <p style="font-size: 13px; line-height: 1.6; color: #888; text-align: center;">We will notify you again once your package has been shipped.</p>
         </div>
       `,
-    };
+    });
 
     await transporter.sendMail(mailOptions);
     console.log(`Order update email sent for ${order.orderId}`);
@@ -169,23 +133,7 @@ const sendOrderUpdateEmail = async (order, customerEmail, customerName) => {
 
 
 const sendOrderConfirmationEmail = async (order, customerEmail, customerName) => {
-  const emailUser = process.env.EMAIL_USER;
-  const emailPass = process.env.EMAIL_PASS;
-
-  if (!emailUser || !emailPass) {
-    console.warn("Skipping order confirmation email: EMAIL_USER or EMAIL_PASS not configured.");
-    return;
-  }
-
   try {
-    const transporter = nodemailer.createTransport({
-      service: "gmail",
-      auth: {
-        user: emailUser,
-        pass: emailPass,
-      },
-    });
-
     const itemsHtml = order.cartItems.map(item => `
       <tr>
         <td style="padding: 10px; border-bottom: 1px solid #eee;">${item.name} (${item.size})</td>
@@ -194,8 +142,7 @@ const sendOrderConfirmationEmail = async (order, customerEmail, customerName) =>
       </tr>
     `).join("");
 
-    const mailOptions = {
-      from: `"29sFORMULA" <${emailUser}>`,
+    await sendEmail({
       to: customerEmail,
       subject: `Order Confirmation - ${order.orderId}`,
       html: `
@@ -230,9 +177,7 @@ const sendOrderConfirmationEmail = async (order, customerEmail, customerName) =>
           </p>
         </div>
       `
-    };
-
-    await transporter.sendMail(mailOptions);
+    });
     console.log(`Order confirmation email sent to ${customerEmail} for order ${order.orderId}`);
   } catch (error) {
     console.error("Failed to send order confirmation email:", error);

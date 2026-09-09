@@ -1,29 +1,12 @@
 import express from "express";
-import nodemailer from "nodemailer";
 import User from "../models/User.js";
+import { sendEmail } from "../utils/emailService.js";
 
 const router = express.Router();
 
 const sendWelcomeEmail = async (userEmail, userName) => {
-  const emailUser = process.env.EMAIL_USER;
-  const emailPass = process.env.EMAIL_PASS;
-
-  if (!emailUser || !emailPass) {
-    console.warn("Skipping welcome email: EMAIL_USER or EMAIL_PASS not configured.");
-    return;
-  }
-
   try {
-    const transporter = nodemailer.createTransport({
-      service: "gmail",
-      auth: {
-        user: emailUser,
-        pass: emailPass,
-      },
-    });
-
-    const mailOptions = {
-      from: `"29sFORMULA" <${emailUser}>`,
+    await sendEmail({
       to: userEmail,
       subject: "Welcome to 29sFORMULA! 🎉",
       html: `
@@ -44,16 +27,14 @@ const sendWelcomeEmail = async (userEmail, userName) => {
             <li style="margin-bottom: 10px;">Enjoy seamless luxury shopping and fast delivery.</li>
           </ul>
           <div style="text-align: center; margin: 40px 0;">
-            <a href="http://localhost:3000/shop" style="display: inline-block; padding: 14px 35px; background-color: #000; color: #fff; text-decoration: none; font-size: 13px; letter-spacing: 1.5px; text-transform: uppercase;">Discover the Collection</a>
+            <a href="https://29sformula.com/shop" style="display: inline-block; padding: 14px 35px; background-color: #000; color: #fff; text-decoration: none; font-size: 13px; letter-spacing: 1.5px; text-transform: uppercase;">Discover the Collection</a>
           </div>
           <p style="font-size: 15px; line-height: 1.6; color: #444;">Should you need assistance selecting a scent or tracking a package, simply reply to this email. Our fragrance concierges are always at your service.</p>
           <br>
           <p style="font-size: 15px; line-height: 1.6; color: #444;">Warm regards,<br><strong>The 29sFORMULA Team</strong></p>
         </div>
       `,
-    };
-
-    await transporter.sendMail(mailOptions);
+    });
     console.log(`Welcome email sent to ${userEmail}`);
   } catch (error) {
     console.error("Error sending welcome email:", error);

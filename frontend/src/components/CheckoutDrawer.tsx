@@ -287,7 +287,7 @@ export default function CheckoutDrawer({ isOpen, onClose, cartItems, primaryColo
 
   const handleVerifyOtp = async () => {
     if (!otpValue.trim() || otpValue.trim().length !== 6) {
-      setSearchError("Please enter a valid 6 digit OTP.");
+      setSearchError("Please enter a valid 6 Digit OTP.");
       return;
     }
     setIsVerifyingOtp(true);
@@ -561,12 +561,12 @@ export default function CheckoutDrawer({ isOpen, onClose, cartItems, primaryColo
                       </>
                     ) : (
                       <>
-                        <p style={{ fontSize: "0.85rem", color: "#6b7280", margin: 0 }}>Enter the 6 digit verification code sent to <strong>{searchQuery}</strong>.</p>
+                        <p style={{ fontSize: "0.85rem", color: "#6b7280", margin: 0 }}>Enter the 6 Digit verification code sent to <strong>{searchQuery}</strong>.</p>
                         <div style={{ display: "flex", gap: "8px", flexDirection: "column" }}>
                           <div className={styles.inputRow}>
                             <input
                               type="text"
-                              placeholder="6 digit OTP"
+                              placeholder="6 Digit OTP"
                               value={otpValue}
                               onChange={(e) => setOtpValue(e.target.value)}
                               maxLength={6}
