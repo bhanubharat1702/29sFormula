@@ -65,7 +65,7 @@ export default function ProductDetailPage() {
     setCartError(msg);
     setTimeout(() => setCartError(null), 3000);
   };
-  const [isDiscountExpanded, setIsDiscountExpanded] = useState<boolean>(false);
+
   const [isCartClosing, setIsCartClosing] = useState<boolean>(false);
 
   // Accordion State
@@ -1606,38 +1606,7 @@ export default function ProductDetailPage() {
                 <div className={styles.cartDrawerFooter}>
                   <div className={styles.cartDrawerDivider}></div>
                   
-                  <div 
-                    className={`${styles.discountRow} ${isDiscountExpanded ? styles.discountRowExpanded : ""}`}
-                    onClick={() => setIsDiscountExpanded(!isDiscountExpanded)}
-                  >
-                    <span>Discount</span>
-                    <span>{isDiscountExpanded ? "−" : "+"}</span>
-                  </div>
-                  
-                  <div className={`${styles.discountFormWrapper} ${isDiscountExpanded ? styles.discountFormWrapperExpanded : ""}`}>
-                    <div className={styles.discountForm}>
-                      <input 
-                        type="text" 
-                        placeholder="Discount code" 
-                        value={couponCodeInput}
-                        onChange={(e) => setCouponCodeInput(e.target.value.toUpperCase())}
-                        className={styles.discountInput} 
-                        onClick={(e) => e.stopPropagation()} 
-                      />
-                      <button 
-                        className={styles.discountApplyBtn}
-                        onClick={handleApplyCoupon}
-                      >
-                        Apply
-                      </button>
-                    </div>
-                    {couponMessage && (
-                      <p style={{ fontSize: "0.78rem", color: appliedDiscount ? "#16a34a" : "#dc2626", marginTop: "5px", paddingLeft: "5px", fontWeight: 600 }}>
-                        {couponMessage}
-                      </p>
-                    )}
-                  </div>
-                  
+
                   <div className={styles.totalContainer}>
                     <span className={styles.totalTitle}>Estimated total</span>
                     <span className={styles.totalVal}>

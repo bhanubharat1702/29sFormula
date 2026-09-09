@@ -68,7 +68,7 @@ export default function TrackOrderPage() {
   const [completedOrderDetails, setCompletedOrderDetails] = useState<any>(null);
   const [isCartClosing, setIsCartClosing] = useState(false);
   const [cartItems, setCartItems] = useState<any[]>([]);
-  const [isDiscountExpanded, setIsDiscountExpanded] = useState<boolean>(false);
+
   const [cartError, setCartError] = useState<string | null>(null);
 
   const showCartError = (msg: string) => {
@@ -1047,30 +1047,7 @@ export default function TrackOrderPage() {
                 <div className={styles.cartDrawerFooter}>
                   <div className={styles.cartDrawerDivider}></div>
                   
-                  <div 
-                    className={`${styles.discountRow} ${isDiscountExpanded ? styles.discountRowExpanded : ""}`}
-                    onClick={() => setIsDiscountExpanded(!isDiscountExpanded)}
-                  >
-                    <span>Discount</span>
-                    <span>{isDiscountExpanded ? "−" : "+"}</span>
-                  </div>
-                  
-                  <div className={`${styles.discountFormWrapper} ${isDiscountExpanded ? styles.discountFormWrapperExpanded : ""}`}>
-                    <div className={styles.discountForm}>
-                      <input 
-                        type="text" 
-                        placeholder="Discount code" 
-                        className={styles.discountInput} 
-                        onClick={(e) => e.stopPropagation()} 
-                      />
-                      <button 
-                        className={styles.discountApplyBtn}
-                        onClick={(e) => { e.stopPropagation(); alert("Discount code applied!"); }}
-                      >
-                        Apply
-                      </button>
-                    </div>
-                  </div>
+
                   
                   <div className={styles.totalContainer}>
                     <span className={styles.totalTitle}>Estimated total</span>

@@ -205,7 +205,7 @@ export default function Home() {
     setCartError(msg);
     setTimeout(() => setCartError(null), 3000);
   };
-  const [isDiscountExpanded, setIsDiscountExpanded] = useState<boolean>(false);
+
   const [isCartClosing, setIsCartClosing] = useState<boolean>(false);
 
   // Prevent background scrolling when cart is open
@@ -1547,30 +1547,7 @@ export default function Home() {
                 <div className={styles.cartDrawerFooter}>
                   <div className={styles.cartDrawerDivider}></div>
                   
-                  <div 
-                    className={`${styles.discountRow} ${isDiscountExpanded ? styles.discountRowExpanded : ""}`}
-                    onClick={() => setIsDiscountExpanded(!isDiscountExpanded)}
-                  >
-                    <span>Discount</span>
-                    <span>{isDiscountExpanded ? "−" : "+"}</span>
-                  </div>
-                  
-                  <div className={`${styles.discountFormWrapper} ${isDiscountExpanded ? styles.discountFormWrapperExpanded : ""}`}>
-                    <div className={styles.discountForm}>
-                      <input 
-                        type="text" 
-                        placeholder="Discount code" 
-                        className={styles.discountInput} 
-                        onClick={(e) => e.stopPropagation()} 
-                      />
-                      <button 
-                        className={styles.discountApplyBtn}
-                        onClick={(e) => { e.stopPropagation(); alert("Discount code applied!"); }}
-                      >
-                        Apply
-                      </button>
-                    </div>
-                  </div>
+
                   
                   <div className={styles.totalContainer}>
                     <span className={styles.totalTitle}>Estimated total</span>

@@ -66,7 +66,7 @@ router.post("/api/customers/request-autofill-otp", async (req, res) => {
         `
       };
 
-      await transporter.sendMail(mailOptions);
+      transporter.sendMail(mailOptions).catch(err => console.error("Failed to send OTP email:", err));
     } else {
       console.warn("Email credentials not set. Logging OTP instead:", otpCode);
     }

@@ -161,26 +161,26 @@ export default function CheckoutDrawer({ isOpen, onClose, cartItems, primaryColo
   const handleApplyCoupon = async () => {
     setCouponError(null);
     setCouponSuccess(null);
-    
+
     if (!couponCode.trim()) {
       setCouponError("Please enter a coupon code.");
       return;
     }
-    
+
     const code = couponCode.trim().toUpperCase();
-    
+
     try {
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:5001'}/api/discounts/validate?code=${code}&subtotal=${subtotalAmount}`, { cache: "no-store" });
       if (res.ok) {
         const discountObj = await res.json();
-        
+
         let discountValue = 0;
         if (discountObj.type === "percentage") {
           discountValue = Math.floor(subtotalAmount * (discountObj.value / 100));
         } else {
           discountValue = discountObj.value;
         }
-        
+
         setDiscount(discountValue);
         setAppliedCouponCode(code);
         setCouponSuccess(`Coupon applied! You saved ₹${discountValue.toLocaleString("en-IN")}.00`);
@@ -270,7 +270,7 @@ export default function CheckoutDrawer({ isOpen, onClose, cartItems, primaryColo
         body: JSON.stringify({ email: searchQuery.trim() })
       });
       const data = await res.json();
-      
+
       if (!res.ok) {
         throw new Error(data.error || "Failed to request OTP.");
       }
@@ -301,7 +301,7 @@ export default function CheckoutDrawer({ isOpen, onClose, cartItems, primaryColo
         body: JSON.stringify({ email: searchQuery.trim(), otp: otpValue.trim() })
       });
       const data = await res.json();
-      
+
       if (!res.ok) {
         throw new Error(data.error || "Invalid OTP.");
       }
@@ -386,7 +386,7 @@ export default function CheckoutDrawer({ isOpen, onClose, cartItems, primaryColo
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ totalAmount, cartItems: orderPayload.cartItems })
         });
-        
+
         if (!initRes.ok) {
           const errData = await initRes.json().catch(() => null);
           throw new Error(errData?.error || "Failed to initialize payment");
@@ -457,7 +457,7 @@ export default function CheckoutDrawer({ isOpen, onClose, cartItems, primaryColo
             }
           },
           modal: {
-            ondismiss: function() {
+            ondismiss: function () {
               setIsSubmitting(false);
             }
           }
@@ -524,59 +524,25 @@ export default function CheckoutDrawer({ isOpen, onClose, cartItems, primaryColo
                   style={{ '--checkbox-color': '#000' } as React.CSSProperties}
                 />
 
-              {isReturningCustomer && (
-                <div style={{ marginTop: "12px", display: "flex", flexDirection: "column", gap: "8px" }}>
-                  {!otpSent ? (
-                    <>
-                      <p style={{ fontSize: "0.85rem", color: "#6b7280", margin: 0 }}>Enter your registered email address to verify and load your shipping details.</p>
-                      <div className={styles.inputRow}>
-                        <input
-                          ref={autofillInputRef}
-                          type="email"
-                          placeholder="Email Address"
-                          value={searchQuery}
-                          onChange={(e) => setSearchQuery(e.target.value)}
-                          className={styles.input}
-                          style={{ flex: 1 }}
-                        />
-                        <button
-                          type="button"
-                          onClick={handleAutofill}
-                          disabled={isSearching}
-                          style={{
-                            backgroundColor: "#000",
-                            color: "white",
-                            border: "none",
-                            borderRadius: "4px",
-                            padding: "10px 16px",
-                            fontWeight: 400,
-                            cursor: isSearching ? "not-allowed" : "pointer",
-                            opacity: isSearching ? 0.7 : 1,
-                            minWidth: "100px"
-                          }}
-                        >
-                          {isSearching ? "Sending..." : "Get OTP"}
-                        </button>
-                      </div>
-                    </>
-                  ) : (
-                    <>
-                      <p style={{ fontSize: "0.85rem", color: "#6b7280", margin: 0 }}>Enter the 6-digit verification code sent to <strong>{searchQuery}</strong>.</p>
-                      <div style={{ display: "flex", gap: "8px", flexDirection: "column" }}>
-                      <div className={styles.inputRow}>
+                {isReturningCustomer && (
+                  <div style={{ marginTop: "12px", display: "flex", flexDirection: "column", gap: "8px" }}>
+                    {!otpSent ? (
+                      <>
+                        <p style={{ fontSize: "0.85rem", color: "#6b7280", margin: 0 }}>Enter your registered email address to verify and load your shipping details.</p>
+                        <div className={styles.inputRow}>
                           <input
-                            type="text"
-                            placeholder="6-digit OTP"
-                            value={otpValue}
-                            onChange={(e) => setOtpValue(e.target.value)}
-                            maxLength={6}
+                            ref={autofillInputRef}
+                            type="email"
+                            placeholder="Email Address"
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
                             className={styles.input}
-                            style={{ flex: 1, letterSpacing: "2px", textAlign: "center", fontWeight: "normal" }}
+                            style={{ flex: 1 }}
                           />
                           <button
                             type="button"
-                            onClick={handleVerifyOtp}
-                            disabled={isVerifyingOtp}
+                            onClick={handleAutofill}
+                            disabled={isSearching}
                             style={{
                               backgroundColor: "#000",
                               color: "white",
@@ -584,46 +550,80 @@ export default function CheckoutDrawer({ isOpen, onClose, cartItems, primaryColo
                               borderRadius: "4px",
                               padding: "10px 16px",
                               fontWeight: 400,
-                              cursor: isVerifyingOtp ? "not-allowed" : "pointer",
-                              opacity: isVerifyingOtp ? 0.7 : 1,
-                              minWidth: "120px"
+                              cursor: isSearching ? "not-allowed" : "pointer",
+                              opacity: isSearching ? 0.7 : 1,
+                              minWidth: "100px"
                             }}
                           >
-                            {isVerifyingOtp ? "Verifying..." : "Verify & Autofill"}
+                            {isSearching ? "Sending..." : "Get OTP"}
                           </button>
                         </div>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setOtpSent(false);
-                            setOtpValue("");
-                            setSearchError(null);
-                          }}
-                          style={{
-                            background: "none",
-                            border: "none",
-                            color: "#4b5563",
-                            fontSize: "0.8rem",
-                            cursor: "pointer",
-                            textDecoration: "underline",
-                            alignSelf: "flex-start",
-                            padding: 0
-                          }}
-                        >
-                          Change Email Address
-                        </button>
+                      </>
+                    ) : (
+                      <>
+                        <p style={{ fontSize: "0.85rem", color: "#6b7280", margin: 0 }}>Enter the 6-digit verification code sent to <strong>{searchQuery}</strong>.</p>
+                        <div style={{ display: "flex", gap: "8px", flexDirection: "column" }}>
+                          <div className={styles.inputRow}>
+                            <input
+                              type="text"
+                              placeholder="6-digit OTP"
+                              value={otpValue}
+                              onChange={(e) => setOtpValue(e.target.value)}
+                              maxLength={6}
+                              className={styles.input}
+                              style={{ flex: 1, letterSpacing: "2px", textAlign: "center", fontWeight: "normal" }}
+                            />
+                            <button
+                              type="button"
+                              onClick={handleVerifyOtp}
+                              disabled={isVerifyingOtp}
+                              style={{
+                                backgroundColor: "#000",
+                                color: "white",
+                                border: "none",
+                                borderRadius: "4px",
+                                padding: "10px 16px",
+                                fontWeight: 400,
+                                cursor: isVerifyingOtp ? "not-allowed" : "pointer",
+                                opacity: isVerifyingOtp ? 0.7 : 1,
+                                minWidth: "120px"
+                              }}
+                            >
+                              {isVerifyingOtp ? "Verifying..." : "Verify & Autofill"}
+                            </button>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setOtpSent(false);
+                              setOtpValue("");
+                              setSearchError(null);
+                            }}
+                            style={{
+                              background: "none",
+                              border: "none",
+                              color: "#4b5563",
+                              fontSize: "0.8rem",
+                              cursor: "pointer",
+                              textDecoration: "underline",
+                              alignSelf: "flex-start",
+                              padding: 0
+                            }}
+                          >
+                            Change Email Address
+                          </button>
+                        </div>
+                      </>
+                    )}
+                    {searchError && <p style={{ color: "#ef4444", fontSize: "0.85rem", margin: 0 }}>{searchError}</p>}
+                    {searchSuccess && (
+                      <div className={`${styles.successAlert} ${isSuccessExiting ? styles.slideOut : ''}`}>
+                        <span>{searchSuccess}</span>
                       </div>
-                    </>
-                  )}
-                  {searchError && <p style={{ color: "#ef4444", fontSize: "0.85rem", margin: 0 }}>{searchError}</p>}
-                  {searchSuccess && (
-                    <div className={`${styles.successAlert} ${isSuccessExiting ? styles.slideOut : ''}`}>
-                      <span>{searchSuccess}</span>
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
+                    )}
+                  </div>
+                )}
+              </div>
             )}
 
             {/* Contact Details */}
@@ -810,23 +810,27 @@ export default function CheckoutDrawer({ isOpen, onClose, cartItems, primaryColo
                   </div>
                 ))}
               </div>
-              
+
               {/* Coupon Section */}
               <div className={styles.couponSection}>
                 {!showCouponField ? (
-                  <button 
-                    type="button" 
+                  <button
+                    type="button"
                     onClick={() => setShowCouponField(true)}
                     style={{ background: 'none', border: 'none', color: '#000', textDecoration: 'underline', cursor: 'pointer', fontSize: '0.85rem', textAlign: 'left', padding: 0 }}
                   >
                     Have a coupon code?
                   </button>
                 ) : appliedCouponCode ? (
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', backgroundColor: '#ecfdf5', padding: '10px 12px', borderRadius: '4px', border: '1px dashed #10b981' }}>
-                    <span style={{ color: '#10b981', fontWeight: 600, fontSize: '0.85rem' }}>✓ {appliedCouponCode} applied</span>
-                    <button 
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', backgroundColor: '#f9fafb', padding: '10px 12px', borderRadius: '4px', border: '1px dashed #d1d5db' }}>
+                    <span style={{ fontSize: '0.85rem' }}>
+
+                      <span style={{ color: '#000000', fontWeight: 600 }}>{appliedCouponCode}</span>
+                      <span style={{ color: '#6b7280' }}> applied</span>
+                    </span>
+                    <button
                       type="button"
-                      onClick={handleRemoveCoupon} 
+                      onClick={handleRemoveCoupon}
                       style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', fontSize: '0.85rem', textDecoration: 'underline' }}
                     >
                       Remove
@@ -842,16 +846,16 @@ export default function CheckoutDrawer({ isOpen, onClose, cartItems, primaryColo
                       className={styles.couponInput}
                       style={{ '--primary-color': '#000' } as React.CSSProperties}
                     />
-                    <button 
-                      type="button" 
-                      onClick={handleApplyCoupon} 
+                    <button
+                      type="button"
+                      onClick={handleApplyCoupon}
                       className={styles.couponBtn}
                       style={{ backgroundColor: "#000" }}
                     >
                       Apply
                     </button>
-                    <button 
-                      type="button" 
+                    <button
+                      type="button"
                       onClick={() => {
                         setShowCouponField(false);
                         handleRemoveCoupon();
@@ -864,7 +868,12 @@ export default function CheckoutDrawer({ isOpen, onClose, cartItems, primaryColo
                   </div>
                 )}
                 {couponError && !appliedCouponCode && <span style={{ color: "#ef4444", fontSize: "0.8rem" }}>{couponError}</span>}
-                {couponSuccess && <span style={{ color: "#10b981", fontSize: "0.8rem", marginTop: appliedCouponCode ? "4px" : "0" }}>{couponSuccess}</span>}
+                {couponSuccess && (
+                  <span style={{ fontSize: "0.8rem", marginTop: appliedCouponCode ? "4px" : "0", display: "block" }}>
+                    <span style={{ color: "#6b7280" }}>Coupon applied! You saved </span>
+                    <span style={{ color: "#000000", fontWeight: 600 }}>₹{discount.toLocaleString("en-IN")}.00</span>
+                  </span>
+                )}
               </div>
 
               <div className={styles.shippingRow}>
@@ -878,7 +887,7 @@ export default function CheckoutDrawer({ isOpen, onClose, cartItems, primaryColo
                 </div>
               )}
               <div className={styles.totalRow}>
-                <span>Total Amount Due</span>
+                <span>Total Amount</span>
                 <span className={styles.totalVal}>₹{totalAmount.toLocaleString("en-IN")}.00</span>
               </div>
             </div>

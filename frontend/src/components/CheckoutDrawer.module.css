@@ -384,7 +384,7 @@
   align-items: center;
   font-size: 0.9rem;
   margin-top: 8px;
-  color: #10b981;
+  color: #000000;
 }
 @media (max-width: 600px) {
   .drawer {
