@@ -276,9 +276,14 @@
 
 .googleBtnContainer {
   width: 100%;
+  min-height: 44px;
   display: flex;
   justify-content: center;
   margin-top: 5px;
+}
+
+.googleBtnContainer iframe {
+  width: 100% !important;
 }
 @media (max-width: 768px) {
   .loginCard {

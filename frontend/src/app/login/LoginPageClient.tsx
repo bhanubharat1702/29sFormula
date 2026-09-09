@@ -54,29 +54,41 @@ export default function LoginPageClient({ initialColor }: { initialColor: string
   useEffect(() => {
     if (!googleClientId) return;
 
-    const script = document.createElement("script");
-    script.src = "https://accounts.google.com/gsi/client";
-    script.async = true;
-    script.defer = true;
-    script.onload = () => {
+    const initGoogle = () => {
       if (window.google) {
         window.google.accounts.id.initialize({
           client_id: googleClientId,
-          callback: handleGoogleLoginCallback
+          callback: handleGoogleLoginCallback,
+          auto_select: false,
+          ux_mode: "popup",
         });
-        window.google.accounts.id.renderButton(
-          document.getElementById("google-signin-btn"),
-          { theme: "outline", size: "large", width: "100%" }
-        );
+        const btnContainer = document.getElementById("google-signin-btn");
+        if (btnContainer) {
+          btnContainer.innerHTML = "";
+          window.google.accounts.id.renderButton(
+            btnContainer,
+            { theme: "outline", size: "large", width: "100%", text: "continue_with" }
+          );
+        }
       }
     };
-    document.body.appendChild(script);
 
-    return () => {
-      if (document.body.contains(script)) {
-        document.body.removeChild(script);
-      }
-    };
+    if (window.google) {
+      initGoogle();
+    } else {
+      const script = document.createElement("script");
+      script.src = "https://accounts.google.com/gsi/client";
+      script.async = true;
+      script.defer = true;
+      script.onload = initGoogle;
+      document.body.appendChild(script);
+
+      return () => {
+        if (document.body.contains(script)) {
+          document.body.removeChild(script);
+        }
+      };
+    }
   }, [googleClientId]);
 
   const handleGoogleLoginCallback = async (response: any) => {
@@ -160,6 +172,84 @@ export default function LoginPageClient({ initialColor }: { initialColor: string
     }
   };
 
+  // Forgot password flow state: 'login' | 'request_email' | 'enter_otp' | 'success'
+  const [resetStep, setResetStep] = useState<'login' | 'request_email' | 'enter_otp' | 'success'>('login');
+  const [resetEmail, setResetEmail] = useState<string>("");
+  const [resetOtp, setResetOtp] = useState<string>("");
+  const [newPassword, setNewPassword] = useState<string>("");
+  const [confirmPassword, setConfirmPassword] = useState<string>("");
+  const [resetMessage, setResetMessage] = useState<string | null>(null);
+
+  const handleRequestResetOtp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!resetEmail || !resetEmail.includes("@")) {
+      setError("Please enter a valid email address.");
+      return;
+    }
+
+    setIsLoading(true);
+    setError(null);
+    setResetMessage(null);
+
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:5001'}/api/auth/request-reset-otp`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: resetEmail })
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || "Failed to request password reset code.");
+      }
+
+      setResetStep('enter_otp');
+      setResetMessage("Verification code sent! Please check your email inbox.");
+    } catch (err: any) {
+      setError(err.message || "Failed to process request.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleResetPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!resetOtp || resetOtp.trim().length !== 6) {
+      setError("Please enter the 6-digit verification code.");
+      return;
+    }
+    if (!newPassword || newPassword.length < 6) {
+      setError("New password must be at least 6 characters long.");
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      setError("Passwords do not match. Please try again.");
+      return;
+    }
+
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:5001'}/api/auth/reset-password`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: resetEmail, otp: resetOtp, newPassword })
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || "Password reset failed.");
+      }
+
+      setResetStep('success');
+    } catch (err: any) {
+      setError(err.message || "Failed to reset password.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <div suppressHydrationWarning className={styles.loginContainer} style={{ backgroundColor: primaryColor }}>
       {/* Background branding texture */}
@@ -180,7 +270,12 @@ export default function LoginPageClient({ initialColor }: { initialColor: string
           ) : (
             <h1 className={styles.logoText}>{brandLogoValue || "29sFORMULA"}</h1>
           )}
-          <p className={styles.subtitle}>Sign in to your account</p>
+          <p className={styles.subtitle}>
+            {resetStep === 'login' && "Sign in to your account"}
+            {resetStep === 'request_email' && "Reset your password"}
+            {resetStep === 'enter_otp' && "Verify code & set new password"}
+            {resetStep === 'success' && "Password updated successfully"}
+          </p>
         </div>
 
         {success ? (
@@ -192,6 +287,137 @@ export default function LoginPageClient({ initialColor }: { initialColor: string
             </div>
             <h2 className={styles.successTitle}>{isAdmin ? "Admin Authorized" : "Welcome Back"}</h2>
             <p className={styles.successDesc}>Redirecting to {isAdmin ? "admin dashboard" : "homepage"}...</p>
+          </div>
+        ) : resetStep === 'request_email' ? (
+          <form onSubmit={handleRequestResetOtp} className={styles.loginForm}>
+            {error && <div className={styles.errorAlert}>{error}</div>}
+
+            <p style={{ fontSize: "0.85rem", color: "#4b5563", margin: "0 0 10px 0" }}>
+              Enter your account's email address. We will verify if it exists and send you a 6-digit verification code.
+            </p>
+
+            <div className={styles.inputGroup}>
+              <label htmlFor="resetEmail" className={styles.inputLabel}>
+                Email Address
+              </label>
+              <input
+                type="email"
+                id="resetEmail"
+                value={resetEmail}
+                onChange={(e) => setResetEmail(e.target.value)}
+                placeholder="e.g. user@gmail.com"
+                className={styles.textInput}
+                required
+              />
+            </div>
+
+            <button type="submit" disabled={isLoading} className={styles.loginBtn}>
+              {isLoading ? "Checking Email..." : "Send Verification Code"}
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                setResetStep('login');
+                setError(null);
+              }}
+              style={{ background: 'none', border: 'none', color: '#6b7280', fontSize: '0.85rem', cursor: 'pointer', textDecoration: 'underline', marginTop: '10px' }}
+            >
+              Back to Sign In
+            </button>
+          </form>
+        ) : resetStep === 'enter_otp' ? (
+          <form onSubmit={handleResetPassword} className={styles.loginForm}>
+            {error && <div className={styles.errorAlert}>{error}</div>}
+            {resetMessage && <div style={{ backgroundColor: '#f0fdf4', borderLeft: '3px solid #16a34a', color: '#15803d', padding: '10px 12px', fontSize: '0.82rem', borderRadius: '4px' }}>{resetMessage}</div>}
+
+            <p style={{ fontSize: "0.85rem", color: "#4b5563", margin: "0 0 10px 0" }}>
+              Enter the 6-digit code sent to <strong>{resetEmail}</strong> and choose a new password.
+            </p>
+
+            <div className={styles.inputGroup}>
+              <label htmlFor="resetOtp" className={styles.inputLabel}>
+                6-Digit Verification Code
+              </label>
+              <input
+                type="text"
+                id="resetOtp"
+                value={resetOtp}
+                onChange={(e) => setResetOtp(e.target.value)}
+                placeholder="123456"
+                maxLength={6}
+                className={styles.textInput}
+                style={{ letterSpacing: '3px', textAlign: 'center', fontWeight: 'bold' }}
+                required
+              />
+            </div>
+
+            <div className={styles.inputGroup}>
+              <label htmlFor="newPassword" className={styles.inputLabel}>
+                New Password
+              </label>
+              <input
+                type="password"
+                id="newPassword"
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                placeholder="At least 6 characters"
+                className={styles.textInput}
+                required
+              />
+            </div>
+
+            <div className={styles.inputGroup}>
+              <label htmlFor="confirmPassword" className={styles.inputLabel}>
+                Confirm New Password
+              </label>
+              <input
+                type="password"
+                id="confirmPassword"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                placeholder="Repeat new password"
+                className={styles.textInput}
+                required
+              />
+            </div>
+
+            <button type="submit" disabled={isLoading} className={styles.loginBtn}>
+              {isLoading ? "Updating Password..." : "Reset Password"}
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                setResetStep('request_email');
+                setError(null);
+              }}
+              style={{ background: 'none', border: 'none', color: '#6b7280', fontSize: '0.85rem', cursor: 'pointer', textDecoration: 'underline', marginTop: '10px' }}
+            >
+              Change Email
+            </button>
+          </form>
+        ) : resetStep === 'success' ? (
+          <div className={styles.successState}>
+            <div className={styles.checkCircle}>
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={3} stroke="currentColor" className={styles.checkIcon}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="m4.5 12.75 6 6 9-13.5" />
+              </svg>
+            </div>
+            <h2 className={styles.successTitle}>Password Updated</h2>
+            <p className={styles.successDesc}>Your password has been reset successfully.</p>
+            <button
+              type="button"
+              onClick={() => {
+                setResetStep('login');
+                setError(null);
+                setPassword("");
+              }}
+              className={styles.loginBtn}
+              style={{ width: "100%", marginTop: "20px" }}
+            >
+              Sign In Now
+            </button>
           </div>
         ) : (
           <form onSubmit={handleSubmit} className={styles.loginForm}>
@@ -234,9 +460,18 @@ export default function LoginPageClient({ initialColor }: { initialColor: string
                 <label htmlFor="password" className={styles.inputLabel}>
                   Password
                 </label>
-                <a href="#" className={styles.forgotLink}>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setResetStep('request_email');
+                    setResetEmail(email);
+                    setError(null);
+                  }}
+                  className={styles.forgotLink}
+                  style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer' }}
+                >
                   Forgot Password?
-                </a>
+                </button>
               </div>
               <input
                 type="password"

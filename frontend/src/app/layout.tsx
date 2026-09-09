@@ -16,6 +16,13 @@ export const metadata: Metadata = {
   description: "A premium luxury perfume brand handcrafted by PhD students. Discover scientifically curated fragrances where scent is the difference you feel.",
 };
 
+export const viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  viewportFit: "cover",
+};
+
 export default function RootLayout({
   children,
 }: Readonly<{

@@ -1768,6 +1768,7 @@
   left: 0;
   width: 100vw;
   height: 100vh;
+  height: 100dvh;
   background-color: rgba(0, 0, 0, 0.5);
   backdrop-filter: blur(4px);
   z-index: 13000;
@@ -1793,12 +1794,13 @@
   width: 100%;
   max-width: 650px;
   max-height: 90vh;
+  max-height: 90dvh;
   overflow-y: auto;
   border-top-left-radius: 20px;
   border-top-right-radius: 20px;
   border-bottom-left-radius: 0;
   border-bottom-right-radius: 0;
-  padding: 32px 28px 40px 28px;
+  padding: 32px 28px max(40px, calc(30px + env(safe-area-inset-bottom, 0px))) 28px;
   box-shadow: 0 -4px 25px rgba(0, 0, 0, 0.1);
   box-sizing: border-box;
   scrollbar-width: thin;

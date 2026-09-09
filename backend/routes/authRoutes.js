@@ -175,4 +175,99 @@ router.post("/api/auth/google", async (req, res) => {
   }
 });
 
+// Request Password Reset OTP
+router.post("/api/auth/request-reset-otp", async (req, res) => {
+  try {
+    const { email } = req.body;
+    if (!email) {
+      return res.status(400).json({ error: "Email is required." });
+    }
+
+    const trimmedEmail = email.trim().toLowerCase();
+    const user = await User.findOne({ email: trimmedEmail });
+    if (!user) {
+      return res.status(404).json({ error: "No account found with this email address." });
+    }
+
+    if (user.isGoogleUser) {
+      return res.status(400).json({ error: "This account uses Google Sign-In. Please sign in with Google." });
+    }
+
+    // Generate 6 digit OTP
+    const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
+
+    // Import Otp model dynamically or at top
+    const Otp = (await import("../models/Otp.js")).default;
+    await Otp.findOneAndUpdate(
+      { email: trimmedEmail },
+      { otp: otpCode, createdAt: Date.now() },
+      { upsert: true, returnDocument: 'after' }
+    );
+
+    // Send email via Brevo
+    const { sendEmail } = await import("../utils/emailService.js");
+    await sendEmail({
+      to: trimmedEmail,
+      subject: "Password Reset Code - 29sFORMULA",
+      text: `Hello ${user.name || 'User'},\n\nYour 6-digit password reset verification code is: ${otpCode}\nThis code will expire in 5 minutes.\n\nIf you did not request a password reset, please ignore this email.`,
+      html: `
+        <div style="font-family: Arial, sans-serif; padding: 20px; max-width: 600px; margin: 0 auto; border: 1px solid #ddd; border-radius: 8px;">
+          <h2 style="color: #333; text-align: center;">Reset Your Password</h2>
+          <p style="color: #555; font-size: 16px;">Hello ${user.name || 'User'},</p>
+          <p style="color: #555; font-size: 16px;">Use the 6-digit verification code below to reset your password. This code expires in 5 minutes.</p>
+          <div style="text-align: center; margin: 30px 0;">
+            <span style="display: inline-block; padding: 15px 30px; font-size: 28px; font-weight: bold; background-color: #f4f4f4; border-radius: 8px; letter-spacing: 4px; color: #111;">
+              ${otpCode}
+            </span>
+          </div>
+          <p style="color: #777; font-size: 14px; text-align: center;">If you did not request a password reset, you can safely ignore this email.</p>
+        </div>
+      `
+    });
+
+    res.json({ success: true, message: "Verification code sent to your email." });
+  } catch (error) {
+    console.error("Error requesting password reset OTP:", error);
+    res.status(500).json({ error: error.message || "Failed to send reset verification code." });
+  }
+});
+
+// Reset Password with OTP
+router.post("/api/auth/reset-password", async (req, res) => {
+  try {
+    const { email, otp, newPassword } = req.body;
+    if (!email || !otp || !newPassword) {
+      return res.status(400).json({ error: "Email, OTP, and new password are required." });
+    }
+
+    if (newPassword.length < 6) {
+      return res.status(400).json({ error: "Password must be at least 6 characters long." });
+    }
+
+    const trimmedEmail = email.trim().toLowerCase();
+    const Otp = (await import("../models/Otp.js")).default;
+    const otpRecord = await Otp.findOne({ email: trimmedEmail, otp: otp.trim() });
+
+    if (!otpRecord) {
+      return res.status(400).json({ error: "Invalid or expired verification code." });
+    }
+
+    const user = await User.findOne({ email: trimmedEmail });
+    if (!user) {
+      return res.status(404).json({ error: "Account not found." });
+    }
+
+    user.password = newPassword;
+    await user.save();
+
+    // Delete used OTP
+    await Otp.deleteOne({ _id: otpRecord._id });
+
+    res.json({ success: true, message: "Password updated successfully. You can now log in." });
+  } catch (error) {
+    console.error("Error resetting password:", error);
+    res.status(500).json({ error: "Failed to reset password." });
+  }
+});
+
 export default router;
