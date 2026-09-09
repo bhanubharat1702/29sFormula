@@ -131,6 +131,19 @@ export default function CheckoutDrawer({ isOpen, onClose, cartItems, primaryColo
     };
   }, [isOpen]);
 
+  useEffect(() => {
+    if (isOpen) {
+      fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:5001'}/api/settings`, { cache: 'no-store' })
+        .then(res => res.json())
+        .then(data => {
+          if (data && data.brandLogoValue) {
+            setBrandLogoValue(data.brandLogoValue);
+          }
+        })
+        .catch(err => console.error("Error querying settings for checkout drawer:", err));
+    }
+  }, [isOpen]);
+
   if (!isOpen) return null;
 
   const subtotalAmount = cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0);
@@ -144,19 +157,6 @@ export default function CheckoutDrawer({ isOpen, onClose, cartItems, primaryColo
       zIndex: 10000
     });
   };
-
-  useEffect(() => {
-    if (isOpen) {
-      fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:5001'}/api/settings`, { cache: 'no-store' })
-        .then(res => res.json())
-        .then(data => {
-          if (data && data.brandLogoValue) {
-            setBrandLogoValue(data.brandLogoValue);
-          }
-        })
-        .catch(err => console.error("Error querying settings for checkout drawer:", err));
-    }
-  }, [isOpen]);
 
   const handleApplyCoupon = async () => {
     setCouponError(null);
