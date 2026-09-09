@@ -66,15 +66,16 @@ router.post("/api/customers/request-autofill-otp", async (req, res) => {
         `
       };
 
-      transporter.sendMail(mailOptions).catch(err => console.error("Failed to send OTP email:", err));
+      await transporter.sendMail(mailOptions);
     } else {
-      console.warn("Email credentials not set. Logging OTP instead:", otpCode);
+      console.error("Email credentials (EMAIL_USER / EMAIL_PASS) not configured on backend server environment.");
+      return res.status(500).json({ error: "Email service not configured on server. Please contact support." });
     }
 
     res.json({ success: true, message: "OTP sent successfully" });
   } catch (error) {
     console.error("Failed to request autofill OTP:", error);
-    res.status(500).json({ error: "Failed to request OTP" });
+    res.status(500).json({ error: error.message || "Failed to send OTP email. Please try again." });
   }
 });
 
