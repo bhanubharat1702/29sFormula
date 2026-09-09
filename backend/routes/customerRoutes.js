@@ -38,11 +38,16 @@ router.post("/api/customers/request-autofill-otp", async (req, res) => {
     // Send email
     if (emailUser && emailPass) {
       const transporter = nodemailer.createTransport({
-        service: "gmail",
+        host: "smtp.gmail.com",
+        port: 465,
+        secure: true,
         auth: {
           user: emailUser,
           pass: emailPass,
         },
+        connectionTimeout: 10000, // 10s connection timeout
+        greetingTimeout: 10000,
+        socketTimeout: 15000,     // 15s socket timeout
       });
 
       const mailOptions = {
