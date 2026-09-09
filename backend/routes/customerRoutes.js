@@ -37,13 +37,18 @@ router.post("/api/customers/request-autofill-otp", async (req, res) => {
 
     // Send email
     if (emailUser && emailPass) {
-      const transporter = nodemailer.createTransport({
+      const createTransporter = (port, secure) => nodemailer.createTransport({
         host: "smtp.gmail.com",
-        port: 465,
-        secure: true,
+        port: port,
+        secure: secure,
+        requireTLS: !secure,
         auth: {
           user: emailUser,
           pass: emailPass,
+        },
+        tls: {
+          rejectUnauthorized: false, // Bypass SSL certificate verification issues on cloud platforms
+          ciphers: "SSLv3",
         },
         connectionTimeout: 10000, // 10s connection timeout
         greetingTimeout: 10000,
@@ -71,7 +76,16 @@ router.post("/api/customers/request-autofill-otp", async (req, res) => {
         `
       };
 
-      await transporter.sendMail(mailOptions);
+      try {
+        // Try Port 587 (STARTTLS) first
+        const transporter587 = createTransporter(587, false);
+        await transporter587.sendMail(mailOptions);
+      } catch (err587) {
+        console.warn("Port 587 email dispatch failed/blocked. Attempting fallback to Port 465 (SSL)...", err587.message);
+        // Fallback to Port 465 (Direct SSL) if Port 587 is blocked
+        const transporter465 = createTransporter(465, true);
+        await transporter465.sendMail(mailOptions);
+      }
     } else {
       console.error("Email credentials (EMAIL_USER / EMAIL_PASS) not configured on backend server environment.");
       return res.status(500).json({ error: "Email service not configured on server. Please contact support." });
