@@ -350,10 +350,8 @@
 .giftSetItemsBox {
   margin-top: 6px;
   margin-bottom: 8px;
-  padding: 10px 12px;
-  background-color: #f8fafc;
-  border-radius: 8px;
-  border: 1px solid #e2e8f0;
+  padding: 6px 0;
+  background-color: transparent;
   display: flex;
   flex-direction: column;
   gap: 8px;

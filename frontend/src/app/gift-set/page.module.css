@@ -121,17 +121,17 @@
 .sizeCardsGrid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 16px;
+  gap: 14px;
   width: 100%;
   margin: 0 0 36px 0;
 }
 
 .sizeCard {
   background-color: #ffffff;
-  border: 1.5px solid #e2e8f0;
-  border-radius: 16px;
-  padding: 16px 14px;
-  min-height: 110px;
+  border: 1.5px solid #e5e7eb;
+  border-radius: 20px;
+  padding: 18px 10px;
+  min-height: 140px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -139,6 +139,7 @@
   cursor: pointer;
   transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
   text-align: center;
+  box-sizing: border-box;
 }
 
 .sizeCard:hover {
@@ -154,17 +155,17 @@
 }
 
 .bottleIcon {
-  width: 26px;
-  height: 26px;
-  margin-bottom: 6px;
-  color: #94a3b8;
+  width: 24px;
+  height: 30px;
+  margin-bottom: 10px;
+  color: #d1d5db;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
 .sizeCardActive .bottleIcon {
-  color: #ffffff;
+  color: #e2e8f0;
 }
 
 .bottleIcon svg {
@@ -173,24 +174,30 @@
 }
 
 .sizeCardValue {
-  font-size: 1.1rem;
-  font-weight: 500;
-  margin-bottom: 3px;
-  color: #0f172a;
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin-bottom: 4px;
+  color: #000000;
 }
 
 .sizeCardActive .sizeCardValue {
   color: #ffffff;
 }
 
-.sizeCardTag {
-  font-size: 0.76rem;
-  color: #94a3b8;
+.desktopSizeCardTag {
+  display: block;
+  font-size: 0.72rem;
+  color: #9ca3af;
   font-weight: 400;
+  line-height: 1.3;
 }
 
-.sizeCardActive .sizeCardTag {
-  color: #cbd5e1;
+.sizeCardActive .desktopSizeCardTag {
+  color: #9ca3af;
+}
+
+.mobileSizeCardTag {
+  display: none;
 }
 
 /* Slot Selection Tracker Bar (Bottom Floating Panel matching user screenshot) */
@@ -332,7 +339,7 @@
   border-radius: 50px;
   padding: 16px 24px;
   font-size: 0.95rem;
-  font-weight: 500;
+  font-weight: 400;
   letter-spacing: 0.02em;
   cursor: pointer;
   transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
@@ -740,16 +747,147 @@
     padding: 0 20px;
   }
   .sizeCardsGrid {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(3, 1fr);
     gap: 12px;
   }
-  .slotTrackerBar {
+  .sizeCard {
+    padding: 14px 6px;
+    border-radius: 14px;
+    min-height: 120px;
+  }
+  .bottleIcon {
+    width: 20px;
+    height: 25px;
+    margin-bottom: 6px;
+  }
+  .sizeCardValue {
+    font-size: 0.92rem;
+    font-weight: 500;
+    margin-bottom: 2px;
+  }
+  .desktopSizeCardTag {
+    display: none;
+  }
+  .mobileSizeCardTag {
+    display: flex;
     flex-direction: column;
-    align-items: stretch;
-    top: 60px;
+    align-items: center;
+    gap: 2px;
+    font-size: 0.62rem;
+    color: #9ca3af;
+    font-weight: 400;
+    line-height: 1.25;
+  }
+  .sizeCardActive .mobileSizeCardTag {
+    color: #9ca3af;
+  }
+  .slotTrackerBar {
+    position: fixed;
+    top: auto;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    transform: translateY(100%);
+    width: 100%;
+    max-width: 100vw;
+    background-color: #ffffff;
+    border-top: 1px solid #e2e8f0;
+    border-radius: 18px 18px 0 0;
+    padding: 14px 14px max(48px, calc(36px + env(safe-area-inset-bottom, 0px)));
+    box-shadow: 0 -8px 25px rgba(0, 0, 0, 0.12);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease;
+    opacity: 0;
+    pointer-events: none;
+    z-index: 9999;
+    box-sizing: border-box;
+    overflow: hidden;
+  }
+  .slotTrackerBarVisible {
+    transform: translateY(0);
+    opacity: 1;
+    pointer-events: auto;
   }
   .slotsList {
+    display: flex;
+    gap: 6px;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+    overflow: hidden;
+  }
+  .slotBox {
+    flex: 1 1 0%;
+    min-width: 0;
+    background-color: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 5px 6px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    min-height: 42px;
+    box-sizing: border-box;
+    overflow: hidden;
+  }
+  .emptySlotContent {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    width: 100%;
+    min-width: 0;
+    overflow: hidden;
+  }
+  .slotInfo {
+    flex: 1 1 0%;
+    min-width: 0;
+    overflow: hidden;
+    display: flex;
     flex-direction: column;
+    justify-content: center;
+  }
+  .slotImg {
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    flex-shrink: 0;
+  }
+  .emptySlotPlaceholderIcon {
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    flex-shrink: 0;
+  }
+  .slotName {
+    font-size: 0.65rem;
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: block;
+    width: 100%;
+    margin: 0;
+  }
+  .slotSize {
+    display: none;
+  }
+  .removeSlotBtn {
+    font-size: 0.75rem;
+    padding: 1px 3px;
+    flex-shrink: 0;
+    line-height: 1;
+  }
+  .addBundleBtn {
+    padding: 12px 14px;
+    font-size: 0.82rem;
+    font-weight: 400;
+    border-radius: 50px;
+    width: 100%;
+    box-sizing: border-box;
   }
   .fragranceGrid {
     grid-template-columns: repeat(2, 1fr);
@@ -759,6 +897,11 @@
 
 @media (max-width: 550px) {
   .fragranceGrid {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+  .fragranceCard {
+    padding: 16px 12px;
+    border-radius: 16px;
   }
 }

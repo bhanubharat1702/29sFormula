@@ -197,10 +197,10 @@ export default function GiftSetPage() {
 
           <div className={styles.sizeCardsGrid}>
             {[
-              { size: "20 ml", tag: "Petite · Travel-friendly" },
-              { size: "50 ml", tag: "Classic · Most popular" },
-              { size: "100 ml", tag: "Grand · Full experience" }
-            ].map(({ size, tag }) => {
+              { size: "20 ml", label: "Petite", desc: "Travel-friendly" },
+              { size: "50 ml", label: "Classic", desc: "Most popular" },
+              { size: "100 ml", label: "Grand", desc: "Full experience" }
+            ].map(({ size, label, desc }) => {
               const isSelected = selectedSize === size;
               return (
                 <div
@@ -209,12 +209,19 @@ export default function GiftSetPage() {
                   className={`${styles.sizeCard} ${isSelected ? styles.sizeCardActive : ""}`}
                 >
                   <div className={styles.bottleIcon}>
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-                      <path d="M9 2h6v2H9V2zm-1 4h8a1 1 0 0 1 1 1v2.5a2.5 2.5 0 0 0 .73 1.77L19 12.5V20a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7.5l1.27-1.23A2.5 2.5 0 0 0 7 9.5V7a1 1 0 0 1 1-1z" />
+                    <svg viewBox="0 0 24 30" fill="currentColor">
+                      <rect x="9" y="1" width="6" height="4" rx="1.5" />
+                      <rect x="5" y="7" width="14" height="20" rx="5" />
                     </svg>
                   </div>
                   <div className={styles.sizeCardValue}>{size}</div>
-                  <div className={styles.sizeCardTag}>{tag}</div>
+                  {/* Desktop view single-line tag */}
+                  <div className={styles.desktopSizeCardTag}>{label} · {desc}</div>
+                  {/* Mobile view stacked tag */}
+                  <div className={styles.mobileSizeCardTag}>
+                    <div>{label}</div>
+                    <div>{desc}</div>
+                  </div>
                 </div>
               );
             })}
@@ -337,9 +344,11 @@ export default function GiftSetPage() {
                     </div>
                     <h3 className={styles.cardTitle}>{product.name}</h3>
                     <div className={styles.cardCategory}>{categoryLabel}</div>
-                    <div className={styles.cardPrice}>
-                      {isSizeAvailable ? `₹${displayPrice.toLocaleString("en-IN")}` : `Unavailable in ${selectedSize}`}
-                    </div>
+                    {isSizeAvailable && (
+                      <div className={styles.cardPrice}>
+                        ₹{displayPrice.toLocaleString("en-IN")}
+                      </div>
+                    )}
 
                     {/* Clicking product card toggles selection if no count yet, or increments if available */}
                     {isSizeAvailable && (
