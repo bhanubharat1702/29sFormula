@@ -6,6 +6,7 @@ const customerSchema = new mongoose.Schema({
   email: { type: String, required: true, unique: true },
   phone: { type: String },
   address: { type: String },
+  cart: { type: Array, default: [] },
   totalOrders: { type: Number, default: 0 },
   totalSpend: { type: Number, default: 0 }
 }, { timestamps: true });

@@ -1,5 +1,6 @@
 import express from "express";
 import User from "../models/User.js";
+import Customer from "../models/Customer.js";
 import { sendEmail } from "../utils/emailService.js";
 
 const router = express.Router();
@@ -100,10 +101,14 @@ router.post("/api/auth/login", async (req, res) => {
       return res.status(400).json({ error: "Invalid email or password." });
     }
 
+    const existingCustomer = await Customer.findOne({ email: new RegExp(`^${trimmedEmail}$`, 'i') });
+
     res.json({
       _id: user._id,
       name: user.name,
       email: user.email,
+      phone: existingCustomer?.phone || "",
+      address: existingCustomer?.address || "",
       isGoogleUser: false
     });
   } catch (error) {
@@ -162,10 +167,14 @@ router.post("/api/auth/google", async (req, res) => {
       await user.save();
     }
 
+    const existingCustomer = await Customer.findOne({ email: new RegExp(`^${trimmedEmail}$`, 'i') });
+
     res.json({
       _id: user._id,
       name: user.name,
       email: user.email,
+      phone: existingCustomer?.phone || "",
+      address: existingCustomer?.address || "",
       isGoogleUser: true,
       profilePicture: user.profilePicture
     });

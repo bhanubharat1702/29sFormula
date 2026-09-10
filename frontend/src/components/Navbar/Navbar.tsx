@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import styles from "./Navbar.module.css";
+import { fetchAndSyncUserCart } from "@/utils/cartSync";
 
 interface NavbarProps {
   onCartClick: () => void;
@@ -45,6 +46,7 @@ export default function Navbar({ onCartClick }: NavbarProps) {
       }
     };
     loadCartCount();
+    fetchAndSyncUserCart();
     window.addEventListener("cartUpdated", loadCartCount);
     window.addEventListener("storage", loadCartCount);
 

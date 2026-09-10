@@ -9,6 +9,7 @@ import Navbar from "@/components/Navbar/Navbar";
 import CartDrawer from "@/components/CartDrawer";
 import CheckoutDrawer from "@/components/CheckoutDrawer";
 import OrderSuccessModal from "@/components/OrderSuccessModal";
+import { saveCart, clearCart, fetchAndSyncUserCart } from "@/utils/cartSync";
 
 interface Order {
   _id: string;
@@ -121,7 +122,7 @@ export default function TrackOrderPage() {
     if (newQuantity <= 0) {
       const updated = cartItems.filter((_, idx) => idx !== index);
       setCartItems(updated);
-      localStorage.setItem("cart", JSON.stringify(updated));
+      saveCart(updated);
     } else {
       const item = cartItems[index];
       if (item.availableQuantity !== undefined && newQuantity > item.availableQuantity) {
@@ -129,19 +130,19 @@ export default function TrackOrderPage() {
         const updated = [...cartItems];
         updated[index].quantity = item.availableQuantity;
         setCartItems(updated);
-        localStorage.setItem("cart", JSON.stringify(updated));
+        saveCart(updated);
         return;
       }
       const updated = [...cartItems];
       updated[index].quantity = newQuantity;
       setCartItems(updated);
-      localStorage.setItem("cart", JSON.stringify(updated));
+      saveCart(updated);
     }
-    window.dispatchEvent(new Event("cartUpdated"));
   };
 
   useEffect(() => {
     loadCart();
+    fetchAndSyncUserCart();
     const handleStorageChange = () => loadCart();
     window.addEventListener("storage", handleStorageChange);
     window.addEventListener("cartUpdated", handleStorageChange);
@@ -987,8 +988,7 @@ export default function TrackOrderPage() {
           primaryColor={primaryColor}
           onOrderSuccess={(orderId, orderDetails) => {
             setShowCheckoutDrawer(false);
-            localStorage.removeItem("cart");
-            window.dispatchEvent(new Event("cartUpdated"));
+            clearCart();
             setCompletedOrderId(orderId);
             setCompletedOrderDetails(orderDetails);
             setShowSuccessModal(true);

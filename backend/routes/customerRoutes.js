@@ -123,13 +123,47 @@ router.get("/api/customers", async (req, res) => {
   }
 });
 
-router.delete("/api/customers/:id", async (req, res) => {
+router.get("/api/cart", async (req, res) => {
   try {
-    await Customer.findByIdAndDelete(req.params.id);
-    res.json({ success: true, message: "Customer deleted successfully" });
+    const { email } = req.query;
+    if (!email) {
+      return res.status(400).json({ error: "Email parameter is required" });
+    }
+    const customer = await Customer.findOne({ email: new RegExp(`^${email.trim()}$`, 'i') });
+    if (!customer) {
+      return res.json({ cart: [] });
+    }
+    res.json({ cart: customer.cart || [] });
   } catch (error) {
-    console.error("Failed to delete customer:", error);
-    res.status(500).json({ error: "Failed to delete customer" });
+    console.error("Failed to fetch cart:", error);
+    res.status(500).json({ error: "Failed to fetch cart" });
+  }
+});
+
+router.post("/api/cart", async (req, res) => {
+  try {
+    const { email, cart } = req.body;
+    if (!email) {
+      return res.status(400).json({ error: "Email is required" });
+    }
+    const cleanEmail = email.trim().toLowerCase();
+    const cartItems = Array.isArray(cart) ? cart : [];
+
+    let customer = await Customer.findOne({ email: new RegExp(`^${cleanEmail}$`, 'i') });
+    if (customer) {
+      customer.cart = cartItems;
+      await customer.save();
+    } else {
+      customer = await Customer.create({
+        name: cleanEmail.split('@')[0],
+        email: cleanEmail,
+        cart: cartItems
+      });
+    }
+    res.json({ success: true, cart: customer.cart });
+  } catch (error) {
+    console.error("Failed to save cart:", error);
+    res.status(500).json({ error: "Failed to save cart" });
   }
 });
 

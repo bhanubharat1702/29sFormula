@@ -13,6 +13,7 @@ import CheckoutDrawer from "@/components/CheckoutDrawer";
 import CartDrawer from "@/components/CartDrawer";
 import OrderSuccessModal from "@/components/OrderSuccessModal";
 import Navbar from "@/components/Navbar/Navbar";
+import { saveCart, clearCart, fetchAndSyncUserCart } from "@/utils/cartSync";
 
 interface Product {
   _id: string;
@@ -514,10 +515,8 @@ export default function ProductDetailPage() {
     setCompletedOrderDetails(orderDetails);
     setShowSuccessModal(true);
     
-    // Clear cart
-    localStorage.removeItem("cart");
-    // Dispatch cart update event
-    window.dispatchEvent(new Event("cartUpdated"));
+    // Clear cart locally and on backend
+    clearCart();
   };
 
   const loadCart = () => {
@@ -537,6 +536,7 @@ export default function ProductDetailPage() {
 
   useEffect(() => {
     loadCart();
+    fetchAndSyncUserCart();
     const handleStorageChange = () => loadCart();
     window.addEventListener("storage", handleStorageChange);
     window.addEventListener("cartUpdated", handleStorageChange);
@@ -591,8 +591,7 @@ export default function ProductDetailPage() {
           maxStock: maxS
         });
       }
-      localStorage.setItem("cart", JSON.stringify(itemsList));
-      window.dispatchEvent(new Event("cartUpdated"));
+      saveCart(itemsList);
       setShowCartDrawer(true);
     }
   };
@@ -601,7 +600,7 @@ export default function ProductDetailPage() {
     if (newQty <= 0) {
       const updated = cartItems.filter((_, idx) => idx !== index);
       setCartItems(updated);
-      localStorage.setItem("cart", JSON.stringify(updated));
+      saveCart(updated);
     } else {
       const item = cartItems[index];
       if (item.maxStock !== undefined && newQty > item.maxStock) {
@@ -609,17 +608,15 @@ export default function ProductDetailPage() {
         const updated = [...cartItems];
         updated[index].quantity = item.maxStock;
         setCartItems(updated);
-        localStorage.setItem("cart", JSON.stringify(updated));
-        window.dispatchEvent(new Event("cartUpdated"));
+        saveCart(updated);
         setShowCartDrawer(true);
         return;
       }
       const updated = [...cartItems];
       updated[index].quantity = newQty;
       setCartItems(updated);
-      localStorage.setItem("cart", JSON.stringify(updated));
+      saveCart(updated);
     }
-    window.dispatchEvent(new Event("cartUpdated"));
   };
 
   useEffect(() => {

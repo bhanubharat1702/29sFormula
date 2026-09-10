@@ -10,6 +10,7 @@ import CartDrawer from "@/components/CartDrawer";
 import CheckoutDrawer from "@/components/CheckoutDrawer";
 import OrderSuccessModal from "@/components/OrderSuccessModal";
 import NewtonsCradleLoader from "@/components/NewtonsCradleLoader";
+import { saveCart, clearCart, fetchAndSyncUserCart } from "@/utils/cartSync";
 
 interface Product {
   _id: string;
@@ -45,8 +46,7 @@ export default function GiftSetPage() {
       updated[index].quantity = newQty;
     }
     setCartItems(updated);
-    localStorage.setItem("cart", JSON.stringify(updated));
-    window.dispatchEvent(new Event("cartUpdated"));
+    saveCart(updated);
   };
 
   const toggleGiftSetDropdown = (itemId: string) => {
@@ -64,6 +64,7 @@ export default function GiftSetPage() {
       }
     };
     loadCart();
+    fetchAndSyncUserCart();
     window.addEventListener("cartUpdated", loadCart);
 
     fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:5001'}/api/products`, { cache: 'no-store' })
@@ -167,9 +168,8 @@ export default function GiftSetPage() {
     } catch (e) { }
 
     cart.push(bundleItem);
-    localStorage.setItem("cart", JSON.stringify(cart));
+    saveCart(cart);
     setCartItems(cart);
-    window.dispatchEvent(new Event("cartUpdated"));
     setShowCartDrawer(true);
   };
 
@@ -414,9 +414,8 @@ export default function GiftSetPage() {
           cartItems={cartItems}
           primaryColor="#57bc74"
           onOrderSuccess={(orderId: string, details?: any) => {
-            localStorage.removeItem("cart");
+            clearCart();
             setCartItems([]);
-            window.dispatchEvent(new Event("cartUpdated"));
             setShowCheckoutDrawer(false);
             setCompletedOrderId(orderId);
             setCompletedOrderDetails(details || null);

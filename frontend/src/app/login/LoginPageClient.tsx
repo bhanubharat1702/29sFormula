@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import styles from "./page.module.css";
+import { fetchAndSyncUserCart } from "@/utils/cartSync";
 
 declare global {
   interface Window {
@@ -110,6 +111,7 @@ export default function LoginPageClient({ initialColor }: { initialColor: string
       setSuccess(true);
       localStorage.setItem("userSession", JSON.stringify(data));
       localStorage.setItem("lastActivityTime", Date.now().toString());
+      await fetchAndSyncUserCart();
 
       setTimeout(() => {
         window.location.href = "/";
@@ -161,6 +163,7 @@ export default function LoginPageClient({ initialColor }: { initialColor: string
       setSuccess(true);
       localStorage.setItem("userSession", JSON.stringify(data));
       localStorage.setItem("lastActivityTime", Date.now().toString());
+      await fetchAndSyncUserCart();
 
       setTimeout(() => {
         window.location.href = "/";

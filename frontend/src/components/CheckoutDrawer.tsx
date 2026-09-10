@@ -4,20 +4,58 @@ import { useState, useEffect, useRef } from "react";
 import confetti from "canvas-confetti";
 import styles from "./CheckoutDrawer.module.css";
 import CustomCheckbox from "./CustomCheckbox/CustomCheckbox";
+import { getAppliedCoupon } from "@/utils/cartSync";
 
-const loadRazorpayScript = () => {
+const loadRazorpayScript = (): Promise<boolean> => {
   return new Promise((resolve) => {
+    // Already loaded
     if (typeof window !== "undefined" && (window as any).Razorpay) {
       resolve(true);
       return;
     }
+
+    // Script tag may already be injected (e.g. hot reload) — wait for it
+    const existingScript = document.querySelector(
+      'script[src="https://checkout.razorpay.com/v1/checkout.js"]'
+    );
+
+    const waitForRazorpay = (timeout: number) => {
+      const start = Date.now();
+      const poll = () => {
+        if ((window as any).Razorpay) {
+          resolve(true);
+        } else if (Date.now() - start > timeout) {
+          resolve(false);
+        } else {
+          setTimeout(poll, 100);
+        }
+      };
+      poll();
+    };
+
+    if (existingScript) {
+      // Script already in DOM, just wait for window.Razorpay
+      waitForRazorpay(8000);
+      return;
+    }
+
     const script = document.createElement("script");
     script.src = "https://checkout.razorpay.com/v1/checkout.js";
+    script.async = true;
     script.onload = () => {
-      resolve(true);
+      // Give Razorpay a moment to initialize on the window object
+      waitForRazorpay(5000);
     };
     script.onerror = () => {
-      resolve(false);
+      // Retry once after 1 second (handles transient network hiccups)
+      setTimeout(() => {
+        const retryScript = document.createElement("script");
+        retryScript.src = "https://checkout.razorpay.com/v1/checkout.js";
+        retryScript.async = true;
+        retryScript.onload = () => waitForRazorpay(5000);
+        retryScript.onerror = () => resolve(false);
+        document.body.appendChild(retryScript);
+      }, 1000);
     };
     document.body.appendChild(script);
   });
@@ -68,16 +106,77 @@ export default function CheckoutDrawer({ isOpen, onClose, cartItems, primaryColo
   const [isVerifyingOtp, setIsVerifyingOtp] = useState(false);
   const [isFetchingLocation, setIsFetchingLocation] = useState(false);
 
-  const [couponCode, setCouponCode] = useState("");
   const [discount, setDiscount] = useState(0);
-  const [couponError, setCouponError] = useState<string | null>(null);
-  const [couponSuccess, setCouponSuccess] = useState<string | null>(null);
   const [appliedCouponCode, setAppliedCouponCode] = useState<string | null>(null);
-  const [showCouponField, setShowCouponField] = useState(false);
+
+  const parseSavedAddress = (fullAddress: any) => {
+    if (!fullAddress) return { address: "", city: "", stateVal: "", pinCode: "" };
+    if (typeof fullAddress === 'object') {
+      return {
+        address: fullAddress.address || fullAddress.street || fullAddress.addressLine1 || "",
+        city: fullAddress.city || "",
+        stateVal: fullAddress.state || fullAddress.stateVal || "",
+        pinCode: fullAddress.pincode || fullAddress.pinCode || fullAddress.zip || ""
+      };
+    }
+    let str = String(fullAddress).trim();
+    if (!str) return { address: "", city: "", stateVal: "", pinCode: "" };
+
+    // Try parsing if it's a JSON string
+    if (str.startsWith("{") && str.endsWith("}")) {
+      try {
+        const obj = JSON.parse(str);
+        if (obj && typeof obj === 'object') {
+          return {
+            address: obj.address || obj.street || obj.addressLine1 || "",
+            city: obj.city || "",
+            stateVal: obj.state || obj.stateVal || "",
+            pinCode: obj.pincode || obj.pinCode || obj.zip || ""
+          };
+        }
+      } catch (e) { }
+    }
+
+    // Extract 6-digit Indian pincode from the end (e.g. "- 400706" or "400706")
+    let pinCode = "";
+    const pinMatch = str.match(/(?:-\s*|\s+)(\d{6})\s*$/);
+    if (pinMatch) {
+      pinCode = pinMatch[1];
+      str = str.replace(/(?:-\s*|\s+)\d{6}\s*$/, "").trim();
+    }
+
+    // Split remaining string by comma
+    const parts = str.split(',').map(p => p.trim()).filter(Boolean);
+    if (parts.length >= 3) {
+      const stateVal = parts.pop() || "";
+      const city = parts.pop() || "";
+      const address = parts.join(", ");
+      return { address, city, stateVal, pinCode };
+    } else if (parts.length === 2) {
+      return { address: parts[0], city: parts[1], stateVal: "", pinCode };
+    } else {
+      return { address: str, city: "", stateVal: "", pinCode };
+    }
+  };
+
+  const applyCustomerDetails = (data: any) => {
+    if (data.name) setName(data.name);
+    if (data.email) setEmail(data.email);
+    if (data.phone) setPhone(data.phone);
+    if (data.address) {
+      const parsed = parseSavedAddress(data.address);
+      if (parsed.address) setAddress(parsed.address);
+      if (parsed.city) setCity(parsed.city);
+      if (parsed.stateVal) setStateVal(parsed.stateVal);
+      if (parsed.pinCode) setPinCode(parsed.pinCode);
+    }
+  };
 
   // Prevent background scrolling when checkout popup is open
   useEffect(() => {
     if (isOpen) {
+      setIsSubmitting(false);
+      setError(null);
       document.body.style.overflow = "hidden";
       document.documentElement.style.overflow = "hidden";
       const session = localStorage.getItem("userSession");
@@ -86,32 +185,25 @@ export default function CheckoutDrawer({ isOpen, onClose, cartItems, primaryColo
           const user = JSON.parse(session);
           setLoggedInUser(user);
           if (user.name) setName(user.name);
+          if (user.email) setEmail(user.email);
+          if (user.phone) setPhone(user.phone);
+          if (user.address) {
+            const parsed = parseSavedAddress(user.address);
+            if (parsed.address) setAddress(parsed.address);
+            if (parsed.city) setCity(parsed.city);
+            if (parsed.stateVal) setStateVal(parsed.stateVal);
+            if (parsed.pinCode) setPinCode(parsed.pinCode);
+          }
+
+          // Always fetch latest customer profile from backend to ensure cross-device consistency
           if (user.email) {
-            setEmail(user.email);
-            // Automatically fetch customer details to pre-fill phone and address
             fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:5001'}/api/customers/search?query=${encodeURIComponent(user.email)}`)
               .then(res => {
                 if (res.ok) return res.json();
                 throw new Error("Not found");
               })
               .then(data => {
-                if (data.phone) setPhone(data.phone);
-                if (data.address) {
-                  const parts = data.address.split('-');
-                  if (parts.length >= 2) {
-                    setPinCode(parts[1].trim());
-                    const addressParts = parts[0].split(',');
-                    if (addressParts.length >= 3) {
-                      setStateVal(addressParts[addressParts.length - 1].trim());
-                      setCity(addressParts[addressParts.length - 2].trim());
-                      setAddress(addressParts.slice(0, addressParts.length - 2).join(',').trim());
-                    } else {
-                      setAddress(parts[0].trim());
-                    }
-                  } else {
-                    setAddress(data.address);
-                  }
-                }
+                applyCustomerDetails(data);
               })
               .catch(err => console.log("No previous details found for autofill", err));
           }
@@ -133,6 +225,26 @@ export default function CheckoutDrawer({ isOpen, onClose, cartItems, primaryColo
 
   useEffect(() => {
     if (isOpen) {
+      const activeCoupon = getAppliedCoupon();
+      if (activeCoupon) {
+        setAppliedCouponCode(activeCoupon.code);
+        const subtotal = cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0);
+        let calcDiscount = 0;
+        if (activeCoupon.type === 'percentage') {
+          calcDiscount = Math.floor(subtotal * (activeCoupon.value / 100));
+        } else {
+          calcDiscount = activeCoupon.value;
+        }
+        setDiscount(calcDiscount);
+      } else {
+        setAppliedCouponCode(null);
+        setDiscount(0);
+      }
+    }
+  }, [isOpen, cartItems]);
+
+  useEffect(() => {
+    if (isOpen) {
       fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:5001'}/api/settings`, { cache: 'no-store' })
         .then(res => res.json())
         .then(data => {
@@ -148,63 +260,6 @@ export default function CheckoutDrawer({ isOpen, onClose, cartItems, primaryColo
 
   const subtotalAmount = cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0);
   const totalAmount = Math.max(0, subtotalAmount - discount);
-
-  const triggerConfetti = () => {
-    confetti({
-      particleCount: 150,
-      spread: 80,
-      origin: { y: 0.6 },
-      zIndex: 10000
-    });
-  };
-
-  const handleApplyCoupon = async () => {
-    setCouponError(null);
-    setCouponSuccess(null);
-
-    if (!couponCode.trim()) {
-      setCouponError("Please enter a coupon code.");
-      return;
-    }
-
-    const code = couponCode.trim().toUpperCase();
-
-    try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:5001'}/api/discounts/validate?code=${code}&subtotal=${subtotalAmount}`, { cache: "no-store" });
-      if (res.ok) {
-        const discountObj = await res.json();
-
-        let discountValue = 0;
-        if (discountObj.type === "percentage") {
-          discountValue = Math.floor(subtotalAmount * (discountObj.value / 100));
-        } else {
-          discountValue = discountObj.value;
-        }
-
-        setDiscount(discountValue);
-        setAppliedCouponCode(code);
-        setCouponSuccess(`Coupon applied! You saved ₹${discountValue.toLocaleString("en-IN")}.00`);
-        triggerConfetti();
-      } else {
-        const errData = await res.json().catch(() => null);
-        setCouponError(errData?.error || "Invalid discount coupon code.");
-        setDiscount(0);
-        setAppliedCouponCode(null);
-      }
-    } catch (err) {
-      setCouponError("Could not validate coupon.");
-      setDiscount(0);
-      setAppliedCouponCode(null);
-    }
-  };
-
-  const handleRemoveCoupon = () => {
-    setDiscount(0);
-    setCouponCode("");
-    setAppliedCouponCode(null);
-    setCouponSuccess(null);
-    setCouponError(null);
-  };
 
   const handleAutoFetchAddress = () => {
     if (!navigator.geolocation) {
@@ -306,26 +361,7 @@ export default function CheckoutDrawer({ isOpen, onClose, cartItems, primaryColo
         throw new Error(data.error || "Invalid OTP.");
       }
 
-      if (data.name) setName(data.name);
-      if (data.email) setEmail(data.email);
-      if (data.phone) setPhone(data.phone);
-
-      if (data.address) {
-        const parts = data.address.split('-');
-        if (parts.length >= 2) {
-          setPinCode(parts[1].trim());
-          const addressParts = parts[0].split(',');
-          if (addressParts.length >= 3) {
-            setStateVal(addressParts[addressParts.length - 1].trim());
-            setCity(addressParts[addressParts.length - 2].trim());
-            setAddress(addressParts.slice(0, addressParts.length - 2).join(',').trim());
-          } else {
-            setAddress(parts[0].trim());
-          }
-        } else {
-          setAddress(data.address);
-        }
-      }
+      applyCustomerDetails(data);
 
       setIsSuccessExiting(false);
       setSearchSuccess(`Welcome back ${data.name}! Your details have been autofilled.`);
@@ -344,6 +380,20 @@ export default function CheckoutDrawer({ isOpen, onClose, cartItems, primaryColo
       setSearchError(err.message);
     } finally {
       setIsVerifyingOtp(false);
+    }
+  };
+
+  const updateUserSessionOnOrder = (payload: any) => {
+    try {
+      const existing = localStorage.getItem("userSession");
+      const sessionObj = existing ? JSON.parse(existing) : {};
+      sessionObj.name = payload.customerName || sessionObj.name;
+      sessionObj.email = payload.customerEmail || sessionObj.email;
+      sessionObj.phone = payload.customerPhone || sessionObj.phone;
+      sessionObj.address = payload.shippingAddress || sessionObj.address;
+      localStorage.setItem("userSession", JSON.stringify(sessionObj));
+    } catch (e) {
+      console.error("Error updating userSession:", e);
     }
   };
 
@@ -417,6 +467,8 @@ export default function CheckoutDrawer({ isOpen, onClose, cartItems, primaryColo
               if (!verifyRes.ok) throw new Error("Payment verification failed");
               const verifyData = await verifyRes.json();
               if (verifyData.success && verifyData.orderId) {
+                updateUserSessionOnOrder(orderPayload);
+                setIsSubmitting(false);
                 onOrderSuccess(verifyData.orderId, { ...orderPayload, orderId: verifyData.orderId });
               }
             } catch (err: any) {
@@ -485,6 +537,7 @@ export default function CheckoutDrawer({ isOpen, onClose, cartItems, primaryColo
 
         const data = await res.json();
         if (data && data.orderId) {
+          updateUserSessionOnOrder(orderPayload);
           onOrderSuccess(data.orderId, data);
         } else {
           throw new Error("Invalid order response from server.");
@@ -811,78 +864,13 @@ export default function CheckoutDrawer({ isOpen, onClose, cartItems, primaryColo
                 ))}
               </div>
 
-              {/* Coupon Section */}
-              <div className={styles.couponSection}>
-                {!showCouponField ? (
-                  <button
-                    type="button"
-                    onClick={() => setShowCouponField(true)}
-                    style={{ background: 'none', border: 'none', color: '#000', textDecoration: 'underline', cursor: 'pointer', fontSize: '0.85rem', textAlign: 'left', padding: 0 }}
-                  >
-                    Have a coupon code?
-                  </button>
-                ) : appliedCouponCode ? (
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', backgroundColor: '#f9fafb', padding: '10px 12px', borderRadius: '4px', border: '1px dashed #d1d5db' }}>
-                    <span style={{ fontSize: '0.85rem' }}>
-
-                      <span style={{ color: '#000000', fontWeight: 600 }}>{appliedCouponCode}</span>
-                      <span style={{ color: '#6b7280' }}> applied</span>
-                    </span>
-                    <button
-                      type="button"
-                      onClick={handleRemoveCoupon}
-                      style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', fontSize: '0.85rem', textDecoration: 'underline' }}
-                    >
-                      Remove
-                    </button>
-                  </div>
-                ) : (
-                  <div className={styles.couponInputGroup}>
-                    <input
-                      type="text"
-                      placeholder="Enter Coupon Code"
-                      value={couponCode}
-                      onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
-                      className={styles.couponInput}
-                      style={{ '--primary-color': '#000' } as React.CSSProperties}
-                    />
-                    <button
-                      type="button"
-                      onClick={handleApplyCoupon}
-                      className={styles.couponBtn}
-                      style={{ backgroundColor: "#000" }}
-                    >
-                      Apply
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setShowCouponField(false);
-                        handleRemoveCoupon();
-                      }}
-                      style={{ background: 'none', border: 'none', color: '#9ca3af', cursor: 'pointer', padding: '0 4px', fontSize: '1.2rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-                      title="Cancel Coupon"
-                    >
-                      ✕
-                    </button>
-                  </div>
-                )}
-                {couponError && !appliedCouponCode && <span style={{ color: "#ef4444", fontSize: "0.8rem" }}>{couponError}</span>}
-                {couponSuccess && (
-                  <span style={{ fontSize: "0.8rem", marginTop: appliedCouponCode ? "4px" : "0", display: "block" }}>
-                    <span style={{ color: "#6b7280" }}>Coupon applied! You saved </span>
-                    <span style={{ color: "#000000", fontWeight: 600 }}>₹{discount.toLocaleString("en-IN")}.00</span>
-                  </span>
-                )}
-              </div>
-
               <div className={styles.shippingRow}>
                 <span>Shipping Fee</span>
                 <span className={styles.freeBadge}>FREE</span>
               </div>
               {discount > 0 && (
                 <div className={styles.discountRow}>
-                  <span>Discount</span>
+                  <span>Coupon {appliedCouponCode ? `(${appliedCouponCode})` : ''}</span>
                   <span className={styles.discountAmount}>-₹{discount.toLocaleString("en-IN")}.00</span>
                 </div>
               )}

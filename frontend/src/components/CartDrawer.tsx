@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import styles from './CartDrawer.module.css';
+import { getAppliedCoupon, setAppliedCoupon, removeAppliedCoupon } from '@/utils/cartSync';
 
 export interface CartItem {
   _id: string;
@@ -40,6 +41,78 @@ export default function CartDrawer({
 }: CartDrawerProps) {
   const [isClosing, setIsClosing] = useState(false);
   const [expandedGiftSets, setExpandedGiftSets] = useState<{ [key: string]: boolean }>({});
+  const [couponInput, setCouponInput] = useState('');
+  const [appliedCoupon, setAppliedCouponState] = useState<any | null>(null);
+  const [couponError, setCouponError] = useState<string | null>(null);
+  const [couponSuccess, setCouponSuccess] = useState<string | null>(null);
+  const [isSuccessFading, setIsSuccessFading] = useState(false);
+  const [isValidatingCoupon, setIsValidatingCoupon] = useState(false);
+
+  useEffect(() => {
+    if (couponSuccess) {
+      setIsSuccessFading(false);
+      const timer = setTimeout(() => {
+        setIsSuccessFading(true);
+        const hideTimer = setTimeout(() => {
+          setCouponSuccess(null);
+          setIsSuccessFading(false);
+        }, 800);
+        return () => clearTimeout(hideTimer);
+      }, 3000);
+
+      return () => clearTimeout(timer);
+    }
+  }, [couponSuccess]);
+
+  useEffect(() => {
+    if (isOpen) {
+      const active = getAppliedCoupon();
+      setAppliedCouponState(active);
+    }
+  }, [isOpen]);
+
+  const handleApplyCoupon = async () => {
+    setCouponError(null);
+    setCouponSuccess(null);
+    if (!couponInput.trim()) {
+      setCouponError('Please enter a coupon code.');
+      return;
+    }
+    setIsValidatingCoupon(true);
+    const code = couponInput.trim().toUpperCase();
+    const subtotal = cartItems.reduce((acc, item) => acc + item.price * (item.quantity || 1), 0);
+
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:5001'}/api/discounts/validate?code=${code}&subtotal=${subtotal}`, { cache: 'no-store' });
+      if (res.ok) {
+        const discountObj = await res.json();
+        const couponData = {
+          code: code,
+          type: discountObj.type,
+          value: discountObj.value
+        };
+        setAppliedCoupon(couponData);
+        setAppliedCouponState(couponData);
+        setCouponSuccess(`Coupon ${code} applied successfully!`);
+        setCouponInput('');
+      } else {
+        const errData = await res.json().catch(() => null);
+        setCouponError(errData?.error || 'Invalid or expired coupon code.');
+      }
+    } catch (e) {
+      setCouponError('Could not validate coupon.');
+    } finally {
+      setIsValidatingCoupon(false);
+    }
+  };
+
+  const handleRemoveCoupon = () => {
+    removeAppliedCoupon();
+    setAppliedCouponState(null);
+    setCouponSuccess(null);
+    setCouponError(null);
+    setIsSuccessFading(false);
+  };
 
   useEffect(() => {
     if (isOpen) {
@@ -81,7 +154,16 @@ export default function CartDrawer({
   if (!isOpen && !isClosing) return null;
 
   const totalQuantity = cartItems.reduce((acc, item) => acc + (item.quantity || 1), 0);
-  const totalPrice = cartItems.reduce((acc, item) => acc + item.price * (item.quantity || 1), 0);
+  const subtotalPrice = cartItems.reduce((acc, item) => acc + item.price * (item.quantity || 1), 0);
+  let discountAmount = 0;
+  if (appliedCoupon) {
+    if (appliedCoupon.type === 'percentage') {
+      discountAmount = Math.floor(subtotalPrice * (appliedCoupon.value / 100));
+    } else {
+      discountAmount = appliedCoupon.value;
+    }
+  }
+  const estimatedTotal = Math.max(0, subtotalPrice - discountAmount);
 
   return (
     <div
@@ -211,9 +293,8 @@ export default function CartDrawer({
                                 viewBox="0 0 24 24"
                                 strokeWidth={2}
                                 stroke="currentColor"
-                                className={`${styles.giftSetChevron} ${
-                                  expandedGiftSets[item._id] ? styles.giftSetChevronRotated : ''
-                                }`}
+                                className={`${styles.giftSetChevron} ${expandedGiftSets[item._id] ? styles.giftSetChevronRotated : ''
+                                  }`}
                               >
                                 <path
                                   strokeLinecap="round"
@@ -342,10 +423,72 @@ export default function CartDrawer({
             <div className={styles.cartDrawerFooter}>
               <div className={styles.cartDrawerDivider} />
 
+              {/* Coupon Code Section */}
+              <div className={styles.cartCouponSection}>
+                {appliedCoupon ? (
+                  <div className={styles.appliedCouponTag}>
+                    <span>Coupon <span className={styles.couponCodeGreen}>{appliedCoupon.code}</span> Applied</span>
+                    <button
+                      type="button"
+                      onClick={handleRemoveCoupon}
+                      className={styles.removeCouponTextBtn}
+                    >
+                      Remove
+                    </button>
+                  </div>
+                ) : (
+                  <div className={styles.couponInputRow}>
+                    <input
+                      type="text"
+                      placeholder="ENTER PROMO CODE"
+                      value={couponInput}
+                      onChange={(e) => setCouponInput(e.target.value.toUpperCase())}
+                      className={styles.couponInput}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          e.preventDefault();
+                          handleApplyCoupon();
+                        }
+                      }}
+                    />
+                    <button
+                      type="button"
+                      onClick={handleApplyCoupon}
+                      className={styles.couponApplyBtn}
+                      disabled={isValidatingCoupon}
+                    >
+                      {isValidatingCoupon ? '...' : 'APPLY'}
+                    </button>
+                  </div>
+                )}
+                {couponError && <span className={styles.couponMessageError}>{couponError}</span>}
+                {couponSuccess && (
+                  <span
+                    className={`${styles.couponMessageSuccess} ${isSuccessFading ? styles.couponMessageSuccessFading : ''}`}
+                  >
+                    {couponSuccess}
+                  </span>
+                )}
+              </div>
+
+              {/* Price Breakdown */}
+              {discountAmount > 0 && (
+                <>
+                  <div className={styles.subtotalRow}>
+                    <span>Subtotal</span>
+                    <span>Rs. {subtotalPrice.toLocaleString('en-IN')}.00</span>
+                  </div>
+                  <div className={styles.discountRow}>
+                    <span>Discount ({appliedCoupon?.code})</span>
+                    <span className={styles.discountVal}>- Rs. {discountAmount.toLocaleString('en-IN')}.00</span>
+                  </div>
+                </>
+              )}
+
               <div className={styles.totalContainer}>
                 <span className={styles.totalTitle}>Estimated total</span>
                 <span className={styles.totalVal}>
-                  Rs. {totalPrice.toLocaleString('en-IN')}.00
+                  Rs. {estimatedTotal.toLocaleString('en-IN')}.00
                 </span>
               </div>
 

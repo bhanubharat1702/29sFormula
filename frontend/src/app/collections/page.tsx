@@ -10,6 +10,7 @@ import CartDrawer from "@/components/CartDrawer";
 import CheckoutDrawer from "@/components/CheckoutDrawer";
 import OrderSuccessModal from "@/components/OrderSuccessModal";
 import NewtonsCradleLoader from "@/components/NewtonsCradleLoader";
+import { saveCart, clearCart, fetchAndSyncUserCart } from "@/utils/cartSync";
 
 interface Product {
   _id: string;
@@ -105,6 +106,7 @@ export default function Collections() {
 
   useEffect(() => {
     loadCart();
+    fetchAndSyncUserCart();
     const handleStorageChange = () => loadCart();
     window.addEventListener("storage", handleStorageChange);
     window.addEventListener("cartUpdated", handleStorageChange);
@@ -161,8 +163,7 @@ export default function Collections() {
           maxStock: maxStock
         });
       }
-      localStorage.setItem("cart", JSON.stringify(itemsList));
-      window.dispatchEvent(new Event("cartUpdated"));
+      saveCart(itemsList);
       setShowCartDrawer(true);
     }
   };
@@ -171,7 +172,7 @@ export default function Collections() {
     if (newQty <= 0) {
       const updated = cartItems.filter((_, idx) => idx !== index);
       setCartItems(updated);
-      localStorage.setItem("cart", JSON.stringify(updated));
+      saveCart(updated);
     } else {
       const item = cartItems[index];
       if (item.maxStock !== undefined && newQty > item.maxStock) {
@@ -179,17 +180,15 @@ export default function Collections() {
         const updated = [...cartItems];
         updated[index].quantity = item.maxStock;
         setCartItems(updated);
-        localStorage.setItem("cart", JSON.stringify(updated));
-        window.dispatchEvent(new Event("cartUpdated"));
+        saveCart(updated);
         setShowCartDrawer(true);
         return;
       }
       const updated = [...cartItems];
       updated[index].quantity = newQty;
       setCartItems(updated);
-      localStorage.setItem("cart", JSON.stringify(updated));
+      saveCart(updated);
     }
-    window.dispatchEvent(new Event("cartUpdated"));
   };
 
   const getProductImages = (product: Product) => {
@@ -543,9 +542,8 @@ export default function Collections() {
         cartItems={cartItems}
         primaryColor="#d0d0d0"
         onOrderSuccess={(orderId: string, orderDetails: any) => {
-          localStorage.removeItem("cart");
+          clearCart();
           setCartItems([]);
-          window.dispatchEvent(new Event("cartUpdated"));
           setShowCheckoutDrawer(false);
           setCompletedOrderId(orderId);
           setCompletedOrderDetails(orderDetails);
