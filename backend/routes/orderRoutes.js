@@ -125,13 +125,132 @@ const sendOrderUpdateEmail = async (order, customerEmail, customerName) => {
       `,
     });
 
-    await transporter.sendMail(mailOptions);
+
     console.log(`Order update email sent for ${order.orderId}`);
   } catch (error) {
     console.error("Error sending order update email:", error);
   }
 };
 
+
+const sendAdminNewOrderEmail = async (order) => {
+  const adminEmail = process.env.ADMIN_EMAIL;
+  if (!adminEmail) return;
+
+  try {
+    const itemsHtml = (order.cartItems || []).map(item => `
+      <tr>
+        <td style="padding: 12px 10px; border-bottom: 1px solid #eee; font-size: 14px; color: #333;">
+          <strong>${item.name}</strong>
+          <span style="display:block; font-size:12px; color:#888; margin-top:3px;">${item.size}${item.isGiftSet ? ' &bull; Gift Set' : ''}</span>
+        </td>
+        <td style="padding: 12px 10px; border-bottom: 1px solid #eee; font-size: 14px; color: #333; text-align: center;">${item.quantity}</td>
+        <td style="padding: 12px 10px; border-bottom: 1px solid #eee; font-size: 14px; color: #333; text-align: right;">&#8377;${(item.price * item.quantity).toLocaleString('en-IN')}</td>
+      </tr>
+    `).join('');
+
+    const addr = order.shippingAddress || {};
+    const addressStr = typeof addr === 'string'
+      ? addr
+      : [addr.addressLine1, addr.addressLine2, addr.city, addr.state, addr.pincode, addr.country]
+          .filter(Boolean).join(', ');
+
+    const now = new Date();
+    const formattedDate = now.toLocaleString('en-IN', {
+      timeZone: 'Asia/Kolkata',
+      day: '2-digit', month: 'long', year: 'numeric',
+      hour: '2-digit', minute: '2-digit', hour12: true
+    });
+
+    await sendEmail({
+      to: adminEmail,
+      subject: `🛒 New Order Received — ${order.orderId} (&#8377;${(order.totalAmount || 0).toLocaleString('en-IN')})`,
+      html: `
+        <div style="font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; max-width:640px; margin:0 auto; background:#ffffff; border:1px solid #e0e0e0; border-radius:6px; overflow:hidden;">
+
+          <!-- Header -->
+          <div style="background:#0a0a0a; padding:28px 32px; text-align:center;">
+            <h1 style="margin:0; letter-spacing:3px; font-weight:300; color:#fff; font-size:22px;">29sFORMULA</h1>
+            <p style="margin:6px 0 0; font-size:11px; letter-spacing:2px; text-transform:uppercase; color:#aaa;">Admin Order Alert</p>
+          </div>
+
+          <!-- Alert Banner -->
+          <div style="background:#f0fdf4; border-left:4px solid #16a34a; padding:16px 24px; margin:0;">
+            <p style="margin:0; font-size:15px; color:#15803d; font-weight:600;">&#x2705; New Order Placed</p>
+            <p style="margin:4px 0 0; font-size:13px; color:#166534;">Received on ${formattedDate} (IST)</p>
+          </div>
+
+          <!-- Order Summary -->
+          <div style="padding:28px 32px;">
+
+            <!-- Order Meta -->
+            <div style="display:flex; gap:12px; flex-wrap:wrap; margin-bottom:24px;">
+              <div style="flex:1; min-width:140px; background:#f8f8f8; border-radius:6px; padding:14px 18px;">
+                <p style="margin:0; font-size:11px; text-transform:uppercase; letter-spacing:1px; color:#888;">Order ID</p>
+                <p style="margin:6px 0 0; font-size:16px; font-weight:700; color:#000;">${order.orderId}</p>
+              </div>
+              <div style="flex:1; min-width:140px; background:#f8f8f8; border-radius:6px; padding:14px 18px;">
+                <p style="margin:0; font-size:11px; text-transform:uppercase; letter-spacing:1px; color:#888;">Total Amount</p>
+                <p style="margin:6px 0 0; font-size:16px; font-weight:700; color:#000;">&#8377;${(order.totalAmount || 0).toLocaleString('en-IN')}</p>
+              </div>
+              <div style="flex:1; min-width:140px; background:#f8f8f8; border-radius:6px; padding:14px 18px;">
+                <p style="margin:0; font-size:11px; text-transform:uppercase; letter-spacing:1px; color:#888;">Payment</p>
+                <p style="margin:6px 0 0; font-size:16px; font-weight:700; color:#000;">${order.paymentMethod || 'COD'}</p>
+              </div>
+              <div style="flex:1; min-width:140px; background:#f8f8f8; border-radius:6px; padding:14px 18px;">
+                <p style="margin:0; font-size:11px; text-transform:uppercase; letter-spacing:1px; color:#888;">Items</p>
+                <p style="margin:6px 0 0; font-size:16px; font-weight:700; color:#000;">${(order.cartItems || []).reduce((s, i) => s + i.quantity, 0)}</p>
+              </div>
+            </div>
+
+            <!-- Customer Info -->
+            <h3 style="margin:0 0 12px; font-size:13px; text-transform:uppercase; letter-spacing:1px; color:#555; border-bottom:1px solid #eee; padding-bottom:8px;">Customer</h3>
+            <table style="width:100%; font-size:14px; color:#333; margin-bottom:24px; border-collapse:collapse;">
+              <tr><td style="padding:6px 0; color:#888; width:130px;">Name</td><td style="padding:6px 0; font-weight:600;">${order.customerName || '—'}</td></tr>
+              <tr><td style="padding:6px 0; color:#888;">Email</td><td style="padding:6px 0;"><a href="mailto:${order.customerEmail}" style="color:#2563eb; text-decoration:none;">${order.customerEmail || '—'}</a></td></tr>
+              <tr><td style="padding:6px 0; color:#888;">Phone</td><td style="padding:6px 0;"><a href="tel:${order.customerPhone}" style="color:#2563eb; text-decoration:none;">${order.customerPhone || '—'}</a></td></tr>
+              <tr><td style="padding:6px 0; color:#888; vertical-align:top;">Address</td><td style="padding:6px 0; line-height:1.5;">${addressStr || '—'}</td></tr>
+            </table>
+
+            <!-- Items Table -->
+            <h3 style="margin:0 0 12px; font-size:13px; text-transform:uppercase; letter-spacing:1px; color:#555; border-bottom:1px solid #eee; padding-bottom:8px;">Items Ordered</h3>
+            <table style="width:100%; border-collapse:collapse; margin-bottom:24px;">
+              <thead>
+                <tr style="background:#f3f4f6;">
+                  <th style="padding:10px; text-align:left; font-size:12px; text-transform:uppercase; letter-spacing:0.5px; color:#666;">Product</th>
+                  <th style="padding:10px; text-align:center; font-size:12px; text-transform:uppercase; letter-spacing:0.5px; color:#666;">Qty</th>
+                  <th style="padding:10px; text-align:right; font-size:12px; text-transform:uppercase; letter-spacing:0.5px; color:#666;">Subtotal</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${itemsHtml}
+              </tbody>
+              <tfoot>
+                <tr>
+                  <td colspan="2" style="padding:12px 10px; text-align:right; font-size:14px; font-weight:700; color:#000;">Total</td>
+                  <td style="padding:12px 10px; text-align:right; font-size:14px; font-weight:700; color:#000;">&#8377;${(order.totalAmount || 0).toLocaleString('en-IN')}</td>
+                </tr>
+              </tfoot>
+            </table>
+
+            <!-- CTA -->
+            <div style="text-align:center; margin-top:28px;">
+              <a href="https://29sformula.com/admin" style="display:inline-block; padding:14px 40px; background:#0a0a0a; color:#fff; text-decoration:none; font-size:13px; letter-spacing:1.5px; text-transform:uppercase; border-radius:3px;">View in Admin Dashboard</a>
+            </div>
+          </div>
+
+          <!-- Footer -->
+          <div style="background:#f9f9f9; border-top:1px solid #eee; padding:18px 32px; text-align:center;">
+            <p style="margin:0; font-size:12px; color:#aaa;">This is an automated notification from 29sFORMULA &mdash; do not reply.</p>
+          </div>
+        </div>
+      `
+    });
+    console.log(`Admin new-order notification sent for ${order.orderId}`);
+  } catch (err) {
+    console.error('Failed to send admin new-order email:', err);
+  }
+};
 
 const sendOrderConfirmationEmail = async (order, customerEmail, customerName) => {
   try {
@@ -320,8 +439,17 @@ router.post("/api/orders", async (req, res) => {
     // Invalidate products cache
     invalidateProductsCache();
 
-    // Send confirmation email asynchronously (does not block checkout)
+    // Send confirmation email to customer (async, non-blocking)
     sendOrderConfirmationEmail(newOrder, email, customerName);
+
+    // Notify admin of the new order (async, non-blocking)
+    sendAdminNewOrderEmail({
+      ...newOrder.toObject(),
+      customerName,
+      customerEmail: email,
+      customerPhone,
+      shippingAddress
+    });
 
     const orderJson = newOrder.toJSON();
     orderJson.customerName = customerName;
