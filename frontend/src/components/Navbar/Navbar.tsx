@@ -167,6 +167,7 @@ export default function Navbar({ onCartClick }: NavbarProps) {
           <Link href="/" className={`${styles.navLink} ${pathname === "/" ? styles.activeLink : ""}`}>HOME</Link>
           <Link href="/shop" className={`${styles.navLink} ${pathname === "/shop" ? styles.activeLink : ""}`}>SHOP ALL</Link>
           <Link href="/collections" className={`${styles.navLink} ${pathname === "/collections" ? styles.activeLink : ""}`}>COLLECTIONS</Link>
+          <Link href="/gift-set" className={`${styles.navLink} ${pathname === "/gift-set" ? styles.activeLink : ""}`}>GIFT SET</Link>
           <Link href="/track" className={`${styles.navLink} ${pathname === "/track" ? styles.activeLink : ""}`}>TRACK ORDER</Link>
         </nav>
         {/* Mobile Navigation Drawer Overlay */}
@@ -175,6 +176,7 @@ export default function Navbar({ onCartClick }: NavbarProps) {
             <Link href="/" onClick={() => setIsMobileMenuOpen(false)} className={`${styles.mobileMenuItem} ${styles.mobileNavLink} ${pathname === "/" ? styles.mobileNavLinkActive : ""}`}>HOME</Link>
             <Link href="/shop" onClick={() => setIsMobileMenuOpen(false)} className={`${styles.mobileMenuItem} ${styles.mobileNavLink} ${pathname === "/shop" ? styles.mobileNavLinkActive : ""}`}>SHOP ALL</Link>
             <Link href="/collections" onClick={() => setIsMobileMenuOpen(false)} className={`${styles.mobileMenuItem} ${styles.mobileNavLink} ${pathname === "/collections" ? styles.mobileNavLinkActive : ""}`}>COLLECTIONS</Link>
+            <Link href="/gift-set" onClick={() => setIsMobileMenuOpen(false)} className={`${styles.mobileMenuItem} ${styles.mobileNavLink} ${pathname === "/gift-set" ? styles.mobileNavLinkActive : ""}`}>GIFT SET</Link>
             <Link href="/track" onClick={() => setIsMobileMenuOpen(false)} className={`${styles.mobileMenuItem} ${styles.mobileNavLink} ${pathname === "/track" ? styles.mobileNavLinkActive : ""}`}>TRACK ORDER</Link>
           </div>
         </div>

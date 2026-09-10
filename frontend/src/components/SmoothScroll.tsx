@@ -21,6 +21,8 @@ export default function SmoothScroll({ children }: { children: React.ReactNode }
       touchMultiplier: 2.0,
     });
 
+    (window as any).lenis = lenis;
+
     let animationFrameId: number;
     
     function raf(time: number) {
@@ -32,6 +34,7 @@ export default function SmoothScroll({ children }: { children: React.ReactNode }
 
     return () => {
       cancelAnimationFrame(animationFrameId);
+      delete (window as any).lenis;
       lenis.destroy();
     };
   }, [isAdminPage]);

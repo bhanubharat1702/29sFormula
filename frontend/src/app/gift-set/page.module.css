@@ -1,0 +1,764 @@
+.page {
+  min-height: 100vh;
+  min-height: 100dvh;
+  background-color: #fafafa;
+  color: #1a1a1a;
+  overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.mainContent {
+  flex: 1;
+  width: 100%;
+}
+
+/* Header Hero Banner matching 3rd screenshot */
+.headerBannerSection {
+  width: 100%;
+  max-width: 820px;
+  margin: 30px auto 40px auto;
+  padding: 0 24px;
+  box-sizing: border-box;
+}
+
+.headerBannerCard {
+  position: relative;
+  width: 100%;
+  border-radius: 28px;
+  overflow: hidden;
+  background-image: linear-gradient(to right, rgba(45, 55, 72, 0.85) 0%, rgba(45, 55, 72, 0.65) 45%, rgba(45, 55, 72, 0.35) 100%), url("/images/gift_set_header_bg.jpg");
+  background-size: cover;
+  background-position: center;
+  padding: 48px 56px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  color: #ffffff;
+  min-height: 220px;
+  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.1);
+}
+
+.headerBadge {
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: #cbd5e1;
+  margin-bottom: 12px;
+}
+
+.headerTitle {
+  font-family: var(--font-outfit), sans-serif;
+  font-size: 3rem;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  color: #ffffff;
+  margin: 0 0 12px 0;
+  line-height: 1.1;
+}
+
+.headerSubtitle {
+  font-size: 1.05rem;
+  color: #e2e8f0;
+  line-height: 1.5;
+  margin: 0;
+  font-weight: 400;
+}
+
+/* Builder Main Container */
+.builderSection {
+  width: 100%;
+  max-width: 720px;
+  margin: 0 auto 60px auto;
+  padding: 0 24px;
+  box-sizing: border-box;
+}
+
+/* Step Headers with Numbered Badge */
+.stepHeaderRow {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 24px;
+}
+
+.stepNumberBadge {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background-color: #000000;
+  color: #ffffff;
+  font-size: 0.95rem;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.stepTitle {
+  font-family: var(--font-outfit), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size: 1.35rem;
+  font-weight: 500;
+  color: #0f172a;
+  margin: 0;
+  letter-spacing: -0.01em;
+}
+
+.chosenPill {
+  background-color: #f1f5f9;
+  color: #64748b;
+  font-size: 0.82rem;
+  font-weight: 500;
+  padding: 6px 16px;
+  border-radius: 50px;
+}
+
+/* Step 1: Bottle Size Cards Grid */
+.sizeCardsGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  width: 100%;
+  margin: 0 0 36px 0;
+}
+
+.sizeCard {
+  background-color: #ffffff;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 16px 14px;
+  min-height: 110px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  text-align: center;
+}
+
+.sizeCard:hover {
+  border-color: #cbd5e1;
+  transform: translateY(-2px);
+}
+
+.sizeCardActive {
+  background-color: #000000;
+  border-color: #000000;
+  color: #ffffff;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+}
+
+.bottleIcon {
+  width: 26px;
+  height: 26px;
+  margin-bottom: 6px;
+  color: #94a3b8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.sizeCardActive .bottleIcon {
+  color: #ffffff;
+}
+
+.bottleIcon svg {
+  width: 100%;
+  height: 100%;
+}
+
+.sizeCardValue {
+  font-size: 1.1rem;
+  font-weight: 500;
+  margin-bottom: 3px;
+  color: #0f172a;
+}
+
+.sizeCardActive .sizeCardValue {
+  color: #ffffff;
+}
+
+.sizeCardTag {
+  font-size: 0.76rem;
+  color: #94a3b8;
+  font-weight: 400;
+}
+
+.sizeCardActive .sizeCardTag {
+  color: #cbd5e1;
+}
+
+/* Slot Selection Tracker Bar (Bottom Floating Panel matching user screenshot) */
+.slotTrackerBar {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translate(-50%, 160%);
+  z-index: 1000;
+  width: calc(100% - 48px);
+  max-width: 900px;
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 24px;
+  padding: 18px 24px;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.12), 0 4px 16px rgba(0, 0, 0, 0.04);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.35s ease;
+  opacity: 0;
+  pointer-events: none;
+  box-sizing: border-box;
+}
+
+.slotTrackerBarVisible {
+  transform: translate(-50%, 0);
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.slotsList {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  width: 100%;
+}
+
+.slotBox {
+  background-color: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 10px 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 58px;
+  position: relative;
+  transition: all 0.2s ease;
+  box-sizing: border-box;
+}
+
+.slotBoxFilled {
+  background-color: #f8fafc;
+  border-color: #cbd5e1;
+}
+
+.slotImg {
+  width: 38px;
+  height: 38px;
+  border-radius: 8px;
+  object-fit: cover;
+  background-color: #ffffff;
+  flex-shrink: 0;
+}
+
+.emptySlotContent {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+}
+
+.emptySlotPlaceholderIcon {
+  width: 38px;
+  height: 38px;
+  border-radius: 8px;
+  background-color: #e2e8f0;
+  color: #64748b;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  font-weight: 500;
+  flex-shrink: 0;
+}
+
+.slotInfo {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-width: 0;
+}
+
+.slotName {
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: #0f172a;
+  margin: 0;
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.slotSize {
+  font-size: 0.72rem;
+  color: #64748b;
+  margin-top: 2px;
+  font-weight: 400;
+}
+
+.removeSlotBtn {
+  background: transparent;
+  border: none;
+  color: #94a3b8;
+  font-size: 0.9rem;
+  font-weight: 400;
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s ease;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.removeSlotBtn:hover {
+  color: #ef4444;
+}
+
+.addBundleBtn {
+  width: 100%;
+  background-color: #000000;
+  color: #ffffff;
+  border: none;
+  border-radius: 50px;
+  padding: 16px 24px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  text-align: center;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15);
+}
+
+.addBundleBtn:disabled {
+  background-color: #e2e8f0;
+  color: #94a3b8;
+  box-shadow: none;
+  cursor: not-allowed;
+}
+
+/* Step 2: Fragrance Grid matching screenshot */
+.fragranceGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  width: 100%;
+  margin-bottom: 60px;
+}
+
+.fragranceCard {
+  position: relative;
+  background-color: #ffffff;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 20px;
+  padding: 24px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.fragranceCard:hover {
+  border-color: #94a3b8;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.05);
+}
+
+.fragranceCardSelected {
+  border-color: #0f172a;
+  background-color: #ffffff;
+  box-shadow: 0 4px 16px rgba(15, 23, 42, 0.08);
+}
+
+.fragranceCardDisabled {
+  opacity: 0.55;
+  background-color: #f8fafc;
+  border-color: #e2e8f0;
+  cursor: not-allowed;
+  filter: grayscale(0.2);
+}
+
+.fragranceCardDisabled:hover {
+  border-color: #e2e8f0;
+  transform: none;
+  box-shadow: none;
+}
+
+.unavailableBadge {
+  position: absolute;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.65);
+  color: #ffffff;
+  font-size: 0.7rem;
+  font-weight: 500;
+  padding: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  line-height: 1.2;
+  letter-spacing: 0.02em;
+  backdrop-filter: blur(2px);
+  text-transform: uppercase;
+}
+
+.selectedCheckBadge {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background-color: #000000;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.cardImgWrapper {
+  position: relative;
+  width: 76px;
+  height: 76px;
+  border-radius: 14px;
+  overflow: hidden;
+  margin-bottom: 12px;
+  background-color: #f8fafc;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cardImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.cardTitle {
+  font-family: var(--font-outfit), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size: 1rem;
+  font-weight: 500;
+  color: #0f172a;
+  margin: 0 0 2px 0;
+  line-height: 1.25;
+}
+
+.cardCategory {
+  font-size: 0.8rem;
+  color: #94a3b8;
+  margin-bottom: 10px;
+  font-weight: 400;
+}
+
+.cardPrice {
+  font-size: 1.05rem;
+  font-weight: 500;
+  color: #0f172a;
+  margin-bottom: 12px;
+}
+
+.cardActionArea {
+  margin-top: 12px;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.selectFragranceBtn {
+  width: 100%;
+  padding: 10px 16px;
+  border-radius: 6px;
+  border: 1.5px solid #000000;
+  background-color: #ffffff;
+  color: #000000;
+  font-size: 0.82rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  letter-spacing: 0.02em;
+}
+
+.selectFragranceBtn:hover:not(:disabled) {
+  background-color: #000000;
+  color: #ffffff;
+}
+
+.selectFragranceBtn:disabled {
+  border-color: #cbd5e1;
+  color: #94a3b8;
+  cursor: not-allowed;
+  background-color: #f8fafc;
+}
+
+/* System-matched Quantity Control Bar */
+.productPageQtyContainer {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  background-color: #f9fafb;
+  overflow: hidden;
+  height: 38px;
+}
+
+.productPageQtyBtn {
+  background: none;
+  border: none;
+  width: 32px;
+  height: 100%;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  color: #1a1a1a;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s ease;
+}
+
+.productPageQtyBtn:hover:not(:disabled) {
+  background-color: #e5e7eb;
+}
+
+.productPageQtyBtn:disabled {
+  color: #cbd5e1;
+  cursor: not-allowed;
+}
+
+.productPageQtyVal {
+  min-width: 28px;
+  text-align: center;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: #1a1a1a;
+}
+
+/* Cart Drawer Overlay & Slide-out Styles */
+.cartOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  height: 100dvh;
+  background-color: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(4px);
+  z-index: 12000;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.cartDrawer {
+  width: 100%;
+  max-width: 440px;
+  height: 100vh;
+  height: 100dvh;
+  background-color: #fafafa;
+  color: #1a1a1a;
+  box-sizing: border-box;
+  padding: 30px;
+  padding-bottom: max(30px, calc(20px + env(safe-area-inset-bottom, 0px)));
+  display: flex;
+  flex-direction: column;
+  box-shadow: -5px 0 25px rgba(0, 0, 0, 0.08);
+  animation: slideInCart 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes slideInCart {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
+}
+
+.cartDrawerHeader {
+  display: flex;
+  flex-shrink: 0;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.cartHeaderLeft {
+  display: flex;
+  align-items: center;
+  font-size: 1.4rem;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  color: #1a1a1a;
+}
+
+.cartCountBadge {
+  background-color: #e2e8f0;
+  color: #4a5568;
+  border-radius: 50%;
+  font-size: 0.85rem;
+  font-weight: 600;
+  width: 24px;
+  height: 24px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 10px;
+}
+
+.closeCartBtn {
+  background: none;
+  border: none;
+  font-size: 1.3rem;
+  color: #1a1a1a;
+  cursor: pointer;
+  padding: 4px;
+  transition: opacity 0.2s ease;
+}
+
+.closeCartBtn:hover {
+  opacity: 0.7;
+}
+
+.cartDrawerBody {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  min-height: 0;
+}
+
+.cartItemsList {
+  flex: 1;
+  overflow-y: auto;
+  padding-right: 5px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  min-height: 0;
+}
+
+.cartItemRow {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+}
+
+.cartItemImg {
+  width: 64px;
+  height: 64px;
+  border-radius: 8px;
+  object-fit: cover;
+  background-color: #f7f7f7;
+}
+
+.cartItemInfo {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0px;
+}
+
+.cartItemHeaderRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 0px;
+}
+
+.cartItemName {
+  font-size: 0.88rem;
+  font-weight: 500;
+  margin: 0;
+  padding: 0;
+  line-height: 1.1;
+  color: #1a1a1a;
+}
+
+.qtyVal {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: #0f172a;
+  min-width: 16px;
+  text-align: center;
+}
+
+.cartDrawerEmpty {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding-bottom: 60px;
+}
+
+.cartEmptyHeading {
+  font-size: 1.3rem;
+  font-weight: 500;
+  color: #1a1a1a;
+  margin-bottom: 20px;
+  letter-spacing: 0.05em;
+}
+
+.continueBtn {
+  background-color: #000000;
+  color: #ffffff;
+  border: none;
+  padding: 14px 40px;
+  border-radius: 50px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+@media (max-width: 900px) {
+  .headerBannerSection {
+    padding: 0 20px;
+    margin: 20px auto 30px auto;
+  }
+  .headerBannerCard {
+    padding: 36px 28px;
+    border-radius: 20px;
+  }
+  .headerTitle {
+    font-size: 2.2rem;
+  }
+  .builderSection {
+    padding: 0 20px;
+  }
+  .sizeCardsGrid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  .slotTrackerBar {
+    flex-direction: column;
+    align-items: stretch;
+    top: 60px;
+  }
+  .slotsList {
+    flex-direction: column;
+  }
+  .fragranceGrid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 14px;
+  }
+}
+
+@media (max-width: 550px) {
+  .fragranceGrid {
+    grid-template-columns: 1fr;
+  }
+}

@@ -1468,19 +1468,22 @@
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 3px;
+  gap: 0px;
 }
 
 .cartItemHeaderRow {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
+  margin-bottom: 0px;
 }
 
 .cartItemName {
   font-size: 0.88rem;
   font-weight: 400; /* Non-bold normal text */
   margin: 0;
+  padding: 0;
+  line-height: 1.1;
   color: #1a1a1a;
   letter-spacing: 0.02em;
 }
@@ -1495,6 +1498,7 @@
   font-size: 0.85rem;
   color: #555555;
   margin: 0;
+  padding-top: 2px;
 }
 
 .cartItemUnitPrice {
@@ -1826,4 +1830,150 @@
 }
 .cartDrawerHeader, .cartDrawerFooter {
   flex-shrink: 0 !important;
+}
+
+/* Gift Set Builder Banner Section below FAQ */
+.giftSetBannerSection {
+  width: 100%;
+  max-width: 1280px;
+  margin: 40px auto 80px auto;
+  padding: 0 40px;
+  box-sizing: border-box;
+}
+
+.giftSetBannerCard {
+  position: relative;
+  width: 100%;
+  border-radius: 28px;
+  overflow: hidden;
+  background-image: linear-gradient(to right, rgba(20, 20, 22, 0.88) 0%, rgba(20, 20, 22, 0.72) 40%, rgba(20, 20, 22, 0.45) 100%), url("/images/gift_set_builder_bg.jpg");
+  background-size: cover;
+  background-position: center;
+  padding: 48px 56px;
+  box-sizing: border-box;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: #ffffff;
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.12);
+}
+
+.giftSetContentLeft {
+  max-width: 580px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.giftSetBadge {
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: #e5e7eb;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.giftSetSparkle {
+  font-size: 0.85rem;
+  color: #ffffff;
+}
+
+.giftSetTitle {
+  font-family: var(--font-outfit), sans-serif;
+  font-size: 2.75rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: #ffffff;
+  margin: 0 0 14px 0;
+  line-height: 1.15;
+}
+
+.giftSetSubtitle {
+  font-size: 1.05rem;
+  color: #d1d5db;
+  line-height: 1.55;
+  margin: 0 0 24px 0;
+  font-weight: 400;
+}
+
+.giftSetPills {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.giftSetPill {
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 18px;
+  border-radius: 50px;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  background-color: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(8px);
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #ffffff;
+  letter-spacing: 0.03em;
+}
+
+.giftSetActionRight {
+  flex-shrink: 0;
+  margin-left: 24px;
+}
+
+.buildSetBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  background-color: #ffffff;
+  color: #09090b;
+  padding: 16px 34px;
+  border-radius: 50px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  text-decoration: none;
+  transition: transform 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+}
+
+.buildSetBtn:hover {
+  background-color: #f4f4f5;
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.22);
+}
+
+@media (max-width: 900px) {
+  .giftSetBannerSection {
+    padding: 0 20px;
+    margin: 30px auto 60px auto;
+  }
+  .giftSetBannerCard {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 36px 28px;
+    border-radius: 24px;
+    background-image: linear-gradient(to bottom, rgba(20, 20, 22, 0.9) 0%, rgba(20, 20, 22, 0.75) 100%), url("/images/gift_set_builder_bg.jpg");
+  }
+  .giftSetTitle {
+    font-size: 2.2rem;
+  }
+  .giftSetSubtitle {
+    font-size: 0.95rem;
+    margin-bottom: 20px;
+  }
+  .giftSetActionRight {
+    margin-left: 0;
+    margin-top: 28px;
+    width: 100%;
+  }
+  .buildSetBtn {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 16px 24px;
+  }
 }
