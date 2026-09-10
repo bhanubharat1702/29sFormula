@@ -1,4 +1,5 @@
 import express from "express";
+import mongoose from "mongoose";
 import axios from "axios";
 import crypto from "crypto";
 import Order from "../models/Order.js";
@@ -197,6 +198,24 @@ router.post("/api/orders", async (req, res) => {
     let calculatedTotal = 0;
     const resolvedCartItems = [];
     for (const item of cartItems) {
+      if (!item.productId || !mongoose.Types.ObjectId.isValid(item.productId)) {
+        // Custom items like Gift Sets use string IDs (e.g. gift-set-...)
+        const giftSetPrice = item.price || 0;
+        resolvedCartItems.push({
+          productId: item.productId,
+          variantId: null,
+          name: item.name || "Custom Gift Set",
+          price: giftSetPrice,
+          makingPrice: 0,
+          size: item.size || "20ml x 3",
+          quantity: item.quantity || 1,
+          image: item.image || "",
+          isGiftSet: !!item.isGiftSet,
+          giftSetDetails: item.giftSetDetails || item.giftSetItems || []
+        });
+        calculatedTotal += giftSetPrice * (item.quantity || 1);
+        continue;
+      }
       const product = await Product.findById(item.productId);
       if (!product) continue;
       
@@ -229,7 +248,8 @@ router.post("/api/orders", async (req, res) => {
         makingPrice: actualMakingPrice,
         size: item.size,
         quantity: item.quantity,
-        image: product.imageFront || item.image
+        image: product.imageFront || item.image,
+        isGiftSet: false
       });
       calculatedTotal += actualPrice * item.quantity;
     }
@@ -729,6 +749,10 @@ router.post("/api/orders/razorpay-init", async (req, res) => {
 
     // Validate inventory before creating payment session
     for (const item of cartItems) {
+      if (!item.productId || !mongoose.Types.ObjectId.isValid(item.productId)) {
+        // Custom items like Gift Sets use string IDs (e.g. gift-set-...) and are not standalone MongoDB Product documents
+        continue;
+      }
       const product = await Product.findById(item.productId);
       if (!product) continue;
       
@@ -846,7 +870,7 @@ router.post("/api/orders/razorpay-verify", async (req, res) => {
 
     // Deduct stock
     for (const item of newOrder.cartItems) {
-      if (item.productId) {
+      if (item.productId && mongoose.Types.ObjectId.isValid(item.productId)) {
         await ProductVariant.updateOne(
           { productId: item.productId, size: item.size },
           { $inc: { quantity: -item.quantity } }

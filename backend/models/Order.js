@@ -10,14 +10,16 @@ const orderSchema = new mongoose.Schema({
   shippingAddress: { type: mongoose.Schema.Types.Mixed },
   cartItems: [
     {
-      productId: { type: mongoose.Schema.Types.ObjectId, ref: "Product", required: true },
+      productId: { type: mongoose.Schema.Types.Mixed, required: false },
       variantId: { type: mongoose.Schema.Types.ObjectId, ref: "ProductVariant" },
       name: { type: String, required: true },
       price: { type: Number, required: true },
       makingPrice: { type: Number, default: 0 },
-      size: { type: String, required: true },
+      size: { type: String },
       quantity: { type: Number, required: true },
-      image: { type: String }
+      image: { type: String },
+      isGiftSet: { type: Boolean, default: false },
+      giftSetDetails: { type: mongoose.Schema.Types.Mixed }
     }
   ],
   totalAmount: { type: Number, required: true },

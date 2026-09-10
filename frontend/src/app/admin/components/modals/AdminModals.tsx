@@ -1611,7 +1611,7 @@ export default function AdminModals(props: any) {
                   <h3 style={{ fontSize: "0.8rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", margin: "0 0 10px 0", color: "#888" }}>Items Purchased</h3>
                   <div style={{ display: "flex", flexDirection: "column", gap: "12px", maxHeight: "45vh", overflowY: "auto", paddingRight: "5px" }}>
                     {selectedOrder.cartItems.map((item: any, idx: number) => (
-                      <div key={idx} style={{ display: "flex", alignItems: "center", gap: "15px", borderBottom: "1px solid #f3f4f6", paddingBottom: "10px" }}>
+                      <div key={idx} style={{ display: "flex", alignItems: "flex-start", gap: "15px", borderBottom: "1px solid #f3f4f6", paddingBottom: "10px" }}>
                         {item.image && (
                           <img 
                             src={item.image} 
@@ -1621,12 +1621,32 @@ export default function AdminModals(props: any) {
                           />
                         )}
                         <div style={{ flex: 1 }}>
-                          <h4 style={{ margin: 0, fontSize: "0.85rem", fontWeight: 600, color: "#111" }}>{item.name}</h4>
+                          <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                            <h4 style={{ margin: 0, fontSize: "0.85rem", fontWeight: 600, color: "#111" }}>{item.name}</h4>
+                            {(item.isGiftSet || item.name?.toLowerCase().includes('gift set')) && (
+                              <span style={{ backgroundColor: "#fef3c7", color: "#b45309", fontSize: "0.65rem", fontWeight: 700, padding: "1px 6px", borderRadius: "4px" }}>
+                                GIFT SET
+                              </span>
+                            )}
+                          </div>
                           <div style={{ display: "flex", alignItems: "center", marginTop: "4px", gap: "6px" }}>
                             <span style={{ fontSize: "0.75rem", color: "#6b7280" }}>Size: {item.size || 'Standard'}</span>
                             <span style={{ fontSize: "0.75rem", color: "#cbd5e1" }}>|</span>
                             <span style={{ fontSize: "0.75rem", color: "#6b7280" }}>Qty: {item.quantity}</span>
                           </div>
+                          {item.giftSetDetails && item.giftSetDetails.length > 0 && (
+                            <div style={{ marginTop: "6px", backgroundColor: "#f8fafc", padding: "6px 8px", borderRadius: "4px", border: "1px solid #e2e8f0" }}>
+                              <span style={{ fontSize: "0.7rem", fontWeight: 600, color: "#64748b", textTransform: "uppercase" }}>Included Items:</span>
+                              <div style={{ display: "flex", flexDirection: "column", gap: "4px", marginTop: "4px" }}>
+                                {item.giftSetDetails.map((sub: any, sIdx: number) => (
+                                  <div key={sIdx} style={{ fontSize: "0.75rem", color: "#334155", display: "flex", alignItems: "center", gap: "6px" }}>
+                                    {sub.imageFront && <img src={sub.imageFront} alt={sub.name} style={{ width: "16px", height: "16px", borderRadius: "2px" }} />}
+                                    <span>{sub.name}</span>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
                         </div>
                         <span style={{ fontSize: "0.85rem", fontWeight: 700, color: "#111" }}>₹{(item.price * item.quantity).toLocaleString("en-IN")}.00</span>
                       </div>

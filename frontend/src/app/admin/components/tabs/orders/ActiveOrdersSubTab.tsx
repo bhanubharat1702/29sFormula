@@ -491,11 +491,20 @@ export default function ActiveOrdersSubTab({
                                     <div style={{ maxWidth: '180px', fontSize: '0.85rem', color: '#6b7280' }}>
                                       {order.cartItems && order.cartItems.length > 0 
                                         ? order.cartItems.map((item: any, idx: number) => (
-                                            <div key={idx} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '6px', marginBottom: '4px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                                              <span style={{ color: '#374151', fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis' }}>{item.name}</span>
-                                              <span style={{ backgroundColor: '#f1f5f9', padding: '2px 6px', borderRadius: '4px', fontSize: '0.7rem', fontWeight: 600, color: '#475569', flexShrink: 0 }}>
-                                                {item.quantity}x {item.size}
-                                              </span>
+                                            <div key={idx} style={{ marginBottom: '6px' }}>
+                                              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '6px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                                <span style={{ color: '#374151', fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                                  {item.name}
+                                                </span>
+                                                <span style={{ backgroundColor: item.isGiftSet || item.name?.toLowerCase().includes('gift set') ? '#fef3c7' : '#f1f5f9', color: item.isGiftSet || item.name?.toLowerCase().includes('gift set') ? '#b45309' : '#475569', padding: '2px 6px', borderRadius: '4px', fontSize: '0.7rem', fontWeight: 600, flexShrink: 0 }}>
+                                                  {item.isGiftSet || item.name?.toLowerCase().includes('gift set') ? 'GIFT SET' : `${item.quantity}x ${item.size}`}
+                                                </span>
+                                              </div>
+                                              {(item.isGiftSet || (item.giftSetDetails && item.giftSetDetails.length > 0)) && (
+                                                <div style={{ fontSize: '0.7rem', color: '#6b7280', marginTop: '2px', paddingLeft: '4px' }}>
+                                                  {item.giftSetDetails ? item.giftSetDetails.map((g: any) => g.name).join(', ') : item.size}
+                                                </div>
+                                              )}
                                             </div>
                                           ))
                                         : "N/A"}
