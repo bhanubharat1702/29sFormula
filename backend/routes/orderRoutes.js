@@ -218,7 +218,7 @@ router.post("/api/orders", async (req, res) => {
       }
       const product = await Product.findById(item.productId);
       if (!product) continue;
-      
+
       let actualPrice = product.price || 0;
       let actualMakingPrice = product.makingPrice || 0;
       const variant = await ProductVariant.findOne({ productId: item.productId, size: item.size });
@@ -253,7 +253,7 @@ router.post("/api/orders", async (req, res) => {
       });
       calculatedTotal += actualPrice * item.quantity;
     }
-    
+
     // Override client's totalAmount with the securely calculated server total
     const secureTotalAmount = calculatedTotal;
 
@@ -339,7 +339,7 @@ router.post("/api/orders", async (req, res) => {
 router.get("/api/orders", async (req, res) => {
   try {
     const orders = await Order.find({}).populate("customerId").sort({ createdAt: -1 }).lean();
-    
+
     const orderIds = orders.map(o => o._id);
     const returnRequests = await ReturnRequest.find({ orderObjectId: { $in: orderIds } }).lean();
     const returnRequestsMap = returnRequests.reduce((acc, r) => {
@@ -370,7 +370,7 @@ router.put("/api/orders/:id", async (req, res) => {
     const { status, refundStatus } = req.body;
     const $set = {};
     const $push = { timeline: { $each: [] } };
-    
+
     if (status !== undefined) {
       $set.status = status;
       $push.timeline.$each.push({ event: `Order Status updated to ${status}` });
@@ -427,6 +427,9 @@ router.put("/api/orders/:id", async (req, res) => {
 router.delete("/api/orders/:id", async (req, res) => {
   try {
     const { cancellationReason } = req.body;
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({ error: "Invalid Order ID" });
+    }
     const order = await Order.findById(req.params.id);
     if (!order) {
       return res.status(404).json({ error: "Order not found" });
@@ -434,25 +437,39 @@ router.delete("/api/orders/:id", async (req, res) => {
 
     const wasAlreadyCancelled = order.status === "Cancelled";
 
-    // Mark as deleted by admin and cancel order
-    order.deletedByAdmin = true;
+    // Cancel order and move to Cancelled table view
+    order.deletedByAdmin = false;
     order.status = "Cancelled";
     if (cancellationReason) {
       order.cancellationReason = cancellationReason;
     }
-    
+
     if (!order.timeline) order.timeline = [];
-    const timelineEvent = cancellationReason 
+    const timelineEvent = cancellationReason
       ? `Order Cancelled by Admin: ${cancellationReason}`
       : "Order Cancelled by Admin";
     order.timeline.push({ event: timelineEvent });
-    
+
     await order.save();
+
+    // Send email notification to customer
+    let cEmail = order.customerEmail || "";
+    let cName = order.customerName || "";
+    if (order.customerId) {
+      const c = await Customer.findById(order.customerId);
+      if (c) {
+        cEmail = c.email || cEmail;
+        cName = c.name || cName;
+      }
+    }
+    if (cEmail) {
+      sendOrderUpdateEmail(order, cEmail, cName);
+    }
 
     // Restore stock for variants and base product if not already cancelled
     if (!wasAlreadyCancelled && order.cartItems && Array.isArray(order.cartItems)) {
       for (const item of order.cartItems) {
-        if (item.productId) {
+        if (item.productId && mongoose.Types.ObjectId.isValid(item.productId)) {
           await ProductVariant.updateOne(
             { productId: item.productId, size: item.size },
             { $inc: { quantity: item.quantity } }
@@ -469,7 +486,7 @@ router.delete("/api/orders/:id", async (req, res) => {
     res.json({ success: true, message: "Order deleted successfully" });
   } catch (error) {
     console.error("Order deletion failed:", error);
-    res.status(500).json({ error: "Failed to delete order" });
+    res.status(500).json({ error: "Failed to cancel order", details: error.message });
   }
 });
 
@@ -619,7 +636,7 @@ router.post("/api/orders/:id/cancel", async (req, res) => {
 router.post("/api/orders/:id/return", async (req, res) => {
   try {
     const { reason, returnType, images } = req.body;
-    
+
     if (!reason || !returnType) {
       return res.status(400).json({ error: "Reason and returnType ('Refund' or 'Replacement') are required." });
     }
@@ -708,7 +725,7 @@ router.put("/api/orders/:id/return-status", async (req, res) => {
     if (order) {
       if (status === "Approved") {
         if (returnRequest.returnType === "Replacement") {
-          order.status = "Processing"; // Send back to active orders
+          order.status = "Processing"; // Shift back to active orders table in initial state
         } else {
           order.status = "Return Approved";
         }
@@ -716,7 +733,7 @@ router.put("/api/orders/:id/return-status", async (req, res) => {
         order.status = "Return Rejected";
       }
       if (!order.timeline) order.timeline = [];
-      order.timeline.push({ event: `Return Request ${status}` });
+      order.timeline.push({ event: `Return Request ${status}: ${adminNotes || ''}`.trim() });
       await order.save();
 
       // Trigger Return Approved/Rejected Email asynchronously
@@ -755,13 +772,13 @@ router.post("/api/orders/razorpay-init", async (req, res) => {
       }
       const product = await Product.findById(item.productId);
       if (!product) continue;
-      
+
       let availableStock = product.quantity || 0;
       const variant = await ProductVariant.findOne({ productId: item.productId, size: item.size });
       if (variant) {
         availableStock = variant.quantity || 0;
       }
-      
+
       if (item.quantity > availableStock) {
         return res.status(400).json({ error: `Not enough stock for ${product.name} (${item.size}). Only ${availableStock} available.` });
       }
@@ -805,11 +822,11 @@ router.post("/api/orders/razorpay-init", async (req, res) => {
 
 router.post("/api/orders/razorpay-verify", async (req, res) => {
   try {
-    const { 
-      razorpay_order_id, 
-      razorpay_payment_id, 
-      razorpay_signature, 
-      orderPayload 
+    const {
+      razorpay_order_id,
+      razorpay_payment_id,
+      razorpay_signature,
+      orderPayload
     } = req.body;
 
     const keySecret = process.env.RAZORPAY_KEY_SECRET;
@@ -853,8 +870,28 @@ router.post("/api/orders/razorpay-verify", async (req, res) => {
       }
     }
     const orderId = `ORD-${orderIdNum}`;
+
+    const resolvedCartItems = [];
+    if (orderPayload.cartItems && Array.isArray(orderPayload.cartItems)) {
+      for (const item of orderPayload.cartItems) {
+        resolvedCartItems.push({
+          productId: item.productId,
+          variantId: item.variantId || null,
+          name: item.name,
+          price: item.price,
+          makingPrice: item.makingPrice || 0,
+          size: item.size,
+          quantity: item.quantity,
+          image: item.image,
+          isGiftSet: !!item.isGiftSet || item.name?.toLowerCase().includes('gift set'),
+          giftSetDetails: item.giftSetDetails || item.giftSetItems || []
+        });
+      }
+    }
+
     const newOrder = new Order({
       ...orderPayload,
+      cartItems: resolvedCartItems.length > 0 ? resolvedCartItems : orderPayload.cartItems,
       orderId,
       customerId: customer._id,
       paymentMethod: "Razorpay",

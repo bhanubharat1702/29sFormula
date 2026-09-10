@@ -41,7 +41,7 @@ export default function AdminDashboard() {
   const [ordersDropdownOpen, setOrdersDropdownOpen] = useState<boolean>(false);
   const [onlineStoreDropdownOpen, setOnlineStoreDropdownOpen] = useState<boolean>(false);
   const [activeSubTab, setActiveSubTab] = useState<"all" | "categories" | "cancelled" | "completed" | "returns">("all");
-  
+
   // Scroll detection state for mobile header
   const [isHeaderVisible, setIsHeaderVisible] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
@@ -111,7 +111,7 @@ export default function AdminDashboard() {
     { label: "Discounts & Coupons", target: "discounts" },
     { label: "Online Store Settings", target: "online-store" },
   ];
-  
+
   const [expandedProducts, setExpandedProducts] = useState<Set<string>>(new Set());
 
   const toggleExpand = (productId: string) => {
@@ -131,11 +131,11 @@ export default function AdminDashboard() {
   // Tab-specific lazy fetching
   useEffect(() => {
     if (!authorized) return;
-    
+
     if (activeTab === "home") {
       fetchDashboardStats(timelineFilter);
     }
-    
+
     if (activeTab === "products" && !fetchedTabs.current.has("products")) {
       fetchedTabs.current.add("products");
       fetchProducts();
@@ -293,9 +293,9 @@ export default function AdminDashboard() {
   const [heroManifestoFontAlignment, setHeroManifestoFontAlignment] = useState<string>("left");
   const [heroManifestoFontWeight, setHeroManifestoFontWeight] = useState<string>("500");
 
-  
 
-  
+
+
   const [videoTitle, setVideoTitle] = useState<string>("");
   const [videoSubtitle, setVideoSubtitle] = useState<string>("");
   const [videoUrl, setVideoUrl] = useState<string>("");
@@ -399,10 +399,10 @@ export default function AdminDashboard() {
     heroTitleFontColor !== (originalSettings.heroTitleFontColor || "#111827") ||
     heroTitleFontSize !== (originalSettings.heroTitleFontSize || "4.5rem") ||
     heroTitleFontAlignment !== (originalSettings.heroTitleFontAlignment || "center") ||
-    
+
     heroTitleFontWeight !== (originalSettings.heroTitleFontWeight || "700") ||
-    
-    
+
+
     heroManifesto !== (originalSettings.heroManifesto || "") ||
     heroManifestoFontType !== (originalSettings.heroManifestoFontType || "Outfit") ||
     heroManifestoFontColor !== (originalSettings.heroManifestoFontColor || "#ffffff") ||
@@ -489,7 +489,7 @@ export default function AdminDashboard() {
     if (heroTitleFontColor !== (originalSettings.heroTitleFontColor || "#111827")) changes.push("Hero title font color");
     if (heroTitleFontSize !== (originalSettings.heroTitleFontSize || "4.5rem")) changes.push("Hero title font size");
     if (heroTitleFontAlignment !== (originalSettings.heroTitleFontAlignment || "center")) changes.push("Hero title font alignment");
-        if (heroTitleFontWeight !== (originalSettings.heroTitleFontWeight || "700")) changes.push("Hero title font weight");
+    if (heroTitleFontWeight !== (originalSettings.heroTitleFontWeight || "700")) changes.push("Hero title font weight");
     if (heroManifesto !== (originalSettings.heroManifesto || "")) changes.push("Hero brand manifesto subtext");
     if (heroManifestoFontType !== (originalSettings.heroManifestoFontType || "Outfit")) changes.push("Hero manifesto font type");
     if (heroManifestoFontColor !== (originalSettings.heroManifestoFontColor || "#ffffff")) changes.push("Hero manifesto font color");
@@ -1044,89 +1044,89 @@ export default function AdminDashboard() {
       if (!res.ok) throw new Error("Failed to save layout adjustments");
 
       setOriginalSettings({
-          tickerText,
-          tickerSpeed,
-          tickerBgColor,
-          tickerTextColor,
-          announcementText,
-          heroTitle,
-          heroTitleFontType,
-          heroTitleFontColor,
-          heroTitleFontSize,
-          heroTitleFontAlignment,
-          heroTitleFontWeight,
-          heroManifesto,
-          heroManifestoFontType,
-          heroManifestoFontColor,
-          heroManifestoFontSize,
-          heroManifestoFontAlignment,
-          heroManifestoFontWeight,
-          heroTemplate,
-          showHeroTitle,
-          showHeroManifesto,
-          showHeroButton,
-          heroButtonText,
-          heroButtonStyle,
-          heroButtonSize,
-          heroButtonColor,
-          heroButtonTextColor,
-          videoTitle,
-          videoSubtitle,
-          videoUrl,
-          videoFallbackColor,
-          videoTitleFontType,
-          videoTitleFontColor,
-          videoTitleFontSize,
-          videoTitleFontAlignment,
-          videoTitleFontWeight,
-          videoSubtitleFontType,
-          videoSubtitleFontColor,
-          videoSubtitleFontSize,
-          videoSubtitleFontAlignment,
-          videoSubtitleFontWeight,
-          videoTemplate,
-          showVideoTitle,
-          showVideoSubtitle,
-          showVideoButton,
-          videoButtonText,
-          videoButtonStyle,
-          videoButtonSize,
-          videoButtonColor,
-          videoButtonTextColor,
-          videoBgType,
-          videoBgColor,
-          videoBgImage,
-          lifestyleText,
-          lifestyleImage,
-          primaryColor,
-          brandLogoType,
-          brandLogoValue,
-          heroBgType,
-          heroBgColor,
-          heroBgImage,
-          heroBgVideo,
-          showTicker,
-          showAnnouncement,
-          showVideo,
-          showLifestyle,
-          showProductReviews,
-          showProductExploreMore,
-          showProductFaq,
-          usageGuideText,
-          exploreMoreTitle,
-          deliverySubtext,
-          supportText,
-          careersText,
-          tradeEnquiryText,
-          aboutUsText,
-          instagramLink,
-          facebookLink,
-          contactLink,
-          contactUsText,
-          returnPolicyText,
-          shippingPolicyText,
-          faqs,
-          googleClientId
+        tickerText,
+        tickerSpeed,
+        tickerBgColor,
+        tickerTextColor,
+        announcementText,
+        heroTitle,
+        heroTitleFontType,
+        heroTitleFontColor,
+        heroTitleFontSize,
+        heroTitleFontAlignment,
+        heroTitleFontWeight,
+        heroManifesto,
+        heroManifestoFontType,
+        heroManifestoFontColor,
+        heroManifestoFontSize,
+        heroManifestoFontAlignment,
+        heroManifestoFontWeight,
+        heroTemplate,
+        showHeroTitle,
+        showHeroManifesto,
+        showHeroButton,
+        heroButtonText,
+        heroButtonStyle,
+        heroButtonSize,
+        heroButtonColor,
+        heroButtonTextColor,
+        videoTitle,
+        videoSubtitle,
+        videoUrl,
+        videoFallbackColor,
+        videoTitleFontType,
+        videoTitleFontColor,
+        videoTitleFontSize,
+        videoTitleFontAlignment,
+        videoTitleFontWeight,
+        videoSubtitleFontType,
+        videoSubtitleFontColor,
+        videoSubtitleFontSize,
+        videoSubtitleFontAlignment,
+        videoSubtitleFontWeight,
+        videoTemplate,
+        showVideoTitle,
+        showVideoSubtitle,
+        showVideoButton,
+        videoButtonText,
+        videoButtonStyle,
+        videoButtonSize,
+        videoButtonColor,
+        videoButtonTextColor,
+        videoBgType,
+        videoBgColor,
+        videoBgImage,
+        lifestyleText,
+        lifestyleImage,
+        primaryColor,
+        brandLogoType,
+        brandLogoValue,
+        heroBgType,
+        heroBgColor,
+        heroBgImage,
+        heroBgVideo,
+        showTicker,
+        showAnnouncement,
+        showVideo,
+        showLifestyle,
+        showProductReviews,
+        showProductExploreMore,
+        showProductFaq,
+        usageGuideText,
+        exploreMoreTitle,
+        deliverySubtext,
+        supportText,
+        careersText,
+        tradeEnquiryText,
+        aboutUsText,
+        instagramLink,
+        facebookLink,
+        contactLink,
+        contactUsText,
+        returnPolicyText,
+        shippingPolicyText,
+        faqs,
+        googleClientId
       });
     } catch (err: any) {
       alert("Could not auto-save storefront configuration: " + err.message);
@@ -1157,31 +1157,31 @@ export default function AdminDashboard() {
       setHeroButtonColor(originalSettings.heroButtonColor || "");
       setHeroButtonTextColor(originalSettings.heroButtonTextColor || "#ffffff");
       setVideoTitle(originalSettings.videoTitle || "");
-    setVideoSubtitle(originalSettings.videoSubtitle || "");
-    setVideoUrl(originalSettings.videoUrl || "");
-    setVideoFallbackColor(originalSettings.videoFallbackColor || "#57bc74");
-    if (originalSettings.videoTitleFontType) setVideoTitleFontType(originalSettings.videoTitleFontType);
-    if (originalSettings.videoTitleFontColor) setVideoTitleFontColor(originalSettings.videoTitleFontColor);
-    if (originalSettings.videoTitleFontSize) setVideoTitleFontSize(originalSettings.videoTitleFontSize);
-    if (originalSettings.videoTitleFontAlignment) setVideoTitleFontAlignment(originalSettings.videoTitleFontAlignment);
-    if (originalSettings.videoTitleFontWeight) setVideoTitleFontWeight(originalSettings.videoTitleFontWeight);
-    if (originalSettings.videoSubtitleFontType) setVideoSubtitleFontType(originalSettings.videoSubtitleFontType);
-    if (originalSettings.videoSubtitleFontColor) setVideoSubtitleFontColor(originalSettings.videoSubtitleFontColor);
-    if (originalSettings.videoSubtitleFontSize) setVideoSubtitleFontSize(originalSettings.videoSubtitleFontSize);
-    if (originalSettings.videoSubtitleFontAlignment) setVideoSubtitleFontAlignment(originalSettings.videoSubtitleFontAlignment);
-    if (originalSettings.videoSubtitleFontWeight) setVideoSubtitleFontWeight(originalSettings.videoSubtitleFontWeight);
-    setVideoTemplate(originalSettings.videoTemplate || "center");
-    if (originalSettings.showVideoTitle !== undefined) setShowVideoTitle(originalSettings.showVideoTitle);
-    if (originalSettings.showVideoSubtitle !== undefined) setShowVideoSubtitle(originalSettings.showVideoSubtitle);
-    if (originalSettings.showVideoButton !== undefined) setShowVideoButton(originalSettings.showVideoButton);
-    setVideoButtonText(originalSettings.videoButtonText || "Shop Now");
-    setVideoButtonStyle(originalSettings.videoButtonStyle || "outline");
-    setVideoButtonSize(originalSettings.videoButtonSize || "md");
-    setVideoButtonColor(originalSettings.videoButtonColor || "#ffffff");
-    setVideoButtonTextColor(originalSettings.videoButtonTextColor || "#121212");
-    setVideoBgType(originalSettings.videoBgType || "video");
-    setVideoBgColor(originalSettings.videoBgColor || "#121212");
-    setVideoBgImage(originalSettings.videoBgImage || "");
+      setVideoSubtitle(originalSettings.videoSubtitle || "");
+      setVideoUrl(originalSettings.videoUrl || "");
+      setVideoFallbackColor(originalSettings.videoFallbackColor || "#57bc74");
+      if (originalSettings.videoTitleFontType) setVideoTitleFontType(originalSettings.videoTitleFontType);
+      if (originalSettings.videoTitleFontColor) setVideoTitleFontColor(originalSettings.videoTitleFontColor);
+      if (originalSettings.videoTitleFontSize) setVideoTitleFontSize(originalSettings.videoTitleFontSize);
+      if (originalSettings.videoTitleFontAlignment) setVideoTitleFontAlignment(originalSettings.videoTitleFontAlignment);
+      if (originalSettings.videoTitleFontWeight) setVideoTitleFontWeight(originalSettings.videoTitleFontWeight);
+      if (originalSettings.videoSubtitleFontType) setVideoSubtitleFontType(originalSettings.videoSubtitleFontType);
+      if (originalSettings.videoSubtitleFontColor) setVideoSubtitleFontColor(originalSettings.videoSubtitleFontColor);
+      if (originalSettings.videoSubtitleFontSize) setVideoSubtitleFontSize(originalSettings.videoSubtitleFontSize);
+      if (originalSettings.videoSubtitleFontAlignment) setVideoSubtitleFontAlignment(originalSettings.videoSubtitleFontAlignment);
+      if (originalSettings.videoSubtitleFontWeight) setVideoSubtitleFontWeight(originalSettings.videoSubtitleFontWeight);
+      setVideoTemplate(originalSettings.videoTemplate || "center");
+      if (originalSettings.showVideoTitle !== undefined) setShowVideoTitle(originalSettings.showVideoTitle);
+      if (originalSettings.showVideoSubtitle !== undefined) setShowVideoSubtitle(originalSettings.showVideoSubtitle);
+      if (originalSettings.showVideoButton !== undefined) setShowVideoButton(originalSettings.showVideoButton);
+      setVideoButtonText(originalSettings.videoButtonText || "Shop Now");
+      setVideoButtonStyle(originalSettings.videoButtonStyle || "outline");
+      setVideoButtonSize(originalSettings.videoButtonSize || "md");
+      setVideoButtonColor(originalSettings.videoButtonColor || "#ffffff");
+      setVideoButtonTextColor(originalSettings.videoButtonTextColor || "#121212");
+      setVideoBgType(originalSettings.videoBgType || "video");
+      setVideoBgColor(originalSettings.videoBgColor || "#121212");
+      setVideoBgImage(originalSettings.videoBgImage || "");
       setLifestyleText(originalSettings.lifestyleText || "");
       setLifestyleImage(originalSettings.lifestyleImage || "https://images.unsplash.com/photo-1615655096345-61a54750068d?auto=format&fit=crop&w=1800&q=80");
       setHeroBgType(originalSettings.heroBgType || "color");
@@ -1331,89 +1331,89 @@ export default function AdminDashboard() {
 
       // Update original settings state
       setOriginalSettings({
-          tickerText,
-          tickerSpeed,
-          tickerBgColor,
-          tickerTextColor,
-          announcementText,
-          heroTitle,
-          heroTitleFontType,
-          heroTitleFontColor,
-          heroTitleFontSize,
-          heroTitleFontAlignment,
-          heroTitleFontWeight,
-          heroManifesto,
-          heroManifestoFontType,
-          heroManifestoFontColor,
-          heroManifestoFontSize,
-          heroManifestoFontAlignment,
-          heroManifestoFontWeight,
-          heroTemplate,
-          showHeroTitle,
-          showHeroManifesto,
-          showHeroButton,
-          heroButtonText,
-          heroButtonStyle,
-          heroButtonSize,
-          heroButtonColor,
-          heroButtonTextColor,
-          videoTitle,
-          videoSubtitle,
-          videoUrl,
-          videoFallbackColor,
-          videoTitleFontType,
-          videoTitleFontColor,
-          videoTitleFontSize,
-          videoTitleFontAlignment,
-          videoTitleFontWeight,
-          videoSubtitleFontType,
-          videoSubtitleFontColor,
-          videoSubtitleFontSize,
-          videoSubtitleFontAlignment,
-          videoSubtitleFontWeight,
-          videoTemplate,
-          showVideoTitle,
-          showVideoSubtitle,
-          showVideoButton,
-          videoButtonText,
-          videoButtonStyle,
-          videoButtonSize,
-          videoButtonColor,
-          videoButtonTextColor,
-          videoBgType,
-          videoBgColor,
-          videoBgImage,
-          lifestyleText,
-          lifestyleImage,
-          primaryColor,
-          brandLogoType,
-          brandLogoValue,
-          heroBgType,
-          heroBgColor,
-          heroBgImage,
-          heroBgVideo,
-          showTicker,
-          showAnnouncement,
-          showVideo,
-          showLifestyle,
-          showProductReviews,
-          showProductExploreMore,
-          showProductFaq,
-          usageGuideText,
-          exploreMoreTitle,
-          deliverySubtext,
-          supportText,
-          careersText,
-          tradeEnquiryText,
-          aboutUsText,
-          instagramLink,
-          facebookLink,
-          contactLink,
-          contactUsText,
-          returnPolicyText,
-          shippingPolicyText,
-          faqs,
-          googleClientId
+        tickerText,
+        tickerSpeed,
+        tickerBgColor,
+        tickerTextColor,
+        announcementText,
+        heroTitle,
+        heroTitleFontType,
+        heroTitleFontColor,
+        heroTitleFontSize,
+        heroTitleFontAlignment,
+        heroTitleFontWeight,
+        heroManifesto,
+        heroManifestoFontType,
+        heroManifestoFontColor,
+        heroManifestoFontSize,
+        heroManifestoFontAlignment,
+        heroManifestoFontWeight,
+        heroTemplate,
+        showHeroTitle,
+        showHeroManifesto,
+        showHeroButton,
+        heroButtonText,
+        heroButtonStyle,
+        heroButtonSize,
+        heroButtonColor,
+        heroButtonTextColor,
+        videoTitle,
+        videoSubtitle,
+        videoUrl,
+        videoFallbackColor,
+        videoTitleFontType,
+        videoTitleFontColor,
+        videoTitleFontSize,
+        videoTitleFontAlignment,
+        videoTitleFontWeight,
+        videoSubtitleFontType,
+        videoSubtitleFontColor,
+        videoSubtitleFontSize,
+        videoSubtitleFontAlignment,
+        videoSubtitleFontWeight,
+        videoTemplate,
+        showVideoTitle,
+        showVideoSubtitle,
+        showVideoButton,
+        videoButtonText,
+        videoButtonStyle,
+        videoButtonSize,
+        videoButtonColor,
+        videoButtonTextColor,
+        videoBgType,
+        videoBgColor,
+        videoBgImage,
+        lifestyleText,
+        lifestyleImage,
+        primaryColor,
+        brandLogoType,
+        brandLogoValue,
+        heroBgType,
+        heroBgColor,
+        heroBgImage,
+        heroBgVideo,
+        showTicker,
+        showAnnouncement,
+        showVideo,
+        showLifestyle,
+        showProductReviews,
+        showProductExploreMore,
+        showProductFaq,
+        usageGuideText,
+        exploreMoreTitle,
+        deliverySubtext,
+        supportText,
+        careersText,
+        tradeEnquiryText,
+        aboutUsText,
+        instagramLink,
+        facebookLink,
+        contactLink,
+        contactUsText,
+        returnPolicyText,
+        shippingPolicyText,
+        faqs,
+        googleClientId
       });
 
       setSuccessMessage("Homepage layout customized successfully!");
@@ -1502,18 +1502,24 @@ export default function AdminDashboard() {
       });
       if (!res.ok) throw new Error("Failed to update return status");
       const updatedReq = await res.json();
-      
+
       setOrders(prev => prev.map(o => {
         if (o._id === orderId) {
-          return { 
-            ...o, 
-            returnRequest: updatedReq, 
-            status: newStatus === "Approved" ? "Return Approved" : newStatus === "Rejected" ? "Return Rejected" : o.status 
+          const isReplacement = (updatedReq.returnType || o.returnRequest?.returnType) === "Replacement";
+          const newOrderStatus = newStatus === "Approved" 
+            ? (isReplacement ? "Processing" : "Return Approved")
+            : newStatus === "Rejected" ? "Return Rejected" : o.status;
+          return {
+            ...o,
+            returnRequest: updatedReq,
+            status: newOrderStatus
           };
         }
         return o;
       }));
       setReturnStatusModalOpen(false);
+      setSuccessMessage(newStatus === "Approved" ? "Return request approved successfully" : "Return request rejected");
+      setTimeout(() => setSuccessMessage(null), 3000);
     } catch (err) {
       console.error(err);
       alert("Failed to update return request status.");
@@ -2018,7 +2024,7 @@ export default function AdminDashboard() {
       for (const prodId of productsToUpdateIds) {
         const prod = products.find(p => p._id === prodId);
         if (!prod) continue;
-        
+
         let updatedCats = Array.isArray(prod.category) ? [...prod.category] : [prod.category].filter(Boolean);
         if (toAdd.includes(prodId)) {
           updatedCats = Array.from(new Set([...updatedCats, renameCategoryTarget]));
@@ -2098,12 +2104,12 @@ export default function AdminDashboard() {
       for (const prod of productsToUpdate) {
         const existingCats = Array.isArray(prod.category) ? prod.category : [prod.category].filter(Boolean);
         const updatedCats = existingCats.filter(c => c !== deleteCategoryTarget);
-        
+
         const updatedVariants = (prod.variants || []).map((v: any) => ({
           ...v,
           category: (Array.isArray(v.category) ? v.category : [v.category]).filter(Boolean).filter((c: any) => c !== deleteCategoryTarget)
         }));
-        
+
         const updatedOptions = (prod.options || []).map((o: any) => ({
           ...o,
           category: (Array.isArray(o.category) ? o.category : [o.category]).filter(Boolean).filter((c: any) => c !== deleteCategoryTarget)
@@ -2257,16 +2263,16 @@ export default function AdminDashboard() {
     );
   }
 
-  
 
-const getSearchResults = () => {
+
+  const getSearchResults = () => {
     if (!searchQuery.trim()) return { pages: [], products: [], orders: [], customers: [] };
     const query = searchQuery.toLowerCase().trim();
-    
+
     const matchedPages = SEARCH_PAGES.filter(p => p.label.toLowerCase().includes(query));
-    
-    const matchedProducts = products.filter(p => 
-      p.name.toLowerCase().includes(query) || 
+
+    const matchedProducts = products.filter(p =>
+      p.name.toLowerCase().includes(query) ||
       (p.description && p.description.toLowerCase().includes(query))
     ).slice(0, 5);
 
@@ -2275,13 +2281,13 @@ const getSearchResults = () => {
       const customerName = (o.shippingAddress?.fullName || "").toLowerCase();
       const customerEmail = (o.shippingAddress?.email || "").toLowerCase();
       const customerPhone = String(o.shippingAddress?.phone || "");
-      return oid.toLowerCase().includes(query) || 
-             customerName.includes(query) || 
-             customerEmail.includes(query) || 
-             customerPhone.includes(query);
+      return oid.toLowerCase().includes(query) ||
+        customerName.includes(query) ||
+        customerEmail.includes(query) ||
+        customerPhone.includes(query);
     });
 
-    const matchedCustomers = customers.filter(c => 
+    const matchedCustomers = customers.filter(c =>
       (c.name && c.name.toLowerCase().includes(query)) ||
       (c.email && c.email.toLowerCase().includes(query)) ||
       (c.phone && String(c.phone).includes(query))
@@ -2293,12 +2299,12 @@ const getSearchResults = () => {
 
   return (
     <div className={styles.adminPageWrapper}>
-      
+
       {/* Mobile Header */}
-      <div 
+      <div
         className={`${styles.mobileHeader} ${!isHeaderVisible && !isMobileMenuOpen ? styles.mobileHeaderHidden : ''}`}
-        style={{ 
-          zIndex: isMobileMenuOpen ? 10002 : 10000, 
+        style={{
+          zIndex: isMobileMenuOpen ? 10002 : 10000,
           backgroundColor: isMobileMenuOpen ? 'transparent' : '#ffffff',
           borderBottom: isMobileMenuOpen ? 'none' : '1px solid #e5e7eb',
           transition: 'all 0.3s ease'
@@ -2368,7 +2374,7 @@ const getSearchResults = () => {
         </header>
 
         {/* GoJim Style Global Search Overlay */}
-        <div 
+        <div
           onClick={() => { setIsSearchOpen(false); setSearchQuery(''); }}
           style={{
             position: 'fixed', inset: 0, top: 0, backgroundColor: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(8px)', zIndex: 1000,
@@ -2388,7 +2394,7 @@ const getSearchResults = () => {
           pointerEvents: isSearchOpen ? 'auto' : 'none'
         }}>
           <div style={{ maxWidth: '896px', margin: '0 auto', display: 'flex', flexDirection: 'column', maxHeight: '50vh' }}>
-            
+
             <div style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '12px', paddingBottom: '16px', marginBottom: '16px', borderBottom: '1px solid #e5e7eb' }}>
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="#86868b" style={{ width: '24px', height: '24px', flexShrink: 0 }}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.602 10.602Z" />
@@ -2455,7 +2461,7 @@ const getSearchResults = () => {
                     </div>
                   ) : (
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-                      
+
                       {/* Pages */}
                       {searchResults.pages.length > 0 && (
                         <div>
@@ -2506,17 +2512,17 @@ const getSearchResults = () => {
                             {searchResults.orders.map((o) => (
                               <button
                                 key={o._id}
-                                onClick={() => { 
+                                onClick={() => {
                                   let targetSubTab = "all";
                                   if (o.status === "Delivered") targetSubTab = "completed";
                                   else if (o.status === "Cancelled") targetSubTab = "cancelled";
                                   else if (o.status === "Returned" || (o.returnRequest && o.returnRequest.status)) targetSubTab = "returns";
 
-                                  setActiveTab('orders'); 
-                                  setActiveSubTab(targetSubTab as any); 
-                                  setSelectedOrder(o); 
-                                  setIsSearchOpen(false); 
-                                  setSearchQuery(''); 
+                                  setActiveTab('orders');
+                                  setActiveSubTab(targetSubTab as any);
+                                  setSelectedOrder(o);
+                                  setIsSearchOpen(false);
+                                  setSearchQuery('');
                                 }}
                                 style={{ display: 'flex', alignItems: 'center', padding: '10px 12px', borderRadius: '8px', background: 'transparent', border: 'none', cursor: 'pointer', width: '100%', textAlign: 'left', color: '#111827', transition: 'all 0.2s' }}
                                 onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#f9fafb'} onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
@@ -2607,198 +2613,198 @@ const getSearchResults = () => {
           )}
 
           <ProductsTab
-              activeTab={activeTab}
-              activeSubTab={activeSubTab}
-              setIsEditing={setIsEditing}
-              resetForm={resetForm}
-              setShowCrudModal={setShowCrudModal}
-              error={error}
-              showCrudModal={showCrudModal}
-              loading={loading}
-              filteredProducts={filteredProducts}
-              expandedProducts={expandedProducts}
-              toggleExpand={toggleExpand}
-              setActiveCategoryPopoverProductId={setActiveCategoryPopoverProductId}
-              activeCategoryPopoverProductId={activeCategoryPopoverProductId}
-              handleEdit={handleEdit}
-              setDeleteTargetId={setDeleteTargetId}
-              selectedCategoryView={selectedCategoryView}
-              setSelectedCategoryView={setSelectedCategoryView}
-              setShowCategoryAddOptionsModal={setShowCategoryAddOptionsModal}
-              products={products}
-              setNewCategoryName={setNewCategoryName}
-              setSelectedProductIds={setSelectedProductIds}
-              setCategoryModalError={setCategoryModalError}
-              setShowAddCategoryModal={setShowAddCategoryModal}
-              allCategories={allCategories}
-              setRenameCategoryTarget={setRenameCategoryTarget}
-              setRenameCategoryNewName={setRenameCategoryNewName}
-              setEditCategorySelectedProductIds={setEditCategorySelectedProductIds}
-              setDeleteCategoryTarget={setDeleteCategoryTarget}
-            />
+            activeTab={activeTab}
+            activeSubTab={activeSubTab}
+            setIsEditing={setIsEditing}
+            resetForm={resetForm}
+            setShowCrudModal={setShowCrudModal}
+            error={error}
+            showCrudModal={showCrudModal}
+            loading={loading}
+            filteredProducts={filteredProducts}
+            expandedProducts={expandedProducts}
+            toggleExpand={toggleExpand}
+            setActiveCategoryPopoverProductId={setActiveCategoryPopoverProductId}
+            activeCategoryPopoverProductId={activeCategoryPopoverProductId}
+            handleEdit={handleEdit}
+            setDeleteTargetId={setDeleteTargetId}
+            selectedCategoryView={selectedCategoryView}
+            setSelectedCategoryView={setSelectedCategoryView}
+            setShowCategoryAddOptionsModal={setShowCategoryAddOptionsModal}
+            products={products}
+            setNewCategoryName={setNewCategoryName}
+            setSelectedProductIds={setSelectedProductIds}
+            setCategoryModalError={setCategoryModalError}
+            setShowAddCategoryModal={setShowAddCategoryModal}
+            allCategories={allCategories}
+            setRenameCategoryTarget={setRenameCategoryTarget}
+            setRenameCategoryNewName={setRenameCategoryNewName}
+            setEditCategorySelectedProductIds={setEditCategorySelectedProductIds}
+            setDeleteCategoryTarget={setDeleteCategoryTarget}
+          />
           <OnlineStoreTab
-              heroButtonColor={heroButtonColor}
-              heroButtonSize={heroButtonSize}
-              heroButtonStyle={heroButtonStyle}
-              heroButtonText={heroButtonText}
-              heroButtonTextColor={heroButtonTextColor}
-              heroTemplate={heroTemplate}
-              showHeroTitle={showHeroTitle}
-              showHeroManifesto={showHeroManifesto}
-              showHeroButton={showHeroButton}
-              activeTab={activeTab}
-              customizeSubTab={customizeSubTab}
-              error={error}
-              handleSaveSettings={handleSaveSettings}
-              setActiveCustomizerSection={setActiveCustomizerSection}
-                        setIsHeroCustomizerModalOpen={setIsHeroCustomizerModalOpen}
-          setIsVideoCustomizerModalOpen={setIsVideoCustomizerModalOpen}
-              activeCustomizerSection={activeCustomizerSection}
-              heroTitleFontType={heroTitleFontType}
-              heroTitleFontSize={heroTitleFontSize}
-              heroTitleFontColor={heroTitleFontColor}
-              heroTitleFontAlignment={heroTitleFontAlignment}
-              heroTitleFontWeight={heroTitleFontWeight}
-              heroManifestoFontType={heroManifestoFontType}
-              heroManifestoFontSize={heroManifestoFontSize}
-              heroManifestoFontColor={heroManifestoFontColor}
-              heroManifestoFontAlignment={heroManifestoFontAlignment}
-              heroManifestoFontWeight={heroManifestoFontWeight}
-              heroTitle={heroTitle}
-              setHeroTitle={setHeroTitle}
-              heroManifesto={heroManifesto}
-              setHeroManifesto={setHeroManifesto}
-              heroBgType={heroBgType}
-              setHeroBgType={setHeroBgType}
-              heroBgColor={heroBgColor}
-              setHeroBgColor={setHeroBgColor}
-              heroBgImage={heroBgImage}
-              setHeroBgImage={setHeroBgImage}
-              heroBgVideo={heroBgVideo}
-              setHeroBgVideo={setHeroBgVideo}
-              setHeroTitleFontType={setHeroTitleFontType}
-              setHeroTitleFontColor={setHeroTitleFontColor}
-              setHeroTitleFontSize={setHeroTitleFontSize}
-              setHeroTitleFontAlignment={setHeroTitleFontAlignment}
-              setHeroTitleFontWeight={setHeroTitleFontWeight}
-              showVideo={showVideo}
-              setShowVideo={setShowVideo}
-              videoTitle={videoTitle}
-              setVideoTitle={setVideoTitle}
-              videoSubtitle={videoSubtitle}
-              setVideoSubtitle={setVideoSubtitle}
-              videoUrl={videoUrl}
-              setVideoUrl={setVideoUrl}
-              videoBgType={videoBgType}
-              setVideoBgType={setVideoBgType}
-              videoBgColor={videoBgColor}
-              setVideoBgColor={setVideoBgColor}
-              videoBgImage={videoBgImage}
-              setVideoBgImage={setVideoBgImage}
-              uploadingVideo={uploadingVideo}
-              videoFallbackColor={videoFallbackColor}
-              handleVideoUpload={handleVideoUpload}
-              videoProgress={videoProgress}
-              setVideoFallbackColor={setVideoFallbackColor}
-              showLifestyle={showLifestyle}
-              setShowLifestyle={setShowLifestyle}
-              lifestyleText={lifestyleText}
-              setLifestyleText={setLifestyleText}
-              lifestyleImage={lifestyleImage}
-              setLifestyleImage={setLifestyleImage}
-              uploadingLifestyle={uploadingLifestyle}
-              handleLifestyleImageUpload={handleLifestyleImageUpload}
-              primaryColor={primaryColor}
-              setPrimaryColor={setPrimaryColor}
-              brandLogoType={brandLogoType}
-              setBrandLogoType={setBrandLogoType}
-              brandLogoValue={brandLogoValue}
-              setBrandLogoValue={setBrandLogoValue}
-              uploadingLogo={uploadingLogo}
-              handleBrandLogoUpload={handleBrandLogoUpload}
-              setGoogleClientId={setGoogleClientId}
-              supportText={supportText}
-              setSupportText={setSupportText}
-              careersText={careersText}
-              setCareersText={setCareersText}
-              tradeEnquiryText={tradeEnquiryText}
-              setTradeEnquiryText={setTradeEnquiryText}
-              aboutUsText={aboutUsText}
-              setAboutUsText={setAboutUsText}
-              instagramLink={instagramLink}
-              setInstagramLink={setInstagramLink}
-              facebookLink={facebookLink}
-              setFacebookLink={setFacebookLink}
-              contactLink={contactLink}
-              setContactLink={setContactLink}
-              contactUsText={contactUsText}
-              setContactUsText={setContactUsText}
-              returnPolicyText={returnPolicyText}
-              setReturnPolicyText={setReturnPolicyText}
-              shippingPolicyText={shippingPolicyText}
-              setShippingPolicyText={setShippingPolicyText}
-              faqs={faqs}
-              setFaqs={setFaqs}
-              showProductReviews={showProductReviews}
-              setShowProductReviews={setShowProductReviews}
-              showProductExploreMore={showProductExploreMore}
-              setShowProductExploreMore={setShowProductExploreMore}
-              showProductFaq={showProductFaq}
-              setShowProductFaq={setShowProductFaq}
-              usageGuideText={usageGuideText}
-              setUsageGuideText={setUsageGuideText}
-              exploreMoreTitle={exploreMoreTitle}
-              setExploreMoreTitle={setExploreMoreTitle}
-              deliverySubtext={deliverySubtext}
-              setDeliverySubtext={setDeliverySubtext}
-              fetchAdminReviews={fetchAdminReviews}
-              adminReviews={adminReviews}
-              reviewSearchQuery={reviewSearchQuery}
-              setEditReviewTarget={setEditReviewTarget}
-              setDeleteReviewTarget={setDeleteReviewTarget}
-              loadingSettings={loadingSettings}
-              hasUnsavedChanges={hasUnsavedChanges}
-              setShowResetConfirmModal={setShowResetConfirmModal}
-            />
+            heroButtonColor={heroButtonColor}
+            heroButtonSize={heroButtonSize}
+            heroButtonStyle={heroButtonStyle}
+            heroButtonText={heroButtonText}
+            heroButtonTextColor={heroButtonTextColor}
+            heroTemplate={heroTemplate}
+            showHeroTitle={showHeroTitle}
+            showHeroManifesto={showHeroManifesto}
+            showHeroButton={showHeroButton}
+            activeTab={activeTab}
+            customizeSubTab={customizeSubTab}
+            error={error}
+            handleSaveSettings={handleSaveSettings}
+            setActiveCustomizerSection={setActiveCustomizerSection}
+            setIsHeroCustomizerModalOpen={setIsHeroCustomizerModalOpen}
+            setIsVideoCustomizerModalOpen={setIsVideoCustomizerModalOpen}
+            activeCustomizerSection={activeCustomizerSection}
+            heroTitleFontType={heroTitleFontType}
+            heroTitleFontSize={heroTitleFontSize}
+            heroTitleFontColor={heroTitleFontColor}
+            heroTitleFontAlignment={heroTitleFontAlignment}
+            heroTitleFontWeight={heroTitleFontWeight}
+            heroManifestoFontType={heroManifestoFontType}
+            heroManifestoFontSize={heroManifestoFontSize}
+            heroManifestoFontColor={heroManifestoFontColor}
+            heroManifestoFontAlignment={heroManifestoFontAlignment}
+            heroManifestoFontWeight={heroManifestoFontWeight}
+            heroTitle={heroTitle}
+            setHeroTitle={setHeroTitle}
+            heroManifesto={heroManifesto}
+            setHeroManifesto={setHeroManifesto}
+            heroBgType={heroBgType}
+            setHeroBgType={setHeroBgType}
+            heroBgColor={heroBgColor}
+            setHeroBgColor={setHeroBgColor}
+            heroBgImage={heroBgImage}
+            setHeroBgImage={setHeroBgImage}
+            heroBgVideo={heroBgVideo}
+            setHeroBgVideo={setHeroBgVideo}
+            setHeroTitleFontType={setHeroTitleFontType}
+            setHeroTitleFontColor={setHeroTitleFontColor}
+            setHeroTitleFontSize={setHeroTitleFontSize}
+            setHeroTitleFontAlignment={setHeroTitleFontAlignment}
+            setHeroTitleFontWeight={setHeroTitleFontWeight}
+            showVideo={showVideo}
+            setShowVideo={setShowVideo}
+            videoTitle={videoTitle}
+            setVideoTitle={setVideoTitle}
+            videoSubtitle={videoSubtitle}
+            setVideoSubtitle={setVideoSubtitle}
+            videoUrl={videoUrl}
+            setVideoUrl={setVideoUrl}
+            videoBgType={videoBgType}
+            setVideoBgType={setVideoBgType}
+            videoBgColor={videoBgColor}
+            setVideoBgColor={setVideoBgColor}
+            videoBgImage={videoBgImage}
+            setVideoBgImage={setVideoBgImage}
+            uploadingVideo={uploadingVideo}
+            videoFallbackColor={videoFallbackColor}
+            handleVideoUpload={handleVideoUpload}
+            videoProgress={videoProgress}
+            setVideoFallbackColor={setVideoFallbackColor}
+            showLifestyle={showLifestyle}
+            setShowLifestyle={setShowLifestyle}
+            lifestyleText={lifestyleText}
+            setLifestyleText={setLifestyleText}
+            lifestyleImage={lifestyleImage}
+            setLifestyleImage={setLifestyleImage}
+            uploadingLifestyle={uploadingLifestyle}
+            handleLifestyleImageUpload={handleLifestyleImageUpload}
+            primaryColor={primaryColor}
+            setPrimaryColor={setPrimaryColor}
+            brandLogoType={brandLogoType}
+            setBrandLogoType={setBrandLogoType}
+            brandLogoValue={brandLogoValue}
+            setBrandLogoValue={setBrandLogoValue}
+            uploadingLogo={uploadingLogo}
+            handleBrandLogoUpload={handleBrandLogoUpload}
+            setGoogleClientId={setGoogleClientId}
+            supportText={supportText}
+            setSupportText={setSupportText}
+            careersText={careersText}
+            setCareersText={setCareersText}
+            tradeEnquiryText={tradeEnquiryText}
+            setTradeEnquiryText={setTradeEnquiryText}
+            aboutUsText={aboutUsText}
+            setAboutUsText={setAboutUsText}
+            instagramLink={instagramLink}
+            setInstagramLink={setInstagramLink}
+            facebookLink={facebookLink}
+            setFacebookLink={setFacebookLink}
+            contactLink={contactLink}
+            setContactLink={setContactLink}
+            contactUsText={contactUsText}
+            setContactUsText={setContactUsText}
+            returnPolicyText={returnPolicyText}
+            setReturnPolicyText={setReturnPolicyText}
+            shippingPolicyText={shippingPolicyText}
+            setShippingPolicyText={setShippingPolicyText}
+            faqs={faqs}
+            setFaqs={setFaqs}
+            showProductReviews={showProductReviews}
+            setShowProductReviews={setShowProductReviews}
+            showProductExploreMore={showProductExploreMore}
+            setShowProductExploreMore={setShowProductExploreMore}
+            showProductFaq={showProductFaq}
+            setShowProductFaq={setShowProductFaq}
+            usageGuideText={usageGuideText}
+            setUsageGuideText={setUsageGuideText}
+            exploreMoreTitle={exploreMoreTitle}
+            setExploreMoreTitle={setExploreMoreTitle}
+            deliverySubtext={deliverySubtext}
+            setDeliverySubtext={setDeliverySubtext}
+            fetchAdminReviews={fetchAdminReviews}
+            adminReviews={adminReviews}
+            reviewSearchQuery={reviewSearchQuery}
+            setEditReviewTarget={setEditReviewTarget}
+            setDeleteReviewTarget={setDeleteReviewTarget}
+            loadingSettings={loadingSettings}
+            hasUnsavedChanges={hasUnsavedChanges}
+            setShowResetConfirmModal={setShowResetConfirmModal}
+          />
           <CustomersTab
-              activeTab={activeTab}
-              customers={customers}
-              setSelectedCustomer={setSelectedCustomer}
-              setDeleteCustomerTargetId={setDeleteCustomerTargetId}
-            />
+            activeTab={activeTab}
+            customers={customers}
+            setSelectedCustomer={setSelectedCustomer}
+            setDeleteCustomerTargetId={setDeleteCustomerTargetId}
+          />
           <MarketingTab
-              activeTab={activeTab}
-              customizeSubTab={customizeSubTab}
-              showTicker={showTicker}
-              setShowTicker={setShowTicker}
-              saveSettingsSilent={saveSettingsSilent}
-              tickerText={tickerText}
-              setTickerText={setTickerText}
-              tickerSpeed={tickerSpeed}
-              setTickerSpeed={setTickerSpeed}
-              tickerBgColor={tickerBgColor}
-              setTickerBgColor={setTickerBgColor}
-              tickerTextColor={tickerTextColor}
-              setTickerTextColor={setTickerTextColor}
-              setSuccessMessage={setSuccessMessage}
-              hasUnsavedChanges={hasUnsavedChanges}
-            />
+            activeTab={activeTab}
+            customizeSubTab={customizeSubTab}
+            showTicker={showTicker}
+            setShowTicker={setShowTicker}
+            saveSettingsSilent={saveSettingsSilent}
+            tickerText={tickerText}
+            setTickerText={setTickerText}
+            tickerSpeed={tickerSpeed}
+            setTickerSpeed={setTickerSpeed}
+            tickerBgColor={tickerBgColor}
+            setTickerBgColor={setTickerBgColor}
+            tickerTextColor={tickerTextColor}
+            setTickerTextColor={setTickerTextColor}
+            setSuccessMessage={setSuccessMessage}
+            hasUnsavedChanges={hasUnsavedChanges}
+          />
           <DiscountsTab
-              activeTab={activeTab}
-              handleCreateDiscount={handleCreateDiscount}
-              discountError={discountError}
-              newDiscountCode={newDiscountCode}
-              setNewDiscountCode={setNewDiscountCode}
-              newDiscountType={newDiscountType}
-              setNewDiscountType={setNewDiscountType}
-              newDiscountValue={newDiscountValue}
-              setNewDiscountValue={setNewDiscountValue}
-              newDiscountMinOrder={newDiscountMinOrder}
-              setNewDiscountMinOrder={setNewDiscountMinOrder}
-              discountsList={discountsList}
-              setDeleteDiscountConfirmId={setDeleteDiscountConfirmId}
+            activeTab={activeTab}
+            handleCreateDiscount={handleCreateDiscount}
+            discountError={discountError}
+            newDiscountCode={newDiscountCode}
+            setNewDiscountCode={setNewDiscountCode}
+            newDiscountType={newDiscountType}
+            setNewDiscountType={setNewDiscountType}
+            newDiscountValue={newDiscountValue}
+            setNewDiscountValue={setNewDiscountValue}
+            newDiscountMinOrder={newDiscountMinOrder}
+            setNewDiscountMinOrder={setNewDiscountMinOrder}
+            discountsList={discountsList}
+            setDeleteDiscountConfirmId={setDeleteDiscountConfirmId}
 
-            />
+          />
         </div>
       </div>
       {deleteDiscountConfirmId && (
@@ -2814,16 +2820,16 @@ const getSearchResults = () => {
               Are you sure you want to permanently revoke this discount coupon? Customers will no longer be able to apply it during checkout.
             </p>
             <div className={`${styles.modalActionRow} ${styles.mobileAlertActionRow}`}>
-              <button 
-                type="button" 
+              <button
+                type="button"
                 className={`${styles.modalConfirmBtn} ${styles.primaryActionBtn}`}
                 style={{ backgroundColor: "#ef4444", borderColor: "#ef4444" }}
                 onClick={() => handleDeleteDiscount(deleteDiscountConfirmId)}
               >
                 Yes, Revoke Coupon
               </button>
-              <button 
-                type="button" 
+              <button
+                type="button"
                 className={`${styles.modalCancelBtn} ${styles.secondaryActionBtn}`}
                 onClick={() => setDeleteDiscountConfirmId(null)}
               >
@@ -2841,32 +2847,32 @@ const getSearchResults = () => {
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="#dc2626" className={`${styles.warningIcon} ${styles.mobileAlertIcon}`} style={{ width: "24px", height: "24px", marginRight: "10px" }}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
               </svg>
-              <h3>Confirm Delete Order</h3>
+              <h3>Confirm Cancle Order</h3>
             </div>
 
             <p className={`${styles.modalDescription} ${styles.mobileAlertDescription}`} style={{ margin: "0 0 20px 0" }}>
-                Are you sure you want to cancel this order? This action cannot be undone.
-              </p>
-              <div style={{ marginBottom: "20px", textAlign: "left", width: "100%" }}>
-                <label style={{ display: "block", marginBottom: "8px", fontWeight: 600, color: "#374151" }}>Reason for Cancellation <span style={{color: "#ef4444"}}>*</span></label>
-                <textarea
-                  value={cancelReasonInput}
-                  onChange={(e) => setCancelReasonInput(e.target.value)}
-                  placeholder="e.g. Out of stock, customer requested..."
-                  rows={3}
-                  style={{
-                    width: "100%",
-                    padding: "10px",
-                    borderRadius: "6px",
-                    border: "1px solid #d1d5db",
-                    fontSize: "0.9rem",
-                    fontFamily: "inherit",
-                    resize: "vertical"
-                  }}
-                  required
-                />
-              </div>
-              <div className={`${styles.modalActionRow} ${styles.mobileAlertActionRow}`}>
+              Are you sure you want to cancel this order? This action cannot be undone.
+            </p>
+            <div style={{ marginBottom: "20px", textAlign: "left", width: "100%" }}>
+              <label style={{ display: "block", marginBottom: "8px", fontWeight: 600, color: "#374151" }}>Reason for Cancellation <span style={{ color: "#ef4444" }}>*</span></label>
+              <textarea
+                value={cancelReasonInput}
+                onChange={(e) => setCancelReasonInput(e.target.value)}
+                placeholder="e.g. Out of stock, customer requested..."
+                rows={3}
+                style={{
+                  width: "100%",
+                  padding: "10px",
+                  borderRadius: "6px",
+                  border: "1px solid #d1d5db",
+                  fontSize: "0.9rem",
+                  fontFamily: "inherit",
+                  resize: "vertical"
+                }}
+                required
+              />
+            </div>
+            <div className={`${styles.modalActionRow} ${styles.mobileAlertActionRow}`}>
               <button
                 onClick={() => {
                   if (deleteOrderTargetId && cancelReasonInput.trim()) {
@@ -2879,7 +2885,7 @@ const getSearchResults = () => {
                 className={styles.primaryActionBtn}
                 style={{ backgroundColor: "#ef4444", borderColor: "#ef4444", opacity: isDeletingOrder ? 0.7 : 1 }}
               >
-                {isDeletingOrder ? "Deleting..." : "Delete Order"}
+                {isDeletingOrder ? "Cancelling..." : "Cancel Order"}
               </button>
               <button
                 onClick={() => setDeleteOrderTargetId(null)}
@@ -2932,156 +2938,156 @@ const getSearchResults = () => {
         </div>
       )}
 
-        <AdminModals
-          allCategories={allCategories}
-          assignLoading={assignLoading}
-          category={category}
-          categoryModalError={categoryModalError}
-          categoryModalLoading={categoryModalLoading}
-          customAlert={customAlert}
-          deleteCategoryLoading={deleteCategoryLoading}
-          deleteCategoryTarget={deleteCategoryTarget}
-          deleteCustomerTargetId={deleteCustomerTargetId}
-          deleteReviewTarget={deleteReviewTarget}
-          deleteTargetId={deleteTargetId}
-          description={description}
-          additionalInformation={additionalInformation}
-          editReviewTarget={editReviewTarget}
-          error={error}
-          setError={setError}
-          executeReturnStatusUpdate={executeReturnStatusUpdate}
-          existingProductIdsToAssign={existingProductIdsToAssign}
-          handleAddCategorySubmit={handleAddCategorySubmit}
-          handleAssignExistingToCategory={handleAssignExistingToCategory}
-          handleDelete={handleDelete}
-          handleDeleteAdminReviewConfirm={handleDeleteAdminReviewConfirm}
-          handleDeleteCategoryConfirm={handleDeleteCategoryConfirm}
-          handleDeleteCustomer={handleDeleteCustomer}
-          handleEditReviewSubmit={handleEditReviewSubmit}
-          handleMultipleFilesUpload={handleMultipleFilesUpload}
-          handleRemoveImage={handleRemoveImage}
-          handleEditCategorySubmit={handleEditCategorySubmit}
-          handleResetToDefaults={handleResetToDefaults}
-          handleSubmit={handleSubmit}
-          handleUpdateOrderStatus={handleUpdateOrderStatus}
-          handleUpdateRefundStatus={handleUpdateRefundStatus}
-          heroBgColor={heroBgColor}
-          heroBgImage={heroBgImage}
-          heroBgType={heroBgType}
-          heroBgVideo={heroBgVideo}
-          heroButtonColor={heroButtonColor}
-          heroButtonSize={heroButtonSize}
-          heroButtonStyle={heroButtonStyle}
-          heroButtonText={heroButtonText}
-          heroButtonTextColor={heroButtonTextColor}
-          heroManifesto={heroManifesto}
-          heroManifestoFontAlignment={heroManifestoFontAlignment}
-          heroManifestoFontColor={heroManifestoFontColor}
-          heroManifestoFontSize={heroManifestoFontSize}
-          heroManifestoFontType={heroManifestoFontType}
-          heroManifestoFontWeight={heroManifestoFontWeight}
-          heroTemplate={heroTemplate}
-          heroTitle={heroTitle}
-          heroTitleFontAlignment={heroTitleFontAlignment}
-          heroTitleFontColor={heroTitleFontColor}
-          heroTitleFontSize={heroTitleFontSize}
-          heroTitleFontType={heroTitleFontType}
-          heroTitleFontWeight={heroTitleFontWeight}
-          imageFront={imageFront}
-          images={images}
-          isDeletingCustomer={isDeletingCustomer}
-          isDeletingProduct={isDeletingProduct}
-          isDeletingReview={isDeletingReview}
-          isEditing={isEditing}
-          isEditingReview={isEditingReview}
-          isRenamingCategory={isRenamingCategory}
-          name={name}
-          newCategoryName={newCategoryName}
-          openCategoryIndex={openCategoryIndex}
-          options={options}
-          orders={orders}
-          price={price}
-          primaryColor={primaryColor}
-          products={products}
-          renameCategoryNewName={renameCategoryNewName}
-          renameCategoryTarget={renameCategoryTarget}
-          editCategorySelectedProductIds={editCategorySelectedProductIds}
-          setEditCategorySelectedProductIds={setEditCategorySelectedProductIds}
-          resetForm={resetForm}
-          returnStatusAction={returnStatusAction}
-          returnStatusModalOpen={returnStatusModalOpen}
-          returnStatusNotes={returnStatusNotes}
-          saveSettingsSilent={saveSettingsSilent}
-          selectedCategoryView={selectedCategoryView}
-          selectedCustomer={selectedCustomer}
-          selectedOrder={selectedOrder}
-          selectedProductIds={selectedProductIds}
-          setCategory={setCategory}
-          setCustomAlert={setCustomAlert}
-          setDeleteCategoryTarget={setDeleteCategoryTarget}
-          setDeleteCustomerTargetId={setDeleteCustomerTargetId}
-          setDeleteReviewTarget={setDeleteReviewTarget}
-          setDeleteTargetId={setDeleteTargetId}
-          setDescription={setDescription}
-          setAdditionalInformation={setAdditionalInformation}
-          setEditReviewTarget={setEditReviewTarget}
-          setExistingProductIdsToAssign={setExistingProductIdsToAssign}
-          setHeroButtonColor={setHeroButtonColor}
-          setHeroButtonSize={setHeroButtonSize}
-          setHeroButtonStyle={setHeroButtonStyle}
-          setHeroButtonText={setHeroButtonText}
-          setHeroButtonTextColor={setHeroButtonTextColor}
-          setHeroManifesto={setHeroManifesto}
-          setHeroManifestoFontAlignment={setHeroManifestoFontAlignment}
-          setHeroManifestoFontColor={setHeroManifestoFontColor}
-          setHeroManifestoFontSize={setHeroManifestoFontSize}
-          setHeroManifestoFontType={setHeroManifestoFontType}
-          setHeroManifestoFontWeight={setHeroManifestoFontWeight}
-          setHeroTemplate={setHeroTemplate}
-          setHeroTitle={setHeroTitle}
-          setHeroTitleFontAlignment={setHeroTitleFontAlignment}
-          setHeroTitleFontColor={setHeroTitleFontColor}
-          setHeroTitleFontSize={setHeroTitleFontSize}
-          setHeroTitleFontType={setHeroTitleFontType}
-          setHeroTitleFontWeight={setHeroTitleFontWeight}
-          setImageFront={setImageFront}
-          setIsDeletingProduct={setIsDeletingProduct}
-          setIsEditing={setIsEditing}
-          setName={setName}
-          setNewCategoryName={setNewCategoryName}
-          setOpenCategoryIndex={setOpenCategoryIndex}
-          setOptions={setOptions}
-          setRenameCategoryNewName={setRenameCategoryNewName}
-          setRenameCategoryTarget={setRenameCategoryTarget}
-          setReturnStatusModalOpen={setReturnStatusModalOpen}
-          setReturnStatusNotes={setReturnStatusNotes}
-          setSelectedCustomer={setSelectedCustomer}
-          setSelectedOrder={setSelectedOrder}
-          setSelectedProductIds={setSelectedProductIds}
-          setShowAddCategoryModal={setShowAddCategoryModal}
-          setShowAddExistingToCategoryModal={setShowAddExistingToCategoryModal}
-          setShowCategoryAddOptionsModal={setShowCategoryAddOptionsModal}
-          setShowCrudModal={setShowCrudModal}
-          setShowHeroButton={setShowHeroButton}
-          setShowHeroManifesto={setShowHeroManifesto}
-          setShowHeroTitle={setShowHeroTitle}
-          setShowResetConfirmModal={setShowResetConfirmModal}
-          showAddCategoryModal={showAddCategoryModal}
-          showAddExistingToCategoryModal={showAddExistingToCategoryModal}
-          showCategoryAddOptionsModal={showCategoryAddOptionsModal}
-          showCrudModal={showCrudModal}
-          showHeroButton={showHeroButton}
-          showHeroManifesto={showHeroManifesto}
-          showHeroTitle={showHeroTitle}
-          showResetConfirmModal={showResetConfirmModal}
-          successMessage={successMessage}
-          uploading={uploading}
-        />
-        
-        {isHeroCustomizerModalOpen && (
-        <CustomizeLayoutModal 
-          isOpen={true} 
-          onClose={() => setIsHeroCustomizerModalOpen(false)} 
+      <AdminModals
+        allCategories={allCategories}
+        assignLoading={assignLoading}
+        category={category}
+        categoryModalError={categoryModalError}
+        categoryModalLoading={categoryModalLoading}
+        customAlert={customAlert}
+        deleteCategoryLoading={deleteCategoryLoading}
+        deleteCategoryTarget={deleteCategoryTarget}
+        deleteCustomerTargetId={deleteCustomerTargetId}
+        deleteReviewTarget={deleteReviewTarget}
+        deleteTargetId={deleteTargetId}
+        description={description}
+        additionalInformation={additionalInformation}
+        editReviewTarget={editReviewTarget}
+        error={error}
+        setError={setError}
+        executeReturnStatusUpdate={executeReturnStatusUpdate}
+        existingProductIdsToAssign={existingProductIdsToAssign}
+        handleAddCategorySubmit={handleAddCategorySubmit}
+        handleAssignExistingToCategory={handleAssignExistingToCategory}
+        handleDelete={handleDelete}
+        handleDeleteAdminReviewConfirm={handleDeleteAdminReviewConfirm}
+        handleDeleteCategoryConfirm={handleDeleteCategoryConfirm}
+        handleDeleteCustomer={handleDeleteCustomer}
+        handleEditReviewSubmit={handleEditReviewSubmit}
+        handleMultipleFilesUpload={handleMultipleFilesUpload}
+        handleRemoveImage={handleRemoveImage}
+        handleEditCategorySubmit={handleEditCategorySubmit}
+        handleResetToDefaults={handleResetToDefaults}
+        handleSubmit={handleSubmit}
+        handleUpdateOrderStatus={handleUpdateOrderStatus}
+        handleUpdateRefundStatus={handleUpdateRefundStatus}
+        heroBgColor={heroBgColor}
+        heroBgImage={heroBgImage}
+        heroBgType={heroBgType}
+        heroBgVideo={heroBgVideo}
+        heroButtonColor={heroButtonColor}
+        heroButtonSize={heroButtonSize}
+        heroButtonStyle={heroButtonStyle}
+        heroButtonText={heroButtonText}
+        heroButtonTextColor={heroButtonTextColor}
+        heroManifesto={heroManifesto}
+        heroManifestoFontAlignment={heroManifestoFontAlignment}
+        heroManifestoFontColor={heroManifestoFontColor}
+        heroManifestoFontSize={heroManifestoFontSize}
+        heroManifestoFontType={heroManifestoFontType}
+        heroManifestoFontWeight={heroManifestoFontWeight}
+        heroTemplate={heroTemplate}
+        heroTitle={heroTitle}
+        heroTitleFontAlignment={heroTitleFontAlignment}
+        heroTitleFontColor={heroTitleFontColor}
+        heroTitleFontSize={heroTitleFontSize}
+        heroTitleFontType={heroTitleFontType}
+        heroTitleFontWeight={heroTitleFontWeight}
+        imageFront={imageFront}
+        images={images}
+        isDeletingCustomer={isDeletingCustomer}
+        isDeletingProduct={isDeletingProduct}
+        isDeletingReview={isDeletingReview}
+        isEditing={isEditing}
+        isEditingReview={isEditingReview}
+        isRenamingCategory={isRenamingCategory}
+        name={name}
+        newCategoryName={newCategoryName}
+        openCategoryIndex={openCategoryIndex}
+        options={options}
+        orders={orders}
+        price={price}
+        primaryColor={primaryColor}
+        products={products}
+        renameCategoryNewName={renameCategoryNewName}
+        renameCategoryTarget={renameCategoryTarget}
+        editCategorySelectedProductIds={editCategorySelectedProductIds}
+        setEditCategorySelectedProductIds={setEditCategorySelectedProductIds}
+        resetForm={resetForm}
+        returnStatusAction={returnStatusAction}
+        returnStatusModalOpen={returnStatusModalOpen}
+        returnStatusNotes={returnStatusNotes}
+        saveSettingsSilent={saveSettingsSilent}
+        selectedCategoryView={selectedCategoryView}
+        selectedCustomer={selectedCustomer}
+        selectedOrder={selectedOrder}
+        selectedProductIds={selectedProductIds}
+        setCategory={setCategory}
+        setCustomAlert={setCustomAlert}
+        setDeleteCategoryTarget={setDeleteCategoryTarget}
+        setDeleteCustomerTargetId={setDeleteCustomerTargetId}
+        setDeleteReviewTarget={setDeleteReviewTarget}
+        setDeleteTargetId={setDeleteTargetId}
+        setDescription={setDescription}
+        setAdditionalInformation={setAdditionalInformation}
+        setEditReviewTarget={setEditReviewTarget}
+        setExistingProductIdsToAssign={setExistingProductIdsToAssign}
+        setHeroButtonColor={setHeroButtonColor}
+        setHeroButtonSize={setHeroButtonSize}
+        setHeroButtonStyle={setHeroButtonStyle}
+        setHeroButtonText={setHeroButtonText}
+        setHeroButtonTextColor={setHeroButtonTextColor}
+        setHeroManifesto={setHeroManifesto}
+        setHeroManifestoFontAlignment={setHeroManifestoFontAlignment}
+        setHeroManifestoFontColor={setHeroManifestoFontColor}
+        setHeroManifestoFontSize={setHeroManifestoFontSize}
+        setHeroManifestoFontType={setHeroManifestoFontType}
+        setHeroManifestoFontWeight={setHeroManifestoFontWeight}
+        setHeroTemplate={setHeroTemplate}
+        setHeroTitle={setHeroTitle}
+        setHeroTitleFontAlignment={setHeroTitleFontAlignment}
+        setHeroTitleFontColor={setHeroTitleFontColor}
+        setHeroTitleFontSize={setHeroTitleFontSize}
+        setHeroTitleFontType={setHeroTitleFontType}
+        setHeroTitleFontWeight={setHeroTitleFontWeight}
+        setImageFront={setImageFront}
+        setIsDeletingProduct={setIsDeletingProduct}
+        setIsEditing={setIsEditing}
+        setName={setName}
+        setNewCategoryName={setNewCategoryName}
+        setOpenCategoryIndex={setOpenCategoryIndex}
+        setOptions={setOptions}
+        setRenameCategoryNewName={setRenameCategoryNewName}
+        setRenameCategoryTarget={setRenameCategoryTarget}
+        setReturnStatusModalOpen={setReturnStatusModalOpen}
+        setReturnStatusNotes={setReturnStatusNotes}
+        setSelectedCustomer={setSelectedCustomer}
+        setSelectedOrder={setSelectedOrder}
+        setSelectedProductIds={setSelectedProductIds}
+        setShowAddCategoryModal={setShowAddCategoryModal}
+        setShowAddExistingToCategoryModal={setShowAddExistingToCategoryModal}
+        setShowCategoryAddOptionsModal={setShowCategoryAddOptionsModal}
+        setShowCrudModal={setShowCrudModal}
+        setShowHeroButton={setShowHeroButton}
+        setShowHeroManifesto={setShowHeroManifesto}
+        setShowHeroTitle={setShowHeroTitle}
+        setShowResetConfirmModal={setShowResetConfirmModal}
+        showAddCategoryModal={showAddCategoryModal}
+        showAddExistingToCategoryModal={showAddExistingToCategoryModal}
+        showCategoryAddOptionsModal={showCategoryAddOptionsModal}
+        showCrudModal={showCrudModal}
+        showHeroButton={showHeroButton}
+        showHeroManifesto={showHeroManifesto}
+        showHeroTitle={showHeroTitle}
+        showResetConfirmModal={showResetConfirmModal}
+        successMessage={successMessage}
+        uploading={uploading}
+      />
+
+      {isHeroCustomizerModalOpen && (
+        <CustomizeLayoutModal
+          isOpen={true}
+          onClose={() => setIsHeroCustomizerModalOpen(false)}
           initialConfig={{
             titleText: heroTitle,
             titleFontType: heroTitleFontType,
@@ -3090,7 +3096,7 @@ const getSearchResults = () => {
             titleFontAlignment: heroTitleFontAlignment,
             titleFontWeight: heroTitleFontWeight,
             showTitle: showHeroTitle,
-            
+
             manifestoText: heroManifesto,
             manifestoFontType: heroManifestoFontType,
             manifestoFontColor: heroManifestoFontColor,
@@ -3098,14 +3104,14 @@ const getSearchResults = () => {
             manifestoFontAlignment: heroManifestoFontAlignment,
             manifestoFontWeight: heroManifestoFontWeight,
             showManifesto: showHeroManifesto,
-            
+
             buttonText: heroButtonText,
             buttonStyle: heroButtonStyle,
             buttonSize: heroButtonSize,
             buttonColor: heroButtonColor,
             buttonTextColor: heroButtonTextColor,
             showButton: showHeroButton,
-            
+
             layoutTemplate: heroTemplate,
             bgType: heroBgType,
             bgColor: heroBgColor,
@@ -3120,7 +3126,7 @@ const getSearchResults = () => {
             setHeroTitleFontAlignment(config.titleFontAlignment);
             setHeroTitleFontWeight(config.titleFontWeight);
             setShowHeroTitle(config.showTitle);
-            
+
             setHeroManifesto(config.manifestoText);
             setHeroManifestoFontType(config.manifestoFontType);
             setHeroManifestoFontColor(config.manifestoFontColor);
@@ -3128,14 +3134,14 @@ const getSearchResults = () => {
             setHeroManifestoFontAlignment(config.manifestoFontAlignment);
             setHeroManifestoFontWeight(config.manifestoFontWeight);
             setShowHeroManifesto(config.showManifesto);
-            
+
             setHeroButtonText(config.buttonText);
             setHeroButtonStyle(config.buttonStyle);
             setHeroButtonSize(config.buttonSize);
             setHeroButtonColor(config.buttonColor);
             setHeroButtonTextColor(config.buttonTextColor);
             setShowHeroButton(config.showButton);
-            
+
             setHeroTemplate(config.layoutTemplate);
             setIsHeroCustomizerModalOpen(false);
             setTimeout(() => {
@@ -3145,81 +3151,81 @@ const getSearchResults = () => {
           sectionName="Hero Section"
           primaryColor={primaryColor}
         />
-        )}
+      )}
 
-        {isVideoCustomizerModalOpen && (
-          <CustomizeLayoutModal 
-            isOpen={true} 
-            onClose={() => setIsVideoCustomizerModalOpen(false)} 
-            initialConfig={{
-              titleText: videoTitle,
-              titleFontType: videoTitleFontType,
-              titleFontColor: videoTitleFontColor,
-              titleFontSize: videoTitleFontSize,
-              titleFontAlignment: videoTitleFontAlignment,
-              titleFontWeight: videoTitleFontWeight,
-              showTitle: showVideoTitle,
-              
-              manifestoText: videoSubtitle,
-              manifestoFontType: videoSubtitleFontType,
-              manifestoFontColor: videoSubtitleFontColor,
-              manifestoFontSize: videoSubtitleFontSize,
-              manifestoFontAlignment: videoSubtitleFontAlignment,
-              manifestoFontWeight: videoSubtitleFontWeight,
-              showManifesto: showVideoSubtitle,
-              
-              buttonText: videoButtonText,
-              buttonStyle: videoButtonStyle,
-              buttonSize: videoButtonSize,
-              buttonColor: videoButtonColor,
-              buttonTextColor: videoButtonTextColor,
-              showButton: showVideoButton,
-              
-              layoutTemplate: videoTemplate,
-              bgType: videoBgType,
-              bgColor: videoBgColor,
-              bgImage: videoBgImage,
-              bgVideo: videoUrl,
-            }}
-            onApply={(config) => {
-              setVideoTitle(config.titleText);
-              setVideoTitleFontType(config.titleFontType);
-              setVideoTitleFontColor(config.titleFontColor);
-              setVideoTitleFontSize(config.titleFontSize);
-              setVideoTitleFontAlignment(config.titleFontAlignment);
-              setVideoTitleFontWeight(config.titleFontWeight);
-              setShowVideoTitle(config.showTitle);
-              
-              setVideoSubtitle(config.manifestoText);
-              setVideoSubtitleFontType(config.manifestoFontType);
-              setVideoSubtitleFontColor(config.manifestoFontColor);
-              setVideoSubtitleFontSize(config.manifestoFontSize);
-              setVideoSubtitleFontAlignment(config.manifestoFontAlignment);
-              setVideoSubtitleFontWeight(config.manifestoFontWeight);
-              setShowVideoSubtitle(config.showManifesto);
-              
-              setVideoButtonText(config.buttonText);
-              setVideoButtonStyle(config.buttonStyle);
-              setVideoButtonSize(config.buttonSize);
-              setVideoButtonColor(config.buttonColor);
-              setVideoButtonTextColor(config.buttonTextColor);
-              setShowVideoButton(config.showButton);
-              
-              setVideoTemplate(config.layoutTemplate || "center");
-              setVideoBgType(config.bgType || "video");
-              setVideoBgColor(config.bgColor || "#121212");
-              setVideoBgImage(config.bgImage || "");
-              setVideoUrl(config.bgVideo || "");
-              
-              setIsVideoCustomizerModalOpen(false);
-              setTimeout(() => {
-                saveSettingsSilent();
-              }, 100);
-            }}
-            sectionName="Video Section"
-            primaryColor={primaryColor}
-          />
-        )}
+      {isVideoCustomizerModalOpen && (
+        <CustomizeLayoutModal
+          isOpen={true}
+          onClose={() => setIsVideoCustomizerModalOpen(false)}
+          initialConfig={{
+            titleText: videoTitle,
+            titleFontType: videoTitleFontType,
+            titleFontColor: videoTitleFontColor,
+            titleFontSize: videoTitleFontSize,
+            titleFontAlignment: videoTitleFontAlignment,
+            titleFontWeight: videoTitleFontWeight,
+            showTitle: showVideoTitle,
+
+            manifestoText: videoSubtitle,
+            manifestoFontType: videoSubtitleFontType,
+            manifestoFontColor: videoSubtitleFontColor,
+            manifestoFontSize: videoSubtitleFontSize,
+            manifestoFontAlignment: videoSubtitleFontAlignment,
+            manifestoFontWeight: videoSubtitleFontWeight,
+            showManifesto: showVideoSubtitle,
+
+            buttonText: videoButtonText,
+            buttonStyle: videoButtonStyle,
+            buttonSize: videoButtonSize,
+            buttonColor: videoButtonColor,
+            buttonTextColor: videoButtonTextColor,
+            showButton: showVideoButton,
+
+            layoutTemplate: videoTemplate,
+            bgType: videoBgType,
+            bgColor: videoBgColor,
+            bgImage: videoBgImage,
+            bgVideo: videoUrl,
+          }}
+          onApply={(config) => {
+            setVideoTitle(config.titleText);
+            setVideoTitleFontType(config.titleFontType);
+            setVideoTitleFontColor(config.titleFontColor);
+            setVideoTitleFontSize(config.titleFontSize);
+            setVideoTitleFontAlignment(config.titleFontAlignment);
+            setVideoTitleFontWeight(config.titleFontWeight);
+            setShowVideoTitle(config.showTitle);
+
+            setVideoSubtitle(config.manifestoText);
+            setVideoSubtitleFontType(config.manifestoFontType);
+            setVideoSubtitleFontColor(config.manifestoFontColor);
+            setVideoSubtitleFontSize(config.manifestoFontSize);
+            setVideoSubtitleFontAlignment(config.manifestoFontAlignment);
+            setVideoSubtitleFontWeight(config.manifestoFontWeight);
+            setShowVideoSubtitle(config.showManifesto);
+
+            setVideoButtonText(config.buttonText);
+            setVideoButtonStyle(config.buttonStyle);
+            setVideoButtonSize(config.buttonSize);
+            setVideoButtonColor(config.buttonColor);
+            setVideoButtonTextColor(config.buttonTextColor);
+            setShowVideoButton(config.showButton);
+
+            setVideoTemplate(config.layoutTemplate || "center");
+            setVideoBgType(config.bgType || "video");
+            setVideoBgColor(config.bgColor || "#121212");
+            setVideoBgImage(config.bgImage || "");
+            setVideoUrl(config.bgVideo || "");
+
+            setIsVideoCustomizerModalOpen(false);
+            setTimeout(() => {
+              saveSettingsSilent();
+            }, 100);
+          }}
+          sectionName="Video Section"
+          primaryColor={primaryColor}
+        />
+      )}
     </div>
   );
 }

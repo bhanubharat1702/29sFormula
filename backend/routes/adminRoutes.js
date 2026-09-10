@@ -1,4 +1,5 @@
 import express from "express";
+import mongoose from "mongoose";
 import Order from "../models/Order.js";
 import { Product, ProductVariant } from "../models/Product.js";
 import Customer from "../models/Customer.js";
@@ -38,11 +39,14 @@ router.get("/api/admin/dashboard-stats", async (req, res) => {
         { $unwind: "$cartItems" },
         { $group: { _id: "$cartItems.productId", totalSold: { $sum: "$cartItems.quantity" } } },
         { $sort: { totalSold: -1 } },
-        { $limit: 5 }
+        { $limit: 10 }
       ]).then(async (topSales) => {
-        const productIds = topSales.map(t => t._id);
-        const products = await Product.find({ _id: { $in: productIds } }).lean();
-        return topSales.map(t => products.find(p => String(p._id) === String(t._id))).filter(Boolean);
+        const validProductIds = topSales
+          .map(t => t._id)
+          .filter(id => id && mongoose.Types.ObjectId.isValid(id));
+        if (validProductIds.length === 0) return [];
+        const products = await Product.find({ _id: { $in: validProductIds } }).lean();
+        return topSales.map(t => products.find(p => String(p._id) === String(t._id))).filter(Boolean).slice(0, 5);
       }),
       Order.find({ deletedByAdmin: false }).sort({ createdAt: -1 }).limit(5).populate("customerId").lean(),
       ProductVariant.find({}, "productId size makingPrice").lean(),
@@ -82,6 +86,7 @@ router.get("/api/admin/dashboard-stats", async (req, res) => {
     };
 
     const getMakingPrice = (productId, size) => {
+       if (!productId || !mongoose.Types.ObjectId.isValid(productId)) return 0;
        const variant = allVariants.find(v => String(v.productId) === String(productId) && v.size === size);
        if (variant && variant.makingPrice > 0) return variant.makingPrice;
        const product = allBaseProducts.find(p => String(p._id) === String(productId));

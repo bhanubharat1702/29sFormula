@@ -19,6 +19,7 @@ interface ReturnsSubTabProps {
   setOpenStatusDropdownId: (val: string | null) => void;
   handleUpdateReturnStatus: (id: string, status: string) => void;
   handleUpdateOrderStatus: (id: string, status: string) => void;
+  handleUpdateRefundStatus?: (id: string, refundStatus: string) => void;
   setSelectedOrder: (order: any) => void;
   handleDeleteOrder: (id: string) => void;
 }
@@ -41,6 +42,7 @@ export default function ReturnsSubTab({
   setOpenStatusDropdownId,
   handleUpdateReturnStatus,
   handleUpdateOrderStatus,
+  handleUpdateRefundStatus,
   setSelectedOrder,
   handleDeleteOrder
 }: ReturnsSubTabProps) {
@@ -229,7 +231,7 @@ export default function ReturnsSubTab({
                       <p>No orders placed in the system yet. Placed orders will show up here in real-time.</p>
                     </div>
                   ) : (
-                    <div className={styles.tableResponsive} style={{ overflow: openStatusDropdownId ? "visible" : "auto" }}>
+                    <div className={styles.tableResponsive} style={{ overflow: (openStatusDropdownId || openActionDropdownId) ? "visible" : "auto" }}>
                       <table className={styles.inventoryTable}>
                         <thead className={styles.hideOnMobile}>
                           {activeSubTab === "returns" ? (
@@ -239,10 +241,9 @@ export default function ReturnsSubTab({
                               <th>Items</th>
                               <th style={{ textAlign: 'center' }}>Qty</th>
                               <th style={{ textAlign: 'right' }}>Amount</th>
-                              <th style={{ minWidth: "200px" }}>Damage Reason & Proof</th>
-                              <th>Return Status</th>
+                              <th>Status</th>
                               <th>Date</th>
-                              <th>Admin Action</th>
+                              <th>Actions</th>
                             </tr>
                           ) : (
                             <tr>
@@ -257,40 +258,20 @@ export default function ReturnsSubTab({
                             </tr>
                           )}
                         </thead>
-                        <tbody>
+<tbody>
                           {(() => {
   const filteredOrders = orders
     .filter(o => !o.deletedByAdmin)
     .filter(o => {
-                              if (activeSubTab === "returns") {
-                                return o.status === "Return Requested" || 
-                                       (o.returnRequest && o.returnRequest.status === "Pending");
-                              } else if (activeSubTab === "cancelled") {
-                                const matchesRefund = refundStatusFilter === "All" || (o.refundStatus || "Not Refunded") === refundStatusFilter;
-                                return o.status === "Cancelled" && (o.refundStatus || "Not Refunded") !== "Refunded" && matchesRefund;
-                              } else if (activeSubTab === "completed") {
-                                const hasPendingReturn = o.status === "Return Requested" || (o.returnRequest && o.returnRequest.status === "Pending");
-                                if (hasPendingReturn) return false;
-                                return o.status === "Delivered" || 
-                                       o.status === "Return Rejected" || 
-                                       o.status === "Return Approved" || 
-                                       (o.status === "Cancelled" && o.refundStatus === "Refunded");
-                              } else {
-                                const matchesStatus = orderStatusFilter === "All" || o.status === orderStatusFilter;
-                                return o.status !== "Cancelled" && 
-                                       o.status !== "Delivered" && 
-                                       o.status !== "Return Requested" && 
-                                       o.status !== "Return Approved" && 
-                                       o.status !== "Return Rejected" && 
-                                       matchesStatus;
-                              }
-                            })
-                            .filter(o =>
-                              o.orderId.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                              o.customerName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                              o.customerEmail.toLowerCase().includes(searchQuery.toLowerCase())
-                            )
-                            ;
+      return o.status === "Return Requested" || 
+             o.status === "Return Rejected" ||
+             (o.returnRequest && o.returnRequest.status === "Pending");
+    })
+    .filter(o =>
+      o.orderId.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      o.customerName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      o.customerEmail.toLowerCase().includes(searchQuery.toLowerCase())
+    );
   if (filteredOrders.length === 0) {
     return (
       <tr>
@@ -303,17 +284,17 @@ export default function ReturnsSubTab({
     );
   }
   return filteredOrders.map((order, idx, arr) => {
-                              const openUpwards = arr.length > 0 && idx >= arr.length - 2;
-                              if (activeSubTab === "returns") {
-                                return (
-                                  <React.Fragment key={order._id}>
+                               const openUpwards = arr.length > 0 && idx >= arr.length - 2;
+                               const isRejected = order.status === "Return Rejected" || order.returnRequest?.status === "Rejected";
+                               return (
+                                 <React.Fragment key={order._id}>
                                 <tr className={styles.desktopRow} style={{ borderBottom: '1px solid #f9fafb', cursor: 'pointer' }} onClick={() => setSelectedOrder(order)}>
                                     <td>
                                       <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
                                         <span style={{ fontSize: '12px', color: '#374151' }}>{order.orderId ? (order.orderId.length > 12 ? order.orderId.substring(0, 4) + '...' + order.orderId.slice(-6) : order.orderId) : order._id.substring(order._id.length - 4)}</span>
-                                        {order.returnRequest?.returnType === "Replacement" && order.returnRequest?.status === "Approved" && (
-                                          <span style={{ fontSize: "0.65rem", fontWeight: 700, padding: "2px 6px", borderRadius: "8px", backgroundColor: "#e0e7ff", color: "#4338ca", width: "fit-content" }}>EXCHANGE</span>
-                                        )}
+                                        <span style={{ fontSize: "0.65rem", fontWeight: 700, padding: "2px 6px", borderRadius: "8px", backgroundColor: "#fce7f3", color: "#be185d", width: "fit-content" }}>
+                                          {order.returnRequest?.returnType?.toUpperCase() || "RETURN"}
+                                        </span>
                                       </div>
                                     </td>
                                     <td>
@@ -323,11 +304,18 @@ export default function ReturnsSubTab({
                                       <div style={{ maxWidth: '180px', fontSize: '0.85rem', color: '#6b7280' }}>
                                         {order.cartItems && order.cartItems.length > 0 
                                           ? order.cartItems.map((item: any, idx: number) => (
-                                              <div key={idx} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '6px', marginBottom: '4px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                                                <span style={{ color: '#374151', fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis' }}>{item.name}</span>
-                                                <span style={{ backgroundColor: '#f1f5f9', padding: '2px 6px', borderRadius: '4px', fontSize: '0.7rem', fontWeight: 600, color: '#475569', flexShrink: 0 }}>
-                                                  {item.quantity}x {item.size}
-                                                </span>
+                                              <div key={idx} style={{ marginBottom: '6px' }}>
+                                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '6px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                                  <span style={{ color: '#374151', fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis' }}>{item.name}</span>
+                                                  <span style={{ backgroundColor: item.isGiftSet || item.name?.toLowerCase().includes('gift set') ? '#fef3c7' : '#f1f5f9', color: item.isGiftSet || item.name?.toLowerCase().includes('gift set') ? '#b45309' : '#475569', padding: '2px 6px', borderRadius: '4px', fontSize: '0.7rem', fontWeight: 600, flexShrink: 0 }}>
+                                                    {item.isGiftSet || item.name?.toLowerCase().includes('gift set') ? 'GIFT SET' : `${item.quantity}x ${item.size}`}
+                                                  </span>
+                                                </div>
+                                                {(item.isGiftSet || (item.giftSetDetails && item.giftSetDetails.length > 0)) && (
+                                                  <div style={{ fontSize: '0.7rem', color: '#6b7280', marginTop: '2px', paddingLeft: '4px' }}>
+                                                    {item.giftSetDetails ? item.giftSetDetails.map((g: any) => g.name).join(', ') : item.size}
+                                                  </div>
+                                                )}
                                               </div>
                                             ))
                                           : "N/A"}
@@ -340,256 +328,120 @@ export default function ReturnsSubTab({
                                       ₹{(order.totalAmount || 0).toLocaleString("en-IN")}
                                     </td>
                                     <td>
-                                      <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
-                                        <div style={{ display: "inline-flex", alignItems: "center", gap: "6px", marginBottom: "4px" }}>
-                                          <span style={{ fontSize: "0.7rem", fontWeight: 700, backgroundColor: "#f1f5f9", padding: "2px 6px", borderRadius: "4px", color: "#475569", textTransform: "uppercase", letterSpacing: "0.5px" }}>
-                                            {order.returnRequest?.returnType || "Unknown"}
+                                      <div style={{ display: "flex", flexDirection: "column", gap: "2px" }}>
+                                        <span style={{
+                                          display: "inline-block",
+                                          padding: "4px 8px",
+                                          borderRadius: "12px",
+                                          fontSize: "0.75rem",
+                                          fontWeight: 700,
+                                          textTransform: "uppercase",
+                                          backgroundColor: isRejected ? "#fef2f2" : "#fef3c7",
+                                          color: isRejected ? "#b91c1c" : "#b45309",
+                                          width: "fit-content"
+                                        }}>
+                                          {isRejected ? "REJECTED" : (order.returnRequest?.status || "Return Requested")}
+                                        </span>
+                                        {isRejected && (
+                                          <span style={{ fontSize: "0.68rem", fontWeight: 600, color: (order.refundStatus === "Refunded") ? "#166534" : "#991b1b" }}>
+                                            {order.refundStatus === "Refunded" ? "Refunded" : "Not Refunded"}
                                           </span>
-                                        </div>
-                                        <p style={{ margin: 0, fontSize: "0.85rem", fontWeight: 600, color: "#1e293b", whiteSpace: "normal", maxWidth: "250px", lineHeight: "1.3" }}>
-                                          {order.returnRequest?.reason || "Reason not provided"}
-                                        </p>
-                                        {order.returnRequest?.images && order.returnRequest.images.length > 0 && (
-                                          <div style={{ display: "flex", gap: "6px", flexWrap: "wrap", marginTop: "4px" }}>
-                                            {order.returnRequest.images.map((imgUrl: string, i: number) => (
-                                              <a key={i} href={imgUrl} target="_blank" rel="noopener noreferrer" style={{ display: "block", width: "40px", height: "40px", borderRadius: "4px", overflow: "hidden", border: "1px solid #cbd5e1" }}>
-                                                <img src={imgUrl} alt="Proof" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                                              </a>
-                                            ))}
-                                          </div>
                                         )}
                                       </div>
-                                    </td>
-                                    <td>
-                                      <span style={{
-                                      display: "inline-block",
-                                      padding: "2px 6px",
-                                      borderRadius: "12px",
-                                      fontSize: "0.65rem",
-                                      fontWeight: 700,
-                                      textTransform: "uppercase",
-                                      backgroundColor: order.status === "Delivered" ? "#dcfce7" : order.status === "Return Rejected" ? "#fee2e2" : order.status === "Shipped" || order.status === "Dispatched" ? "#e0e7ff" : order.status === "Return Approved" ? "#ecfccb" : order.status === "Cancelled" ? "#f3f4f6" : order.status === "Processing" ? "#fef3c7" : "#fce7f3",
-                                      color: order.status === "Delivered" ? "#15803d" : order.status === "Return Rejected" ? "#b91c1c" : order.status === "Shipped" || order.status === "Dispatched" ? "#4338ca" : order.status === "Return Approved" ? "#4d7c0f" : order.status === "Cancelled" ? "#4b5563" : order.status === "Processing" ? "#b45309" : "#be185d"
-                                    }}>
-                                        {order.returnRequest?.status || "Pending"}
-                                      </span>
                                     </td>
                                     <td>
                                       <span className={styles.tableDesc} style={{ whiteSpace: "normal" }}>
-                                        {order.returnRequest?.createdAt 
-                                          ? new Date(order.returnRequest.createdAt).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })
-                                          : new Date(order.createdAt).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })
-                                        }
+                                        {new Date(order.returnRequest?.createdAt || order.createdAt).toLocaleDateString("en-IN", {
+                                          day: "numeric",
+                                          month: "short",
+                                          year: "numeric"
+                                        })}
                                       </span>
                                     </td>
                                     <td>
-                                      <div style={{ position: "relative", display: "inline-block" }}>
-                                        <div
-                                          onClick={() => setOpenStatusDropdownId(openStatusDropdownId === order._id ? null : order._id)}
-                                          className={styles.selectInput}
-                                          style={{ padding: "4px 8px", fontSize: "0.8rem", cursor: "pointer", minWidth: "110px", display: "flex", alignItems: "center", justifyContent: "space-between" }}
-                                        >
-                                          {order.returnRequest?.status || "Pending"}
-                                          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="#6b7280" style={{ width: "12px", height: "12px", transform: openStatusDropdownId === order._id ? "rotate(180deg)" : "none", transition: "transform 0.2s" }}>
-                                            <path strokeLinecap="round" strokeLinejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
-                                          </svg>
-                                        </div>
-                                        {openStatusDropdownId === order._id && (
-                                          <>
-                                            <div style={{ position: "fixed", inset: 0, zIndex: 100 }} onClick={() => setOpenStatusDropdownId(null)} />
-                                            <div style={{
-                                              position: "absolute",
-                                              left: 0,
-                                              minWidth: "120px",
-                                              background: "#fff",
-                                              border: "1px solid #e5e7eb",
-                                              borderRadius: "8px",
-                                              boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.1)",
-                                              zIndex: 9999,
-                                              overflow: "hidden",
-                                              top: openUpwards ? "auto" : "100%",
-                                              bottom: openUpwards ? "100%" : "auto",
-                                              marginTop: openUpwards ? "0" : "4px",
-                                              marginBottom: openUpwards ? "4px" : "0"
-                                            }}>
-                                              {["Pending", "Approved", "Rejected"].map((opt) => (
+                                      <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
+                                        <div style={{ position: "relative" }}>
+                                          <button
+                                            onClick={(e) => { e.stopPropagation(); setOpenActionDropdownId(openActionDropdownId === order._id ? null : order._id); }}
+                                            title="Actions"
+                                            style={{ background: "transparent", border: "none", cursor: "pointer", color: "#4b5563", padding: "4px", display: "flex", alignItems: "center" }}
+                                          >
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" style={{ width: "20px", height: "20px" }}>
+                                              <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.75a.75.75 0 1 1 0-1.5.75.75 0 0 1 0 1.5ZM12 12.75a.75.75 0 1 1 0-1.5.75.75 0 0 1 0 1.5ZM12 18.75a.75.75 0 1 1 0-1.5.75.75 0 0 1 0 1.5Z" />
+                                            </svg>
+                                          </button>
+                                          {openActionDropdownId === order._id && (
+                                            <>
+                                              <div style={{ position: "fixed", inset: 0, zIndex: 100 }} onClick={(e) => { e.stopPropagation(); setOpenActionDropdownId(null); }} />
+                                              <div style={{
+                                                position: "absolute",
+                                                right: 0,
+                                                minWidth: "160px",
+                                                background: "#fff",
+                                                border: "1px solid #e5e7eb",
+                                                borderRadius: "8px",
+                                                boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.1)",
+                                                zIndex: 9999,
+                                                overflow: "hidden",
+                                                top: openUpwards ? "auto" : "100%",
+                                                bottom: openUpwards ? "100%" : "auto",
+                                                marginBottom: openUpwards ? "4px" : "0",
+                                                marginTop: openUpwards ? "0" : "4px"
+                                              }}>
                                                 <div
-                                                  key={opt}
-                                                  onClick={() => { handleUpdateReturnStatus(order._id, opt); setOpenStatusDropdownId(null); }}
-                                                  style={{
-                                                    padding: "6px 12px",
-                                                    fontSize: "0.8rem",
-                                                    cursor: "pointer",
-                                                    backgroundColor: order.returnRequest?.status === opt ? "#eff6ff" : "transparent",
-                                                    fontWeight: order.returnRequest?.status === opt ? 600 : 400
-                                                  }}
+                                                  onClick={(e) => { e.stopPropagation(); setSelectedOrder(order); setOpenActionDropdownId(null); }}
+                                                  style={{ padding: "8px 12px", fontSize: "0.85rem", cursor: "pointer", color: "#374151", fontWeight: 500 }}
                                                   onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#f3f4f6")}
-                                                  onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = order.returnRequest?.status === opt ? "#eff6ff" : "transparent")}
+                                                  onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "transparent")}
                                                 >
-                                                  {opt}
+                                                  View Details
                                                 </div>
-                                              ))}
-                                            </div>
-                                          </>
-                                        )}
+                                                {!isRejected ? (
+                                                  <>
+                                                    <div
+                                                      onClick={(e) => { e.stopPropagation(); handleUpdateReturnStatus(order._id, "Approved"); setOpenActionDropdownId(null); }}
+                                                      style={{ padding: "8px 12px", fontSize: "0.85rem", cursor: "pointer", color: "#166534", fontWeight: 500 }}
+                                                      onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#f0fdf4")}
+                                                      onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "transparent")}
+                                                    >
+                                                      Approve Return
+                                                    </div>
+                                                    <div
+                                                      onClick={(e) => { e.stopPropagation(); handleUpdateReturnStatus(order._id, "Rejected"); setOpenActionDropdownId(null); }}
+                                                      style={{ padding: "8px 12px", fontSize: "0.85rem", cursor: "pointer", color: "#b91c1c", fontWeight: 500 }}
+                                                      onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#fef2f2")}
+                                                      onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "transparent")}
+                                                    >
+                                                      Reject Return
+                                                    </div>
+                                                  </>
+                                                ) : (
+                                                  <>
+                                                    <div
+                                                      onClick={(e) => { e.stopPropagation(); handleUpdateRefundStatus?.(order._id, "Refunded"); setOpenActionDropdownId(null); }}
+                                                      style={{ padding: "8px 12px", fontSize: "0.85rem", cursor: "pointer", color: "#166534", fontWeight: 500 }}
+                                                      onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#f0fdf4")}
+                                                      onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "transparent")}
+                                                    >
+                                                      Mark as Refunded
+                                                    </div>
+                                                    <div
+                                                      onClick={(e) => { e.stopPropagation(); handleUpdateRefundStatus?.(order._id, "Not Refunded"); setOpenActionDropdownId(null); }}
+                                                      style={{ padding: "8px 12px", fontSize: "0.85rem", cursor: "pointer", color: "#b91c1c", fontWeight: 500 }}
+                                                      onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#fef2f2")}
+                                                      onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "transparent")}
+                                                    >
+                                                      Mark as Not Refunded
+                                                    </div>
+                                                  </>
+                                                )}
+                                              </div>
+                                            </>
+                                          )}
+                                        </div>
                                       </div>
                                     </td>
                                   </tr>
-                                  <tr className={styles.mobileCard} onClick={() => setSelectedOrder(order)}>
-                                    <td colSpan={10} style={{ padding: 0, border: 'none' }}>
-                                      <div className={styles.mobileCardContainer}>
-                                        <div className={styles.mobileCardHeader}>
-                                          <div>
-                                            <div className={styles.mobileCustomerName}>{order.customerName ? order.customerName.toLowerCase() : "N/A"}</div>
-                                            <div className={styles.mobileOrderMeta}>
-                                              {order.orderId ? (order.orderId.length > 12 ? order.orderId.substring(0, 4) + '...' + order.orderId.slice(-6) : order.orderId) : `ORD-${order._id.substring(order._id.length - 4).toUpperCase()}`} · {new Date(order.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
-                                            </div>
-                                          </div>
-                                          <div style={{ textAlign: 'right' }}>
-                                            <div className={styles.mobileOrderAmount}>₹{(order.totalAmount || 0).toLocaleString('en-IN')}</div>
-                                            <div className={styles.mobileStatusBadge} style={{
-                                              backgroundColor: order.status === 'Processing' ? '#fef3c7' : order.status === 'Dispatched' ? '#e0e7ff' : order.status === 'Delivered' ? '#f0fdf4' : order.status === 'Cancelled' ? '#f3f4f6' : '#fee2e2',
-                                              color: order.status === 'Processing' ? '#b45309' : order.status === 'Dispatched' ? '#4338ca' : order.status === 'Delivered' ? '#166534' : order.status === 'Cancelled' ? '#4b5563' : '#b91c1c'
-                                            }}>
-                                              <div className={styles.mobileStatusDot} style={{
-                                                backgroundColor: order.status === 'Processing' ? '#b45309' : order.status === 'Dispatched' ? '#4338ca' : order.status === 'Delivered' ? '#166534' : order.status === 'Cancelled' ? '#4b5563' : '#b91c1c'
-                                              }}></div>
-                                              {order.status}
-                                            </div>
-                                          </div>
-                                        </div>
-                                        
-                                        <div className={styles.mobileProductsList}>
-                                          {order.cartItems && order.cartItems.map((item: any, idx: number) => (
-                                            <div key={idx} className={styles.mobileProductPill}>
-                                              {item.name} · <span className={styles.mobileProductWeight}>{item.size} ×{item.quantity}</span>
-                                            </div>
-                                          ))}
-                                        </div>
-                                        
-                                        <div className={styles.mobileItemsSummary}>
-                                          {order.cartItems ? order.cartItems.reduce((acc: number, it: any) => acc + (it.quantity || 1), 0) : 0} items · {order.cartItems?.length || 0} products
-                                        </div>
-                                      </div>
-                                    </td>
-                                  </tr>
-                                </React.Fragment>
-                                );
-                              }
-
-
-                              return (
-                                <React.Fragment key={order._id}>
-                                <tr className={styles.desktopRow} style={{ borderBottom: '1px solid #f9fafb', cursor: 'pointer' }} onClick={() => setSelectedOrder(order)}>
-                                  <td>
-                                    <span style={{ fontSize: '12px', color: '#374151' }}>{order.orderId ? (order.orderId.length > 12 ? order.orderId.substring(0, 4) + '...' + order.orderId.slice(-6) : order.orderId) : order._id.substring(order._id.length - 4)}</span>
-                                  </td>
-                                  <td>
-                                    <span style={{ fontSize: '14px', color: '#000', textTransform: 'capitalize' }}>{order.customerName ? order.customerName.toLowerCase() : "N/A"}</span>
-                                  </td>
-                                  <td>
-                                    <div style={{ maxWidth: '180px', fontSize: '0.85rem', color: '#6b7280' }}>
-                                      {order.cartItems && order.cartItems.length > 0 
-                                        ? order.cartItems.map((item: any, idx: number) => (
-                                            <div key={idx} style={{ marginBottom: '6px' }}>
-                                              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '6px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                                                <span style={{ color: '#374151', fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                                                  {item.name}
-                                                </span>
-                                                <span style={{ backgroundColor: item.isGiftSet || item.name?.toLowerCase().includes('gift set') ? '#fef3c7' : '#f1f5f9', color: item.isGiftSet || item.name?.toLowerCase().includes('gift set') ? '#b45309' : '#475569', padding: '2px 6px', borderRadius: '4px', fontSize: '0.7rem', fontWeight: 600, flexShrink: 0 }}>
-                                                  {item.isGiftSet || item.name?.toLowerCase().includes('gift set') ? 'GIFT SET' : `${item.quantity}x ${item.size}`}
-                                                </span>
-                                              </div>
-                                              {(item.isGiftSet || (item.giftSetDetails && item.giftSetDetails.length > 0)) && (
-                                                <div style={{ fontSize: '0.7rem', color: '#6b7280', marginTop: '2px', paddingLeft: '4px' }}>
-                                                  {item.giftSetDetails ? item.giftSetDetails.map((g: any) => g.name).join(', ') : item.size}
-                                                </div>
-                                              )}
-                                            </div>
-                                          ))
-                                        : "N/A"}
-                                    </div>
-                                  </td>
-                                  <td style={{ textAlign: 'center', fontSize: '14px', fontWeight: 500, color: '#374151' }}>
-                                    {order.cartItems ? order.cartItems.reduce((acc: number, item: any) => acc + (item.quantity || 1), 0) : 0}
-                                  </td>
-                                  <td style={{ textAlign: 'right', fontSize: '14px', fontWeight: 500, color: '#111827' }}>
-                                    ₹{(order.totalAmount || 0).toLocaleString("en-IN")}
-                                  </td>
-                                  <td>
-                                    <span style={{
-                                      display: "inline-block",
-                                      padding: "4px 8px",
-                                      borderRadius: "12px",
-                                      fontSize: "0.75rem",
-                                      fontWeight: 700,
-                                      textTransform: "uppercase",
-                                      backgroundColor: order.status === "Delivered" || (order.status === "Return Approved" && !(order.returnRequest?.returnType === "Refund" && order.refundStatus !== "Refunded")) ? "#eaf7ee" : order.status === "Return Rejected" ? "#fef2f2" : order.status === "Shipped" ? "#eff6ff" : order.status === "Return Approved" ? "#fef3c7" : "#fef3c7",
-                                      color: order.status === "Delivered" || (order.status === "Return Approved" && !(order.returnRequest?.returnType === "Refund" && order.refundStatus !== "Refunded")) ? "#15803d" : order.status === "Return Rejected" ? "#991b1b" : order.status === "Shipped" ? "#1d4ed8" : order.status === "Return Approved" ? "#b45309" : "#b45309"
-                                    }}>
-                                      {order.status === "Return Approved" ? (order.returnRequest?.returnType === "Refund" && order.refundStatus !== "Refunded" ? "Payment Pending" : "Approved") : order.status === "Return Rejected" ? "Rejected" : order.status}
-                                    </span>
-                                  </td>
-                                  <td>
-                                    <span className={styles.tableDesc} style={{ whiteSpace: "normal" }}>
-                                      {new Date(order.createdAt).toLocaleDateString("en-IN", {
-                                        day: "numeric",
-                                        month: "short",
-                                        year: "numeric"
-                                      })}
-                                    </span>
-                                  </td>
-                                  <td>
-                                    <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
-                                      <div style={{ position: "relative" }}>
-                                        <button
-                                          onClick={(e) => { e.stopPropagation(); setOpenActionDropdownId(openActionDropdownId === order._id ? null : order._id); }}
-                                          title="Actions"
-                                          style={{ background: "transparent", border: "none", cursor: "pointer", color: "#4b5563", padding: "4px", display: "flex", alignItems: "center" }}
-                                        >
-                                          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" style={{ width: "20px", height: "20px" }}>
-                                            <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.75a.75.75 0 1 1 0-1.5.75.75 0 0 1 0 1.5ZM12 12.75a.75.75 0 1 1 0-1.5.75.75 0 0 1 0 1.5ZM12 18.75a.75.75 0 1 1 0-1.5.75.75 0 0 1 0 1.5Z" />
-                                          </svg>
-                                        </button>
-                                        {openActionDropdownId === order._id && (
-                                          <>
-                                            <div style={{ position: "fixed", inset: 0, zIndex: 100 }} onClick={(e) => { e.stopPropagation(); setOpenActionDropdownId(null); }} />
-                                            <div style={{
-                                              position: "absolute",
-                                              right: 0,
-                                              minWidth: "120px",
-                                              background: "#fff",
-                                              border: "1px solid #e5e7eb",
-                                              borderRadius: "8px",
-                                              boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.1)",
-                                              zIndex: 9999,
-                                              overflow: "hidden",
-                                              top: "100%",
-                                              marginTop: "4px"
-                                            }}>
-                                              <div
-                                                onClick={(e) => { e.stopPropagation(); setSelectedOrder(order); setOpenActionDropdownId(null); }}
-                                                style={{ padding: "8px 12px", fontSize: "0.85rem", cursor: "pointer", color: "#374151", fontWeight: 500 }}
-                                                onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#f3f4f6")}
-                                                onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "transparent")}
-                                              >
-                                                View Details
-                                              </div>
-                                              <div
-                                                onClick={(e) => { e.stopPropagation(); handleDeleteOrder(order._id); setOpenActionDropdownId(null); }}
-                                                style={{ padding: "8px 12px", fontSize: "0.85rem", cursor: "pointer", color: "#ef4444", fontWeight: 500 }}
-                                                onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#fee2e2")}
-                                                onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "transparent")}
-                                              >
-                                                Cancel Order
-                                              </div>
-                                            </div>
-                                          </>
-                                        )}
-                                      </div>
-                                    </div>
-                                  </td>
-                                </tr>
                                   <tr className={styles.mobileCard} onClick={() => setSelectedOrder(order)}>
                                     <td colSpan={10} style={{ padding: 0, border: 'none' }}>
                                       <div className={styles.mobileCardContainer}>
@@ -630,7 +482,7 @@ export default function ReturnsSubTab({
                                   </tr>
                                 </React.Fragment>
                               );
-                            });})()}
+                             });})()}
                         </tbody>
                       </table>
                     </div>

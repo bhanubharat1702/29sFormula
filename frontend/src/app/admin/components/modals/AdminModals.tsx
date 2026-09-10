@@ -1583,7 +1583,7 @@ export default function AdminModals(props: any) {
       {/* Selected Order Detail Modal */}
       {selectedOrder && (
         <div className={styles.modalOverlay} onClick={() => setSelectedOrder(null)} style={{ display: "flex", alignItems: "center", justifyContent: "center", position: "fixed", top: 0, left: 0, right: 0, bottom: 0, backgroundColor: "rgba(0,0,0,0.5)", zIndex: 10000, padding: "20px" }}>
-          <div className={styles.modalContent} onClick={(e) => e.stopPropagation()} style={{ width: "100%", maxWidth: "900px", background: "#fff", borderRadius: "8px", padding: "30px", maxHeight: "90vh", overflowY: "auto", display: "flex", flexDirection: "column" }}>
+          <div className={styles.modalContent} onClick={(e) => e.stopPropagation()} style={{ width: "100%", maxWidth: "900px", background: "#fff", borderRadius: "8px", padding: "30px", maxHeight: "90vh", overflow: "hidden", display: "flex", flexDirection: "column" }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingBottom: "12px", marginBottom: "20px" }}>
               <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
                 <span style={{ fontSize: "1.1rem", fontWeight: 400, margin: 0, color: "#000" }}>{selectedOrder.orderId}</span>
@@ -1603,13 +1603,13 @@ export default function AdminModals(props: any) {
               <button onClick={() => setSelectedOrder(null)} style={{ background: "none", border: "none", fontSize: "1.2rem", cursor: "pointer", color: "#6b7280" }}>✕</button>
             </div>
 
-            <div className={styles.hideOnMobile} style={{ display: "flex", gap: "40px", textAlign: "left", alignItems: "stretch" }}>
+            <div className={styles.hideOnMobile} style={{ display: "flex", gap: "40px", textAlign: "left", alignItems: "stretch", flex: 1, minHeight: 0, overflow: "hidden" }}>
               
               {/* LEFT COLUMN: Items Purchased & Total */}
-              <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: "20px" }}>
-                <div>
-                  <h3 style={{ fontSize: "0.8rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", margin: "0 0 10px 0", color: "#888" }}>Items Purchased</h3>
-                  <div style={{ display: "flex", flexDirection: "column", gap: "12px", maxHeight: "45vh", overflowY: "auto", paddingRight: "5px" }}>
+              <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: "20px", minHeight: 0 }}>
+                <div style={{ flex: 1, display: "flex", flexDirection: "column", minHeight: 0 }}>
+                  <h3 style={{ fontSize: "0.8rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", margin: "0 0 10px 0", color: "#888", flexShrink: 0 }}>Items Purchased</h3>
+                  <div style={{ display: "flex", flexDirection: "column", gap: "12px", flex: 1, overflowY: "auto", paddingRight: "5px", minHeight: 0 }}>
                     {selectedOrder.cartItems.map((item: any, idx: number) => (
                       <div key={idx} style={{ display: "flex", alignItems: "flex-start", gap: "15px", borderBottom: "1px solid #f3f4f6", paddingBottom: "10px" }}>
                         {item.image && (
@@ -1634,16 +1634,27 @@ export default function AdminModals(props: any) {
                             <span style={{ fontSize: "0.75rem", color: "#cbd5e1" }}>|</span>
                             <span style={{ fontSize: "0.75rem", color: "#6b7280" }}>Qty: {item.quantity}</span>
                           </div>
-                          {item.giftSetDetails && item.giftSetDetails.length > 0 && (
+                          {(item.isGiftSet || (item.giftSetDetails && item.giftSetDetails.length > 0) || (item.giftSetItems && item.giftSetItems.length > 0) || item.name?.toLowerCase().includes('gift set')) && (
                             <div style={{ marginTop: "6px", backgroundColor: "#f8fafc", padding: "6px 8px", borderRadius: "4px", border: "1px solid #e2e8f0" }}>
                               <span style={{ fontSize: "0.7rem", fontWeight: 600, color: "#64748b", textTransform: "uppercase" }}>Included Items:</span>
                               <div style={{ display: "flex", flexDirection: "column", gap: "4px", marginTop: "4px" }}>
-                                {item.giftSetDetails.map((sub: any, sIdx: number) => (
-                                  <div key={sIdx} style={{ fontSize: "0.75rem", color: "#334155", display: "flex", alignItems: "center", gap: "6px" }}>
-                                    {sub.imageFront && <img src={sub.imageFront} alt={sub.name} style={{ width: "16px", height: "16px", borderRadius: "2px" }} />}
-                                    <span>{sub.name}</span>
-                                  </div>
-                                ))}
+                                {item.giftSetDetails && item.giftSetDetails.length > 0 ? (
+                                  item.giftSetDetails.map((sub: any, sIdx: number) => (
+                                    <div key={sIdx} style={{ fontSize: "0.75rem", color: "#334155", display: "flex", alignItems: "center", gap: "6px" }}>
+                                      {sub.imageFront && <img src={sub.imageFront} alt={sub.name} style={{ width: "16px", height: "16px", borderRadius: "2px", objectFit: "cover" }} />}
+                                      <span>{sub.name || (typeof sub === 'string' ? sub : 'Fragrance Item')}</span>
+                                    </div>
+                                  ))
+                                ) : item.giftSetItems && item.giftSetItems.length > 0 ? (
+                                  item.giftSetItems.map((subName: any, sIdx: number) => (
+                                    <div key={sIdx} style={{ fontSize: "0.75rem", color: "#334155", display: "flex", alignItems: "center", gap: "6px" }}>
+                                      <span style={{ width: "6px", height: "6px", borderRadius: "50%", backgroundColor: "#94a3b8" }}></span>
+                                      <span>{typeof subName === 'string' ? subName : (subName.name || 'Fragrance Item')}</span>
+                                    </div>
+                                  ))
+                                ) : (
+                                  <div style={{ fontSize: "0.75rem", color: "#64748b" }}>Custom Fragrance Set ({item.size || '3 items'})</div>
+                                )}
                               </div>
                             </div>
                           )}
@@ -1696,7 +1707,7 @@ export default function AdminModals(props: any) {
               <div style={{ width: "1px", backgroundColor: "#e5e7eb", margin: "0", flexShrink: 0 }}></div>
 
               {/* RIGHT COLUMN: Info, Status & Timeline */}
-              <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: "20px" }}>
+              <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: "20px", minHeight: 0 }}>
                 <div>
                   <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
                     <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "4px" }}>
@@ -1781,10 +1792,10 @@ export default function AdminModals(props: any) {
                 )}
 
                 {/* ORDER TIMELINE */}
-                <div style={{ marginTop: "10px", paddingTop: "20px", borderTop: "1px dashed #e5e7eb" }}>
-                  <h3 style={{ fontSize: "0.85rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", margin: "0 0 16px 0", color: "#6b7280" }}>Order Timeline</h3>
+                <div style={{ marginTop: "10px", paddingTop: "20px", borderTop: "1px dashed #e5e7eb", flex: 1, display: "flex", flexDirection: "column", minHeight: 0 }}>
+                  <h3 style={{ fontSize: "0.85rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", margin: "0 0 16px 0", color: "#6b7280", flexShrink: 0 }}>Order Timeline</h3>
                   
-                  <div style={{ maxHeight: "40vh", overflowY: "auto", paddingRight: "5px" }}>
+                  <div style={{ flex: 1, overflowY: "auto", paddingRight: "5px", minHeight: 0 }}>
                     <div style={{ display: "flex", flexDirection: "column", gap: "16px", position: "relative", paddingLeft: "10px" }}>
                       <div style={{ position: "absolute", left: "14px", top: "4px", bottom: "4px", width: "2px", backgroundColor: "#e5e7eb", zIndex: 0 }}></div>
                     {(() => {
@@ -1954,16 +1965,47 @@ export default function AdminModals(props: any) {
                       <div className={styles.mobileAccordionContent}>
                         <div style={{ display: "flex", flexDirection: "column", gap: "12px", maxHeight: "40vh", overflowY: "auto", paddingRight: "5px" }}>
                           {selectedOrder.cartItems.map((item: any, idx: number) => (
-                            <div key={idx} style={{ display: "flex", alignItems: "center", gap: "15px", borderBottom: "1px solid #f3f4f6", paddingBottom: "10px" }}>
+                            <div key={idx} style={{ display: "flex", alignItems: "flex-start", gap: "15px", borderBottom: "1px solid #f3f4f6", paddingBottom: "10px" }}>
                               {item.image && (
                                 <img src={item.image} alt={item.name} style={{ width: "45px", height: "45px", objectFit: "cover", borderRadius: "4px", border: "1px solid #eaeaea" }} onError={(e) => { e.currentTarget.style.display = 'none'; }} />
                               )}
                               <div style={{ flex: 1 }}>
-                                <h4 style={{ margin: 0, fontSize: "0.85rem", fontWeight: 400, color: "#111" }}>{item.name}</h4>
+                                <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                                  <h4 style={{ margin: 0, fontSize: "0.85rem", fontWeight: 400, color: "#111" }}>{item.name}</h4>
+                                  {(item.isGiftSet || item.name?.toLowerCase().includes('gift set')) && (
+                                    <span style={{ backgroundColor: "#fef3c7", color: "#b45309", fontSize: "0.65rem", fontWeight: 700, padding: "1px 6px", borderRadius: "4px" }}>
+                                      GIFT SET
+                                    </span>
+                                  )}
+                                </div>
                                 <div style={{ display: "flex", alignItems: "center", marginTop: "4px", gap: "6px" }}>
                                   <span style={{ fontSize: "0.75rem", color: "#6b7280" }}>Size: {item.size || 'Standard'}</span>
                                   <span style={{ fontSize: "0.75rem", color: "#cbd5e1" }}>|</span>
                                   <span style={{ fontSize: "0.75rem", color: "#6b7280" }}>Qty: {item.quantity}</span>
+                                  {(item.isGiftSet || item.giftSetDetails?.length > 0 || item.giftSetItems?.length > 0 || item.name?.toLowerCase().includes('gift set')) && (
+                                    <div style={{ marginTop: "6px", backgroundColor: "#f8fafc", padding: "6px 8px", borderRadius: "4px", border: "1px solid #e2e8f0" }}>
+                                      <span style={{ fontSize: "0.7rem", fontWeight: 600, color: "#64748b", textTransform: "uppercase" }}>Included Items:</span>
+                                      <div style={{ display: "flex", flexDirection: "column", gap: "4px", marginTop: "4px" }}>
+                                        {item.giftSetDetails && item.giftSetDetails.length > 0 ? (
+                                          item.giftSetDetails.map((sub: any, sIdx: number) => (
+                                            <div key={sIdx} style={{ fontSize: "0.75rem", color: "#334155", display: "flex", alignItems: "center", gap: "6px" }}>
+                                              {sub.imageFront && <img src={sub.imageFront} alt={sub.name} style={{ width: "16px", height: "16px", borderRadius: "2px", objectFit: "cover" }} />}
+                                              <span>{sub.name || sub}</span>
+                                            </div>
+                                          ))
+                                        ) : item.giftSetItems && item.giftSetItems.length > 0 ? (
+                                          item.giftSetItems.map((subName: any, sIdx: number) => (
+                                            <div key={sIdx} style={{ fontSize: "0.75rem", color: "#334155", display: "flex", alignItems: "center", gap: "6px" }}>
+                                              <span style={{ width: "6px", height: "6px", borderRadius: "50%", backgroundColor: "#94a3b8" }}></span>
+                                              <span>{typeof subName === 'string' ? subName : subName.name}</span>
+                                            </div>
+                                          ))
+                                        ) : (
+                                          <div style={{ fontSize: "0.75rem", color: "#64748b" }}>Custom Fragrance Set ({item.size || '3 items'})</div>
+                                        )}
+                                      </div>
+                                    </div>
+                                  )}
                                 </div>
                               </div>
                               <span style={{ fontSize: "0.85rem", fontWeight: 400, color: "#111" }}>₹{(item.price * item.quantity).toLocaleString("en-IN")}</span>

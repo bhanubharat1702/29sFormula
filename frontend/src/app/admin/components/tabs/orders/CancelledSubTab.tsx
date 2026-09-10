@@ -229,7 +229,7 @@ export default function CancelledSubTab({
                       <p>No orders placed in the system yet. Placed orders will show up here in real-time.</p>
                     </div>
                   ) : (
-                    <div className={styles.tableResponsive} style={{ overflow: openStatusDropdownId ? "visible" : "auto" }}>
+                    <div className={styles.tableResponsive} style={{ overflow: (openStatusDropdownId || openActionDropdownId) ? "visible" : "auto" }}>
                       <table className={styles.inventoryTable}>
                         <thead className={styles.hideOnMobile}>
                           {activeSubTab === "returns" ? (
