@@ -388,91 +388,177 @@ export default function AdminDashboard() {
   const [customAlert, setCustomAlert] = useState<{ title: string; message: string } | null>(null);
   const [showResetConfirmModal, setShowResetConfirmModal] = useState<boolean>(false);
 
+  const normalizeSettingsSnapshot = (data: any) => {
+    if (!data) return null;
+    return {
+      tickerText: data.tickerText || "",
+      tickerSpeed: data.tickerSpeed || 60,
+      tickerBgColor: data.tickerBgColor || "#ffffff",
+      tickerTextColor: data.tickerTextColor || "#000000",
+      announcementText: data.announcementText || "",
+      heroTitle: data.heroTitle || "",
+      heroTitleFontType: data.heroTitleFontType || "Outfit",
+      heroTitleFontColor: data.heroTitleFontColor || "#111827",
+      heroTitleFontSize: data.heroTitleFontSize || "4.5rem",
+      heroTitleFontAlignment: data.heroTitleFontAlignment || "center",
+      heroTitleFontWeight: data.heroTitleFontWeight || "700",
+      heroManifestoFontType: data.heroManifestoFontType || "Outfit",
+      heroManifestoFontColor: data.heroManifestoFontColor || "#ffffff",
+      heroManifestoFontSize: data.heroManifestoFontSize || "0.72rem",
+      heroManifestoFontAlignment: data.heroManifestoFontAlignment || "left",
+      heroManifestoFontWeight: data.heroManifestoFontWeight || "500",
+      heroManifesto: data.heroManifesto || "",
+      heroTemplate: data.heroTemplate || "center",
+      showHeroTitle: data.showHeroTitle !== false,
+      showHeroManifesto: data.showHeroManifesto !== false,
+      showHeroButton: data.showHeroButton !== false,
+      heroButtonText: data.heroButtonText || "Shop Now",
+      heroButtonStyle: data.heroButtonStyle || "solid",
+      heroButtonSize: data.heroButtonSize || "md",
+      heroButtonColor: data.heroButtonColor || "",
+      heroButtonTextColor: data.heroButtonTextColor || "#ffffff",
+      videoTitle: data.videoTitle || "",
+      videoSubtitle: data.videoSubtitle || "",
+      videoUrl: data.videoUrl || "",
+      videoFallbackColor: data.videoFallbackColor || "#121212",
+      videoTitleFontType: data.videoTitleFontType || "Outfit",
+      videoTitleFontColor: data.videoTitleFontColor || "#ffffff",
+      videoTitleFontSize: data.videoTitleFontSize || "3.5rem",
+      videoTitleFontAlignment: data.videoTitleFontAlignment || "center",
+      videoTitleFontWeight: data.videoTitleFontWeight || "700",
+      videoSubtitleFontType: data.videoSubtitleFontType || "Outfit",
+      videoSubtitleFontColor: data.videoSubtitleFontColor || "#ffffff",
+      videoSubtitleFontSize: data.videoSubtitleFontSize || "1.1rem",
+      videoSubtitleFontAlignment: data.videoSubtitleFontAlignment || "center",
+      videoSubtitleFontWeight: data.videoSubtitleFontWeight || "500",
+      videoTemplate: data.videoTemplate || "center",
+      showVideoTitle: data.showVideoTitle !== false,
+      showVideoSubtitle: data.showVideoSubtitle !== false,
+      showVideoButton: data.showVideoButton !== false,
+      videoButtonText: data.videoButtonText || "Shop Now",
+      videoButtonStyle: data.videoButtonStyle || "outline",
+      videoButtonSize: data.videoButtonSize || "md",
+      videoButtonColor: data.videoButtonColor || "#ffffff",
+      videoButtonTextColor: data.videoButtonTextColor || "#121212",
+      videoBgType: data.videoBgType || "video",
+      videoBgColor: data.videoBgColor || "#121212",
+      videoBgImage: data.videoBgImage || "",
+      lifestyleText: data.lifestyleText || "",
+      lifestyleImage: data.lifestyleImage || "https://images.unsplash.com/photo-1615655096345-61a54750068d?auto=format&fit=crop&w=1800&q=80",
+      primaryColor: data.primaryColor || "#57bc74",
+      brandLogoType: data.brandLogoType || "text",
+      brandLogoValue: data.brandLogoValue || "29sFORMULA",
+      heroBgType: data.heroBgType || "color",
+      heroBgColor: data.heroBgColor || "#57bc74",
+      heroBgImage: data.heroBgImage || "",
+      heroBgVideo: data.heroBgVideo || "",
+      showTicker: data.showTicker !== undefined ? data.showTicker : true,
+      showAnnouncement: data.showAnnouncement !== undefined ? data.showAnnouncement : true,
+      showVideo: data.showVideo !== undefined ? data.showVideo : true,
+      showLifestyle: data.showLifestyle !== undefined ? data.showLifestyle : true,
+      showProductReviews: data.showProductReviews !== undefined ? data.showProductReviews : true,
+      showProductExploreMore: data.showProductExploreMore !== undefined ? data.showProductExploreMore : true,
+      showProductFaq: data.showProductFaq !== undefined ? data.showProductFaq : true,
+      usageGuideText: data.usageGuideText || "Fits your mood. Handcrafted with scientific precision. Refer to our USAGE GUIDE for layering notes.",
+      exploreMoreTitle: data.exploreMoreTitle || "Don't Stop. Explore More.",
+      deliverySubtext: data.deliverySubtext || "TAXES INCLUDED. SHIPPING CALCULATED AT CHECKOUT.",
+      googleClientId: data.googleClientId || "753896502014-yourmockclientid.apps.googleusercontent.com",
+      supportText: data.supportText !== undefined ? data.supportText : "For support inquiries, please contact us.",
+      careersText: data.careersText !== undefined ? data.careersText : "Join our team! Check out our open positions.",
+      tradeEnquiryText: data.tradeEnquiryText !== undefined ? data.tradeEnquiryText : "For trade and wholesale inquiries, contact our B2B team.",
+      aboutUsText: data.aboutUsText !== undefined ? data.aboutUsText : "We are 29sFORMULA, redefining luxury.",
+      instagramLink: data.instagramLink !== undefined ? data.instagramLink : "#",
+      facebookLink: data.facebookLink !== undefined ? data.facebookLink : "#",
+      contactLink: data.contactLink !== undefined ? data.contactLink : "#",
+      contactUsText: data.contactUsText !== undefined ? data.contactUsText : "Need help? Email us at hello@29sformula.in and our support team will get back to you within 24 hours.",
+      returnPolicyText: data.returnPolicyText !== undefined ? data.returnPolicyText : "We offer a 7-day hassle-free return policy. If you're not fully satisfied with your purchase, contact our support team for a full refund.",
+      shippingPolicyText: data.shippingPolicyText !== undefined ? data.shippingPolicyText : "We offer free shipping across India. Orders are typically processed within 1-2 business days and delivered within 4-7 business days.",
+      faqs: data.faqs || []
+    };
+  };
+
   const hasUnsavedChanges = originalSettings ? (
-    tickerText !== (originalSettings.tickerText || "") ||
-    tickerSpeed !== (originalSettings.tickerSpeed || 60) ||
-    tickerBgColor !== (originalSettings.tickerBgColor || "#ffffff") ||
-    tickerTextColor !== (originalSettings.tickerTextColor || "#000000") ||
-    announcementText !== (originalSettings.announcementText || "") ||
-    heroTitle !== (originalSettings.heroTitle || "") ||
-    heroTitleFontType !== (originalSettings.heroTitleFontType || "Outfit") ||
-    heroTitleFontColor !== (originalSettings.heroTitleFontColor || "#111827") ||
-    heroTitleFontSize !== (originalSettings.heroTitleFontSize || "4.5rem") ||
-    heroTitleFontAlignment !== (originalSettings.heroTitleFontAlignment || "center") ||
-
-    heroTitleFontWeight !== (originalSettings.heroTitleFontWeight || "700") ||
-
-
-    heroManifesto !== (originalSettings.heroManifesto || "") ||
-    heroManifestoFontType !== (originalSettings.heroManifestoFontType || "Outfit") ||
-    heroManifestoFontColor !== (originalSettings.heroManifestoFontColor || "#ffffff") ||
-    heroManifestoFontSize !== (originalSettings.heroManifestoFontSize || "0.72rem") ||
-    heroManifestoFontAlignment !== (originalSettings.heroManifestoFontAlignment || "left") ||
-    heroManifestoFontWeight !== (originalSettings.heroManifestoFontWeight || "500") ||
-    heroTemplate !== (originalSettings.heroTemplate || "center") ||
-    showHeroTitle !== (originalSettings.showHeroTitle !== false) ||
-    showHeroManifesto !== (originalSettings.showHeroManifesto !== false) ||
-    showHeroButton !== (originalSettings.showHeroButton !== false) ||
-    heroButtonText !== (originalSettings.heroButtonText || "Shop Now") ||
-    heroButtonStyle !== (originalSettings.heroButtonStyle || "solid") ||
-    heroButtonSize !== (originalSettings.heroButtonSize || "md") ||
-    heroButtonColor !== (originalSettings.heroButtonColor || "") ||
-    heroButtonTextColor !== (originalSettings.heroButtonTextColor || "#ffffff") ||
-    videoTitle !== (originalSettings.videoTitle || "") ||
-    videoSubtitle !== (originalSettings.videoSubtitle || "") ||
-    videoUrl !== (originalSettings.videoUrl || "") ||
-    videoFallbackColor !== (originalSettings.videoFallbackColor || "#57bc74") ||
-    videoTitleFontType !== (originalSettings.videoTitleFontType || "Outfit") ||
-    videoTitleFontColor !== (originalSettings.videoTitleFontColor || "#ffffff") ||
-    videoTitleFontSize !== (originalSettings.videoTitleFontSize || "3.5rem") ||
-    videoTitleFontAlignment !== (originalSettings.videoTitleFontAlignment || "center") ||
-    videoTitleFontWeight !== (originalSettings.videoTitleFontWeight || "700") ||
-    videoSubtitleFontType !== (originalSettings.videoSubtitleFontType || "Outfit") ||
-    videoSubtitleFontColor !== (originalSettings.videoSubtitleFontColor || "#ffffff") ||
-    videoSubtitleFontSize !== (originalSettings.videoSubtitleFontSize || "1.1rem") ||
-    videoSubtitleFontAlignment !== (originalSettings.videoSubtitleFontAlignment || "center") ||
-    videoSubtitleFontWeight !== (originalSettings.videoSubtitleFontWeight || "500") ||
-    videoTemplate !== (originalSettings.videoTemplate || "center") ||
-    showVideoTitle !== (originalSettings.showVideoTitle ?? true) ||
-    showVideoSubtitle !== (originalSettings.showVideoSubtitle ?? true) ||
-    showVideoButton !== (originalSettings.showVideoButton ?? true) ||
-    videoButtonText !== (originalSettings.videoButtonText || "Shop Now") ||
-    videoButtonStyle !== (originalSettings.videoButtonStyle || "outline") ||
-    videoButtonSize !== (originalSettings.videoButtonSize || "md") ||
-    videoButtonColor !== (originalSettings.videoButtonColor || "#ffffff") ||
-    videoButtonTextColor !== (originalSettings.videoButtonTextColor || "#121212") ||
-    videoBgType !== (originalSettings.videoBgType || "video") ||
-    videoBgColor !== (originalSettings.videoBgColor || "#121212") ||
-    videoBgImage !== (originalSettings.videoBgImage || "") ||
-    lifestyleText !== (originalSettings.lifestyleText || "") ||
-    lifestyleImage !== (originalSettings.lifestyleImage || "") ||
-    primaryColor !== (originalSettings.primaryColor || "#57bc74") ||
-    brandLogoType !== (originalSettings.brandLogoType || "text") ||
-    brandLogoValue !== (originalSettings.brandLogoValue || "29sFORMULA") ||
-    heroBgType !== (originalSettings.heroBgType || "color") ||
-    heroBgColor !== (originalSettings.heroBgColor || "#57bc74") ||
-    heroBgImage !== (originalSettings.heroBgImage || "") ||
-    heroBgVideo !== (originalSettings.heroBgVideo || "") ||
-    showTicker !== (originalSettings.showTicker !== undefined ? originalSettings.showTicker : true) ||
-    showAnnouncement !== (originalSettings.showAnnouncement !== undefined ? originalSettings.showAnnouncement : true) ||
-    showVideo !== (originalSettings.showVideo !== undefined ? originalSettings.showVideo : true) ||
-    showLifestyle !== (originalSettings.showLifestyle !== undefined ? originalSettings.showLifestyle : true) ||
-    showProductReviews !== (originalSettings.showProductReviews !== undefined ? originalSettings.showProductReviews : true) ||
-    showProductExploreMore !== (originalSettings.showProductExploreMore !== undefined ? originalSettings.showProductExploreMore : true) ||
-    showProductFaq !== (originalSettings.showProductFaq !== undefined ? originalSettings.showProductFaq : true) ||
-    usageGuideText !== (originalSettings.usageGuideText || "Fits your mood. Handcrafted with scientific precision. Refer to our USAGE GUIDE for layering notes.") ||
-    exploreMoreTitle !== (originalSettings.exploreMoreTitle || "Don't Stop. Explore More.") ||
-    deliverySubtext !== (originalSettings.deliverySubtext || "TAXES INCLUDED. SHIPPING CALCULATED AT CHECKOUT.") ||
-    supportText !== (originalSettings.supportText || "For support inquiries, please contact us.") ||
-    careersText !== (originalSettings.careersText || "Join our team! Check out our open positions.") ||
-    tradeEnquiryText !== (originalSettings.tradeEnquiryText || "For trade and wholesale inquiries, contact our B2B team.") ||
-    aboutUsText !== (originalSettings.aboutUsText || "We are 29sFORMULA, redefining luxury.") ||
-    instagramLink !== (originalSettings.instagramLink || "#") ||
-    facebookLink !== (originalSettings.facebookLink || "#") ||
-    contactLink !== (originalSettings.contactLink || "#") ||
-    contactUsText !== (originalSettings.contactUsText || "Need help? Email us at hello@29sformula.in and our support team will get back to you within 24 hours.") ||
-    returnPolicyText !== (originalSettings.returnPolicyText || "We offer a 7-day hassle-free return policy. If you're not fully satisfied with your purchase, contact our support team for a full refund.") ||
-    shippingPolicyText !== (originalSettings.shippingPolicyText || "We offer free shipping across India. Orders are typically processed within 1-2 business days and delivered within 4-7 business days.") ||
+    tickerText !== originalSettings.tickerText ||
+    tickerSpeed !== originalSettings.tickerSpeed ||
+    tickerBgColor !== originalSettings.tickerBgColor ||
+    tickerTextColor !== originalSettings.tickerTextColor ||
+    announcementText !== originalSettings.announcementText ||
+    heroTitle !== originalSettings.heroTitle ||
+    heroTitleFontType !== originalSettings.heroTitleFontType ||
+    heroTitleFontColor !== originalSettings.heroTitleFontColor ||
+    heroTitleFontSize !== originalSettings.heroTitleFontSize ||
+    heroTitleFontAlignment !== originalSettings.heroTitleFontAlignment ||
+    heroTitleFontWeight !== originalSettings.heroTitleFontWeight ||
+    heroManifesto !== originalSettings.heroManifesto ||
+    heroManifestoFontType !== originalSettings.heroManifestoFontType ||
+    heroManifestoFontColor !== originalSettings.heroManifestoFontColor ||
+    heroManifestoFontSize !== originalSettings.heroManifestoFontSize ||
+    heroManifestoFontAlignment !== originalSettings.heroManifestoFontAlignment ||
+    heroManifestoFontWeight !== originalSettings.heroManifestoFontWeight ||
+    heroTemplate !== originalSettings.heroTemplate ||
+    showHeroTitle !== originalSettings.showHeroTitle ||
+    showHeroManifesto !== originalSettings.showHeroManifesto ||
+    showHeroButton !== originalSettings.showHeroButton ||
+    heroButtonText !== originalSettings.heroButtonText ||
+    heroButtonStyle !== originalSettings.heroButtonStyle ||
+    heroButtonSize !== originalSettings.heroButtonSize ||
+    heroButtonColor !== originalSettings.heroButtonColor ||
+    heroButtonTextColor !== originalSettings.heroButtonTextColor ||
+    videoTitle !== originalSettings.videoTitle ||
+    videoSubtitle !== originalSettings.videoSubtitle ||
+    videoUrl !== originalSettings.videoUrl ||
+    videoFallbackColor !== originalSettings.videoFallbackColor ||
+    videoTitleFontType !== originalSettings.videoTitleFontType ||
+    videoTitleFontColor !== originalSettings.videoTitleFontColor ||
+    videoTitleFontSize !== originalSettings.videoTitleFontSize ||
+    videoTitleFontAlignment !== originalSettings.videoTitleFontAlignment ||
+    videoTitleFontWeight !== originalSettings.videoTitleFontWeight ||
+    videoSubtitleFontType !== originalSettings.videoSubtitleFontType ||
+    videoSubtitleFontColor !== originalSettings.videoSubtitleFontColor ||
+    videoSubtitleFontSize !== originalSettings.videoSubtitleFontSize ||
+    videoSubtitleFontAlignment !== originalSettings.videoSubtitleFontAlignment ||
+    videoSubtitleFontWeight !== originalSettings.videoSubtitleFontWeight ||
+    videoTemplate !== originalSettings.videoTemplate ||
+    showVideoTitle !== originalSettings.showVideoTitle ||
+    showVideoSubtitle !== originalSettings.showVideoSubtitle ||
+    showVideoButton !== originalSettings.showVideoButton ||
+    videoButtonText !== originalSettings.videoButtonText ||
+    videoButtonStyle !== originalSettings.videoButtonStyle ||
+    videoButtonSize !== originalSettings.videoButtonSize ||
+    videoButtonColor !== originalSettings.videoButtonColor ||
+    videoButtonTextColor !== originalSettings.videoButtonTextColor ||
+    videoBgType !== originalSettings.videoBgType ||
+    videoBgColor !== originalSettings.videoBgColor ||
+    videoBgImage !== originalSettings.videoBgImage ||
+    lifestyleText !== originalSettings.lifestyleText ||
+    lifestyleImage !== originalSettings.lifestyleImage ||
+    primaryColor !== originalSettings.primaryColor ||
+    brandLogoType !== originalSettings.brandLogoType ||
+    brandLogoValue !== originalSettings.brandLogoValue ||
+    heroBgType !== originalSettings.heroBgType ||
+    heroBgColor !== originalSettings.heroBgColor ||
+    heroBgImage !== originalSettings.heroBgImage ||
+    heroBgVideo !== originalSettings.heroBgVideo ||
+    showTicker !== originalSettings.showTicker ||
+    showAnnouncement !== originalSettings.showAnnouncement ||
+    showVideo !== originalSettings.showVideo ||
+    showLifestyle !== originalSettings.showLifestyle ||
+    showProductReviews !== originalSettings.showProductReviews ||
+    showProductExploreMore !== originalSettings.showProductExploreMore ||
+    showProductFaq !== originalSettings.showProductFaq ||
+    usageGuideText !== originalSettings.usageGuideText ||
+    exploreMoreTitle !== originalSettings.exploreMoreTitle ||
+    deliverySubtext !== originalSettings.deliverySubtext ||
+    supportText !== originalSettings.supportText ||
+    careersText !== originalSettings.careersText ||
+    tradeEnquiryText !== originalSettings.tradeEnquiryText ||
+    aboutUsText !== originalSettings.aboutUsText ||
+    instagramLink !== originalSettings.instagramLink ||
+    facebookLink !== originalSettings.facebookLink ||
+    contactLink !== originalSettings.contactLink ||
+    contactUsText !== originalSettings.contactUsText ||
+    returnPolicyText !== originalSettings.returnPolicyText ||
+    shippingPolicyText !== originalSettings.shippingPolicyText ||
     JSON.stringify(faqs) !== JSON.stringify(originalSettings.faqs || [])
   ) : false;
 
@@ -672,91 +758,7 @@ export default function AdminDashboard() {
         setFaqs(loadedFaqs);
 
         // Save initial snapshot
-        setOriginalSettings({
-          tickerText: data.tickerText || "",
-          tickerSpeed: data.tickerSpeed || 60,
-          tickerBgColor: data.tickerBgColor || "#ffffff",
-          tickerTextColor: data.tickerTextColor || "#000000",
-          announcementText: data.announcementText || "",
-          heroTitle: data.heroTitle || "",
-          heroTitleFontType: data.heroTitleFontType || "Outfit",
-          heroTitleFontColor: data.heroTitleFontColor || "#111827",
-          heroTitleFontSize: data.heroTitleFontSize || "4.5rem",
-          heroTitleFontAlignment: data.heroTitleFontAlignment || "center",
-          heroTitleFontWeight: data.heroTitleFontWeight || "700",
-          heroManifestoFontType: data.heroManifestoFontType || "Outfit",
-          heroManifestoFontColor: data.heroManifestoFontColor || "#ffffff",
-          heroManifestoFontSize: data.heroManifestoFontSize || "0.72rem",
-          heroManifestoFontAlignment: data.heroManifestoFontAlignment || "left",
-          heroManifestoFontWeight: data.heroManifestoFontWeight || "500",
-          heroManifesto: data.heroManifesto || "",
-          heroTemplate: data.heroTemplate || "center",
-          showHeroTitle: data.showHeroTitle !== false,
-          showHeroManifesto: data.showHeroManifesto !== false,
-          showHeroButton: data.showHeroButton !== false,
-          heroButtonText: data.heroButtonText || "Shop Now",
-          heroButtonStyle: data.heroButtonStyle || "solid",
-          heroButtonSize: data.heroButtonSize || "md",
-          heroButtonColor: data.heroButtonColor || "",
-          heroButtonTextColor: data.heroButtonTextColor || "#ffffff",
-          videoTitle: data.videoTitle || "",
-          videoSubtitle: data.videoSubtitle || "",
-          videoUrl: data.videoUrl || "",
-          videoFallbackColor: data.videoFallbackColor || "#57bc74",
-          videoTitleFontType: data.videoTitleFontType || "Outfit",
-          videoTitleFontColor: data.videoTitleFontColor || "#ffffff",
-          videoTitleFontSize: data.videoTitleFontSize || "3.5rem",
-          videoTitleFontAlignment: data.videoTitleFontAlignment || "center",
-          videoTitleFontWeight: data.videoTitleFontWeight || "700",
-          videoSubtitleFontType: data.videoSubtitleFontType || "Outfit",
-          videoSubtitleFontColor: data.videoSubtitleFontColor || "#ffffff",
-          videoSubtitleFontSize: data.videoSubtitleFontSize || "1.1rem",
-          videoSubtitleFontAlignment: data.videoSubtitleFontAlignment || "center",
-          videoSubtitleFontWeight: data.videoSubtitleFontWeight || "500",
-          videoTemplate: data.videoTemplate || "center",
-          showVideoTitle: data.showVideoTitle !== false,
-          showVideoSubtitle: data.showVideoSubtitle !== false,
-          showVideoButton: data.showVideoButton !== false,
-          videoButtonText: data.videoButtonText || "Shop Now",
-          videoButtonStyle: data.videoButtonStyle || "outline",
-          videoButtonSize: data.videoButtonSize || "md",
-          videoButtonColor: data.videoButtonColor || "#ffffff",
-          videoButtonTextColor: data.videoButtonTextColor || "#121212",
-          videoBgType: data.videoBgType || "video",
-          videoBgColor: data.videoBgColor || "#121212",
-          videoBgImage: data.videoBgImage || "",
-          lifestyleText: data.lifestyleText || "",
-          lifestyleImage: data.lifestyleImage || "https://images.unsplash.com/photo-1615655096345-61a54750068d?auto=format&fit=crop&w=1800&q=80",
-          primaryColor: data.primaryColor || "#57bc74",
-          brandLogoType: data.brandLogoType || "text",
-          brandLogoValue: data.brandLogoValue || "29sFORMULA",
-          heroBgType: data.heroBgType || "color",
-          heroBgColor: data.heroBgColor || "#57bc74",
-          heroBgImage: data.heroBgImage || "",
-          heroBgVideo: data.heroBgVideo || "",
-          showTicker: data.showTicker !== undefined ? data.showTicker : true,
-          showAnnouncement: data.showAnnouncement !== undefined ? data.showAnnouncement : true,
-          showVideo: data.showVideo !== undefined ? data.showVideo : true,
-          showLifestyle: data.showLifestyle !== undefined ? data.showLifestyle : true,
-          showProductReviews: data.showProductReviews !== undefined ? data.showProductReviews : true,
-          showProductExploreMore: data.showProductExploreMore !== undefined ? data.showProductExploreMore : true,
-          showProductFaq: data.showProductFaq !== undefined ? data.showProductFaq : true,
-          usageGuideText: data.usageGuideText || "Fits your mood. Handcrafted with scientific precision. Refer to our USAGE GUIDE for layering notes.",
-          exploreMoreTitle: data.exploreMoreTitle || "Don't Stop. Explore More.",
-          deliverySubtext: data.deliverySubtext || "TAXES INCLUDED. SHIPPING CALCULATED AT CHECKOUT.",
-          googleClientId: data.googleClientId || "753896502014-yourmockclientid.apps.googleusercontent.com",
-          supportText: data.supportText || "",
-          careersText: data.careersText || "",
-          tradeEnquiryText: data.tradeEnquiryText || "",
-          aboutUsText: data.aboutUsText || "",
-          instagramLink: data.instagramLink || "#",
-          facebookLink: data.facebookLink || "#",
-          contactLink: data.contactLink || "#",
-          contactUsText: data.contactUsText || "",
-          returnPolicyText: data.returnPolicyText || "",
-          shippingPolicyText: data.shippingPolicyText || "",
-          faqs: loadedFaqs
-        });
+        setOriginalSettings(normalizeSettingsSnapshot(data));
       }
     } catch (err: any) {
       console.warn("Storefront settings query failed (likely backend starting up):", err.message || err);
@@ -950,100 +952,9 @@ export default function AdminDashboard() {
     }
   };
 
-  const saveSettingsSilent = async () => {
+  const saveSettingsSilent = async (overrideSettings?: Record<string, any>) => {
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:5001'}/api/settings`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          tickerText,
-          tickerSpeed,
-          tickerBgColor,
-          tickerTextColor,
-          announcementText,
-          heroTitle,
-          heroTitleFontType,
-          heroTitleFontColor,
-          heroTitleFontSize,
-          heroTitleFontAlignment,
-          heroTitleFontWeight,
-          heroManifesto,
-          heroManifestoFontType,
-          heroManifestoFontColor,
-          heroManifestoFontSize,
-          heroManifestoFontAlignment,
-          heroManifestoFontWeight,
-          heroTemplate,
-          showHeroTitle,
-          showHeroManifesto,
-          showHeroButton,
-          heroButtonText,
-          heroButtonStyle,
-          heroButtonSize,
-          heroButtonColor,
-          heroButtonTextColor,
-          videoTitle,
-          videoSubtitle,
-          videoUrl,
-          videoFallbackColor,
-          videoTitleFontType,
-          videoTitleFontColor,
-          videoTitleFontSize,
-          videoTitleFontAlignment,
-          videoTitleFontWeight,
-          videoSubtitleFontType,
-          videoSubtitleFontColor,
-          videoSubtitleFontSize,
-          videoSubtitleFontAlignment,
-          videoSubtitleFontWeight,
-          videoTemplate,
-          showVideoTitle,
-          showVideoSubtitle,
-          showVideoButton,
-          videoButtonText,
-          videoButtonStyle,
-          videoButtonSize,
-          videoButtonColor,
-          videoButtonTextColor,
-          videoBgType,
-          videoBgColor,
-          videoBgImage,
-          lifestyleText,
-          lifestyleImage,
-          primaryColor,
-          brandLogoType,
-          brandLogoValue,
-          heroBgType,
-          heroBgColor,
-          heroBgImage,
-          heroBgVideo,
-          showTicker,
-          showAnnouncement,
-          showVideo,
-          showLifestyle,
-          showProductReviews,
-          showProductExploreMore,
-          showProductFaq,
-          usageGuideText,
-          exploreMoreTitle,
-          deliverySubtext,
-          supportText,
-          careersText,
-          tradeEnquiryText,
-          aboutUsText,
-          instagramLink,
-          facebookLink,
-          contactLink,
-          contactUsText,
-          returnPolicyText,
-          shippingPolicyText,
-          faqs,
-          googleClientId
-        })
-      });
-      if (!res.ok) throw new Error("Failed to save layout adjustments");
-
-      setOriginalSettings({
+      const payload = {
         tickerText,
         tickerSpeed,
         tickerBgColor,
@@ -1126,10 +1037,21 @@ export default function AdminDashboard() {
         returnPolicyText,
         shippingPolicyText,
         faqs,
-        googleClientId
+        googleClientId,
+        ...overrideSettings
+      };
+
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:5001'}/api/settings`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
       });
+      if (!res.ok) throw new Error("Failed to save layout adjustments");
+
+      const data = await res.json();
+      setOriginalSettings(normalizeSettingsSnapshot(data));
     } catch (err: any) {
-      alert("Could not auto-save storefront configuration: " + err.message);
+      console.error("Silent save settings error:", err);
     }
   };
 
@@ -1329,92 +1251,8 @@ export default function AdminDashboard() {
       });
       if (!res.ok) throw new Error("Failed to save layout adjustments");
 
-      // Update original settings state
-      setOriginalSettings({
-        tickerText,
-        tickerSpeed,
-        tickerBgColor,
-        tickerTextColor,
-        announcementText,
-        heroTitle,
-        heroTitleFontType,
-        heroTitleFontColor,
-        heroTitleFontSize,
-        heroTitleFontAlignment,
-        heroTitleFontWeight,
-        heroManifesto,
-        heroManifestoFontType,
-        heroManifestoFontColor,
-        heroManifestoFontSize,
-        heroManifestoFontAlignment,
-        heroManifestoFontWeight,
-        heroTemplate,
-        showHeroTitle,
-        showHeroManifesto,
-        showHeroButton,
-        heroButtonText,
-        heroButtonStyle,
-        heroButtonSize,
-        heroButtonColor,
-        heroButtonTextColor,
-        videoTitle,
-        videoSubtitle,
-        videoUrl,
-        videoFallbackColor,
-        videoTitleFontType,
-        videoTitleFontColor,
-        videoTitleFontSize,
-        videoTitleFontAlignment,
-        videoTitleFontWeight,
-        videoSubtitleFontType,
-        videoSubtitleFontColor,
-        videoSubtitleFontSize,
-        videoSubtitleFontAlignment,
-        videoSubtitleFontWeight,
-        videoTemplate,
-        showVideoTitle,
-        showVideoSubtitle,
-        showVideoButton,
-        videoButtonText,
-        videoButtonStyle,
-        videoButtonSize,
-        videoButtonColor,
-        videoButtonTextColor,
-        videoBgType,
-        videoBgColor,
-        videoBgImage,
-        lifestyleText,
-        lifestyleImage,
-        primaryColor,
-        brandLogoType,
-        brandLogoValue,
-        heroBgType,
-        heroBgColor,
-        heroBgImage,
-        heroBgVideo,
-        showTicker,
-        showAnnouncement,
-        showVideo,
-        showLifestyle,
-        showProductReviews,
-        showProductExploreMore,
-        showProductFaq,
-        usageGuideText,
-        exploreMoreTitle,
-        deliverySubtext,
-        supportText,
-        careersText,
-        tradeEnquiryText,
-        aboutUsText,
-        instagramLink,
-        facebookLink,
-        contactLink,
-        contactUsText,
-        returnPolicyText,
-        shippingPolicyText,
-        faqs,
-        googleClientId
-      });
+      const data = await res.json();
+      setOriginalSettings(normalizeSettingsSnapshot(data));
 
       setSuccessMessage("Homepage layout customized successfully!");
       setTimeout(() => setSuccessMessage(null), 3000);
@@ -3143,10 +2981,12 @@ export default function AdminDashboard() {
             setShowHeroButton(config.showButton);
 
             setHeroTemplate(config.layoutTemplate);
+            if (config.bgType) setHeroBgType(config.bgType);
+            if (config.bgColor) setHeroBgColor(config.bgColor);
+            if (config.bgImage !== undefined) setHeroBgImage(config.bgImage);
+            if (config.bgVideo !== undefined) setHeroBgVideo(config.bgVideo);
+
             setIsHeroCustomizerModalOpen(false);
-            setTimeout(() => {
-              saveSettingsSilent();
-            }, 100);
           }}
           sectionName="Hero Section"
           primaryColor={primaryColor}
@@ -3218,9 +3058,6 @@ export default function AdminDashboard() {
             setVideoUrl(config.bgVideo || "");
 
             setIsVideoCustomizerModalOpen(false);
-            setTimeout(() => {
-              saveSettingsSilent();
-            }, 100);
           }}
           sectionName="Video Section"
           primaryColor={primaryColor}

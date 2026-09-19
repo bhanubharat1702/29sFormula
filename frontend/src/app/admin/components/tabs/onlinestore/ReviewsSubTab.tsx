@@ -1283,7 +1283,7 @@ export default function ReviewsSubTab({
                   )}
 
                   {/* Save and Reset Row */}
-                  {(customizeSubTab === "landing" || customizeSubTab === "product") && (
+                  {(customizeSubTab === "landing" || customizeSubTab === "product" || customizeSubTab === "reviews") && (
                     <div style={{ display: "flex", gap: "15px", flexWrap: "wrap", marginTop: "15px", width: "100%" }}>
                       <button
                         type="submit"

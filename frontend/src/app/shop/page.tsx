@@ -48,6 +48,7 @@ export default function Shop() {
 
   // Filtering & Sorting State
   const [inStockOnly, setInStockOnly] = useState<boolean>(false);
+  const [availabilityFilter, setAvailabilityFilter] = useState<"all" | "in-stock" | "out-of-stock">("all");
   const [priceRange, setPriceRange] = useState<"all" | "under-1500" | "1500-2000" | "over-2000">("all");
   const [sortBy, setSortBy] = useState<"featured" | "low-to-high" | "high-to-low" | "a-z" | "z-a">("featured");
   const [viewLayout, setViewLayout] = useState<"grid" | "list">("grid");
@@ -335,6 +336,21 @@ export default function Shop() {
     return ["#d2b48c", "#8b0000", "#111111"]; // Amber/Ruby/Charcoal defaults
   };
 
+  const getProductStock = (product: Product): number => {
+    if (!product) return 0;
+    if (Array.isArray(product.variants) && product.variants.length > 0) {
+      const variantStock = product.variants.reduce((sum, v) => sum + (Number(v.quantity) || 0), 0);
+      if (variantStock > 0 || product.quantity === undefined || product.quantity === null) {
+        return variantStock;
+      }
+    }
+    if (Array.isArray((product as any).options) && (product as any).options.length > 0) {
+      const optionStock = (product as any).options.reduce((sum: number, o: any) => sum + (Number(o.quantity) || 0), 0);
+      if (optionStock > 0) return optionStock;
+    }
+    return Number(product.quantity) || 0;
+  };
+
   // Filter logic
   const filteredProducts = products.filter(product => {
     // Category match
@@ -351,7 +367,13 @@ export default function Shop() {
       categoryString.toLowerCase().includes(searchQuery.toLowerCase());
 
     // Availability match
-    const matchesAvailability = !inStockOnly || (product.quantity ?? 0) > 0;
+    const stock = getProductStock(product);
+    const matchesAvailability =
+      availabilityFilter === "in-stock" || inStockOnly
+        ? stock > 0
+        : availabilityFilter === "out-of-stock"
+        ? stock <= 0
+        : true;
 
     // Price range match
     let matchesPrice = true;
@@ -401,12 +423,33 @@ export default function Shop() {
               </button>
               {activeDropdown === "availability" && (
                 <div className={styles.dropdownContent}>
-                  <CustomCheckbox 
-                    checked={inStockOnly} 
-                    onChange={(e) => setInStockOnly(e.target.checked)}
-                    label="In Stock Only"
-                    style={{ '--checkbox-color': primaryColor } as React.CSSProperties}
-                  />
+                  <label className={styles.radioLabel}>
+                    <input 
+                      type="radio" 
+                      name="availabilityFilter" 
+                      checked={availabilityFilter === "all" && !inStockOnly} 
+                      onChange={() => { setAvailabilityFilter("all"); setInStockOnly(false); }} 
+                    />
+                    All Products
+                  </label>
+                  <label className={styles.radioLabel}>
+                    <input 
+                      type="radio" 
+                      name="availabilityFilter" 
+                      checked={availabilityFilter === "in-stock" || inStockOnly} 
+                      onChange={() => { setAvailabilityFilter("in-stock"); setInStockOnly(true); }} 
+                    />
+                    In Stock
+                  </label>
+                  <label className={styles.radioLabel}>
+                    <input 
+                      type="radio" 
+                      name="availabilityFilter" 
+                      checked={availabilityFilter === "out-of-stock"} 
+                      onChange={() => { setAvailabilityFilter("out-of-stock"); setInStockOnly(false); }} 
+                    />
+                    Out of Stock
+                  </label>
                 </div>
               )}
             </div>
@@ -547,24 +590,24 @@ export default function Shop() {
                   key={product._id} 
                   className={styles.productCard}
                   style={{
-                    cursor: product.quantity === 0 ? "not-allowed" : "pointer"
+                    cursor: getProductStock(product) === 0 ? "not-allowed" : "pointer"
                   }}
                   onMouseEnter={() => {
-                    if (product.quantity === 0) return;
+                    if (getProductStock(product) === 0) return;
                     const imgs = getProductImages(product);
                     if (imgs.length > 1) {
                       setActiveImageIndexes(prev => ({ ...prev, [product._id]: 1 }));
                     }
                   }}
                   onMouseLeave={() => {
-                    if (product.quantity === 0) return;
+                    if (getProductStock(product) === 0) return;
                     setActiveImageIndexes(prev => ({ ...prev, [product._id]: 0 }));
                   }}
                 >
-                  <div className={styles.productImageContainer} style={product.quantity === 0 ? { pointerEvents: "none", filter: "grayscale(1)", opacity: 0.7 } : {}}>
+                  <div className={styles.productImageContainer} style={getProductStock(product) === 0 ? { pointerEvents: "none", filter: "grayscale(1)", opacity: 0.7 } : {}}>
                     <Link 
                       href={`/product/${product._id}`} 
-                      style={{ textDecoration: "none", color: "inherit", display: "block", pointerEvents: product.quantity === 0 ? "none" : "auto" }}
+                      style={{ textDecoration: "none", color: "inherit", display: "block", pointerEvents: getProductStock(product) === 0 ? "none" : "auto" }}
                     >
                       {(() => {
                         const imagesList = getProductImages(product);
@@ -631,8 +674,8 @@ export default function Shop() {
                     </button>
                   </div>
 
-                  <div className={styles.productInfo} style={product.quantity === 0 ? { pointerEvents: "none" } : {}}>
-                    <Link href={`/product/${product._id}`} style={{ textDecoration: "none", color: "inherit", pointerEvents: product.quantity === 0 ? "none" : "auto", display: "flex", flexDirection: "column", alignItems: "center" }}>
+                  <div className={styles.productInfo} style={getProductStock(product) === 0 ? { pointerEvents: "none" } : {}}>
+                    <Link href={`/product/${product._id}`} style={{ textDecoration: "none", color: "inherit", pointerEvents: getProductStock(product) === 0 ? "none" : "auto", display: "flex", flexDirection: "column", alignItems: "center" }}>
                       <h3 className={styles.productTitle}>{product.name.toUpperCase()}</h3>
                       {(() => {
                         const cheapestVariant = product.variants && product.variants.length > 0
@@ -679,11 +722,17 @@ export default function Shop() {
                                 Available in: {availableSizes.join(", ")}
                               </p>
                             )}
-                            {lowestQuantity !== undefined && lowestQuantity <= 5 && (
-                              <p style={{ color: "#dc2626", fontSize: "0.72rem", fontWeight: 700, marginTop: "4px", letterSpacing: "0.02em" }}>
-                                {lowestQuantity === 0 ? "OUT OF STOCK" : `ONLY ${lowestQuantity} LEFT`}
-                              </p>
-                            )}
+                            {(() => {
+                              const stock = getProductStock(product);
+                              if (stock <= 5) {
+                                return (
+                                  <p style={{ color: "#dc2626", fontSize: "0.72rem", fontWeight: 700, marginTop: "4px", letterSpacing: "0.02em" }}>
+                                    {stock === 0 ? "OUT OF STOCK" : `ONLY ${stock} LEFT`}
+                                  </p>
+                                );
+                              }
+                              return null;
+                            })()}
                           </>
                         );
                       })()}
@@ -770,12 +819,35 @@ export default function Shop() {
 
               <div className={styles.mobileFilterGroup}>
                 <h3 className={styles.mobileFilterGroupTitle}>AVAILABILITY</h3>
-                <CustomCheckbox 
-                  checked={inStockOnly}
-                  onChange={(e) => setInStockOnly(e.target.checked)}
-                  label="In Stock Only"
-                  style={{ '--checkbox-color': primaryColor } as React.CSSProperties}
-                />
+                <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+                  <label className={styles.radioLabel}>
+                    <input 
+                      type="radio" 
+                      name="mobileAvailability" 
+                      checked={availabilityFilter === "all" && !inStockOnly} 
+                      onChange={() => { setAvailabilityFilter("all"); setInStockOnly(false); }} 
+                    />
+                    All Products
+                  </label>
+                  <label className={styles.radioLabel}>
+                    <input 
+                      type="radio" 
+                      name="mobileAvailability" 
+                      checked={availabilityFilter === "in-stock" || inStockOnly} 
+                      onChange={() => { setAvailabilityFilter("in-stock"); setInStockOnly(true); }} 
+                    />
+                    In Stock
+                  </label>
+                  <label className={styles.radioLabel}>
+                    <input 
+                      type="radio" 
+                      name="mobileAvailability" 
+                      checked={availabilityFilter === "out-of-stock"} 
+                      onChange={() => { setAvailabilityFilter("out-of-stock"); setInStockOnly(false); }} 
+                    />
+                    Out of Stock
+                  </label>
+                </div>
               </div>
 
             </div>

@@ -5,6 +5,7 @@ import crypto from "crypto";
 import Order from "../models/Order.js";
 import ReturnRequest from "../models/ReturnRequest.js";
 import Customer from "../models/Customer.js";
+import User from "../models/User.js";
 import { Product, ProductVariant } from "../models/Product.js";
 import { invalidateProductsCache } from "../utils/cache.js";
 import { sendEmail } from "../utils/emailService.js";
@@ -380,8 +381,8 @@ router.post("/api/orders", async (req, res) => {
     if (customer) {
       customer.totalOrders += 1;
       customer.totalSpend += secureTotalAmount;
-      customer.name = customerName;
-      customer.phone = customerPhone;
+      if (customerName) customer.name = customerName;
+      if (customerPhone) customer.phone = customerPhone;
       if (shippingAddress) customer.address = shippingAddress;
       await customer.save();
     } else {
@@ -393,6 +394,14 @@ router.post("/api/orders", async (req, res) => {
         totalOrders: 1,
         totalSpend: secureTotalAmount
       });
+    }
+
+    if (email) {
+      const userAcc = await User.findOne({ email: new RegExp(`^${email}$`, 'i') });
+      if (userAcc) {
+        if (customerPhone) userAcc.phone = customerPhone;
+        await userAcc.save();
+      }
     }
 
     let orderIdNum = 1001;
@@ -970,11 +979,12 @@ router.post("/api/orders/razorpay-verify", async (req, res) => {
     }
 
     // Payment is verified. Now create the order in the database.
-    let customer = await Customer.findOne({ email: orderPayload.customerEmail });
+    const cleanEmail = (orderPayload.customerEmail || "").toLowerCase().trim();
+    let customer = await Customer.findOne({ email: new RegExp(`^${cleanEmail}$`, 'i') });
     if (!customer) {
       customer = new Customer({
         name: orderPayload.customerName,
-        email: orderPayload.customerEmail,
+        email: cleanEmail,
         phone: orderPayload.customerPhone,
         address: orderPayload.shippingAddress,
         totalOrders: 1,
@@ -984,8 +994,18 @@ router.post("/api/orders/razorpay-verify", async (req, res) => {
     } else {
       customer.totalOrders += 1;
       customer.totalSpend += orderPayload.totalAmount;
+      if (orderPayload.customerName) customer.name = orderPayload.customerName;
+      if (orderPayload.customerPhone) customer.phone = orderPayload.customerPhone;
       if (orderPayload.shippingAddress) customer.address = orderPayload.shippingAddress;
       await customer.save();
+    }
+
+    if (cleanEmail) {
+      const userAcc = await User.findOne({ email: new RegExp(`^${cleanEmail}$`, 'i') });
+      if (userAcc) {
+        if (orderPayload.customerPhone) userAcc.phone = orderPayload.customerPhone;
+        await userAcc.save();
+      }
     }
 
     let orderIdNum = 1001;

@@ -1,5 +1,7 @@
 import express from "express";
 import Customer from "../models/Customer.js";
+import User from "../models/User.js";
+import Order from "../models/Order.js";
 import Otp from "../models/Otp.js";
 import dotenv from "dotenv";
 import { sendEmail } from "../utils/emailService.js";
@@ -94,19 +96,49 @@ router.get("/api/customers/search", async (req, res) => {
       return res.status(400).json({ error: "Query parameter is required" });
     }
     
-    // Search by email or phone
-    const customer = await Customer.findOne({
+    const cleanQuery = String(query).trim();
+    const escapedQuery = cleanQuery.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+    // 1. Search Customer model
+    let customer = await Customer.findOne({
       $or: [
-        { email: new RegExp(`^${query}$`, 'i') },
-        { phone: query }
+        { email: new RegExp(`^${escapedQuery}$`, 'i') },
+        { phone: cleanQuery }
       ]
-    });
-    
-    if (!customer) {
+    }).lean();
+
+    // 2. Search User model
+    const userAcc = await User.findOne({
+      $or: [
+        { email: new RegExp(`^${escapedQuery}$`, 'i') },
+        { phone: cleanQuery }
+      ]
+    }).lean();
+
+    // 3. Search latest Order
+    const lastOrder = await Order.findOne({
+      $or: [
+        { customerEmail: new RegExp(`^${escapedQuery}$`, 'i') },
+        { customerPhone: cleanQuery }
+      ]
+    }).sort({ _id: -1 }).lean();
+
+    if (!customer && !userAcc && !lastOrder) {
       return res.status(404).json({ error: "Customer not found" });
     }
-    
-    res.json(customer);
+
+    const mergedName = customer?.name || userAcc?.name || lastOrder?.customerName || "";
+    const mergedEmail = customer?.email || userAcc?.email || lastOrder?.customerEmail || cleanQuery;
+    const mergedPhone = customer?.phone || userAcc?.phone || lastOrder?.customerPhone || "";
+    const mergedAddress = customer?.address || lastOrder?.shippingAddress || "";
+
+    res.json({
+      _id: customer?._id || userAcc?._id || lastOrder?._id,
+      name: mergedName,
+      email: mergedEmail,
+      phone: mergedPhone,
+      address: mergedAddress
+    });
   } catch (error) {
     console.error("Failed to search customer:", error);
     res.status(500).json({ error: "Failed to search customer" });

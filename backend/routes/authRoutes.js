@@ -1,6 +1,7 @@
 import express from "express";
 import User from "../models/User.js";
 import Customer from "../models/Customer.js";
+import Order from "../models/Order.js";
 import { sendEmail } from "../utils/emailService.js";
 
 const router = express.Router();
@@ -102,13 +103,17 @@ router.post("/api/auth/login", async (req, res) => {
     }
 
     const existingCustomer = await Customer.findOne({ email: new RegExp(`^${trimmedEmail}$`, 'i') });
+    const lastOrder = await Order.findOne({ customerEmail: new RegExp(`^${trimmedEmail}$`, 'i') }).sort({ _id: -1 });
+
+    const validName = (n) => (n && n !== "Google User" && !n.toLowerCase().includes("google")) ? n.trim() : "";
+    const resolvedName = validName(user.name) || validName(existingCustomer?.name) || validName(lastOrder?.customerName) || user.name;
 
     res.json({
       _id: user._id,
-      name: user.name,
+      name: resolvedName,
       email: user.email,
-      phone: existingCustomer?.phone || "",
-      address: existingCustomer?.address || "",
+      phone: user.phone || existingCustomer?.phone || lastOrder?.customerPhone || "",
+      address: existingCustomer?.address || lastOrder?.shippingAddress || "",
       isGoogleUser: false
     });
   } catch (error) {
@@ -134,18 +139,32 @@ router.post("/api/auth/google", async (req, res) => {
     }
 
     const payload = await verifyRes.json();
-    const { sub: googleId, email, name, picture } = payload;
+    const { sub: googleId, email, name, picture, given_name, family_name } = payload;
 
     if (!email) {
       return res.status(400).json({ error: "Google account does not provide an email address." });
     }
 
     const trimmedEmail = email.trim().toLowerCase();
+
+    // Derive proper full name from Google token fields or email username
+    let computedName = "";
+    if (name && name.trim() && name !== "Google User" && !name.toLowerCase().includes("google")) {
+      computedName = name.trim();
+    } else if (given_name) {
+      computedName = `${given_name} ${family_name || ''}`.trim();
+    }
+
+    if (!computedName && trimmedEmail) {
+      const uname = trimmedEmail.split('@')[0].replace(/[._+-]+/g, ' ').trim();
+      computedName = uname.replace(/\b\w/g, char => char.toUpperCase());
+    }
+
     let user = await User.findOne({ email: trimmedEmail });
 
     if (!user) {
       user = new User({
-        name: name || "Google User",
+        name: computedName || "User",
         email: trimmedEmail,
         googleId,
         isGoogleUser: true,
@@ -160,21 +179,40 @@ router.post("/api/auth/google", async (req, res) => {
         user.isGoogleUser = true;
         user.googleId = googleId;
       }
-      // Always update to the latest profile picture from Google
       if (picture) {
         user.profilePicture = picture;
+      }
+      if (computedName && (!user.name || user.name === "Google User" || user.name.toLowerCase().includes("google"))) {
+        user.name = computedName;
       }
       await user.save();
     }
 
-    const existingCustomer = await Customer.findOne({ email: new RegExp(`^${trimmedEmail}$`, 'i') });
+    let existingCustomer = await Customer.findOne({ email: new RegExp(`^${trimmedEmail}$`, 'i') });
+    if (!existingCustomer) {
+      existingCustomer = await Customer.create({
+        name: user.name || computedName || "Customer",
+        email: trimmedEmail,
+        phone: user.phone || "",
+        address: ""
+      });
+    } else if (computedName && (!existingCustomer.name || existingCustomer.name === "Google User" || existingCustomer.name.toLowerCase().includes("google"))) {
+      existingCustomer.name = user.name || computedName;
+      await existingCustomer.save();
+    }
+
+    const lastOrder = await Order.findOne({ customerEmail: new RegExp(`^${trimmedEmail}$`, 'i') }).sort({ _id: -1 });
+
+    const finalName = (user.name && user.name !== "Google User" && !user.name.toLowerCase().includes("google"))
+      ? user.name
+      : (existingCustomer?.name && existingCustomer.name !== "Google User" ? existingCustomer.name : (lastOrder?.customerName || computedName));
 
     res.json({
       _id: user._id,
-      name: user.name,
+      name: finalName,
       email: user.email,
-      phone: existingCustomer?.phone || "",
-      address: existingCustomer?.address || "",
+      phone: user.phone || existingCustomer?.phone || lastOrder?.customerPhone || "",
+      address: existingCustomer?.address || lastOrder?.shippingAddress || "",
       isGoogleUser: true,
       profilePicture: user.profilePicture
     });

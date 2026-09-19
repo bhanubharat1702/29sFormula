@@ -7,7 +7,8 @@ const userSchema = new mongoose.Schema({
   password: { type: String },
   googleId: { type: String },
   isGoogleUser: { type: Boolean, default: false },
-  profilePicture: { type: String }
+  profilePicture: { type: String },
+  phone: { type: String }
 }, { timestamps: true });
 
 const User = mongoose.models.User || mongoose.model("User", userSchema);

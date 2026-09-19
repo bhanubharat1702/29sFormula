@@ -6,7 +6,11 @@ const router = express.Router();
 
 router.post("/api/upload", upload.single("file"), async (req, res) => {
   try {
-    if (!process.env.CLOUDINARY_CLOUD_NAME || !process.env.CLOUDINARY_API_KEY || !process.env.CLOUDINARY_API_SECRET) {
+    if (process.env.CLOUDINARY_API_SECRET?.includes("*")) {
+      return res.status(400).json({ error: "Cloudinary API Secret is currently masked with asterisks ('**********'). Please update backend/.env with your actual unmasked Cloudinary API Secret." });
+    }
+
+    if (!process.env.CLOUDINARY_URL && (!process.env.CLOUDINARY_CLOUD_NAME || !process.env.CLOUDINARY_API_KEY || !process.env.CLOUDINARY_API_SECRET)) {
       return res.status(400).json({ error: "Cloudinary credentials not configured in backend .env file" });
     }
     
@@ -18,7 +22,8 @@ router.post("/api/upload", upload.single("file"), async (req, res) => {
     const uploadStream = cloudinary.uploader.upload_stream(
       {
         resource_type: "auto",
-        folder: "29sformula"
+        folder: "29sformula",
+        timeout: 120000
       },
       (error, result) => {
         if (error) {

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import styles from "../../page.module.css";
 import { LayoutCustomizationConfig } from '../../types';
+import { fontCategories } from '../../constants/fonts';
 
 import CustomCheckbox from "@/components/CustomCheckbox/CustomCheckbox";
 
@@ -584,30 +585,7 @@ export default function CustomizeLayoutModal({
                                 zIndex: 16100,
                                 boxSizing: "border-box"
                               }}>
-                                {[
-                                  { category: "Elegant Serif (Luxury & Heritage)", fonts: [
-                                    { name: "Cinzel", label: "Cinzel (Luxury Capital)" },
-                                    { name: "Cinzel Decorative", label: "Cinzel Decorative (Ornate)" },
-                                    { name: "Cormorant Garamond", label: "Cormorant Garamond (Editorial)" },
-                                    { name: "Playfair Display", label: "Playfair Display (Classic)" },
-                                    { name: "Prata", label: "Prata (High-Contrast)" },
-                                    { name: "Italiana", label: "Italiana (Minimalist)" },
-                                    { name: "Bodoni Moda", label: "Bodoni Moda (Modern)" },
-                                    { name: "DM Serif Display", label: "DM Serif (Bold Editorial)" },
-                                    { name: "EB Garamond", label: "EB Garamond (Luxury Antique)" },
-                                    { name: "Spectral", label: "Spectral (Editorial Serif)" },
-                                    { name: "Fraunces", label: "Fraunces (Warm & Organic)" }
-                                  ]},
-                                  { category: "Modern Sans-Serif (Clean & Premium)", fonts: [
-                                    { name: "Outfit", label: "Outfit (Modern & Trendy)" },
-                                    { name: "Montserrat", label: "Montserrat (Geometric)" },
-                                    { name: "Inter", label: "Inter (Technical)" },
-                                    { name: "Tenor Sans", label: "Tenor Sans (Clean Chic)" },
-                                    { name: "Space Grotesk", label: "Space Grotesk (Tech)" },
-                                    { name: "Lora", label: "Lora (Contemporary)" },
-                                    { name: "Cabinet Grotesk", label: "Cabinet Grotesk (Luxury Geometric)" }
-                                  ]}
-                                ].map((cat, catIdx) => (
+                                {fontCategories.map((cat, catIdx) => (
                                   <div key={catIdx}>
                                     <div style={{
                                       padding: "6px 12px",

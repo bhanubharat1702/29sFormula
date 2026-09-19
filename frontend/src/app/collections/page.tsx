@@ -300,6 +300,21 @@ export default function Collections() {
     return ["#d2b48c", "#8b0000", "#111111"]; // Amber/Ruby/Charcoal defaults
   };
 
+  const getProductStock = (product: Product): number => {
+    if (!product) return 0;
+    if (Array.isArray(product.variants) && product.variants.length > 0) {
+      const variantStock = product.variants.reduce((sum, v) => sum + (Number(v.quantity) || 0), 0);
+      if (variantStock > 0 || product.quantity === undefined || product.quantity === null) {
+        return variantStock;
+      }
+    }
+    if (Array.isArray((product as any).options) && (product as any).options.length > 0) {
+      const optionStock = (product as any).options.reduce((sum: number, o: any) => sum + (Number(o.quantity) || 0), 0);
+      if (optionStock > 0) return optionStock;
+    }
+    return Number(product.quantity) || 0;
+  };
+
   const filteredProducts = products.filter(product => {
     const matchesCategory =
       categoryFilter === "All" ||
@@ -312,7 +327,8 @@ export default function Collections() {
       product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       categoryString.toLowerCase().includes(searchQuery.toLowerCase());
 
-    const matchesAvailability = !inStockOnly || (product.quantity ?? 0) > 0;
+    const stock = getProductStock(product);
+    const matchesAvailability = !inStockOnly || stock > 0;
 
     let matchesPrice = true;
     if (priceRange === "under-1500") matchesPrice = product.price < 1500;
@@ -388,24 +404,24 @@ export default function Collections() {
                   key={product._id} 
                   className={styles.productCard}
                   style={{
-                    cursor: product.quantity === 0 ? "not-allowed" : "pointer"
+                    cursor: getProductStock(product) === 0 ? "not-allowed" : "pointer"
                   }}
                   onMouseEnter={() => {
-                    if (product.quantity === 0) return;
+                    if (getProductStock(product) === 0) return;
                     const imgs = getProductImages(product);
                     if (imgs.length > 1) {
                       setActiveImageIndexes(prev => ({ ...prev, [product._id]: 1 }));
                     }
                   }}
                   onMouseLeave={() => {
-                    if (product.quantity === 0) return;
+                    if (getProductStock(product) === 0) return;
                     setActiveImageIndexes(prev => ({ ...prev, [product._id]: 0 }));
                   }}
                 >
-                  <div className={styles.productImageContainer} style={product.quantity === 0 ? { pointerEvents: "none", filter: "grayscale(1)", opacity: 0.7 } : {}}>
+                  <div className={styles.productImageContainer} style={getProductStock(product) === 0 ? { pointerEvents: "none", filter: "grayscale(1)", opacity: 0.7 } : {}}>
                     <Link 
                       href={`/product/${product._id}`} 
-                      style={{ textDecoration: "none", color: "inherit", display: "block", pointerEvents: product.quantity === 0 ? "none" : "auto" }}
+                      style={{ textDecoration: "none", color: "inherit", display: "block", pointerEvents: getProductStock(product) === 0 ? "none" : "auto" }}
                     >
                       {(() => {
                         const imagesList = getProductImages(product);
@@ -472,8 +488,8 @@ export default function Collections() {
                     </button>
                   </div>
 
-                  <div className={styles.productInfo} style={product.quantity === 0 ? { pointerEvents: "none" } : {}}>
-                    <Link href={`/product/${product._id}`} style={{ textDecoration: "none", color: "inherit", pointerEvents: product.quantity === 0 ? "none" : "auto", display: "flex", flexDirection: "column", alignItems: "center" }}>
+                  <div className={styles.productInfo} style={getProductStock(product) === 0 ? { pointerEvents: "none" } : {}}>
+                    <Link href={`/product/${product._id}`} style={{ textDecoration: "none", color: "inherit", pointerEvents: getProductStock(product) === 0 ? "none" : "auto", display: "flex", flexDirection: "column", alignItems: "center" }}>
                       <h3 className={styles.productTitle}>{product.name.toUpperCase()}</h3>
                       {(() => {
                         const cheapestVariant = product.variants && product.variants.length > 0
@@ -509,11 +525,17 @@ export default function Collections() {
                         );
                       })()}
                     </Link>
-                    {product.quantity !== undefined && product.quantity <= 5 && (
-                      <p style={{ color: "#dc2626", fontSize: "0.72rem", fontWeight: 700, marginTop: "4px", letterSpacing: "0.02em" }}>
-                        {product.quantity === 0 ? "OUT OF STOCK" : `ONLY ${product.quantity} LEFT`}
-                      </p>
-                    )}
+                    {(() => {
+                      const stock = getProductStock(product);
+                      if (stock <= 5) {
+                        return (
+                          <p style={{ color: "#dc2626", fontSize: "0.72rem", fontWeight: 700, marginTop: "4px", letterSpacing: "0.02em" }}>
+                            {stock === 0 ? "OUT OF STOCK" : `ONLY ${stock} LEFT`}
+                          </p>
+                        );
+                      }
+                      return null;
+                    })()}
                   </div>
                 </div>
               );

@@ -2,15 +2,27 @@ import { v2 as cloudinary } from "cloudinary";
 import multer from "multer";
 
 // Configure Cloudinary
-cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME || "",
-  api_key: process.env.CLOUDINARY_API_KEY || "",
-  api_secret: process.env.CLOUDINARY_API_SECRET || ""
-});
+if (process.env.CLOUDINARY_CLOUD_NAME && process.env.CLOUDINARY_API_KEY && process.env.CLOUDINARY_API_SECRET) {
+  cloudinary.config({
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+    api_key: process.env.CLOUDINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_API_SECRET,
+    secure: true,
+    timeout: 120000
+  });
+} else {
+  cloudinary.config({
+    secure: true,
+    timeout: 120000
+  });
+}
 
 // Configure Multer Memory Storage
 const storage = multer.memoryStorage();
-const upload = multer({ storage });
+const upload = multer({
+  storage,
+  limits: { fileSize: 100 * 1024 * 1024 }
+});
 
 // Helper to extract Cloudinary public_id from URL
 const getCloudinaryPublicId = (url) => {
