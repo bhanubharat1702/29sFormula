@@ -261,28 +261,7 @@ export default function ProductDetailPage() {
 
   // FAQ Section State
   const [activeFaqIndex, setActiveFaqIndex] = useState<number | null>(null);
-  const [faqsList, setFaqsList] = useState<any[]>([
-    {
-      question: "HOW DO I FIND MY PERFECT SCENT?",
-      answer: "We recommend reviewing the scent notes on each product page or starting with our discovery set. Every 29sFORMULA fragrance is crafted with botanical essences that evolve dynamically on skin."
-    },
-    {
-      question: "WHEN WILL MY NEW 29S BOTTLE ARRIVE?",
-      answer: "Every order is hand-packaged with care. Express dispatch typically takes 1-2 business days, followed by 3-5 days delivery time across India with live tracking."
-    },
-    {
-      question: "WHAT IS THE LONGEVITY & PROJECTION OF 29S PERFUMES?",
-      answer: "Our formulations carry high essential oil concentrations (Extrait / Eau de Parfum grade), ensuring 8-12+ hours of long-lasting sillage on skin and fabric."
-    },
-    {
-      question: "WHAT IF I WANT TO RETURN OR EXCHANGE?",
-      answer: "We accept 7-day easy returns and exchanges for unopened bottles in original packaging. Damaged or defective items are replaced immediately with express delivery."
-    },
-    {
-      question: "HOW SHOULD I STORE MY FRAGRANCE FOR LONGEST SHELF LIFE?",
-      answer: "Store your bottle in a cool, dry place away from direct sunlight and temperature fluctuations to preserve the pure formulation notes for up to 3+ years."
-    }
-  ]);
+  const [faqsList, setFaqsList] = useState<any[]>([]);
 
   // Dynamic Admin Product Page CMS Settings
   const [showProductReviews, setShowProductReviews] = useState<boolean>(true);
@@ -634,7 +613,7 @@ export default function ProductDetailPage() {
           if (data.usageGuideText) setUsageGuideText(data.usageGuideText);
           if (data.exploreMoreTitle) setExploreMoreTitle(data.exploreMoreTitle);
           if (data.deliverySubtext) setDeliverySubtext(data.deliverySubtext);
-          if (data.faqs && data.faqs.length > 0) setFaqsList(data.faqs);
+          if (data.faqs !== undefined && Array.isArray(data.faqs)) setFaqsList(data.faqs);
         }
       })
       .catch(err => console.warn("Error setting dynamic colors:", err));
@@ -765,8 +744,8 @@ export default function ProductDetailPage() {
   if (!product) {
     return (
       <div className={styles.errorWrapper}>
-        <h2>Fragrance Not Found</h2>
-        <p>We could not locate this perfume in our inventory catalog.</p>
+        <h2>Product Not Found</h2>
+        <p>We could not locate this product in our inventory catalog.</p>
         <Link href="/" className={styles.backHomeBtn}>
           Back to Storefront
         </Link>
@@ -993,7 +972,7 @@ export default function ProductDetailPage() {
                     {product.description ? (
                       <div dangerouslySetInnerHTML={{ __html: product.description }} />
                     ) : (
-                      <p>Detailed description for this exquisite fragrance goes here.</p>
+                      <p>Detailed description for this item goes here.</p>
                     )}
                   </div>
                 </div>
@@ -1340,7 +1319,7 @@ export default function ProductDetailPage() {
       })()}
 
       {/* FREQUENTLY ASKED QUESTIONS Section */}
-      {showProductFaq && (
+      {showProductFaq && faqsList && faqsList.length > 0 && (
         <section className={styles.faqSection}>
           <h2 className={styles.faqTitle}>FREQUENTLY ASKED QUESTIONS</h2>
           <div className={styles.faqList}>
@@ -1583,7 +1562,7 @@ export default function ProductDetailPage() {
                   <textarea 
                     rows={4} 
                     required 
-                    placeholder="Describe what you liked about this fragrance formulation..." 
+                    placeholder="Describe what you liked about this product..." 
                     value={reviewComment} 
                     onChange={(e) => setReviewComment(e.target.value)} 
                     className={styles.formTextarea} 

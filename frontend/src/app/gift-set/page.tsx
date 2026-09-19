@@ -26,8 +26,9 @@ interface Product {
 export default function GiftSetPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
-  const [selectedSize, setSelectedSize] = useState<"20 ml" | "50 ml" | "100 ml">("50 ml");
-  const [selectedFragrances, setSelectedFragrances] = useState<Product[]>([]);
+  const [selectedSize, setSelectedSize] = useState<string>("50 ml");
+  const [selectedProducts, setSelectedProducts] = useState<Product[]>([]);
+  const [settings, setSettings] = useState<any>(null);
 
   // Cart & Checkout Drawer State
   const [showCheckoutDrawer, setShowCheckoutDrawer] = useState<boolean>(false);
@@ -67,6 +68,19 @@ export default function GiftSetPage() {
     fetchAndSyncUserCart();
     window.addEventListener("cartUpdated", loadCart);
 
+    // Fetch site settings for gift set customization
+    fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:5001'}/api/settings`, { cache: 'no-store' })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data) {
+          setSettings(data);
+          if (data.giftSetDefaultSize) {
+            setSelectedSize(data.giftSetDefaultSize);
+          }
+        }
+      })
+      .catch((err) => console.error("Error fetching settings:", err));
+
     fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:5001'}/api/products`, { cache: 'no-store' })
       .then((res) => res.json())
       .then((data) => {
@@ -83,61 +97,57 @@ export default function GiftSetPage() {
     };
   }, []);
 
-  const handleSelectSize = (size: "20 ml" | "50 ml" | "100 ml") => {
+  const maxProducts = settings?.giftSetMaxFragrances || 3;
+  const configuredSizes = settings?.giftSetSizes?.length > 0 ? settings.giftSetSizes : [
+    { size: "Pack of 3", label: "Starter Set", description: "3 Curated Items" },
+    { size: "Pack of 5", label: "Classic Box", description: "5 Selected Items" },
+    { size: "Pack of 10", label: "Ultimate Bundle", description: "Full Experience" }
+  ];
+
+  const handleSelectSize = (size: string) => {
     setSelectedSize(size);
     // Clear selections if size changes to maintain consistent size bundle
-    setSelectedFragrances([]);
+    setSelectedProducts([]);
   };
 
   const getProductCountInBox = (productId: string) => {
-    return selectedFragrances.filter((p) => p._id === productId).length;
+    return selectedProducts.filter((p) => p._id === productId).length;
   };
 
-  const handleIncrementFragrance = (e: React.MouseEvent, product: Product) => {
+  const handleIncrementProduct = (e: React.MouseEvent, product: Product) => {
     e.stopPropagation();
-    if (selectedFragrances.length >= 3) return;
-    setSelectedFragrances([...selectedFragrances, product]);
+    if (selectedProducts.length >= maxProducts) return;
+    setSelectedProducts([...selectedProducts, product]);
   };
 
-  const handleDecrementFragrance = (e: React.MouseEvent, product: Product) => {
+  const handleDecrementProduct = (e: React.MouseEvent, product: Product) => {
     e.stopPropagation();
-    const idx = selectedFragrances.findIndex((p) => p._id === product._id);
+    const idx = selectedProducts.findIndex((p) => p._id === product._id);
     if (idx > -1) {
-      const updated = [...selectedFragrances];
+      const updated = [...selectedProducts];
       updated.splice(idx, 1);
-      setSelectedFragrances(updated);
-    }
-  };
-
-  const handleToggleFragrance = (product: Product) => {
-    const count = getProductCountInBox(product._id);
-    if (count > 0) {
-      // Remove all instances of this product
-      setSelectedFragrances(selectedFragrances.filter((p) => p._id !== product._id));
-    } else {
-      if (selectedFragrances.length >= 3) return;
-      setSelectedFragrances([...selectedFragrances, product]);
+      setSelectedProducts(updated);
     }
   };
 
   const handleRemoveSlot = (index: number) => {
-    const updated = [...selectedFragrances];
+    const updated = [...selectedProducts];
     updated.splice(index, 1);
-    setSelectedFragrances(updated);
+    setSelectedProducts(updated);
   };
 
   const handleAddGiftBoxToCart = () => {
-    if (selectedFragrances.length !== 3) return;
+    if (selectedProducts.length !== maxProducts) return;
 
     // Calculate bundle total price
-    const totalPrice = selectedFragrances.reduce((sum, item) => {
+    const totalPrice = selectedProducts.reduce((sum, item) => {
       const variantPrice = (item.options && item.options.find((o: any) => o.size === selectedSize)?.price)
         || (item.variants && item.variants.find((v: any) => v.size === selectedSize)?.price)
         || item.price;
       return sum + variantPrice;
     }, 0);
 
-    const giftSetDetails = selectedFragrances.map((item) => {
+    const giftSetDetails = selectedProducts.map((item) => {
       const itemPrice = (item.options && item.options.find((o: any) => o.size === selectedSize)?.price)
         || (item.variants && item.variants.find((v: any) => v.size === selectedSize)?.price)
         || item.price;
@@ -151,13 +161,13 @@ export default function GiftSetPage() {
 
     const bundleItem = {
       _id: `gift-set-${Date.now()}`,
-      name: `Custom Gift Set `,
+      name: `Custom Gift Set`,
       price: totalPrice,
       imageFront: "/images/gift_set_builder_bg.jpg",
       size: selectedSize,
       quantity: 1,
       isGiftSet: true,
-      giftSetItems: selectedFragrances.map((f) => f.name),
+      giftSetItems: selectedProducts.map((f) => f.name),
       giftSetDetails: giftSetDetails
     };
 
@@ -173,65 +183,153 @@ export default function GiftSetPage() {
     setShowCartDrawer(true);
   };
 
+  if (loading) {
+    return <NewtonsCradleLoader fullScreen={true} />;
+  }
+
+  // Check if admin turned off storefront gift set page visibility
+  if (settings && settings.showGiftSetPage === false) {
+    return (
+      <div className={styles.page}>
+        <Navbar onCartClick={() => setShowCartDrawer(true)} />
+        <main className={styles.mainContent} style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", minHeight: "60vh", textAlign: "center", padding: "40px 20px" }}>
+          <div style={{ width: "64px", height: "64px", borderRadius: "50%", backgroundColor: "#f1f5f9", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: "20px" }}>
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="#111827" style={{ width: "32px", height: "32px" }}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M21 11.25v8.25a1.5 1.5 0 0 1-1.5 1.5H4.5a1.5 1.5 0 0 1-1.5-1.5v-8.25M12 4.875A2.625 2.625 0 1 0 9.375 7.5H12m0-2.625V7.5m0-2.625A2.625 2.625 0 1 1 14.625 7.5H12m0 0V21m-9.75-13.5h19.5" />
+            </svg>
+          </div>
+          <h1 style={{ fontFamily: "Outfit, sans-serif", fontSize: "2rem", fontWeight: 700, color: "#111827", marginBottom: "12px" }}>
+            Gift Sets Coming Soon
+          </h1>
+          <p style={{ color: "#6b7280", maxWidth: "480px", marginBottom: "24px", lineHeight: 1.6 }}>
+            Our custom gift box curator is currently undergoing maintenance. Please explore our full product catalog in the meantime.
+          </p>
+          <Link href="/all" style={{ backgroundColor: "#111827", color: "#ffffff", padding: "12px 28px", borderRadius: "8px", fontWeight: 600, textDecoration: "none" }}>
+            Explore All Products
+          </Link>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
+  // Dynamic Header Background Style
+  const headerBgType = settings?.giftSetHeaderBgType || "color";
+  const headerBgStyle: React.CSSProperties = { position: "relative", overflow: "hidden" };
+  if (headerBgType === "image") {
+    const imageUrl = settings?.giftSetHeaderBgImage || "/images/gift_set_header_bg.jpg";
+    headerBgStyle.backgroundImage = `linear-gradient(to right, rgba(0, 0, 0, 0.45) 0%, rgba(0, 0, 0, 0.25) 100%), url(${imageUrl})`;
+    headerBgStyle.backgroundSize = "cover";
+    headerBgStyle.backgroundPosition = "center";
+  } else if (headerBgType === "video") {
+    headerBgStyle.backgroundImage = "none";
+    headerBgStyle.backgroundColor = "#000000";
+  } else {
+    // Solid Color
+    headerBgStyle.backgroundImage = "none";
+    headerBgStyle.backgroundColor = settings?.giftSetHeaderBgColor || "#1e293b";
+  }
+
   return (
     <div className={styles.page}>
       <Navbar onCartClick={() => setShowCartDrawer(true)} />
 
       <main className={styles.mainContent}>
-        {/* Top Header Banner matching 3rd screenshot */}
+        {/* Top Header Banner */}
         <section className={styles.headerBannerSection}>
-          <div className={styles.headerBannerCard}>
-            <span className={styles.headerBadge}>CURATE · GIFT · DELIGHT</span>
-            <h1 className={styles.headerTitle}>Build Your Gift Set</h1>
-            <p className={styles.headerSubtitle}>Pick any 3 fragrances in the same size</p>
+          <div className={styles.headerBannerCard} style={headerBgStyle}>
+            {headerBgType === "video" && settings?.giftSetHeaderBgVideo && (
+              <video
+                autoPlay
+                loop
+                muted
+                playsInline
+                src={settings.giftSetHeaderBgVideo}
+                style={{
+                  position: "absolute",
+                  top: 0,
+                  left: 0,
+                  width: "100%",
+                  height: "100%",
+                  objectFit: "cover",
+                  zIndex: 0
+                }}
+              />
+            )}
+            <div style={{ position: "relative", zIndex: 1, width: "100%" }}>
+              <span className={styles.headerBadge}>
+                {settings?.giftSetHeaderBadge || "CURATE · GIFT · DELIGHT"}
+              </span>
+              <h1
+                className={styles.headerTitle}
+                style={{
+                  fontFamily: settings?.giftSetHeaderTitleFontType || "Outfit",
+                  fontSize: settings?.giftSetHeaderTitleFontSize || "3.5rem",
+                  color: settings?.giftSetHeaderTitleFontColor || "#111827",
+                  fontWeight: settings?.giftSetHeaderTitleFontWeight || "800",
+                  textAlign: (settings?.giftSetHeaderTitleFontAlignment as any) || "center"
+                }}
+              >
+                {settings?.giftSetHeaderTitle || "Build Your Gift Set"}
+              </h1>
+              <p
+                className={styles.headerSubtitle}
+                style={{
+                  fontFamily: settings?.giftSetHeaderSubtitleFontType || "Outfit",
+                  fontSize: settings?.giftSetHeaderSubtitleFontSize || "1.1rem",
+                  color: settings?.giftSetHeaderSubtitleFontColor || "#6b7280",
+                  fontWeight: settings?.giftSetHeaderSubtitleFontWeight || "500"
+                }}
+              >
+                {settings?.giftSetHeaderSubtitle || `Pick any ${maxProducts} products to create your gift set`}
+              </p>
+            </div>
           </div>
         </section>
 
         {/* Builder Container */}
         <section className={styles.builderSection}>
-          {/* Step 1: Choose a bottle size */}
+          {/* Step 1: Choose a box size */}
           <div className={styles.stepHeaderRow}>
             <div className={styles.stepNumberBadge}>1</div>
-            <h2 className={styles.stepTitle}>Choose a bottle size</h2>
+            <h2 className={styles.stepTitle}>Choose box size</h2>
           </div>
 
           <div className={styles.sizeCardsGrid}>
-            {[
-              { size: "20 ml", label: "Petite", desc: "Travel-friendly" },
-              { size: "50 ml", label: "Classic", desc: "Most popular" },
-              { size: "100 ml", label: "Grand", desc: "Full experience" }
-            ].map(({ size, label, desc }) => {
+            {configuredSizes.map(({ size, label, description, desc }: any) => {
               const isSelected = selectedSize === size;
+              const displayDesc = description || desc || "";
               return (
                 <div
                   key={size}
-                  onClick={() => handleSelectSize(size as any)}
+                  onClick={() => handleSelectSize(size)}
                   className={`${styles.sizeCard} ${isSelected ? styles.sizeCardActive : ""}`}
                 >
                   <div className={styles.bottleIcon}>
-                    <svg viewBox="0 0 24 30" fill="currentColor">
-                      <rect x="9" y="1" width="6" height="4" rx="1.5" />
-                      <rect x="5" y="7" width="14" height="20" rx="5" />
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" style={{ width: "22px", height: "22px" }}>
+                      <path d="M20 12v10H4V12" />
+                      <path d="M22 7H2v5h20V7z" />
+                      <path d="M12 22V7" />
+                      <path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z" />
+                      <path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z" />
                     </svg>
                   </div>
                   <div className={styles.sizeCardValue}>{size}</div>
-                  {/* Desktop view single-line tag */}
-                  <div className={styles.desktopSizeCardTag}>{label} · {desc}</div>
-                  {/* Mobile view stacked tag */}
+                  <div className={styles.desktopSizeCardTag}>{label}{displayDesc ? ` · ${displayDesc}` : ""}</div>
                   <div className={styles.mobileSizeCardTag}>
                     <div>{label}</div>
-                    <div>{desc}</div>
+                    {displayDesc && <div>{displayDesc}</div>}
                   </div>
                 </div>
               );
             })}
           </div>
 
-          {/* Slot Selection Tracker Bar (Fixed at bottom of screen, matching screenshot design) */}
-          <div className={`${styles.slotTrackerBar} ${selectedFragrances.length > 0 ? styles.slotTrackerBarVisible : ""}`}>
+          {/* Slot Selection Tracker Bar */}
+          <div className={`${styles.slotTrackerBar} ${selectedProducts.length > 0 ? styles.slotTrackerBarVisible : ""}`}>
             <div className={styles.slotsList}>
-              {[0, 1, 2].map((index) => {
-                const item = selectedFragrances[index];
+              {Array.from({ length: maxProducts }).map((_, index) => {
+                const item = selectedProducts[index];
                 return (
                   <div key={index} className={`${styles.slotBox} ${item ? styles.slotBoxFilled : ""}`}>
                     {item ? (
@@ -245,7 +343,7 @@ export default function GiftSetPage() {
                           type="button"
                           onClick={() => handleRemoveSlot(index)}
                           className={styles.removeSlotBtn}
-                          title="Remove fragrance"
+                          title="Remove item"
                         >
                           ✕
                         </button>
@@ -254,7 +352,7 @@ export default function GiftSetPage() {
                       <div className={styles.emptySlotContent}>
                         <div className={styles.emptySlotPlaceholderIcon}>?</div>
                         <div className={styles.slotInfo}>
-                          <p className={styles.slotName} style={{ color: "#94a3b8" }}>Select Fragrance #{index + 1}</p>
+                          <p className={styles.slotName} style={{ color: "#94a3b8" }}>Select Item #{index + 1}</p>
                           <span className={styles.slotSize}>{selectedSize}</span>
                         </div>
                       </div>
@@ -265,44 +363,49 @@ export default function GiftSetPage() {
             </div>
 
             {(() => {
-              const totalPrice = selectedFragrances.reduce((sum, item) => {
+              const totalPrice = selectedProducts.reduce((sum, item) => {
                 const variantPrice = (item.options && item.options.find((o: any) => o.size === selectedSize)?.price)
                   || (item.variants && item.variants.find((v: any) => v.size === selectedSize)?.price)
                   || item.price;
                 return sum + variantPrice;
               }, 0);
 
+              const isSolid = (settings?.giftSetButtonStyle || "solid") === "solid";
+              const btnBg = isSolid ? (settings?.giftSetButtonColor || "#000000") : "transparent";
+              const btnTextColor = isSolid ? (settings?.giftSetButtonTextColor || "#ffffff") : (settings?.giftSetButtonColor || "#000000");
+              const btnBorder = isSolid ? "none" : `2px solid ${settings?.giftSetButtonColor || "#000000"}`;
+
               return (
                 <button
                   onClick={handleAddGiftBoxToCart}
-                  disabled={selectedFragrances.length !== 3}
+                  disabled={selectedProducts.length !== maxProducts}
                   className={styles.addBundleBtn}
+                  style={{
+                    backgroundColor: selectedProducts.length === maxProducts ? btnBg : undefined,
+                    color: selectedProducts.length === maxProducts ? btnTextColor : undefined,
+                    border: selectedProducts.length === maxProducts ? btnBorder : undefined
+                  }}
                 >
-                  {selectedFragrances.length === 3
-                    ? `Add Gift Box to Cart · ₹${totalPrice.toLocaleString("en-IN")}`
-                    : `Select ${3 - selectedFragrances.length} More`}
+                  {selectedProducts.length === maxProducts
+                    ? `${settings?.giftSetButtonText || "Add Gift Box to Cart"} · ₹${totalPrice.toLocaleString("en-IN")}`
+                    : `Select ${maxProducts - selectedProducts.length} More Items`}
                 </button>
               );
             })()}
           </div>
 
-          {/* Step 2: Pick 3 fragrances */}
+          {/* Step 2: Pick items */}
           <div className={styles.stepHeaderRow} style={{ justifyContent: "space-between" }}>
             <div style={{ display: "flex", alignItems: "center", gap: "14px" }}>
               <div className={styles.stepNumberBadge}>2</div>
-              <h2 className={styles.stepTitle}>Pick 3 fragrances</h2>
+              <h2 className={styles.stepTitle}>Pick {maxProducts} items</h2>
             </div>
             <div className={styles.chosenPill}>
-              {selectedFragrances.length} / 3 chosen
+              {selectedProducts.length} / {maxProducts} chosen
             </div>
           </div>
 
-          {loading ? (
-            <div style={{ display: "flex", justifyContent: "center", padding: "60px 0" }}>
-              <NewtonsCradleLoader />
-            </div>
-          ) : (
-            <div className={styles.fragranceGrid}>
+          <div className={styles.fragranceGrid}>
               {products.map((product) => {
                 // Check if product supports the selected size in variants or options
                 const hasVariantSize = product.variants && product.variants.some((v: any) => v.size === selectedSize && (v.quantity === undefined || v.quantity > 0));
@@ -327,12 +430,14 @@ export default function GiftSetPage() {
                   <div
                     key={product._id}
                     onClick={(e) => {
-                      if (isSizeAvailable && productCount === 0 && selectedFragrances.length < 3) {
-                        handleIncrementFragrance(e, product);
+                      if (isSizeAvailable && productCount === 0 && selectedProducts.length < maxProducts) {
+                        handleIncrementProduct(e, product);
                       }
                     }}
                     className={`${styles.fragranceCard} ${isSelected ? styles.fragranceCardSelected : ""} ${!isSizeAvailable ? styles.fragranceCardDisabled : ""}`}
-                    style={{ cursor: isSizeAvailable && productCount === 0 && selectedFragrances.length < 3 ? "pointer" : "default" }}
+                    style={{
+                      cursor: isSizeAvailable && productCount === 0 && selectedProducts.length < maxProducts ? "pointer" : "default"
+                    }}
                   >
                     <div className={styles.cardImgWrapper}>
                       <img src={product.imageFront} alt={product.name} className={styles.cardImg} />
@@ -356,17 +461,17 @@ export default function GiftSetPage() {
                         className={styles.cardActionArea}
                         onClick={(e) => {
                           e.stopPropagation();
-                          if (productCount === 0 && selectedFragrances.length < 3) {
-                            handleIncrementFragrance(e, product);
+                          if (productCount === 0 && selectedProducts.length < maxProducts) {
+                            handleIncrementProduct(e, product);
                           }
                         }}
-                        style={{ cursor: productCount === 0 && selectedFragrances.length < 3 ? "pointer" : "default" }}
+                        style={{ cursor: productCount === 0 && selectedProducts.length < maxProducts ? "pointer" : "default" }}
                       >
                         {productCount > 0 && (
                           <div className={styles.productPageQtyContainer} onClick={(e) => e.stopPropagation()}>
                             <button
                               type="button"
-                              onClick={(e) => handleDecrementFragrance(e, product)}
+                              onClick={(e) => handleDecrementProduct(e, product)}
                               className={styles.productPageQtyBtn}
                             >
                               −
@@ -374,8 +479,8 @@ export default function GiftSetPage() {
                             <span className={styles.productPageQtyVal}>{productCount}</span>
                             <button
                               type="button"
-                              onClick={(e) => handleIncrementFragrance(e, product)}
-                              disabled={selectedFragrances.length >= 3}
+                              onClick={(e) => handleIncrementProduct(e, product)}
+                              disabled={selectedProducts.length >= maxProducts}
                               className={styles.productPageQtyBtn}
                             >
                               +
@@ -388,7 +493,6 @@ export default function GiftSetPage() {
                 );
               })}
             </div>
-          )}
         </section>
       </main>
 
@@ -412,7 +516,7 @@ export default function GiftSetPage() {
           isOpen={showCheckoutDrawer}
           onClose={() => setShowCheckoutDrawer(false)}
           cartItems={cartItems}
-          primaryColor="#57bc74"
+          primaryColor={settings?.primaryColor || "#111827"}
           onOrderSuccess={(orderId: string, details?: any) => {
             clearCart();
             setCartItems([]);
@@ -431,7 +535,7 @@ export default function GiftSetPage() {
           onClose={() => setShowSuccessModal(false)}
           orderId={completedOrderId}
           orderDetails={completedOrderDetails}
-          primaryColor="#57bc74"
+          primaryColor={settings?.primaryColor || "#111827"}
         />
       )}
     </div>

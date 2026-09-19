@@ -24,28 +24,7 @@ interface FaqItem {
 
 // removed reviewsData
 
-const defaultFaqs: FaqItem[] = [
-  {
-    question: "ARE THESE FRAGRANCES LONG-LASTING?",
-    answer: "Yes, our Extrait de Parfum formulas contain a high concentration of fragrance oils (30-40%), ensuring they last 12+ hours on skin and days on clothing."
-  },
-  {
-    question: "DO YOU USE NATURAL OR SYNTHETIC INGREDIENTS?",
-    answer: "We use a precise blend of both. Natural absolutes provide depth and complexity, while safe synthetics provide stability, projection, and ethical alternatives to animal-derived notes like musk."
-  },
-  {
-    question: "IS YOUR PACKAGING ECO-FRIENDLY?",
-    answer: "Yes, our glass bottles are 100% recyclable, and our packaging uses sustainably sourced, biodegradable materials with minimal plastic."
-  },
-  {
-    question: "WHAT IS YOUR RETURN POLICY?",
-    answer: "We offer a 14-day return policy for unopened and unused products. For hygiene reasons, we cannot accept returns on opened fragrances."
-  },
-  {
-    question: "DO YOU SHIP INTERNATIONALLY?",
-    answer: "Currently, we ship nationwide within our home market. We are actively working on expanding our shipping network to international destinations."
-  }
-];
+const defaultFaqs: FaqItem[] = [];
 
 const getFontFamilyStack = (fontName: string) => {
   if (fontName === "SF Pro") {
@@ -195,6 +174,7 @@ export default function Home() {
   );
   const [showVideo, setShowVideo] = useState<boolean>(true);
   const [showLifestyle, setShowLifestyle] = useState<boolean>(true);
+  const [showGiftSetPage, setShowGiftSetPage] = useState<boolean>(true);
 
   const videoRef = useRef<HTMLVideoElement>(null);
 
@@ -416,6 +396,8 @@ export default function Home() {
       if (cachedShowVideo) setShowVideo(cachedShowVideo === "true");
       const cachedShowLifestyle = localStorage.getItem("settings_showLifestyle");
       if (cachedShowLifestyle) setShowLifestyle(cachedShowLifestyle === "true");
+      const cachedShowGiftSetPage = localStorage.getItem("settings_showGiftSetPage");
+      if (cachedShowGiftSetPage !== null) setShowGiftSetPage(cachedShowGiftSetPage === "true");
       
       // Load cached arrays list to avoid slow loading layout shifts
       const cachedArrivals = localStorage.getItem("storefront_arrivals");
@@ -598,6 +580,10 @@ export default function Home() {
             if (data.showLifestyle !== undefined) {
               setShowLifestyle(data.showLifestyle);
               localStorage.setItem("settings_showLifestyle", String(data.showLifestyle));
+            }
+            if (data.showGiftSetPage !== undefined) {
+              setShowGiftSetPage(data.showGiftSetPage);
+              localStorage.setItem("settings_showGiftSetPage", String(data.showGiftSetPage));
             }
             if (data.faqs !== undefined && Array.isArray(data.faqs)) setFaqs(data.faqs);
           }
@@ -1436,52 +1422,56 @@ export default function Home() {
       </section>
 
       {/* 10. Frequently Asked Questions Section */}
-      <section className={styles.faqSection}>
-        <h2 className={styles.faqTitle}>FREQUENTLY ASKED QUESTIONS</h2>
-        <div className={styles.faqList}>
-          {faqs.map((faq, index) => (
-            <div key={index} className={styles.faqItem} onClick={() => toggleFaq(index)}>
-              <div className={styles.faqItemHeader}>
-                <span className={styles.faqQuestion}>{faq.question.toUpperCase()}</span>
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={3} stroke="currentColor" className={`${styles.faqChevron} ${activeFaq === index ? styles.faqChevronActive : ""}`}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
-                </svg>
+      {faqs && faqs.length > 0 && (
+        <section className={styles.faqSection}>
+          <h2 className={styles.faqTitle}>FREQUENTLY ASKED QUESTIONS</h2>
+          <div className={styles.faqList}>
+            {faqs.map((faq, index) => (
+              <div key={index} className={styles.faqItem} onClick={() => toggleFaq(index)}>
+                <div className={styles.faqItemHeader}>
+                  <span className={styles.faqQuestion}>{faq.question.toUpperCase()}</span>
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={3} stroke="currentColor" className={`${styles.faqChevron} ${activeFaq === index ? styles.faqChevronActive : ""}`}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
+                  </svg>
+                </div>
+                <div className={`${styles.faqItemContent} ${activeFaq === index ? styles.faqItemContentActive : ""}`}>
+                  <p className={styles.faqAnswerText}>{faq.answer}</p>
+                </div>
               </div>
-              <div className={`${styles.faqItemContent} ${activeFaq === index ? styles.faqItemContentActive : ""}`}>
-                <p className={styles.faqAnswerText}>{faq.answer}</p>
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
+            ))}
+          </div>
+        </section>
+      )}
 
       {/* 11. Gift Set Builder Banner Section */}
-      <section className={styles.giftSetBannerSection}>
-        <div className={styles.giftSetBannerCard}>
-          <div className={styles.giftSetContentLeft}>
-            <div className={styles.giftSetBadge}>
-              <span className={styles.giftSetSparkle}>✦</span> LIMITED COLLECTION
+      {showGiftSetPage && (
+        <section className={styles.giftSetBannerSection}>
+          <div className={styles.giftSetBannerCard}>
+            <div className={styles.giftSetContentLeft}>
+              <div className={styles.giftSetBadge}>
+                <span className={styles.giftSetSparkle}>✦</span> LIMITED COLLECTION
+              </div>
+              <h2 className={styles.giftSetTitle}>Gift Set Builder</h2>
+              <p className={styles.giftSetSubtitle}>
+                Curate any 3 fragrances in 20 ml, 50 ml, or 100 ml — beautifully packed in a signature gift box.
+              </p>
+              <div className={styles.giftSetPills}>
+                <span className={styles.giftSetPill}>20 ml × 3</span>
+                <span className={styles.giftSetPill}>50 ml × 3</span>
+                <span className={styles.giftSetPill}>100 ml × 3</span>
+              </div>
             </div>
-            <h2 className={styles.giftSetTitle}>Gift Set Builder</h2>
-            <p className={styles.giftSetSubtitle}>
-              Curate any 3 fragrances in 20 ml, 50 ml, or 100 ml — beautifully packed in a signature gift box.
-            </p>
-            <div className={styles.giftSetPills}>
-              <span className={styles.giftSetPill}>20 ml × 3</span>
-              <span className={styles.giftSetPill}>50 ml × 3</span>
-              <span className={styles.giftSetPill}>100 ml × 3</span>
+            <div className={styles.giftSetActionRight}>
+              <Link href="/gift-set" className={styles.buildSetBtn}>
+                Build a Set
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" style={{ width: '16px', height: '16px' }}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
+                </svg>
+              </Link>
             </div>
           </div>
-          <div className={styles.giftSetActionRight}>
-            <Link href="/gift-set" className={styles.buildSetBtn}>
-              Build a Set
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" style={{ width: '16px', height: '16px' }}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
-              </svg>
-            </Link>
-          </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       {/* Footer Section */}
       <Footer />

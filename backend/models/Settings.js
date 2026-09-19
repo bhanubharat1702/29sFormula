@@ -88,24 +88,7 @@ const settingsSchema = new mongoose.Schema({
   showLifestyle: { type: Boolean, default: true },
   faqs: {
     type: [{ question: String, answer: String }],
-    default: [
-      {
-        question: "HOW DO I FIND MY PERFECT SCENT?",
-        answer: "We recommend starting with our Sample Set. It contains sample vials of our top fragrances so you can wear them on your skin and discover which elements match your personal chemistry."
-      },
-      {
-        question: "WHEN WILL MY NEW 29S BOTTLE ARRIVE?",
-        answer: "Orders are hand-crafted and dispatched within 2-3 business days. Delivery typically takes 4-7 business days depending on your location."
-      },
-      {
-        question: "WHAT IF I WANT TO RETURN OR EXCHANGE?",
-        answer: "We offer hassle-free returns on unopened bottles within 14 days of delivery. Sample vials are non-returnable, but we will gladly exchange any damaged bottles immediately."
-      },
-      {
-        question: "HOW CAN I PAY?",
-        answer: "We accept all major credit cards, UPI (Google Pay, PhonePe, Paytm), and net banking. Secure checkout processed by Razorpay."
-      }
-    ]
+    default: []
   },
   googleClientId: { type: String, default: "753896502014-yourmockclientid.apps.googleusercontent.com" },
   // Product Preview Page Settings
@@ -144,7 +127,47 @@ const settingsSchema = new mongoose.Schema({
   shippingPolicyText: {
     type: String,
     default: "We offer free shipping across India. Orders are typically processed within 1-2 business days and delivered within 4-7 business days."
-  }
+  },
+
+  // Gift Set Page Settings
+  showGiftSetPage: { type: Boolean, default: true },
+  giftSetHeaderBadge: { type: String, default: "CURATE · GIFT · DELIGHT" },
+  giftSetHeaderTitle: { type: String, default: "Build Your Gift Set" },
+  giftSetHeaderSubtitle: { type: String, default: "Pick any 3 fragrances in the same size" },
+  giftSetHeaderTitleFontType: { type: String, default: "Outfit" },
+  giftSetHeaderTitleFontSize: { type: String, default: "3.5rem" },
+  giftSetHeaderTitleFontColor: { type: String, default: "#111827" },
+  giftSetHeaderTitleFontWeight: { type: String, default: "800" },
+  giftSetHeaderTitleFontAlignment: { type: String, default: "center" },
+  giftSetHeaderSubtitleFontType: { type: String, default: "Outfit" },
+  giftSetHeaderSubtitleFontSize: { type: String, default: "1.1rem" },
+  giftSetHeaderSubtitleFontColor: { type: String, default: "#6b7280" },
+  giftSetHeaderSubtitleFontWeight: { type: String, default: "500" },
+  giftSetHeaderBgType: { type: String, default: "color" },
+  giftSetHeaderBgColor: { type: String, default: "#ffffff" },
+  giftSetHeaderBgImage: { type: String, default: "" },
+  giftSetHeaderBgVideo: { type: String, default: "" },
+  giftSetBgType: { type: String, default: "color" },
+  giftSetBgColor: { type: String, default: "#faf5ff" },
+  giftSetBgImage: { type: String, default: "" },
+  giftSetBgGradient: { type: String, default: "linear-gradient(135deg, #faf5ff 0%, #f0e7ff 100%)" },
+  giftSetSizes: {
+    type: [{ size: String, label: String, description: String }],
+    default: [
+      { size: "20 ml", label: "Discovery Set", description: "Pocket perfection for travel" },
+      { size: "50 ml", label: "Classic Trio", description: "The most popular signature box" },
+      { size: "100 ml", label: "Grand Vault", description: "Ultimate statement fragrance collection" }
+    ]
+  },
+  giftSetDefaultSize: { type: String, default: "50 ml" },
+  giftSetMaxFragrances: { type: Number, default: 3 },
+  giftSetButtonText: { type: String, default: "Add Gift Box to Cart" },
+  giftSetButtonColor: { type: String, default: "#111827" },
+  giftSetButtonTextColor: { type: String, default: "#ffffff" },
+  giftSetButtonStyle: { type: String, default: "solid" },
+  giftSetCardBorderColor: { type: String, default: "#e2e8f0" },
+  giftSetCardSelectedColor: { type: String, default: "#111827" },
+  giftSetAccentColor: { type: String, default: "#111827" }
 }, { timestamps: true });
 
 const Settings = mongoose.models.Settings || mongoose.model("Settings", settingsSchema);

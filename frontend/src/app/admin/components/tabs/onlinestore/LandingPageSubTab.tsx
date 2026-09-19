@@ -46,6 +46,9 @@ export default function LandingPageSubTab({
   setHeroBgImage,
   heroBgVideo,
   setHeroBgVideo,
+  uploadingHeroBgVideo,
+  heroBgVideoProgress,
+  handleHeroBgVideoUpload,
   setHeroTitleFontType,
   setHeroTitleFontColor,
   setHeroTitleFontSize,
@@ -309,18 +312,26 @@ export default function LandingPageSubTab({
 
                               {heroBgType === "image" && (
                                 <div className={styles.inputGroup}>
-                                  <label className={styles.inputLabel}>Background Image URL</label>
-                                  <div style={{ display: "flex", gap: "8px" }}>
-                                    <input
-                                      type="text"
-                                      value={heroBgImage}
-                                      onChange={(e: any) => setHeroBgImage(e.target.value)}
-                                      placeholder="https://example.com/background.jpg"
-                                      className={styles.textInput}
-                                      style={{ flex: 1 }}
-                                    />
+                                  <label className={styles.inputLabel}>Background Image</label>
+                                  {heroBgImage ? (
+                                    <div style={{ display: "flex", alignItems: "center", gap: "10px", marginTop: "6px" }}>
+                                      <img src={heroBgImage} alt="Hero Bg" style={{ width: "120px", height: "60px", objectFit: "cover", borderRadius: "6px", border: "1px solid #e2e8f0" }} />
+                                      <button
+                                        type="button"
+                                        onClick={() => setHeroBgImage("")}
+                                        style={{ backgroundColor: "#fee2e2", color: "#ef4444", border: "none", padding: "6px 12px", borderRadius: "6px", fontSize: "0.78rem", fontWeight: 600, cursor: "pointer", display: "flex", alignItems: "center", gap: "5px" }}
+                                      >
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" style={{ width: "14px", height: "14px" }}>
+                                          <path strokeLinecap="round" strokeLinejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
+                                        </svg>
+                                        Remove
+                                      </button>
+                                    </div>
+                                  ) : (
                                     <label style={{
-                                      flexShrink: 0,
+                                      display: "inline-flex",
+                                      alignItems: "center",
+                                      gap: "6px",
                                       padding: "10px 14px",
                                       backgroundColor: "#ffffff",
                                       border: "1px solid #d1d5db",
@@ -328,14 +339,12 @@ export default function LandingPageSubTab({
                                       fontSize: "0.85rem",
                                       fontWeight: 600,
                                       cursor: "pointer",
-                                      display: "flex",
-                                      alignItems: "center",
-                                      gap: "6px"
+                                      marginTop: "6px"
                                     }}>
-                                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" style={{ width: "16px", height: "16px", flexShrink: 0 }}>
+                                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" style={{ width: "16px", height: "16px" }}>
                                         <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5m-13.5-9L12 3m0 0 4.5 4.5M12 3v13.5" />
                                       </svg>
-                                      <span style={{ whiteSpace: "nowrap" }}>Upload</span>
+                                      <span>Upload Image</span>
                                       <input
                                         type="file"
                                         accept="image/*"
@@ -363,24 +372,43 @@ export default function LandingPageSubTab({
                                         }}
                                       />
                                     </label>
-                                  </div>
+                                  )}
                                 </div>
                               )}
 
                               {heroBgType === "video" && (
                                 <div className={styles.inputGroup}>
-                                  <label className={styles.inputLabel}>Background Video URL (MP4 / WebM)</label>
-                                  <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
-                                    <input
-                                      type="text"
-                                      value={heroBgVideo}
-                                      onChange={(e: any) => setHeroBgVideo(e.target.value)}
-                                      placeholder="https://example.com/background.mp4"
-                                      className={styles.textInput}
-                                      style={{ flex: 1 }}
-                                    />
+                                  <label className={styles.inputLabel}>Background Video</label>
+                                  {uploadingHeroBgVideo && (
+                                    <div style={{ marginTop: "6px", marginBottom: "8px" }}>
+                                      <p style={{ fontSize: "0.82rem", color: "#111827", margin: "0 0 4px 0" }}>
+                                        Uploading video ... {heroBgVideoProgress !== null ? `${heroBgVideoProgress}%` : ""}
+                                      </p>
+                                      <div style={{ width: "100%", height: "6px", backgroundColor: "#e2e8f0", borderRadius: "3px", overflow: "hidden" }}>
+                                        <div style={{ width: `${heroBgVideoProgress || 0}%`, height: "100%", backgroundColor: "#111827", transition: "width 0.3s" }} />
+                                      </div>
+                                    </div>
+                                  )}
+
+                                  {heroBgVideo ? (
+                                    <div style={{ display: "flex", alignItems: "center", gap: "10px", marginTop: "6px" }}>
+                                      <video src={heroBgVideo} autoPlay loop muted style={{ width: "120px", height: "60px", objectFit: "cover", borderRadius: "6px", border: "1px solid #e2e8f0" }} />
+                                      <button
+                                        type="button"
+                                        onClick={() => setHeroBgVideo("")}
+                                        style={{ backgroundColor: "#fee2e2", color: "#ef4444", border: "none", padding: "6px 12px", borderRadius: "6px", fontSize: "0.78rem", fontWeight: 600, cursor: "pointer", display: "flex", alignItems: "center", gap: "5px" }}
+                                      >
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" style={{ width: "14px", height: "14px" }}>
+                                          <path strokeLinecap="round" strokeLinejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
+                                        </svg>
+                                        Remove
+                                      </button>
+                                    </div>
+                                  ) : (
                                     <label style={{
-                                      flexShrink: 0,
+                                      display: "inline-flex",
+                                      alignItems: "center",
+                                      gap: "6px",
                                       padding: "10px 14px",
                                       backgroundColor: "#ffffff",
                                       border: "1px solid #d1d5db",
@@ -388,42 +416,21 @@ export default function LandingPageSubTab({
                                       fontSize: "0.85rem",
                                       fontWeight: 600,
                                       cursor: "pointer",
-                                      display: "flex",
-                                      alignItems: "center",
-                                      gap: "6px"
+                                      marginTop: "6px"
                                     }}>
-                                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" style={{ width: "16px", height: "16px", flexShrink: 0 }}>
+                                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" style={{ width: "16px", height: "16px" }}>
                                         <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5m-13.5-9L12 3m0 0 4.5 4.5M12 3v13.5" />
                                       </svg>
-                                      <span style={{ whiteSpace: "nowrap" }}>Upload</span>
+                                      <span>Upload Video</span>
                                       <input
                                         type="file"
                                         accept="video/*"
                                         style={{ display: "none" }}
-                                        onChange={async (e) => {
-                                          if (e.target.files && e.target.files[0]) {
-                                            const file = e.target.files[0];
-                                            const formData = new FormData();
-                                            formData.append("file", file);
-                                            try {
-                                              const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:5001'}/api/upload`, {
-                                                method: "POST",
-                                                body: formData
-                                              });
-                                              if (res.ok) {
-                                                const uploadResult = await res.json();
-                                                setHeroBgVideo(uploadResult.url);
-                                              } else {
-                                                alert("Video upload failed");
-                                              }
-                                            } catch (err) {
-                                              console.error("Upload error:", err);
-                                            }
-                                          }
-                                        }}
+                                        onChange={handleHeroBgVideoUpload}
+                                        disabled={uploadingHeroBgVideo}
                                       />
                                     </label>
-                                  </div>
+                                  )}
                                 </div>
                               )}
                             </div>
@@ -615,18 +622,26 @@ export default function LandingPageSubTab({
 
                               {videoBgType === "image" && (
                                 <div className={styles.inputGroup}>
-                                  <label className={styles.inputLabel}>Background Image URL</label>
-                                  <div style={{ display: "flex", gap: "8px" }}>
-                                    <input
-                                      type="text"
-                                      value={videoBgImage}
-                                      onChange={(e: any) => setVideoBgImage(e.target.value)}
-                                      placeholder="https://example.com/background.jpg"
-                                      className={styles.textInput}
-                                      style={{ flex: 1 }}
-                                    />
+                                  <label className={styles.inputLabel}>Background Image</label>
+                                  {videoBgImage ? (
+                                    <div style={{ display: "flex", alignItems: "center", gap: "10px", marginTop: "6px" }}>
+                                      <img src={videoBgImage} alt="Video Bg" style={{ width: "120px", height: "60px", objectFit: "cover", borderRadius: "6px", border: "1px solid #e2e8f0" }} />
+                                      <button
+                                        type="button"
+                                        onClick={() => setVideoBgImage("")}
+                                        style={{ backgroundColor: "#fee2e2", color: "#ef4444", border: "none", padding: "6px 12px", borderRadius: "6px", fontSize: "0.78rem", fontWeight: 600, cursor: "pointer", display: "flex", alignItems: "center", gap: "5px" }}
+                                      >
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" style={{ width: "14px", height: "14px" }}>
+                                          <path strokeLinecap="round" strokeLinejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
+                                        </svg>
+                                        Remove
+                                      </button>
+                                    </div>
+                                  ) : (
                                     <label style={{
-                                      flexShrink: 0,
+                                      display: "inline-flex",
+                                      alignItems: "center",
+                                      gap: "6px",
                                       padding: "10px 14px",
                                       backgroundColor: "#ffffff",
                                       border: "1px solid #d1d5db",
@@ -634,14 +649,12 @@ export default function LandingPageSubTab({
                                       fontSize: "0.85rem",
                                       fontWeight: 600,
                                       cursor: "pointer",
-                                      display: "flex",
-                                      alignItems: "center",
-                                      gap: "6px"
+                                      marginTop: "6px"
                                     }}>
-                                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" style={{ width: "16px", height: "16px", flexShrink: 0 }}>
+                                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" style={{ width: "16px", height: "16px" }}>
                                         <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5m-13.5-9L12 3m0 0 4.5 4.5M12 3v13.5" />
                                       </svg>
-                                      <span style={{ whiteSpace: "nowrap" }}>Upload</span>
+                                      <span>Upload Image</span>
                                       <input
                                         type="file"
                                         accept="image/*"
@@ -669,24 +682,43 @@ export default function LandingPageSubTab({
                                         }}
                                       />
                                     </label>
-                                  </div>
+                                  )}
                                 </div>
                               )}
 
                               {videoBgType === "video" && (
                                 <div className={styles.inputGroup}>
-                                  <label className={styles.inputLabel}>Background Video URL</label>
-                                  <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
-                                    <input
-                                      type="text"
-                                      value={videoUrl || ""}
-                                      onChange={(e: any) => setVideoUrl(e.target.value)}
-                                      placeholder="https://example.com/background.mp4"
-                                      className={styles.textInput}
-                                      style={{ flex: 1 }}
-                                    />
+                                  <label className={styles.inputLabel}>Background Video</label>
+                                  {uploadingVideo && (
+                                    <div style={{ marginTop: "6px", marginBottom: "8px" }}>
+                                      <p style={{ fontSize: "0.82rem", color: "#111827", margin: "0 0 4px 0" }}>
+                                        Uploading video ... {videoProgress !== null ? `${videoProgress}%` : ""}
+                                      </p>
+                                      <div style={{ width: "100%", height: "6px", backgroundColor: "#e2e8f0", borderRadius: "3px", overflow: "hidden" }}>
+                                        <div style={{ width: `${videoProgress || 0}%`, height: "100%", backgroundColor: "#111827", transition: "width 0.3s" }} />
+                                      </div>
+                                    </div>
+                                  )}
+
+                                  {videoUrl ? (
+                                    <div style={{ display: "flex", alignItems: "center", gap: "10px", marginTop: "6px" }}>
+                                      <video src={videoUrl} autoPlay loop muted style={{ width: "120px", height: "60px", objectFit: "cover", borderRadius: "6px", border: "1px solid #e2e8f0" }} />
+                                      <button
+                                        type="button"
+                                        onClick={() => setVideoUrl("")}
+                                        style={{ backgroundColor: "#fee2e2", color: "#ef4444", border: "none", padding: "6px 12px", borderRadius: "6px", fontSize: "0.78rem", fontWeight: 600, cursor: "pointer", display: "flex", alignItems: "center", gap: "5px" }}
+                                      >
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" style={{ width: "14px", height: "14px" }}>
+                                          <path strokeLinecap="round" strokeLinejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
+                                        </svg>
+                                        Remove
+                                      </button>
+                                    </div>
+                                  ) : (
                                     <label style={{
-                                      flexShrink: 0,
+                                      display: "inline-flex",
+                                      alignItems: "center",
+                                      gap: "6px",
                                       padding: "10px 14px",
                                       backgroundColor: "#ffffff",
                                       border: "1px solid #d1d5db",
@@ -694,14 +726,12 @@ export default function LandingPageSubTab({
                                       fontSize: "0.85rem",
                                       fontWeight: 600,
                                       cursor: "pointer",
-                                      display: "flex",
-                                      alignItems: "center",
-                                      gap: "6px"
+                                      marginTop: "6px"
                                     }}>
-                                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" style={{ width: "16px", height: "16px", flexShrink: 0 }}>
+                                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" style={{ width: "16px", height: "16px" }}>
                                         <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5m-13.5-9L12 3m0 0 4.5 4.5M12 3v13.5" />
                                       </svg>
-                                      <span style={{ whiteSpace: "nowrap" }}>{uploadingVideo ? `Uploading... ${videoProgress !== null ? `${videoProgress}%` : ""}` : "Upload"}</span>
+                                      <span>Upload Video</span>
                                       <input
                                         type="file"
                                         accept="video/*"
@@ -710,7 +740,7 @@ export default function LandingPageSubTab({
                                         disabled={uploadingVideo}
                                       />
                                     </label>
-                                  </div>
+                                  )}
                                 </div>
                               )}
                             </div>
@@ -785,25 +815,38 @@ export default function LandingPageSubTab({
                             </div>
                             <div className={styles.inputGroup} style={{ marginTop: "15px" }}>
                               <label className={styles.inputLabel}>Lifestyle Banner Background Image</label>
-                              <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
-                                <input
-                                  type="text"
-                                  value={lifestyleImage}
-                                  onChange={(e: any) => setLifestyleImage(e.target.value)}
-                                  placeholder="Image URL (e.g. https://images.unsplash.com/...)"
-                                  className={styles.textInput}
-                                  style={{ flex: 1 }}
-                                  disabled={!showLifestyle || uploadingLifestyle}
-                                />
+                              {uploadingLifestyle && <p style={{ fontSize: "0.82rem", color: "#111827", margin: "0 0 8px 0" }}>Uploading image...</p>}
+                              {lifestyleImage ? (
+                                <div style={{ display: "flex", alignItems: "center", gap: "10px", marginTop: "6px" }}>
+                                  <img src={lifestyleImage} alt="Lifestyle Preview" style={{ width: "120px", height: "60px", objectFit: "cover", borderRadius: "6px", border: "1px solid #e2e8f0" }} />
+                                  <button
+                                    type="button"
+                                    onClick={() => setLifestyleImage("")}
+                                    style={{ backgroundColor: "#fee2e2", color: "#ef4444", border: "none", padding: "6px 12px", borderRadius: "6px", fontSize: "0.78rem", fontWeight: 600, cursor: "pointer", display: "flex", alignItems: "center", gap: "5px" }}
+                                    disabled={!showLifestyle}
+                                  >
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" style={{ width: "14px", height: "14px" }}>
+                                      <path strokeLinecap="round" strokeLinejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
+                                    </svg>
+                                    Remove
+                                  </button>
+                                </div>
+                              ) : (
                                 <label
                                   className={styles.fileUploadBtn}
                                   style={{
-                                    margin: 0,
+                                    margin: "6px 0 0 0",
                                     padding: "10px 16px",
                                     cursor: (!showLifestyle || uploadingLifestyle) ? "not-allowed" : "pointer",
-                                    opacity: (!showLifestyle || uploadingLifestyle) ? 0.7 : 1
+                                    opacity: (!showLifestyle || uploadingLifestyle) ? 0.7 : 1,
+                                    display: "inline-flex",
+                                    alignItems: "center",
+                                    gap: "6px"
                                   }}
                                 >
+                                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" style={{ width: "16px", height: "16px" }}>
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5m-13.5-9L12 3m0 0 4.5 4.5M12 3v13.5" />
+                                  </svg>
                                   <input
                                     type="file"
                                     accept="image/*"
@@ -811,18 +854,8 @@ export default function LandingPageSubTab({
                                     style={{ display: "none" }}
                                     disabled={!showLifestyle || uploadingLifestyle}
                                   />
-                                  {uploadingLifestyle ? "Uploading..." : "Upload Image"}
+                                  <span>{uploadingLifestyle ? "Uploading..." : "Upload Image"}</span>
                                 </label>
-                              </div>
-                              {lifestyleImage && (
-                                <div style={{ marginTop: "10px", position: "relative", width: "100%", height: "120px", borderRadius: "8px", overflow: "hidden", border: "1px solid #e5e7eb" }}>
-                                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                                  <img
-                                    src={lifestyleImage}
-                                    alt="Lifestyle Preview"
-                                    style={{ width: "100%", height: "100%", objectFit: "cover" }}
-                                  />
-                                </div>
                               )}
                             </div>
                             <button
@@ -937,21 +970,31 @@ export default function LandingPageSubTab({
                                 />
                               ) : (
                                 <div style={{ marginTop: "8px" }}>
-                                  {brandLogoValue && brandLogoValue.startsWith("http") && (
-                                    <div style={{ marginBottom: "15px", border: "1px solid #e5e7eb", borderRadius: "8px", padding: "10px", backgroundColor: "#f9fafb", display: "inline-block" }}>
+                                  {uploadingLogo && <p style={{ fontSize: "0.82rem", color: "#111827", margin: "0 0 8px 0" }}>Uploading logo...</p>}
+                                  {brandLogoValue && (brandLogoValue.startsWith("http") || brandLogoValue.startsWith("data:")) ? (
+                                    <div style={{ display: "flex", alignItems: "center", gap: "10px", marginTop: "6px" }}>
                                       <img 
                                         src={brandLogoValue} 
                                         alt="Brand Logo Preview" 
-                                        style={{ maxHeight: "60px", objectFit: "contain", display: "block" }} 
+                                        style={{ maxHeight: "50px", maxWidth: "160px", objectFit: "contain", borderRadius: "6px", border: "1px solid #e2e8f0", padding: "4px", backgroundColor: "#ffffff" }} 
                                       />
+                                      <button
+                                        type="button"
+                                        onClick={() => setBrandLogoValue("")}
+                                        style={{ backgroundColor: "#fee2e2", color: "#ef4444", border: "none", padding: "6px 12px", borderRadius: "6px", fontSize: "0.78rem", fontWeight: 600, cursor: "pointer", display: "flex", alignItems: "center", gap: "5px" }}
+                                      >
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" style={{ width: "14px", height: "14px" }}>
+                                          <path strokeLinecap="round" strokeLinejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
+                                        </svg>
+                                        Remove
+                                      </button>
                                     </div>
-                                  )}
-                                  <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
-                                    <label style={{ display: "inline-flex", alignItems: "center", gap: "8px", backgroundColor: "#f3f4f6", border: "1px solid #d1d5db", padding: "10px 16px", borderRadius: "6px", cursor: "pointer", fontSize: "0.9rem", color: "#374151", fontWeight: 500, transition: "all 0.2s ease" }}>
-                                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" width="18" height="18">
+                                  ) : (
+                                    <label style={{ display: "inline-flex", alignItems: "center", gap: "8px", backgroundColor: "#ffffff", border: "1px solid #d1d5db", padding: "10px 16px", borderRadius: "8px", cursor: "pointer", fontSize: "0.85rem", color: "#374151", fontWeight: 600, transition: "all 0.2s ease" }}>
+                                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" width="16" height="16">
                                         <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
                                       </svg>
-                                      {uploadingLogo ? "Uploading..." : "Upload Logo Image"}
+                                      <span>{uploadingLogo ? "Uploading..." : "Upload Logo Image"}</span>
                                       <input 
                                         type="file" 
                                         accept="image/png, image/jpeg, image/webp, image/svg+xml" 
@@ -960,15 +1003,7 @@ export default function LandingPageSubTab({
                                         disabled={uploadingLogo}
                                       />
                                     </label>
-                                    <input
-                                      type="text"
-                                      value={brandLogoValue}
-                                      onChange={(e: any) => setBrandLogoValue(e.target.value)}
-                                      placeholder="Or paste an image URL..."
-                                      className={styles.textInput}
-                                      style={{ flex: 1 }}
-                                    />
-                                  </div>
+                                  )}
                                   <p style={{ fontSize: "0.75rem", color: "#6b7280", marginTop: "8px" }}>
                                     Recommended: Transparent PNG or SVG, max height 60px.
                                   </p>
@@ -1200,46 +1235,25 @@ export default function LandingPageSubTab({
                               >
                                 + Add FAQ
                               </button>
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  setFaqs([
-                                    {
-                                      question: "HOW DO I FIND MY PERFECT SCENT?",
-                                      answer: "We recommend starting with our Sample Set. It contains sample vials of our top fragrances so you can wear them on your skin and discover which elements match your personal chemistry."
-                                    },
-                                    {
-                                      question: "WHEN WILL MY NEW 29S BOTTLE ARRIVE?",
-                                      answer: "Orders are hand-crafted and dispatched within 2-3 business days. Delivery typically takes 4-7 business days depending on your location."
-                                    },
-                                    {
-                                      question: "WHAT IF I WANT TO RETURN OR EXCHANGE?",
-                                      answer: "We offer hassle-free returns on unopened bottles within 14 days of delivery. Sample vials are non-returnable, but we will gladly exchange any damaged bottles immediately."
-                                    },
-                                    {
-                                      question: "HOW CAN I PAY?",
-                                      answer: "We accept all major credit cards, debit cards, UPI, net banking, and Cash on Delivery (COD) services."
-                                    },
-                                    {
-                                      question: "IS CASH ON DELIVERY AVAILABLE?",
-                                      answer: "Yes, Cash on Delivery is available for all pin codes across India at no additional charge."
-                                    }
-                                  ]);
-                                }}
-                                style={{
-                                  backgroundColor: "#f3f4f6",
-                                  color: "#374151",
-                                  border: "1px solid #d1d5db",
-                                  borderRadius: "6px",
-                                  padding: "10px 18px",
-                                  fontSize: "0.85rem",
-                                  fontWeight: 600,
-                                  cursor: "pointer",
-                                  transition: "background 0.2s ease"
-                                }}
-                              >
-                                Reset FAQs to Defaults
-                              </button>
+                              {faqs.length > 0 && (
+                                <button
+                                  type="button"
+                                  onClick={() => setFaqs([])}
+                                  style={{
+                                    backgroundColor: "#fef2f2",
+                                    color: "#dc2626",
+                                    border: "1px solid #fecaca",
+                                    borderRadius: "6px",
+                                    padding: "10px 18px",
+                                    fontSize: "0.85rem",
+                                    fontWeight: 600,
+                                    cursor: "pointer",
+                                    transition: "background 0.2s ease"
+                                  }}
+                                >
+                                  Clear All FAQs
+                                </button>
+                              )}
                             </div>
                           </div>
                         )}

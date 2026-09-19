@@ -13,7 +13,7 @@ router.post("/api/upload", upload.single("file"), async (req, res) => {
     if (!process.env.CLOUDINARY_URL && (!process.env.CLOUDINARY_CLOUD_NAME || !process.env.CLOUDINARY_API_KEY || !process.env.CLOUDINARY_API_SECRET)) {
       return res.status(400).json({ error: "Cloudinary credentials not configured in backend .env file" });
     }
-    
+
     if (!req.file) {
       return res.status(400).json({ error: "No file uploaded" });
     }

@@ -18,7 +18,7 @@ export default function Footer() {
   const [returnPolicyText, setReturnPolicyText] = useState<string>("");
   const [shippingPolicyText, setShippingPolicyText] = useState<string>("");
   const [brandLogoType, setBrandLogoType] = useState<string>("text");
-  const [brandLogoValue, setBrandLogoValue] = useState<string>("29sFORMULA");
+  const [brandLogoValue, setBrandLogoValue] = useState<string>("");
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => { setMounted(true); }, []);
@@ -162,29 +162,28 @@ export default function Footer() {
           {brandLogoType === "image" && brandLogoValue ? (
             <img src={brandLogoValue} alt="Brand Logo" style={{ maxHeight: "120px", maxWidth: "90%", objectFit: "contain" }} />
           ) : (
-            <span style={{ 
-              fontSize: `min(25vw, calc(140vw / ${Math.max(1, (brandLogoValue || "29sFORMULA").length)}))`
+            <span style={{
+              fontSize: `min(25vw, calc(140vw / ${Math.max(1, (brandLogoValue || "").length)}))`
             }}>
-              {brandLogoValue || "29sFORMULA"}
+              {brandLogoValue || ""}
             </span>
           )}
         </div>
         <div className={styles.subFooterDivider}></div>
         <div className={styles.subFooterCopyright}>
-          <p>© {new Date().getFullYear()}, {brandLogoType === "text" ? brandLogoValue : "29sFORMULA"}, ALL RIGHTS RESERVED</p>
-          <p>OWNED BY 29S FORMULA LLP</p>
+          <p>© {new Date().getFullYear()} {brandLogoValue || ""}, ALL RIGHTS RESERVED</p>
         </div>
       </section>
       {mounted && createPortal(
-        <div 
+        <div
           className={`${styles.policyModalOverlay} ${activePopup ? styles.open : ""}`}
           onClick={() => setActivePopup(null)}
         >
-          <div 
+          <div
             className={styles.policyModalContent}
             onClick={(e) => e.stopPropagation()}
           >
-            <button 
+            <button
               className={styles.policyModalCloseBtn}
               onClick={() => setActivePopup(null)}
             >

@@ -1029,46 +1029,25 @@ export default function ReviewsSubTab({
                               >
                                 + Add FAQ
                               </button>
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  setFaqs([
-                                    {
-                                      question: "HOW DO I FIND MY PERFECT SCENT?",
-                                      answer: "We recommend starting with our Sample Set. It contains sample vials of our top fragrances so you can wear them on your skin and discover which elements match your personal chemistry."
-                                    },
-                                    {
-                                      question: "WHEN WILL MY NEW 29S BOTTLE ARRIVE?",
-                                      answer: "Orders are hand-crafted and dispatched within 2-3 business days. Delivery typically takes 4-7 business days depending on your location."
-                                    },
-                                    {
-                                      question: "WHAT IF I WANT TO RETURN OR EXCHANGE?",
-                                      answer: "We offer hassle-free returns on unopened bottles within 14 days of delivery. Sample vials are non-returnable, but we will gladly exchange any damaged bottles immediately."
-                                    },
-                                    {
-                                      question: "HOW CAN I PAY?",
-                                      answer: "We accept all major credit cards, debit cards, UPI, net banking, and Cash on Delivery (COD) services."
-                                    },
-                                    {
-                                      question: "IS CASH ON DELIVERY AVAILABLE?",
-                                      answer: "Yes, Cash on Delivery is available for all pin codes across India at no additional charge."
-                                    }
-                                  ]);
-                                }}
-                                style={{
-                                  backgroundColor: "#f3f4f6",
-                                  color: "#374151",
-                                  border: "1px solid #d1d5db",
-                                  borderRadius: "6px",
-                                  padding: "10px 18px",
-                                  fontSize: "0.85rem",
-                                  fontWeight: 600,
-                                  cursor: "pointer",
-                                  transition: "background 0.2s ease"
-                                }}
-                              >
-                                Reset FAQs to Defaults
-                              </button>
+                              {faqs.length > 0 && (
+                                <button
+                                  type="button"
+                                  onClick={() => setFaqs([])}
+                                  style={{
+                                    backgroundColor: "#fef2f2",
+                                    color: "#dc2626",
+                                    border: "1px solid #fecaca",
+                                    borderRadius: "6px",
+                                    padding: "10px 18px",
+                                    fontSize: "0.85rem",
+                                    fontWeight: 600,
+                                    cursor: "pointer",
+                                    transition: "background 0.2s ease"
+                                  }}
+                                >
+                                  Clear All FAQs
+                                </button>
+                              )}
                             </div>
                           </div>
                         )}

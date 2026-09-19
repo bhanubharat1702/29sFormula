@@ -157,6 +157,39 @@ router.post("/api/settings", async (req, res) => {
     if (facebookLink !== undefined) settings.facebookLink = facebookLink;
     if (contactLink !== undefined) settings.contactLink = contactLink;
 
+    // Gift Set Page Settings
+    if (req.body.showGiftSetPage !== undefined) settings.showGiftSetPage = req.body.showGiftSetPage;
+    if (req.body.giftSetHeaderBadge !== undefined) settings.giftSetHeaderBadge = req.body.giftSetHeaderBadge;
+    if (req.body.giftSetHeaderTitle !== undefined) settings.giftSetHeaderTitle = req.body.giftSetHeaderTitle;
+    if (req.body.giftSetHeaderSubtitle !== undefined) settings.giftSetHeaderSubtitle = req.body.giftSetHeaderSubtitle;
+    if (req.body.giftSetHeaderTitleFontType !== undefined) settings.giftSetHeaderTitleFontType = req.body.giftSetHeaderTitleFontType;
+    if (req.body.giftSetHeaderTitleFontSize !== undefined) settings.giftSetHeaderTitleFontSize = req.body.giftSetHeaderTitleFontSize;
+    if (req.body.giftSetHeaderTitleFontColor !== undefined) settings.giftSetHeaderTitleFontColor = req.body.giftSetHeaderTitleFontColor;
+    if (req.body.giftSetHeaderTitleFontWeight !== undefined) settings.giftSetHeaderTitleFontWeight = req.body.giftSetHeaderTitleFontWeight;
+    if (req.body.giftSetHeaderTitleFontAlignment !== undefined) settings.giftSetHeaderTitleFontAlignment = req.body.giftSetHeaderTitleFontAlignment;
+    if (req.body.giftSetHeaderSubtitleFontType !== undefined) settings.giftSetHeaderSubtitleFontType = req.body.giftSetHeaderSubtitleFontType;
+    if (req.body.giftSetHeaderSubtitleFontSize !== undefined) settings.giftSetHeaderSubtitleFontSize = req.body.giftSetHeaderSubtitleFontSize;
+    if (req.body.giftSetHeaderSubtitleFontColor !== undefined) settings.giftSetHeaderSubtitleFontColor = req.body.giftSetHeaderSubtitleFontColor;
+    if (req.body.giftSetHeaderSubtitleFontWeight !== undefined) settings.giftSetHeaderSubtitleFontWeight = req.body.giftSetHeaderSubtitleFontWeight;
+    if (req.body.giftSetHeaderBgType !== undefined) settings.giftSetHeaderBgType = req.body.giftSetHeaderBgType;
+    if (req.body.giftSetHeaderBgColor !== undefined) settings.giftSetHeaderBgColor = req.body.giftSetHeaderBgColor;
+    if (req.body.giftSetHeaderBgImage !== undefined) settings.giftSetHeaderBgImage = req.body.giftSetHeaderBgImage;
+    if (req.body.giftSetHeaderBgVideo !== undefined) settings.giftSetHeaderBgVideo = req.body.giftSetHeaderBgVideo;
+    if (req.body.giftSetBgType !== undefined) settings.giftSetBgType = req.body.giftSetBgType;
+    if (req.body.giftSetBgColor !== undefined) settings.giftSetBgColor = req.body.giftSetBgColor;
+    if (req.body.giftSetBgImage !== undefined) settings.giftSetBgImage = req.body.giftSetBgImage;
+    if (req.body.giftSetBgGradient !== undefined) settings.giftSetBgGradient = req.body.giftSetBgGradient;
+    if (req.body.giftSetSizes !== undefined) settings.giftSetSizes = req.body.giftSetSizes;
+    if (req.body.giftSetDefaultSize !== undefined) settings.giftSetDefaultSize = req.body.giftSetDefaultSize;
+    if (req.body.giftSetMaxFragrances !== undefined) settings.giftSetMaxFragrances = req.body.giftSetMaxFragrances;
+    if (req.body.giftSetButtonText !== undefined) settings.giftSetButtonText = req.body.giftSetButtonText;
+    if (req.body.giftSetButtonColor !== undefined) settings.giftSetButtonColor = req.body.giftSetButtonColor;
+    if (req.body.giftSetButtonTextColor !== undefined) settings.giftSetButtonTextColor = req.body.giftSetButtonTextColor;
+    if (req.body.giftSetButtonStyle !== undefined) settings.giftSetButtonStyle = req.body.giftSetButtonStyle;
+    if (req.body.giftSetCardBorderColor !== undefined) settings.giftSetCardBorderColor = req.body.giftSetCardBorderColor;
+    if (req.body.giftSetCardSelectedColor !== undefined) settings.giftSetCardSelectedColor = req.body.giftSetCardSelectedColor;
+    if (req.body.giftSetAccentColor !== undefined) settings.giftSetAccentColor = req.body.giftSetAccentColor;
+
     await settings.save();
 
     // Update in-memory cache

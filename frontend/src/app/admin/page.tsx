@@ -366,8 +366,51 @@ export default function AdminDashboard() {
   const [editReviewTarget, setEditReviewTarget] = useState<any>(null);
   const [isEditingReview, setIsEditingReview] = useState<boolean>(false);
 
-  // Customize Page Sub-Tab Switcher State ("landing" vs "product" vs "reviews")
-  const [customizeSubTab, setCustomizeSubTab] = useState<"landing" | "product" | "reviews">("landing");
+  // Customize Page Sub-Tab Switcher State ("landing" vs "product" vs "giftset" vs "reviews")
+  const [customizeSubTab, setCustomizeSubTab] = useState<"landing" | "product" | "giftset" | "reviews">("landing");
+
+  // Gift Set Page CMS State
+  const [showGiftSetPage, setShowGiftSetPage] = useState<boolean>(true);
+  const [giftSetHeaderBadge, setGiftSetHeaderBadge] = useState<string>("CURATE · GIFT · DELIGHT");
+  const [giftSetHeaderTitle, setGiftSetHeaderTitle] = useState<string>("Build Your Gift Set");
+  const [giftSetHeaderSubtitle, setGiftSetHeaderSubtitle] = useState<string>("Pick any 3 fragrances in the same size");
+  const [giftSetHeaderTitleFontType, setGiftSetHeaderTitleFontType] = useState<string>("Outfit");
+  const [giftSetHeaderTitleFontSize, setGiftSetHeaderTitleFontSize] = useState<string>("3.5rem");
+  const [giftSetHeaderTitleFontColor, setGiftSetHeaderTitleFontColor] = useState<string>("#111827");
+  const [giftSetHeaderTitleFontWeight, setGiftSetHeaderTitleFontWeight] = useState<string>("800");
+  const [giftSetHeaderTitleFontAlignment, setGiftSetHeaderTitleFontAlignment] = useState<string>("center");
+  const [giftSetHeaderSubtitleFontType, setGiftSetHeaderSubtitleFontType] = useState<string>("Outfit");
+  const [giftSetHeaderSubtitleFontSize, setGiftSetHeaderSubtitleFontSize] = useState<string>("1.1rem");
+  const [giftSetHeaderSubtitleFontColor, setGiftSetHeaderSubtitleFontColor] = useState<string>("#6b7280");
+  const [giftSetHeaderSubtitleFontWeight, setGiftSetHeaderSubtitleFontWeight] = useState<string>("500");
+  const [giftSetBgType, setGiftSetBgType] = useState<string>("color");
+  const [giftSetBgColor, setGiftSetBgColor] = useState<string>("#faf5ff");
+  const [giftSetBgImage, setGiftSetBgImage] = useState<string>("");
+  const [giftSetBgGradient, setGiftSetBgGradient] = useState<string>("linear-gradient(135deg, #faf5ff 0%, #f0e7ff 100%)");
+  const [giftSetSizes, setGiftSetSizes] = useState<{ size: string; label: string; description: string }[]>([
+    { size: "20 ml", label: "Discovery Set", description: "Pocket perfection for travel" },
+    { size: "50 ml", label: "Classic Trio", description: "The most popular signature box" },
+    { size: "100 ml", label: "Grand Vault", description: "Ultimate statement fragrance collection" }
+  ]);
+  const [giftSetDefaultSize, setGiftSetDefaultSize] = useState<string>("50 ml");
+  const [giftSetMaxFragrances, setGiftSetMaxFragrances] = useState<number>(3);
+  const [giftSetButtonText, setGiftSetButtonText] = useState<string>("Add Gift Box to Cart");
+  const [giftSetButtonColor, setGiftSetButtonColor] = useState<string>("#111827");
+  const [giftSetButtonTextColor, setGiftSetButtonTextColor] = useState<string>("#ffffff");
+  const [giftSetButtonStyle, setGiftSetButtonStyle] = useState<string>("solid");
+  const [giftSetCardBorderColor, setGiftSetCardBorderColor] = useState<string>("#e2e8f0");
+  const [giftSetCardSelectedColor, setGiftSetCardSelectedColor] = useState<string>("#111827");
+  const [giftSetAccentColor, setGiftSetAccentColor] = useState<string>("#111827");
+
+  const [giftSetHeaderBgType, setGiftSetHeaderBgType] = useState<string>("color");
+  const [giftSetHeaderBgColor, setGiftSetHeaderBgColor] = useState<string>("#ffffff");
+  const [giftSetHeaderBgImage, setGiftSetHeaderBgImage] = useState<string>("");
+  const [giftSetHeaderBgVideo, setGiftSetHeaderBgVideo] = useState<string>("");
+  const [uploadingGiftSetHeaderImage, setUploadingGiftSetHeaderImage] = useState<boolean>(false);
+  const [uploadingGiftSetHeaderVideo, setUploadingGiftSetHeaderVideo] = useState<boolean>(false);
+  const [giftSetHeaderVideoProgress, setGiftSetHeaderVideoProgress] = useState<number | null>(null);
+  const [uploadingHeroBgVideo, setUploadingHeroBgVideo] = useState<boolean>(false);
+  const [heroBgVideoProgress, setHeroBgVideoProgress] = useState<number | null>(null);
 
   const [loadingSettings, setLoadingSettings] = useState<boolean>(false);
   const [activeCustomizerSection, setActiveCustomizerSection] = useState<string | null>(null);
@@ -473,7 +516,42 @@ export default function AdminDashboard() {
       contactUsText: data.contactUsText !== undefined ? data.contactUsText : "Need help? Email us at hello@29sformula.in and our support team will get back to you within 24 hours.",
       returnPolicyText: data.returnPolicyText !== undefined ? data.returnPolicyText : "We offer a 7-day hassle-free return policy. If you're not fully satisfied with your purchase, contact our support team for a full refund.",
       shippingPolicyText: data.shippingPolicyText !== undefined ? data.shippingPolicyText : "We offer free shipping across India. Orders are typically processed within 1-2 business days and delivered within 4-7 business days.",
-      faqs: data.faqs || []
+      faqs: data.faqs || [],
+      showGiftSetPage: data.showGiftSetPage !== undefined ? data.showGiftSetPage : true,
+      giftSetHeaderBadge: data.giftSetHeaderBadge || "CURATE · GIFT · DELIGHT",
+      giftSetHeaderTitle: data.giftSetHeaderTitle || "Build Your Gift Set",
+      giftSetHeaderSubtitle: data.giftSetHeaderSubtitle || "Pick any 3 fragrances in the same size",
+      giftSetHeaderTitleFontType: data.giftSetHeaderTitleFontType || "Outfit",
+      giftSetHeaderTitleFontSize: data.giftSetHeaderTitleFontSize || "3.5rem",
+      giftSetHeaderTitleFontColor: data.giftSetHeaderTitleFontColor || "#111827",
+      giftSetHeaderTitleFontWeight: data.giftSetHeaderTitleFontWeight || "800",
+      giftSetHeaderTitleFontAlignment: data.giftSetHeaderTitleFontAlignment || "center",
+      giftSetHeaderSubtitleFontType: data.giftSetHeaderSubtitleFontType || "Outfit",
+      giftSetHeaderSubtitleFontSize: data.giftSetHeaderSubtitleFontSize || "1.1rem",
+      giftSetHeaderSubtitleFontColor: data.giftSetHeaderSubtitleFontColor || "#6b7280",
+      giftSetHeaderSubtitleFontWeight: data.giftSetHeaderSubtitleFontWeight || "500",
+      giftSetHeaderBgType: data.giftSetHeaderBgType || "color",
+      giftSetHeaderBgColor: data.giftSetHeaderBgColor || "#ffffff",
+      giftSetHeaderBgImage: data.giftSetHeaderBgImage || "",
+      giftSetHeaderBgVideo: data.giftSetHeaderBgVideo || "",
+      giftSetBgType: data.giftSetBgType || "color",
+      giftSetBgColor: data.giftSetBgColor || "#faf5ff",
+      giftSetBgImage: data.giftSetBgImage || "",
+      giftSetBgGradient: data.giftSetBgGradient || "linear-gradient(135deg, #faf5ff 0%, #f0e7ff 100%)",
+      giftSetSizes: data.giftSetSizes || [
+        { size: "20 ml", label: "Discovery Set", description: "Pocket perfection for travel" },
+        { size: "50 ml", label: "Classic Trio", description: "The most popular signature box" },
+        { size: "100 ml", label: "Grand Vault", description: "Ultimate statement fragrance collection" }
+      ],
+      giftSetDefaultSize: data.giftSetDefaultSize || "50 ml",
+      giftSetMaxFragrances: data.giftSetMaxFragrances || 3,
+      giftSetButtonText: data.giftSetButtonText || "Add Gift Box to Cart",
+      giftSetButtonColor: data.giftSetButtonColor || "#111827",
+      giftSetButtonTextColor: data.giftSetButtonTextColor || "#ffffff",
+      giftSetButtonStyle: data.giftSetButtonStyle || "solid",
+      giftSetCardBorderColor: data.giftSetCardBorderColor || "#e2e8f0",
+      giftSetCardSelectedColor: data.giftSetCardSelectedColor || "#111827",
+      giftSetAccentColor: data.giftSetAccentColor || "#111827"
     };
   };
 
@@ -559,6 +637,37 @@ export default function AdminDashboard() {
     contactUsText !== originalSettings.contactUsText ||
     returnPolicyText !== originalSettings.returnPolicyText ||
     shippingPolicyText !== originalSettings.shippingPolicyText ||
+    showGiftSetPage !== originalSettings.showGiftSetPage ||
+    giftSetHeaderBadge !== originalSettings.giftSetHeaderBadge ||
+    giftSetHeaderTitle !== originalSettings.giftSetHeaderTitle ||
+    giftSetHeaderSubtitle !== originalSettings.giftSetHeaderSubtitle ||
+    giftSetHeaderTitleFontType !== originalSettings.giftSetHeaderTitleFontType ||
+    giftSetHeaderTitleFontSize !== originalSettings.giftSetHeaderTitleFontSize ||
+    giftSetHeaderTitleFontColor !== originalSettings.giftSetHeaderTitleFontColor ||
+    giftSetHeaderTitleFontWeight !== originalSettings.giftSetHeaderTitleFontWeight ||
+    giftSetHeaderTitleFontAlignment !== originalSettings.giftSetHeaderTitleFontAlignment ||
+    giftSetHeaderSubtitleFontType !== originalSettings.giftSetHeaderSubtitleFontType ||
+    giftSetHeaderSubtitleFontSize !== originalSettings.giftSetHeaderSubtitleFontSize ||
+    giftSetHeaderSubtitleFontColor !== originalSettings.giftSetHeaderSubtitleFontColor ||
+    giftSetHeaderSubtitleFontWeight !== originalSettings.giftSetHeaderSubtitleFontWeight ||
+    giftSetHeaderBgType !== originalSettings.giftSetHeaderBgType ||
+    giftSetHeaderBgColor !== originalSettings.giftSetHeaderBgColor ||
+    giftSetHeaderBgImage !== originalSettings.giftSetHeaderBgImage ||
+    giftSetHeaderBgVideo !== originalSettings.giftSetHeaderBgVideo ||
+    giftSetBgType !== originalSettings.giftSetBgType ||
+    giftSetBgColor !== originalSettings.giftSetBgColor ||
+    giftSetBgImage !== originalSettings.giftSetBgImage ||
+    giftSetBgGradient !== originalSettings.giftSetBgGradient ||
+    JSON.stringify(giftSetSizes) !== JSON.stringify(originalSettings.giftSetSizes || []) ||
+    giftSetDefaultSize !== originalSettings.giftSetDefaultSize ||
+    giftSetMaxFragrances !== originalSettings.giftSetMaxFragrances ||
+    giftSetButtonText !== originalSettings.giftSetButtonText ||
+    giftSetButtonColor !== originalSettings.giftSetButtonColor ||
+    giftSetButtonTextColor !== originalSettings.giftSetButtonTextColor ||
+    giftSetButtonStyle !== originalSettings.giftSetButtonStyle ||
+    giftSetCardBorderColor !== originalSettings.giftSetCardBorderColor ||
+    giftSetCardSelectedColor !== originalSettings.giftSetCardSelectedColor ||
+    giftSetAccentColor !== originalSettings.giftSetAccentColor ||
     JSON.stringify(faqs) !== JSON.stringify(originalSettings.faqs || [])
   ) : false;
 
@@ -754,6 +863,37 @@ export default function AdminDashboard() {
         if (data.contactUsText !== undefined) setContactUsText(data.contactUsText);
         if (data.returnPolicyText !== undefined) setReturnPolicyText(data.returnPolicyText);
         if (data.shippingPolicyText !== undefined) setShippingPolicyText(data.shippingPolicyText);
+        if (data.showGiftSetPage !== undefined) setShowGiftSetPage(data.showGiftSetPage);
+        if (data.giftSetHeaderBadge !== undefined) setGiftSetHeaderBadge(data.giftSetHeaderBadge);
+        if (data.giftSetHeaderTitle !== undefined) setGiftSetHeaderTitle(data.giftSetHeaderTitle);
+        if (data.giftSetHeaderSubtitle !== undefined) setGiftSetHeaderSubtitle(data.giftSetHeaderSubtitle);
+        if (data.giftSetHeaderTitleFontType !== undefined) setGiftSetHeaderTitleFontType(data.giftSetHeaderTitleFontType);
+        if (data.giftSetHeaderTitleFontSize !== undefined) setGiftSetHeaderTitleFontSize(data.giftSetHeaderTitleFontSize);
+        if (data.giftSetHeaderTitleFontColor !== undefined) setGiftSetHeaderTitleFontColor(data.giftSetHeaderTitleFontColor);
+        if (data.giftSetHeaderTitleFontWeight !== undefined) setGiftSetHeaderTitleFontWeight(data.giftSetHeaderTitleFontWeight);
+        if (data.giftSetHeaderTitleFontAlignment !== undefined) setGiftSetHeaderTitleFontAlignment(data.giftSetHeaderTitleFontAlignment);
+        if (data.giftSetHeaderSubtitleFontType !== undefined) setGiftSetHeaderSubtitleFontType(data.giftSetHeaderSubtitleFontType);
+        if (data.giftSetHeaderSubtitleFontSize !== undefined) setGiftSetHeaderSubtitleFontSize(data.giftSetHeaderSubtitleFontSize);
+        if (data.giftSetHeaderSubtitleFontColor !== undefined) setGiftSetHeaderSubtitleFontColor(data.giftSetHeaderSubtitleFontColor);
+        if (data.giftSetHeaderSubtitleFontWeight !== undefined) setGiftSetHeaderSubtitleFontWeight(data.giftSetHeaderSubtitleFontWeight);
+        if (data.giftSetHeaderBgType !== undefined) setGiftSetHeaderBgType(data.giftSetHeaderBgType);
+        if (data.giftSetHeaderBgColor !== undefined) setGiftSetHeaderBgColor(data.giftSetHeaderBgColor);
+        if (data.giftSetHeaderBgImage !== undefined) setGiftSetHeaderBgImage(data.giftSetHeaderBgImage);
+        if (data.giftSetHeaderBgVideo !== undefined) setGiftSetHeaderBgVideo(data.giftSetHeaderBgVideo);
+        if (data.giftSetBgType !== undefined) setGiftSetBgType(data.giftSetBgType);
+        if (data.giftSetBgColor !== undefined) setGiftSetBgColor(data.giftSetBgColor);
+        if (data.giftSetBgImage !== undefined) setGiftSetBgImage(data.giftSetBgImage);
+        if (data.giftSetBgGradient !== undefined) setGiftSetBgGradient(data.giftSetBgGradient);
+        if (data.giftSetSizes !== undefined) setGiftSetSizes(data.giftSetSizes);
+        if (data.giftSetDefaultSize !== undefined) setGiftSetDefaultSize(data.giftSetDefaultSize);
+        if (data.giftSetMaxFragrances !== undefined) setGiftSetMaxFragrances(data.giftSetMaxFragrances);
+        if (data.giftSetButtonText !== undefined) setGiftSetButtonText(data.giftSetButtonText);
+        if (data.giftSetButtonColor !== undefined) setGiftSetButtonColor(data.giftSetButtonColor);
+        if (data.giftSetButtonTextColor !== undefined) setGiftSetButtonTextColor(data.giftSetButtonTextColor);
+        if (data.giftSetButtonStyle !== undefined) setGiftSetButtonStyle(data.giftSetButtonStyle);
+        if (data.giftSetCardBorderColor !== undefined) setGiftSetCardBorderColor(data.giftSetCardBorderColor);
+        if (data.giftSetCardSelectedColor !== undefined) setGiftSetCardSelectedColor(data.giftSetCardSelectedColor);
+        if (data.giftSetAccentColor !== undefined) setGiftSetAccentColor(data.giftSetAccentColor);
         const loadedFaqs = data.faqs || [];
         setFaqs(loadedFaqs);
 
@@ -1246,7 +1386,38 @@ export default function AdminDashboard() {
           returnPolicyText,
           shippingPolicyText,
           faqs,
-          googleClientId
+          googleClientId,
+          showGiftSetPage,
+          giftSetHeaderBadge,
+          giftSetHeaderTitle,
+          giftSetHeaderSubtitle,
+          giftSetHeaderTitleFontType,
+          giftSetHeaderTitleFontSize,
+          giftSetHeaderTitleFontColor,
+          giftSetHeaderTitleFontWeight,
+          giftSetHeaderTitleFontAlignment,
+          giftSetHeaderSubtitleFontType,
+          giftSetHeaderSubtitleFontSize,
+          giftSetHeaderSubtitleFontColor,
+          giftSetHeaderSubtitleFontWeight,
+          giftSetHeaderBgType,
+          giftSetHeaderBgColor,
+          giftSetHeaderBgImage,
+          giftSetHeaderBgVideo,
+          giftSetBgType,
+          giftSetBgColor,
+          giftSetBgImage,
+          giftSetBgGradient,
+          giftSetSizes,
+          giftSetDefaultSize,
+          giftSetMaxFragrances,
+          giftSetButtonText,
+          giftSetButtonColor,
+          giftSetButtonTextColor,
+          giftSetButtonStyle,
+          giftSetCardBorderColor,
+          giftSetCardSelectedColor,
+          giftSetAccentColor
         })
       });
       if (!res.ok) throw new Error("Failed to save layout adjustments");
@@ -1555,6 +1726,101 @@ export default function AdminDashboard() {
       });
     };
 
+    xhr.send(formData);
+  };
+
+  const handleGiftSetHeaderImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploadingGiftSetHeaderImage(true);
+    const formData = new FormData();
+    formData.append("file", file);
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:5001'}/api/upload`, {
+        method: "POST",
+        body: formData
+      });
+      if (!res.ok) throw new Error("Image upload failed");
+      const data = await res.json();
+      setGiftSetHeaderBgImage(data.url);
+    } catch (err: any) {
+      setCustomAlert({ title: "Upload Failed", message: err.message || "Failed to upload image" });
+    } finally {
+      setUploadingGiftSetHeaderImage(false);
+    }
+  };
+
+  const handleGiftSetHeaderVideoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploadingGiftSetHeaderVideo(true);
+    setGiftSetHeaderVideoProgress(0);
+    const formData = new FormData();
+    formData.append("file", file);
+    const xhr = new XMLHttpRequest();
+    xhr.open("POST", `${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:5001'}/api/upload`);
+    xhr.upload.onprogress = (event) => {
+      if (event.lengthComputable) {
+        const percentage = Math.round((event.loaded / event.total) * 100);
+        setGiftSetHeaderVideoProgress(percentage);
+      }
+    };
+    xhr.onload = () => {
+      setUploadingGiftSetHeaderVideo(false);
+      setGiftSetHeaderVideoProgress(null);
+      if (xhr.status === 200) {
+        try {
+          const data = JSON.parse(xhr.responseText);
+          setGiftSetHeaderBgVideo(data.url);
+        } catch (err) {
+          setCustomAlert({ title: "Parse Error", message: "Failed to parse upload server response." });
+        }
+      } else {
+        setCustomAlert({ title: "Video Upload Failed", message: "Upload failed." });
+      }
+    };
+    xhr.onerror = () => {
+      setUploadingGiftSetHeaderVideo(false);
+      setGiftSetHeaderVideoProgress(null);
+      setCustomAlert({ title: "Network Error", message: "Network request failed." });
+    };
+    xhr.send(formData);
+  };
+
+  const handleHeroBgVideoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploadingHeroBgVideo(true);
+    setHeroBgVideoProgress(0);
+    const formData = new FormData();
+    formData.append("file", file);
+    const xhr = new XMLHttpRequest();
+    xhr.open("POST", `${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:5001'}/api/upload`);
+    xhr.upload.onprogress = (event) => {
+      if (event.lengthComputable) {
+        const percentage = Math.round((event.loaded / event.total) * 100);
+        setHeroBgVideoProgress(percentage);
+      }
+    };
+    xhr.onload = () => {
+      setUploadingHeroBgVideo(false);
+      setHeroBgVideoProgress(null);
+      if (xhr.status === 200) {
+        try {
+          const data = JSON.parse(xhr.responseText);
+          setHeroBgVideo(data.url);
+        } catch (err) {
+          setCustomAlert({ title: "Parse Error", message: "Failed to parse upload server response." });
+        }
+      } else {
+        setCustomAlert({ title: "Video Upload Failed", message: "Upload failed." });
+      }
+    };
+    xhr.onerror = () => {
+      setUploadingHeroBgVideo(false);
+      setHeroBgVideoProgress(null);
+      setCustomAlert({ title: "Network Error", message: "Network request failed." });
+    };
     xhr.send(formData);
   };
 
@@ -2520,6 +2786,9 @@ export default function AdminDashboard() {
             setHeroBgImage={setHeroBgImage}
             heroBgVideo={heroBgVideo}
             setHeroBgVideo={setHeroBgVideo}
+            uploadingHeroBgVideo={uploadingHeroBgVideo}
+            heroBgVideoProgress={heroBgVideoProgress}
+            handleHeroBgVideoUpload={handleHeroBgVideoUpload}
             setHeroTitleFontType={setHeroTitleFontType}
             setHeroTitleFontColor={setHeroTitleFontColor}
             setHeroTitleFontSize={setHeroTitleFontSize}
@@ -2603,6 +2872,73 @@ export default function AdminDashboard() {
             loadingSettings={loadingSettings}
             hasUnsavedChanges={hasUnsavedChanges}
             setShowResetConfirmModal={setShowResetConfirmModal}
+            showGiftSetPage={showGiftSetPage}
+            setShowGiftSetPage={setShowGiftSetPage}
+            giftSetHeaderBadge={giftSetHeaderBadge}
+            setGiftSetHeaderBadge={setGiftSetHeaderBadge}
+            giftSetHeaderTitle={giftSetHeaderTitle}
+            setGiftSetHeaderTitle={setGiftSetHeaderTitle}
+            giftSetHeaderSubtitle={giftSetHeaderSubtitle}
+            setGiftSetHeaderSubtitle={setGiftSetHeaderSubtitle}
+            giftSetHeaderTitleFontType={giftSetHeaderTitleFontType}
+            setGiftSetHeaderTitleFontType={setGiftSetHeaderTitleFontType}
+            giftSetHeaderTitleFontSize={giftSetHeaderTitleFontSize}
+            setGiftSetHeaderTitleFontSize={setGiftSetHeaderTitleFontSize}
+            giftSetHeaderTitleFontColor={giftSetHeaderTitleFontColor}
+            setGiftSetHeaderTitleFontColor={setGiftSetHeaderTitleFontColor}
+            giftSetHeaderTitleFontWeight={giftSetHeaderTitleFontWeight}
+            setGiftSetHeaderTitleFontWeight={setGiftSetHeaderTitleFontWeight}
+            giftSetHeaderTitleFontAlignment={giftSetHeaderTitleFontAlignment}
+            setGiftSetHeaderTitleFontAlignment={setGiftSetHeaderTitleFontAlignment}
+            giftSetHeaderSubtitleFontType={giftSetHeaderSubtitleFontType}
+            setGiftSetHeaderSubtitleFontType={setGiftSetHeaderSubtitleFontType}
+            giftSetHeaderSubtitleFontSize={giftSetHeaderSubtitleFontSize}
+            setGiftSetHeaderSubtitleFontSize={setGiftSetHeaderSubtitleFontSize}
+            giftSetHeaderSubtitleFontColor={giftSetHeaderSubtitleFontColor}
+            setGiftSetHeaderSubtitleFontColor={setGiftSetHeaderSubtitleFontColor}
+            giftSetHeaderSubtitleFontWeight={giftSetHeaderSubtitleFontWeight}
+            setGiftSetHeaderSubtitleFontWeight={setGiftSetHeaderSubtitleFontWeight}
+            giftSetBgType={giftSetBgType}
+            setGiftSetBgType={setGiftSetBgType}
+            giftSetBgColor={giftSetBgColor}
+            setGiftSetBgColor={setGiftSetBgColor}
+            giftSetBgImage={giftSetBgImage}
+            setGiftSetBgImage={setGiftSetBgImage}
+            giftSetBgGradient={giftSetBgGradient}
+            setGiftSetBgGradient={setGiftSetBgGradient}
+            giftSetSizes={giftSetSizes}
+            setGiftSetSizes={setGiftSetSizes}
+            giftSetDefaultSize={giftSetDefaultSize}
+            setGiftSetDefaultSize={setGiftSetDefaultSize}
+            giftSetMaxFragrances={giftSetMaxFragrances}
+            setGiftSetMaxFragrances={setGiftSetMaxFragrances}
+            giftSetButtonText={giftSetButtonText}
+            setGiftSetButtonText={setGiftSetButtonText}
+            giftSetButtonColor={giftSetButtonColor}
+            setGiftSetButtonColor={setGiftSetButtonColor}
+            giftSetButtonTextColor={giftSetButtonTextColor}
+            setGiftSetButtonTextColor={setGiftSetButtonTextColor}
+            giftSetButtonStyle={giftSetButtonStyle}
+            setGiftSetButtonStyle={setGiftSetButtonStyle}
+            giftSetCardBorderColor={giftSetCardBorderColor}
+            setGiftSetCardBorderColor={setGiftSetCardBorderColor}
+            giftSetCardSelectedColor={giftSetCardSelectedColor}
+            setGiftSetCardSelectedColor={setGiftSetCardSelectedColor}
+            giftSetAccentColor={giftSetAccentColor}
+            setGiftSetAccentColor={setGiftSetAccentColor}
+            giftSetHeaderBgType={giftSetHeaderBgType}
+            setGiftSetHeaderBgType={setGiftSetHeaderBgType}
+            giftSetHeaderBgColor={giftSetHeaderBgColor}
+            setGiftSetHeaderBgColor={setGiftSetHeaderBgColor}
+            giftSetHeaderBgImage={giftSetHeaderBgImage}
+            setGiftSetHeaderBgImage={setGiftSetHeaderBgImage}
+            giftSetHeaderBgVideo={giftSetHeaderBgVideo}
+            setGiftSetHeaderBgVideo={setGiftSetHeaderBgVideo}
+            uploadingGiftSetHeaderImage={uploadingGiftSetHeaderImage}
+            handleGiftSetHeaderImageUpload={handleGiftSetHeaderImageUpload}
+            uploadingGiftSetHeaderVideo={uploadingGiftSetHeaderVideo}
+            handleGiftSetHeaderVideoUpload={handleGiftSetHeaderVideoUpload}
+            giftSetHeaderVideoProgress={giftSetHeaderVideoProgress}
           />
           <CustomersTab
             activeTab={activeTab}

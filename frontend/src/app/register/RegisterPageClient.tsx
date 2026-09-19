@@ -34,7 +34,7 @@ export default function RegisterPageClient({ initialColor }: { initialColor: str
   const [isLoading, setIsLoading] = useState(false);
   const [primaryColor, setPrimaryColor] = useState<string>(initialColor);
   const [brandLogoType, setBrandLogoType] = useState<string>("text");
-  const [brandLogoValue, setBrandLogoValue] = useState<string>("29sFORMULA");
+  const [brandLogoValue, setBrandLogoValue] = useState<string>("");
 
   useEffect(() => {
     fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:5001'}/api/settings`, { cache: 'no-store' })
@@ -88,7 +88,7 @@ export default function RegisterPageClient({ initialColor }: { initialColor: str
   return (
     <div suppressHydrationWarning className={styles.loginContainer} style={{ backgroundColor: primaryColor }}>
       {brandLogoType === "text" && (
-        <div className={styles.brandBgPattern}>{brandLogoValue || "29sFORMULA"}</div>
+        <div className={styles.brandBgPattern}>{brandLogoValue}</div>
       )}
 
       <div className={styles.loginCard}>
@@ -100,7 +100,7 @@ export default function RegisterPageClient({ initialColor }: { initialColor: str
           {brandLogoType === "image" && brandLogoValue ? (
             <img src={brandLogoValue} alt="Brand Logo" style={{ maxHeight: "60px", maxWidth: "200px", objectFit: "contain", margin: "0 auto 10px auto" }} />
           ) : (
-            <h1 className={styles.logoText}>{brandLogoValue || "29sFORMULA"}</h1>
+            <h1 className={styles.logoText}>{brandLogoValue}</h1>
           )}
           <p className={styles.subtitle}>Create your premium account</p>
         </div>
@@ -143,7 +143,7 @@ export default function RegisterPageClient({ initialColor }: { initialColor: str
                 id="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="e.g. hello@29sformula.in"
+                placeholder="e.g. hello@gmail.com"
                 className={styles.textInput}
                 required
               />

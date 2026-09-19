@@ -96,7 +96,7 @@ export default function CheckoutDrawer({ isOpen, onClose, cartItems, primaryColo
   const [loggedInUser, setLoggedInUser] = useState<any>(null);
   const [isReturningCustomer, setIsReturningCustomer] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [brandLogoValue, setBrandLogoValue] = useState<string>("29sFORMULA");
+  const [brandLogoValue, setBrandLogoValue] = useState<string>("");
   const [isSearching, setIsSearching] = useState(false);
   const [searchError, setSearchError] = useState<string | null>(null);
   const [searchSuccess, setSearchSuccess] = useState<string | null>(null);
@@ -448,7 +448,7 @@ export default function CheckoutDrawer({ isOpen, onClose, cartItems, primaryColo
           key: "rzp_test_TQPDhHLa4xiz9t", // Test API Key
           amount: initData.amount,
           currency: initData.currency,
-          name: brandLogoValue || "29sFORMULA",
+          name: brandLogoValue || "",
           description: "Fine Artisan Perfumery",
           order_id: initData.order_id,
           handler: async function (response: any) {

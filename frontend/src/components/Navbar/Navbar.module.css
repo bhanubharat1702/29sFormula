@@ -3,7 +3,7 @@
   align-items: center;
   justify-content: space-between;
   padding: 20px 40px;
-  background-color: var(--primary-brand-color, #57bc74);
+  background-color: var(--primary-brand-color, #000000);
   position: relative;
   z-index: 10005;
   /* Note: In actual implementation, we might want to ensure --primary-brand-color falls back correctly, or leave it transparent/solid based on route. But all pages currently use the same structure */
