@@ -3,37 +3,34 @@ import User from "../models/User.js";
 import Customer from "../models/Customer.js";
 import Order from "../models/Order.js";
 import { sendEmail } from "../utils/emailService.js";
+import { getBrandInfo } from "../utils/brandHelper.js";
 
 const router = express.Router();
 
 const sendWelcomeEmail = async (userEmail, userName) => {
   try {
+    const { brandName, brandTagline, primaryColor, contactText, frontendUrl } = await getBrandInfo();
+
     await sendEmail({
       to: userEmail,
-      subject: "Welcome to 29sFORMULA! 🎉",
+      subject: `Welcome to ${brandName}! 🎉`,
       html: `
         <div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; color: #1a1a1a; padding: 40px 30px; border: 1px solid #e5e5e5; border-radius: 4px; background-color: #fafafa;">
           <div style="text-align: center; margin-bottom: 30px;">
-            <h1 style="letter-spacing: 2px; font-weight: 300; margin: 0; color: #000;">29sFORMULA</h1>
-            <p style="text-transform: uppercase; letter-spacing: 1.5px; font-size: 11px; color: #666; margin-top: 5px;">Fine Artisan Perfumery</p>
+            <h1 style="letter-spacing: 2px; font-weight: 600; margin: 0; color: #000;">${brandName}</h1>
+            <p style="text-transform: uppercase; letter-spacing: 1.5px; font-size: 11px; color: #666; margin-top: 5px;">${brandTagline}</p>
           </div>
           <hr style="border: none; border-top: 1px solid #eaeaea; margin-bottom: 30px;" />
-          <h2 style="color: #222; text-align: center; font-weight: 400; letter-spacing: 1px;">Welcome to Our World of Fragrance</h2>
+          <h2 style="color: #222; text-align: center; font-weight: 400; letter-spacing: 1px;">Welcome to ${brandName}</h2>
           <p style="font-size: 15px; line-height: 1.6; color: #444;">Dear ${userName},</p>
-          <p style="font-size: 15px; line-height: 1.6; color: #444;">We are delighted to welcome you to the inner circle of <strong>29sFORMULA</strong>. Our philosophy is rooted in crafting exquisite, long-lasting perfumes that leave an unforgettable impression.</p>
-          <p style="font-size: 15px; line-height: 1.6; color: #444;">As a member, you now have exclusive access to our luxury collections, new signature scent drops, and personalized fragrance recommendations.</p>
-          <p style="font-size: 15px; line-height: 1.6; color: #444;">Here’s where your fragrance journey begins:</p>
-          <ul style="font-size: 15px; line-height: 1.6; color: #444; padding-left: 20px;">
-            <li style="margin-bottom: 10px;">Discover our artisanal Extrait de Parfums.</li>
-            <li style="margin-bottom: 10px;">Find the perfect signature scent for every occasion.</li>
-            <li style="margin-bottom: 10px;">Enjoy seamless luxury shopping and fast delivery.</li>
-          </ul>
+          <p style="font-size: 15px; line-height: 1.6; color: #444;">We are delighted to welcome you to <strong>${brandName}</strong>. Thank you for creating an account with us.</p>
+          <p style="font-size: 15px; line-height: 1.6; color: #444;">As a valued member, you now have exclusive access to explore our products, enjoy personalized recommendations, and track your orders seamlessly.</p>
           <div style="text-align: center; margin: 40px 0;">
-            <a href="https://29sformula.com/shop" style="display: inline-block; padding: 14px 35px; background-color: #000; color: #fff; text-decoration: none; font-size: 13px; letter-spacing: 1.5px; text-transform: uppercase;">Discover the Collection</a>
+            <a href="${frontendUrl}/shop" style="display: inline-block; padding: 14px 35px; background-color: ${primaryColor}; color: #fff; text-decoration: none; font-size: 13px; letter-spacing: 1.5px; text-transform: uppercase; border-radius: 4px;">Discover Our Collection</a>
           </div>
-          <p style="font-size: 15px; line-height: 1.6; color: #444;">Should you need assistance selecting a scent or tracking a package, simply reply to this email. Our fragrance concierges are always at your service.</p>
+          <p style="font-size: 15px; line-height: 1.6; color: #444;">${contactText}</p>
           <br>
-          <p style="font-size: 15px; line-height: 1.6; color: #444;">Warm regards,<br><strong>The 29sFORMULA Team</strong></p>
+          <p style="font-size: 15px; line-height: 1.6; color: #444;">Warm regards,<br><strong>The ${brandName} Team</strong></p>
         </div>
       `,
     });
@@ -253,13 +250,14 @@ router.post("/api/auth/request-reset-otp", async (req, res) => {
 
     // Send email via Brevo
     const { sendEmail } = await import("../utils/emailService.js");
+    const { brandName } = await getBrandInfo();
     await sendEmail({
       to: trimmedEmail,
-      subject: "Password Reset Code - 29sFORMULA",
-      text: `Hello ${user.name || 'User'},\n\nYour 6-digit password reset verification code is: ${otpCode}\nThis code will expire in 5 minutes.\n\nIf you did not request a password reset, please ignore this email.`,
+      subject: `Password Reset Code - ${brandName}`,
+      text: `Hello ${user.name || 'User'},\n\nYour 6-digit password reset verification code for ${brandName} is: ${otpCode}\nThis code will expire in 5 minutes.\n\nIf you did not request a password reset, please ignore this email.`,
       html: `
         <div style="font-family: Arial, sans-serif; padding: 20px; max-width: 600px; margin: 0 auto; border: 1px solid #ddd; border-radius: 8px;">
-          <h2 style="color: #333; text-align: center;">Reset Your Password</h2>
+          <h2 style="color: #333; text-align: center;">Reset Your Password - ${brandName}</h2>
           <p style="color: #555; font-size: 16px;">Hello ${user.name || 'User'},</p>
           <p style="color: #555; font-size: 16px;">Use the 6-digit verification code below to reset your password. This code expires in 5 minutes.</p>
           <div style="text-align: center; margin: 30px 0;">

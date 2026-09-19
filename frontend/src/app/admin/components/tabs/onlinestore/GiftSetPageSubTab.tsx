@@ -314,9 +314,9 @@ export default function GiftSetPageSubTab({
                       {giftSetHeaderBgType === "image" && (
                         <div>
                           <label className={styles.inputLabel} style={{ fontSize: "0.82rem" }}>Background Image</label>
-                          {uploadingGiftSetHeaderImage && <p style={{ fontSize: "0.82rem", color: "#111827", margin: "0 0 8px 0" }}>Uploading image...</p>}
-
-                          {giftSetHeaderBgImage ? (
+                          {uploadingGiftSetHeaderImage ? (
+                            <p style={{ fontSize: "0.82rem", color: "#111827", margin: "6px 0 0 0" }}>Uploading image...</p>
+                          ) : giftSetHeaderBgImage ? (
                             <div style={{ display: "flex", alignItems: "center", gap: "10px", marginTop: "6px" }}>
                               <img src={giftSetHeaderBgImage} alt="Header Bg" style={{ width: "120px", height: "60px", objectFit: "cover", borderRadius: "6px", border: "1px solid #e2e8f0" }} />
                               <button
@@ -335,9 +335,8 @@ export default function GiftSetPageSubTab({
                               type="file"
                               accept="image/*"
                               onChange={handleGiftSetHeaderImageUpload}
-                              disabled={uploadingGiftSetHeaderImage}
                               className={styles.textInput}
-                              style={{ height: "auto", padding: "8px" }}
+                              style={{ height: "auto", padding: "8px", marginTop: "6px" }}
                             />
                           )}
                         </div>
@@ -346,7 +345,7 @@ export default function GiftSetPageSubTab({
                       {giftSetHeaderBgType === "video" && (
                         <div>
                           <label className={styles.inputLabel} style={{ fontSize: "0.82rem" }}>Background Video</label>
-                          {uploadingGiftSetHeaderVideo && (
+                          {uploadingGiftSetHeaderVideo ? (
                             <div style={{ marginTop: "6px", marginBottom: "8px" }}>
                               <p style={{ fontSize: "0.82rem", color: "#111827", margin: "0 0 4px 0" }}>
                                 Uploading video ... {giftSetHeaderVideoProgress !== null ? `${giftSetHeaderVideoProgress}%` : ""}
@@ -355,9 +354,7 @@ export default function GiftSetPageSubTab({
                                 <div style={{ width: `${giftSetHeaderVideoProgress || 0}%`, height: "100%", backgroundColor: "#111827", transition: "width 0.3s" }} />
                               </div>
                             </div>
-                          )}
-
-                          {giftSetHeaderBgVideo ? (
+                          ) : giftSetHeaderBgVideo ? (
                             <div style={{ display: "flex", alignItems: "center", gap: "10px", marginTop: "6px" }}>
                               <video src={giftSetHeaderBgVideo} autoPlay loop muted style={{ width: "120px", height: "60px", objectFit: "cover", borderRadius: "6px", border: "1px solid #e2e8f0" }} />
                               <button
@@ -376,9 +373,8 @@ export default function GiftSetPageSubTab({
                               type="file"
                               accept="video/*"
                               onChange={handleGiftSetHeaderVideoUpload}
-                              disabled={uploadingGiftSetHeaderVideo}
                               className={styles.textInput}
-                              style={{ height: "auto", padding: "8px" }}
+                              style={{ height: "auto", padding: "8px", marginTop: "6px" }}
                             />
                           )}
                         </div>

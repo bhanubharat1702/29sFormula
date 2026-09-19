@@ -9,12 +9,14 @@ import User from "../models/User.js";
 import { Product, ProductVariant } from "../models/Product.js";
 import { invalidateProductsCache } from "../utils/cache.js";
 import { sendEmail } from "../utils/emailService.js";
+import { getBrandInfo } from "../utils/brandHelper.js";
 import Razorpay from "razorpay";
 
 const router = express.Router();
 
 const sendReturnUpdateEmail = async (order, customerEmail, customerName, returnStatus, adminNotes) => {
   try {
+    const { brandName, brandTagline, primaryColor, frontendUrl } = await getBrandInfo();
     let subject = `Update on your Return Request - ${order.orderId}`;
     let heading = "Return Request Update";
     let message = "";
@@ -22,7 +24,7 @@ const sendReturnUpdateEmail = async (order, customerEmail, customerName, returnS
     if (returnStatus === "Return Requested") {
       subject = `Return Request Received - ${order.orderId}`;
       heading = "We have received your return request";
-      message = "Your claim for a damaged product has been submitted and is currently under review by our team. We will notify you once a decision has been made.";
+      message = "Your claim has been submitted and is currently under review by our team. We will notify you once a decision has been made.";
     } else if (returnStatus === "Return Approved") {
       subject = `Return Request Approved - ${order.orderId}`;
       heading = "Your return request has been approved";
@@ -49,8 +51,8 @@ const sendReturnUpdateEmail = async (order, customerEmail, customerName, returnS
       html: `
         <div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; color: #1a1a1a; padding: 40px 30px; border: 1px solid #e5e5e5; border-radius: 4px; background-color: #fafafa;">
           <div style="text-align: center; margin-bottom: 30px;">
-            <h1 style="letter-spacing: 2px; font-weight: 300; margin: 0; color: #000;">29sFORMULA</h1>
-            <p style="text-transform: uppercase; letter-spacing: 1.5px; font-size: 11px; color: #666; margin-top: 5px;">Fine Artisan Perfumery</p>
+            <h1 style="letter-spacing: 2px; font-weight: 600; margin: 0; color: #000;">${brandName}</h1>
+            <p style="text-transform: uppercase; letter-spacing: 1.5px; font-size: 11px; color: #666; margin-top: 5px;">${brandTagline}</p>
           </div>
           <hr style="border: none; border-top: 1px solid #eaeaea; margin-bottom: 30px;" />
           
@@ -59,7 +61,7 @@ const sendReturnUpdateEmail = async (order, customerEmail, customerName, returnS
           <p style="font-size: 15px; line-height: 1.6; color: #444;">${message}</p>
           
           <div style="text-align: center; margin: 40px 0;">
-            <a href="https://29sformula.com/track?order_id=${order.orderId}" style="display: inline-block; padding: 14px 35px; background-color: #000; color: #fff; text-decoration: none; font-size: 13px; letter-spacing: 1.5px; text-transform: uppercase;">Track Your Order</a>
+            <a href="${frontendUrl}/track?order_id=${order.orderId}" style="display: inline-block; padding: 14px 35px; background-color: ${primaryColor}; color: #fff; text-decoration: none; font-size: 13px; letter-spacing: 1.5px; text-transform: uppercase; border-radius: 4px;">Track Your Order</a>
           </div>
           
           <hr style="border: none; border-top: 1px solid #eaeaea; margin-top: 40px; margin-bottom: 30px;" />
@@ -75,22 +77,23 @@ const sendReturnUpdateEmail = async (order, customerEmail, customerName, returnS
 
 const sendOrderUpdateEmail = async (order, customerEmail, customerName) => {
   try {
+    const { brandName, brandTagline, primaryColor, frontendUrl } = await getBrandInfo();
     let subject = `Order Update - ${order.orderId}`;
     let heading = "An Update on Your Order";
     let message = `The status of your order is now: <strong style="font-weight: 600; color: #111;">${order.status}</strong>`;
 
     if (order.status === "Shipped") {
-      subject = `Your 29sFORMULA Order is on its way - ${order.orderId}`;
-      heading = "Your fragrance is en route.";
-      message = "Your artisanal perfume has been carefully packaged and handed over to our shipping partners. It is currently making its way to you.";
+      subject = `Your ${brandName} Order is on its way - ${order.orderId}`;
+      heading = "Your order is en route.";
+      message = "Your package has been carefully prepared and handed over to our shipping partners. It is currently making its way to you.";
     } else if (order.status === "Delivered") {
-      subject = `Your 29sFORMULA Order has arrived - ${order.orderId}`;
-      heading = "Your fragrance has been delivered.";
-      message = "Your order has been successfully delivered. We hope you enjoy the exquisite scent and the journey it takes you on.";
+      subject = `Your ${brandName} Order has arrived - ${order.orderId}`;
+      heading = "Your order has been delivered.";
+      message = "Your order has been successfully delivered. We hope you enjoy your purchase.";
     } else if (order.status === "Cancelled") {
       subject = `Order Cancelled - ${order.orderId}`;
       heading = "Your order has been cancelled";
-      message = "Your recent order has been cancelled. If this was a mistake or you require assistance, our concierge is here to help.";
+      message = "Your recent order has been cancelled. If this was a mistake or you require assistance, our support team is here to help.";
     }
 
     await sendEmail({
@@ -99,8 +102,8 @@ const sendOrderUpdateEmail = async (order, customerEmail, customerName) => {
       html: `
         <div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; color: #1a1a1a; padding: 40px 30px; border: 1px solid #e5e5e5; border-radius: 4px; background-color: #fafafa;">
           <div style="text-align: center; margin-bottom: 30px;">
-            <h1 style="letter-spacing: 2px; font-weight: 300; margin: 0; color: #000;">29sFORMULA</h1>
-            <p style="text-transform: uppercase; letter-spacing: 1.5px; font-size: 11px; color: #666; margin-top: 5px;">Fine Artisan Perfumery</p>
+            <h1 style="letter-spacing: 2px; font-weight: 600; margin: 0; color: #000;">${brandName}</h1>
+            <p style="text-transform: uppercase; letter-spacing: 1.5px; font-size: 11px; color: #666; margin-top: 5px;">${brandTagline}</p>
           </div>
           <hr style="border: none; border-top: 1px solid #eaeaea; margin-bottom: 30px;" />
           
@@ -117,15 +120,14 @@ const sendOrderUpdateEmail = async (order, customerEmail, customerName) => {
           </div>
           
           <div style="text-align: center; margin: 40px 0;">
-            <a href="https://29sformula.com/track?order_id=${order.orderId}" style="display: inline-block; padding: 14px 35px; background-color: #000; color: #fff; text-decoration: none; font-size: 13px; letter-spacing: 1.5px; text-transform: uppercase;">Track Your Order</a>
+            <a href="${frontendUrl}/track?order_id=${order.orderId}" style="display: inline-block; padding: 14px 35px; background-color: ${primaryColor}; color: #fff; text-decoration: none; font-size: 13px; letter-spacing: 1.5px; text-transform: uppercase; border-radius: 4px;">Track Your Order</a>
           </div>
           
           <hr style="border: none; border-top: 1px solid #eaeaea; margin-top: 40px; margin-bottom: 30px;" />
-          <p style="font-size: 13px; line-height: 1.6; color: #888; text-align: center;">We will notify you again once your package has been shipped.</p>
+          <p style="font-size: 13px; line-height: 1.6; color: #888; text-align: center;">We will notify you again once your package status updates.</p>
         </div>
       `,
     });
-
 
     console.log(`Order update email sent for ${order.orderId}`);
   } catch (error) {
@@ -139,11 +141,12 @@ const sendAdminNewOrderEmail = async (order) => {
   if (!adminEmail) return;
 
   try {
+    const { brandName, frontendUrl } = await getBrandInfo();
     const itemsHtml = (order.cartItems || []).map(item => `
       <tr>
         <td style="padding: 12px 10px; border-bottom: 1px solid #eee; font-size: 14px; color: #333;">
           <strong>${item.name}</strong>
-          <span style="display:block; font-size:12px; color:#888; margin-top:3px;">${item.size}${item.isGiftSet ? ' &bull; Gift Set' : ''}</span>
+          <span style="display:block; font-size:12px; color:#888; margin-top:3px;">${item.size}${item.isGiftSet ? ' &bull; Custom Box' : ''}</span>
         </td>
         <td style="padding: 12px 10px; border-bottom: 1px solid #eee; font-size: 14px; color: #333; text-align: center;">${item.quantity}</td>
         <td style="padding: 12px 10px; border-bottom: 1px solid #eee; font-size: 14px; color: #333; text-align: right;">&#8377;${(item.price * item.quantity).toLocaleString('en-IN')}</td>
@@ -171,7 +174,7 @@ const sendAdminNewOrderEmail = async (order) => {
 
           <!-- Header -->
           <div style="background:#0a0a0a; padding:28px 32px; text-align:center;">
-            <h1 style="margin:0; letter-spacing:3px; font-weight:300; color:#fff; font-size:22px;">29sFORMULA</h1>
+            <h1 style="margin:0; letter-spacing:3px; font-weight:600; color:#fff; font-size:22px;">${brandName}</h1>
             <p style="margin:6px 0 0; font-size:11px; letter-spacing:2px; text-transform:uppercase; color:#aaa;">Admin Order Alert</p>
           </div>
 
@@ -236,13 +239,13 @@ const sendAdminNewOrderEmail = async (order) => {
 
             <!-- CTA -->
             <div style="text-align:center; margin-top:28px;">
-              <a href="https://29sformula.com/admin" style="display:inline-block; padding:14px 40px; background:#0a0a0a; color:#fff; text-decoration:none; font-size:13px; letter-spacing:1.5px; text-transform:uppercase; border-radius:3px;">View in Admin Dashboard</a>
+              <a href="${frontendUrl}/admin" style="display:inline-block; padding:14px 40px; background:#0a0a0a; color:#fff; text-decoration:none; font-size:13px; letter-spacing:1.5px; text-transform:uppercase; border-radius:3px;">View in Admin Dashboard</a>
             </div>
           </div>
 
           <!-- Footer -->
           <div style="background:#f9f9f9; border-top:1px solid #eee; padding:18px 32px; text-align:center;">
-            <p style="margin:0; font-size:12px; color:#aaa;">This is an automated notification from 29sFORMULA &mdash; do not reply.</p>
+            <p style="margin:0; font-size:12px; color:#aaa;">This is an automated notification from ${brandName} &mdash; do not reply.</p>
           </div>
         </div>
       `
@@ -255,6 +258,7 @@ const sendAdminNewOrderEmail = async (order) => {
 
 const sendOrderConfirmationEmail = async (order, customerEmail, customerName) => {
   try {
+    const { brandName, primaryColor } = await getBrandInfo();
     const itemsHtml = order.cartItems.map(item => `
       <tr>
         <td style="padding: 10px; border-bottom: 1px solid #eee;">${item.name} (${item.size})</td>
@@ -268,8 +272,8 @@ const sendOrderConfirmationEmail = async (order, customerEmail, customerName) =>
       subject: `Order Confirmation - ${order.orderId}`,
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; color: #333;">
-          <h2 style="color: #4f46e5;">Thank you for your order, ${customerName}!</h2>
-          <p>We've received your order and are currently processing it. Here are the details:</p>
+          <h2 style="color: ${primaryColor};">Thank you for your order, ${customerName}!</h2>
+          <p>We've received your order for ${brandName} and are currently processing it. Here are the details:</p>
           
           <div style="background-color: #f9fafb; padding: 15px; border-radius: 8px; margin: 20px 0;">
             <strong>Order ID:</strong> ${order.orderId}<br>
@@ -294,14 +298,14 @@ const sendOrderConfirmationEmail = async (order, customerEmail, customerName) =>
           <p>You can track your order status anytime on our website.</p>
           <p style="margin-top: 30px; font-size: 0.9em; color: #666;">
             Best regards,<br>
-            <strong>29sFORMULA Team</strong>
+            <strong>The ${brandName} Team</strong>
           </p>
         </div>
       `
     });
-    console.log(`Order confirmation email sent to ${customerEmail} for order ${order.orderId}`);
+    console.log(`Order confirmation email sent for ${order.orderId}`);
   } catch (error) {
-    console.error("Failed to send order confirmation email:", error);
+    console.error("Error sending order confirmation email:", error);
   }
 };
 

@@ -5,6 +5,7 @@ import Order from "../models/Order.js";
 import Otp from "../models/Otp.js";
 import dotenv from "dotenv";
 import { sendEmail } from "../utils/emailService.js";
+import { getBrandInfo } from "../utils/brandHelper.js";
 
 dotenv.config();
 
@@ -34,14 +35,14 @@ router.post("/api/customers/request-autofill-otp", async (req, res) => {
       { upsert: true, returnDocument: 'after' }
     );
 
-    // Send email via Resend
+    const { brandName } = await getBrandInfo();
     await sendEmail({
       to: customer.email,
-      subject: "Your 29sFORMULA Verification Code",
-      text: `Hello ${customer.name || 'Customer'},\n\nPlease use the verification code below to autofill your checkout details. This code will expire in 5 minutes.\n\nCode: ${otpCode}\n\nIf you didn't request this code, you can safely ignore this email.`,
+      subject: `Your ${brandName} Verification Code`,
+      text: `Hello ${customer.name || 'Customer'},\n\nPlease use the verification code below to autofill your checkout details for ${brandName}. This code will expire in 5 minutes.\n\nCode: ${otpCode}\n\nIf you didn't request this code, you can safely ignore this email.`,
       html: `
         <div style="font-family: Arial, sans-serif; padding: 20px; max-width: 600px; margin: 0 auto; border: 1px solid #ddd; border-radius: 8px;">
-          <h2 style="color: #333; text-align: center;">Your Verification Code</h2>
+          <h2 style="color: #333; text-align: center;">Your ${brandName} Verification Code</h2>
           <p style="color: #555; font-size: 16px;">Hello ${customer.name || 'Customer'},</p>
           <p style="color: #555; font-size: 16px;">Please use the verification code below to autofill your checkout details. This code will expire in 5 minutes.</p>
           <div style="text-align: center; margin: 30px 0;">

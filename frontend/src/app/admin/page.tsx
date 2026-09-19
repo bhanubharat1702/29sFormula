@@ -411,6 +411,8 @@ export default function AdminDashboard() {
   const [giftSetHeaderVideoProgress, setGiftSetHeaderVideoProgress] = useState<number | null>(null);
   const [uploadingHeroBgVideo, setUploadingHeroBgVideo] = useState<boolean>(false);
   const [heroBgVideoProgress, setHeroBgVideoProgress] = useState<number | null>(null);
+  const [uploadingHeroBgImage, setUploadingHeroBgImage] = useState<boolean>(false);
+  const [heroBgImageProgress, setHeroBgImageProgress] = useState<number | null>(null);
 
   const [loadingSettings, setLoadingSettings] = useState<boolean>(false);
   const [activeCustomizerSection, setActiveCustomizerSection] = useState<string | null>(null);
@@ -1824,6 +1826,43 @@ export default function AdminDashboard() {
     xhr.send(formData);
   };
 
+  const handleHeroBgImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploadingHeroBgImage(true);
+    setHeroBgImageProgress(0);
+    const formData = new FormData();
+    formData.append("file", file);
+    const xhr = new XMLHttpRequest();
+    xhr.open("POST", `${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:5001'}/api/upload`);
+    xhr.upload.onprogress = (event) => {
+      if (event.lengthComputable) {
+        const percentage = Math.round((event.loaded / event.total) * 100);
+        setHeroBgImageProgress(percentage);
+      }
+    };
+    xhr.onload = () => {
+      setUploadingHeroBgImage(false);
+      setHeroBgImageProgress(null);
+      if (xhr.status === 200) {
+        try {
+          const data = JSON.parse(xhr.responseText);
+          setHeroBgImage(data.url);
+        } catch (err) {
+          setCustomAlert({ title: "Parse Error", message: "Failed to parse upload server response." });
+        }
+      } else {
+        setCustomAlert({ title: "Image Upload Failed", message: "Upload failed." });
+      }
+    };
+    xhr.onerror = () => {
+      setUploadingHeroBgImage(false);
+      setHeroBgImageProgress(null);
+      setCustomAlert({ title: "Network Error", message: "Network request failed." });
+    };
+    xhr.send(formData);
+  };
+
   const handleLifestyleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -2789,6 +2828,9 @@ export default function AdminDashboard() {
             uploadingHeroBgVideo={uploadingHeroBgVideo}
             heroBgVideoProgress={heroBgVideoProgress}
             handleHeroBgVideoUpload={handleHeroBgVideoUpload}
+            uploadingHeroBgImage={uploadingHeroBgImage}
+            heroBgImageProgress={heroBgImageProgress}
+            handleHeroBgImageUpload={handleHeroBgImageUpload}
             setHeroTitleFontType={setHeroTitleFontType}
             setHeroTitleFontColor={setHeroTitleFontColor}
             setHeroTitleFontSize={setHeroTitleFontSize}

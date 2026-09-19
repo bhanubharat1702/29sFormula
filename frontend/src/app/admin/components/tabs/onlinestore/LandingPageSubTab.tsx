@@ -49,6 +49,9 @@ export default function LandingPageSubTab({
   uploadingHeroBgVideo,
   heroBgVideoProgress,
   handleHeroBgVideoUpload,
+  uploadingHeroBgImage,
+  heroBgImageProgress,
+  handleHeroBgImageUpload,
   setHeroTitleFontType,
   setHeroTitleFontColor,
   setHeroTitleFontSize,
@@ -313,7 +316,16 @@ export default function LandingPageSubTab({
                               {heroBgType === "image" && (
                                 <div className={styles.inputGroup}>
                                   <label className={styles.inputLabel}>Background Image</label>
-                                  {heroBgImage ? (
+                                  {uploadingHeroBgImage ? (
+                                    <div style={{ marginTop: "6px", marginBottom: "8px" }}>
+                                      <p style={{ fontSize: "0.82rem", color: "#111827", margin: "0 0 4px 0" }}>
+                                        Uploading image ... {heroBgImageProgress !== null ? `${heroBgImageProgress}%` : ""}
+                                      </p>
+                                      <div style={{ width: "100%", height: "6px", backgroundColor: "#e2e8f0", borderRadius: "3px", overflow: "hidden" }}>
+                                        <div style={{ width: `${heroBgImageProgress || 0}%`, height: "100%", backgroundColor: "#111827", transition: "width 0.3s" }} />
+                                      </div>
+                                    </div>
+                                  ) : heroBgImage ? (
                                     <div style={{ display: "flex", alignItems: "center", gap: "10px", marginTop: "6px" }}>
                                       <img src={heroBgImage} alt="Hero Bg" style={{ width: "120px", height: "60px", objectFit: "cover", borderRadius: "6px", border: "1px solid #e2e8f0" }} />
                                       <button
@@ -349,27 +361,7 @@ export default function LandingPageSubTab({
                                         type="file"
                                         accept="image/*"
                                         style={{ display: "none" }}
-                                        onChange={async (e) => {
-                                          if (e.target.files && e.target.files[0]) {
-                                            const file = e.target.files[0];
-                                            const formData = new FormData();
-                                            formData.append("file", file);
-                                            try {
-                                              const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:5001'}/api/upload`, {
-                                                method: "POST",
-                                                body: formData
-                                              });
-                                              if (res.ok) {
-                                                const uploadResult = await res.json();
-                                                setHeroBgImage(uploadResult.url);
-                                              } else {
-                                                alert("Image upload failed");
-                                              }
-                                            } catch (err) {
-                                              console.error("Upload error:", err);
-                                            }
-                                          }
-                                        }}
+                                        onChange={handleHeroBgImageUpload}
                                       />
                                     </label>
                                   )}
@@ -379,7 +371,7 @@ export default function LandingPageSubTab({
                               {heroBgType === "video" && (
                                 <div className={styles.inputGroup}>
                                   <label className={styles.inputLabel}>Background Video</label>
-                                  {uploadingHeroBgVideo && (
+                                  {uploadingHeroBgVideo ? (
                                     <div style={{ marginTop: "6px", marginBottom: "8px" }}>
                                       <p style={{ fontSize: "0.82rem", color: "#111827", margin: "0 0 4px 0" }}>
                                         Uploading video ... {heroBgVideoProgress !== null ? `${heroBgVideoProgress}%` : ""}
@@ -388,9 +380,7 @@ export default function LandingPageSubTab({
                                         <div style={{ width: `${heroBgVideoProgress || 0}%`, height: "100%", backgroundColor: "#111827", transition: "width 0.3s" }} />
                                       </div>
                                     </div>
-                                  )}
-
-                                  {heroBgVideo ? (
+                                  ) : heroBgVideo ? (
                                     <div style={{ display: "flex", alignItems: "center", gap: "10px", marginTop: "6px" }}>
                                       <video src={heroBgVideo} autoPlay loop muted style={{ width: "120px", height: "60px", objectFit: "cover", borderRadius: "6px", border: "1px solid #e2e8f0" }} />
                                       <button
@@ -427,7 +417,6 @@ export default function LandingPageSubTab({
                                         accept="video/*"
                                         style={{ display: "none" }}
                                         onChange={handleHeroBgVideoUpload}
-                                        disabled={uploadingHeroBgVideo}
                                       />
                                     </label>
                                   )}
@@ -686,10 +675,7 @@ export default function LandingPageSubTab({
                                 </div>
                               )}
 
-                              {videoBgType === "video" && (
-                                <div className={styles.inputGroup}>
-                                  <label className={styles.inputLabel}>Background Video</label>
-                                  {uploadingVideo && (
+                                  {uploadingVideo ? (
                                     <div style={{ marginTop: "6px", marginBottom: "8px" }}>
                                       <p style={{ fontSize: "0.82rem", color: "#111827", margin: "0 0 4px 0" }}>
                                         Uploading video ... {videoProgress !== null ? `${videoProgress}%` : ""}
@@ -698,9 +684,7 @@ export default function LandingPageSubTab({
                                         <div style={{ width: `${videoProgress || 0}%`, height: "100%", backgroundColor: "#111827", transition: "width 0.3s" }} />
                                       </div>
                                     </div>
-                                  )}
-
-                                  {videoUrl ? (
+                                  ) : videoUrl ? (
                                     <div style={{ display: "flex", alignItems: "center", gap: "10px", marginTop: "6px" }}>
                                       <video src={videoUrl} autoPlay loop muted style={{ width: "120px", height: "60px", objectFit: "cover", borderRadius: "6px", border: "1px solid #e2e8f0" }} />
                                       <button
@@ -737,12 +721,9 @@ export default function LandingPageSubTab({
                                         accept="video/*"
                                         style={{ display: "none" }}
                                         onChange={handleVideoUpload}
-                                        disabled={uploadingVideo}
                                       />
                                     </label>
                                   )}
-                                </div>
-                              )}
                             </div>
                             <button
                               type="button"
