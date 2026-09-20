@@ -16,7 +16,9 @@ const getValidNextStatuses = (currentStatus: string): string[] => {
     case "Shipped":
       return ["Out for Delivery"];
     case "Out for Delivery":
-      return ["Delivered"];
+      return ["Delivered", "Delivery Attempted", "Cancelled"];
+    case "Delivery Attempted":
+      return ["Out for Delivery", "Delivered", "Cancelled", "Returned"];
     case "Return Requested":
       return ["Returned", "Cancelled"];
     default:
@@ -36,6 +38,8 @@ const getStatusBadgeStyle = (status: string) => {
       return { bg: "#eff6ff", color: "#1d4ed8", dot: "#2563eb" };
     case "Out for Delivery":
       return { bg: "#ccfbf1", color: "#0f766e", dot: "#0d9488" };
+    case "Delivery Attempted":
+      return { bg: "#ffedd5", color: "#c2410c", dot: "#ea580c" };
     case "Delivered":
       return { bg: "#eaf7ee", color: "#15803d", dot: "#16a34a" };
     case "Returned":
@@ -1916,8 +1920,8 @@ export default function AdminModals(props: any) {
                   fontSize: "0.75rem",
                   fontWeight: 700,
                   textTransform: "uppercase",
-                  backgroundColor: selectedOrder.status === "Delivered" || (selectedOrder.status === "Return Approved" && !(selectedOrder.returnRequest?.returnType === "Refund" && selectedOrder.refundStatus !== "Refunded")) ? "#eaf7ee" : selectedOrder.status === "Return Rejected" ? "#fef2f2" : selectedOrder.status === "Shipped" ? "#eff6ff" : selectedOrder.status === "Cancelled" ? "#fee2e2" : selectedOrder.status === "Return Approved" ? "#fef3c7" : "#fef3c7",
-                  color: selectedOrder.status === "Delivered" || (selectedOrder.status === "Return Approved" && !(selectedOrder.returnRequest?.returnType === "Refund" && selectedOrder.refundStatus !== "Refunded")) ? "#15803d" : selectedOrder.status === "Return Rejected" ? "#991b1b" : selectedOrder.status === "Shipped" ? "#1d4ed8" : selectedOrder.status === "Cancelled" ? "#ef4444" : selectedOrder.status === "Return Approved" ? "#b45309" : "#b45309"
+                  backgroundColor: getStatusBadgeStyle(selectedOrder.status).bg,
+                  color: getStatusBadgeStyle(selectedOrder.status).color
                 }}>
                   {selectedOrder.status === "Return Approved" ? (selectedOrder.returnRequest?.returnType === "Refund" && selectedOrder.refundStatus !== "Refunded" ? "Payment Pending" : "Approved") : selectedOrder.status === "Return Rejected" ? "Rejected" : selectedOrder.status}
                 </span>

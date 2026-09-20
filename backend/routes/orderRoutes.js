@@ -102,6 +102,10 @@ const sendOrderUpdateEmail = async (order, customerEmail, customerName) => {
       subject = `Your ${brandName} Order is Out for Delivery - ${order.orderId}`;
       heading = "Your order is arriving today!";
       message = "Exciting news! Your package is with our delivery agent and will be delivered to your doorstep today.";
+    } else if (order.status === "Delivery Attempted") {
+      subject = `Delivery Attempted for Order - ${order.orderId}`;
+      heading = "Delivery Attempted";
+      message = "Our delivery agent attempted to deliver your package today, but was unable to complete delivery (e.g. recipient unavailable). A re-attempt will be scheduled shortly.";
     } else if (order.status === "Delivered") {
       subject = `Your ${brandName} Order has arrived - ${order.orderId}`;
       heading = "Your order has been delivered.";

@@ -1292,7 +1292,7 @@ export default function ProductPageSubTab({
         </div>
       )}
 
-      {/* Redesigned Customers Directory Tab */}
+      {/* Redesigned Customers Tab */}
     </>
   );
 }

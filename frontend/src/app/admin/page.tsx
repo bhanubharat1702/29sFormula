@@ -106,7 +106,7 @@ export default function AdminDashboard() {
     { label: "Dashboard Home", target: "home" },
     { label: "Products Catalog", target: "products" },
     { label: "Orders Management", target: "orders" },
-    { label: "Customers Directory", target: "customers" },
+    { label: "Customers ", target: "customers" },
     { label: "Marketing Campaigns & Promos", target: "marketing" },
     { label: "Discounts & Coupons", target: "discounts" },
     { label: "Online Store Settings", target: "online-store" },
@@ -2039,7 +2039,7 @@ export default function AdminDashboard() {
       setOrders(prev => prev.map(o => {
         if (o._id === orderId) {
           const isReplacement = (updatedReq.returnType || o.returnRequest?.returnType) === "Replacement";
-          const newOrderStatus = newStatus === "Approved" 
+          const newOrderStatus = newStatus === "Approved"
             ? (isReplacement ? "Processing" : "Return Approved")
             : newStatus === "Rejected" ? "Return Rejected" : o.status;
           return {

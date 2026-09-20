@@ -129,7 +129,7 @@ export default function ActiveOrdersSubTab({
                         <>
                           <div style={{ position: "fixed", inset: 0, zIndex: 100 }} onClick={() => setIsStatusFilterOpen(false)} />
                           <div style={{ position: "absolute", top: "42px", left: 0, width: "100%", background: "#fff", border: "1px solid #e5e7eb", borderRadius: "8px", boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.1)", zIndex: 110, overflow: "hidden" }}>
-                            {["All", "Pending", "Confirmed", "Packed", "Shipped", "Out for Delivery"].map((opt) => (
+                            {["All", "Pending", "Confirmed", "Packed", "Shipped", "Out for Delivery", "Delivery Attempted"].map((opt) => (
                               <div
                                 key={opt}
                                 onClick={() => { setOrderStatusFilter(opt); setIsStatusFilterOpen(false); }}
@@ -212,6 +212,14 @@ export default function ActiveOrdersSubTab({
                       <div className={`${styles.mobileFilterPill} ${orderStatusFilter === 'Shipped' ? styles.mobileFilterPillActive : ''}`} onClick={() => setOrderStatusFilter('Shipped')}>
                         <div className={styles.mobileStatusDot} style={{ backgroundColor: '#4338ca' }}></div>
                         Shipped <span className={styles.mobileFilterCount}>{orders.filter((o:any)=>o.status==='Shipped').length}</span>
+                      </div>
+                      <div className={`${styles.mobileFilterPill} ${orderStatusFilter === 'Out for Delivery' ? styles.mobileFilterPillActive : ''}`} onClick={() => setOrderStatusFilter('Out for Delivery')}>
+                        <div className={styles.mobileStatusDot} style={{ backgroundColor: '#0d9488' }}></div>
+                        Out for Delivery <span className={styles.mobileFilterCount}>{orders.filter((o:any)=>o.status==='Out for Delivery').length}</span>
+                      </div>
+                      <div className={`${styles.mobileFilterPill} ${orderStatusFilter === 'Delivery Attempted' ? styles.mobileFilterPillActive : ''}`} onClick={() => setOrderStatusFilter('Delivery Attempted')}>
+                        <div className={styles.mobileStatusDot} style={{ backgroundColor: '#ea580c' }}></div>
+                        Delivery Attempted <span className={styles.mobileFilterCount}>{orders.filter((o:any)=>o.status==='Delivery Attempted').length}</span>
                       </div>
                       <div className={`${styles.mobileFilterPill} ${orderStatusFilter === 'Delivered' ? styles.mobileFilterPillActive : ''}`} onClick={() => setOrderStatusFilter('Delivered')}>
                         <div className={styles.mobileStatusDot} style={{ backgroundColor: '#166534' }}></div>
@@ -524,8 +532,8 @@ export default function ActiveOrdersSubTab({
                                       fontSize: "0.75rem",
                                       fontWeight: 700,
                                       textTransform: "uppercase",
-                                      backgroundColor: order.status === "Delivered" || (order.status === "Return Approved" && !(order.returnRequest?.returnType === "Refund" && order.refundStatus !== "Refunded")) ? "#eaf7ee" : order.status === "Return Rejected" ? "#fef2f2" : order.status === "Shipped" ? "#eff6ff" : order.status === "Return Approved" ? "#fef3c7" : "#fef3c7",
-                                      color: order.status === "Delivered" || (order.status === "Return Approved" && !(order.returnRequest?.returnType === "Refund" && order.refundStatus !== "Refunded")) ? "#15803d" : order.status === "Return Rejected" ? "#991b1b" : order.status === "Shipped" ? "#1d4ed8" : order.status === "Return Approved" ? "#b45309" : "#b45309"
+                                      backgroundColor: order.status === "Delivered" || (order.status === "Return Approved" && !(order.returnRequest?.returnType === "Refund" && order.refundStatus !== "Refunded")) ? "#eaf7ee" : order.status === "Return Rejected" ? "#fef2f2" : order.status === "Shipped" ? "#eff6ff" : order.status === "Out for Delivery" ? "#ccfbf1" : order.status === "Delivery Attempted" ? "#ffedd5" : order.status === "Return Approved" ? "#fef3c7" : "#fef3c7",
+                                      color: order.status === "Delivered" || (order.status === "Return Approved" && !(order.returnRequest?.returnType === "Refund" && order.refundStatus !== "Refunded")) ? "#15803d" : order.status === "Return Rejected" ? "#991b1b" : order.status === "Shipped" ? "#1d4ed8" : order.status === "Out for Delivery" ? "#0f766e" : order.status === "Delivery Attempted" ? "#c2410c" : order.status === "Return Approved" ? "#b45309" : "#b45309"
                                     }}>
                                       {order.status === "Return Approved" ? (order.returnRequest?.returnType === "Refund" && order.refundStatus !== "Refunded" ? "Payment Pending" : "Approved") : order.status === "Return Rejected" ? "Rejected" : order.status}
                                     </span>
