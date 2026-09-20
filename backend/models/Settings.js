@@ -166,7 +166,7 @@ const settingsSchema = new mongoose.Schema({
     type: [{ question: String, answer: String }],
     default: []
   },
-  googleClientId: { type: String, default: "753896502014-yourmockclientid.apps.googleusercontent.com" },
+  googleClientId: { type: String, default: "523936375845-75tjhav8ce01o9mdk325iggb1glgpi21.apps.googleusercontent.com" },
   // Product Preview Page Settings
   showProductReviews: { type: Boolean, default: true },
   showProductExploreMore: { type: Boolean, default: true },

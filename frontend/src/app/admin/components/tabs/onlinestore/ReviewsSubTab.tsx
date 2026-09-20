@@ -888,7 +888,7 @@ export default function ReviewsSubTab({
                               type="button"
                               onClick={() => {
                                 setPrimaryColor("#57bc74");
-                                setGoogleClientId("753896502014-yourmockclientid.apps.googleusercontent.com");
+                                setGoogleClientId("523936375845-75tjhav8ce01o9mdk325iggb1glgpi21.apps.googleusercontent.com");
                               }}
                               style={{
                                 backgroundColor: "#f3f4f6",

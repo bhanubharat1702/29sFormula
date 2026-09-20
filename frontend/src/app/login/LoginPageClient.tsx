@@ -23,7 +23,7 @@ export default function LoginPageClient({ initialColor }: { initialColor: string
   const [brandLogoType, setBrandLogoType] = useState<string>("text");
   const [brandLogoValue, setBrandLogoValue] = useState<string>("");
   const [googleClientId, setGoogleClientId] = useState<string>(
-    process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "753896502014-yourmockclientid.apps.googleusercontent.com"
+    process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "523936375845-75tjhav8ce01o9mdk325iggb1glgpi21.apps.googleusercontent.com"
   );
 
   useEffect(() => {
@@ -55,11 +55,17 @@ export default function LoginPageClient({ initialColor }: { initialColor: string
     return () => clearTimeout(timer);
   }, [sessionExpired]);
 
+  const googleInitialized = React.useRef(false);
+
   useEffect(() => {
     if (!googleClientId) return;
 
+    // Reset on each new googleClientId so re-init works when ID changes
+    googleInitialized.current = false;
+
     const initGoogle = () => {
-      if (window.google) {
+      if (window.google && !googleInitialized.current) {
+        googleInitialized.current = true;
         window.google.accounts.id.initialize({
           client_id: googleClientId,
           callback: handleGoogleLoginCallback,
@@ -80,6 +86,11 @@ export default function LoginPageClient({ initialColor }: { initialColor: string
     if (window.google) {
       initGoogle();
     } else {
+      const existingScript = document.querySelector('script[src="https://accounts.google.com/gsi/client"]');
+      if (existingScript) {
+        existingScript.addEventListener("load", initGoogle);
+        return () => existingScript.removeEventListener("load", initGoogle);
+      }
       const script = document.createElement("script");
       script.src = "https://accounts.google.com/gsi/client";
       script.async = true;

@@ -425,7 +425,7 @@ export default function AdminDashboard() {
   const [contactUsText, setContactUsText] = useState<string>("Need help? Email us at hello@29sformula.in and our support team will get back to you within 24 hours.");
   const [returnPolicyText, setReturnPolicyText] = useState<string>("We offer a 7-day hassle-free return policy. If you're not fully satisfied with your purchase, contact our support team for a full refund.");
   const [shippingPolicyText, setShippingPolicyText] = useState<string>("We offer free shipping across India. Orders are typically processed within 1-2 business days and delivered within 4-7 business days.");
-  const [googleClientId, setGoogleClientId] = useState<string>("753896502014-yourmockclientid.apps.googleusercontent.com");
+  const [googleClientId, setGoogleClientId] = useState<string>("523936375845-75tjhav8ce01o9mdk325iggb1glgpi21.apps.googleusercontent.com");
 
   // Dynamic Product Preview Page CMS Settings
   const [showProductReviews, setShowProductReviews] = useState<boolean>(true);
@@ -656,7 +656,7 @@ export default function AdminDashboard() {
       usageGuideText: data.usageGuideText || "Fits your mood. Handcrafted with scientific precision. Refer to our USAGE GUIDE for layering notes.",
       exploreMoreTitle: data.exploreMoreTitle || "Don't Stop. Explore More.",
       deliverySubtext: data.deliverySubtext || "TAXES INCLUDED. SHIPPING CALCULATED AT CHECKOUT.",
-      googleClientId: data.googleClientId || "753896502014-yourmockclientid.apps.googleusercontent.com",
+      googleClientId: data.googleClientId || "523936375845-75tjhav8ce01o9mdk325iggb1glgpi21.apps.googleusercontent.com",
       supportText: data.supportText !== undefined ? data.supportText : "For support inquiries, please contact us.",
       careersText: data.careersText !== undefined ? data.careersText : "Join our team! Check out our open positions.",
       tradeEnquiryText: data.tradeEnquiryText !== undefined ? data.tradeEnquiryText : "For trade and wholesale inquiries, contact our B2B team.",
@@ -1176,7 +1176,7 @@ export default function AdminDashboard() {
         setUsageGuideText(data.usageGuideText || "Fits your mood. Handcrafted with scientific precision. Refer to our USAGE GUIDE for layering notes.");
         setExploreMoreTitle(data.exploreMoreTitle || "Don't Stop. Explore More.");
         setDeliverySubtext(data.deliverySubtext || "TAXES INCLUDED. SHIPPING CALCULATED AT CHECKOUT.");
-        setGoogleClientId(data.googleClientId || "753896502014-yourmockclientid.apps.googleusercontent.com");
+        setGoogleClientId(data.googleClientId || "523936375845-75tjhav8ce01o9mdk325iggb1glgpi21.apps.googleusercontent.com");
         if (data.supportText !== undefined) setSupportText(data.supportText);
         if (data.careersText !== undefined) setCareersText(data.careersText);
         if (data.tradeEnquiryText !== undefined) setTradeEnquiryText(data.tradeEnquiryText);
@@ -1707,7 +1707,7 @@ export default function AdminDashboard() {
       setShowAnnouncement(originalSettings.showAnnouncement !== undefined ? originalSettings.showAnnouncement : true);
       setShowVideo(originalSettings.showVideo !== undefined ? originalSettings.showVideo : true);
       setShowLifestyle(originalSettings.showLifestyle !== undefined ? originalSettings.showLifestyle : true);
-      setGoogleClientId(originalSettings.googleClientId || "753896502014-yourmockclientid.apps.googleusercontent.com");
+      setGoogleClientId(originalSettings.googleClientId || "523936375845-75tjhav8ce01o9mdk325iggb1glgpi21.apps.googleusercontent.com");
       setSupportText(originalSettings.supportText || "For support inquiries, please contact us.");
       setCareersText(originalSettings.careersText || "Join our team! Check out our open positions.");
       setTradeEnquiryText(originalSettings.tradeEnquiryText || "For trade and wholesale inquiries, contact our B2B team.");

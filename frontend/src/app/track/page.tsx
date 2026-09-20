@@ -9,6 +9,7 @@ import Navbar from "@/components/Navbar/Navbar";
 import CartDrawer from "@/components/CartDrawer";
 import CheckoutDrawer from "@/components/CheckoutDrawer";
 import OrderSuccessModal from "@/components/OrderSuccessModal";
+import CustomSelect from "@/components/CustomSelect/CustomSelect";
 import { saveCart, clearCart, fetchAndSyncUserCart } from "@/utils/cartSync";
 
 interface Order {
@@ -69,6 +70,16 @@ export default function TrackOrderPage() {
   const [completedOrderId, setCompletedOrderId] = useState<string>("");
   const [completedOrderDetails, setCompletedOrderDetails] = useState<any>(null);
   const [showCancelConfirmModal, setShowCancelConfirmModal] = useState(false);
+  const [selectedCancelReason, setSelectedCancelReason] = useState("Changed my mind");
+
+  const CANCELLATION_REASONS = [
+    { value: "Changed my mind", label: "Changed my mind" },
+    { value: "Ordered by mistake", label: "Ordered by mistake" },
+    { value: "Found a better price elsewhere", label: "Found a better price elsewhere" },
+    { value: "Shipping time is too long", label: "Shipping time is too long" },
+    { value: "Incorrect shipping address or details", label: "Incorrect shipping address or details" },
+    { value: "Other reason", label: "Other reason" }
+  ];
   const [isCartClosing, setIsCartClosing] = useState(false);
   const [cartItems, setCartItems] = useState<any[]>([]);
 
@@ -249,6 +260,7 @@ export default function TrackOrderPage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          cancellationReason: selectedCancelReason,
           email: currentOrder.customerEmail,
           phone: currentOrder.customerPhone
         })
@@ -439,9 +451,9 @@ export default function TrackOrderPage() {
                               : "This order has been cancelled."}
                           </span>
                           {order.cancellationReason && (
-                            <div style={{ marginTop: '8px', padding: '8px 12px', backgroundColor: '#fef2f2', borderLeft: '3px solid #ef4444', borderRadius: '4px' }}>
-                              <span style={{ fontSize: '0.8rem', fontWeight: 600, color: '#991b1b', display: 'block' }}>Reason for cancellation:</span>
-                              <span style={{ fontSize: '0.85rem', color: '#7f1d1d', marginTop: '2px', display: 'block' }}>{order.cancellationReason}</span>
+                            <div style={{ marginTop: '6px' }}>
+                              <span style={{ fontSize: '0.8rem', fontWeight: 600, color: '#000000', display: 'block' }}>Reason for cancellation:</span>
+                              <span style={{ fontSize: '0.85rem', color: '#6b7280', marginTop: '2px', display: 'block' }}>{order.cancellationReason}</span>
                             </div>
                           )}
                         </div>
@@ -644,10 +656,10 @@ export default function TrackOrderPage() {
                 </div>
 
                 {/* Cancel Button Option */}
-                {order.status === "Processing" && (
+                {["Pending", "Processing", "Confirmed", "Packed"].includes(order.status) && (
                   <div className={styles.cancellationBlock}>
                     <p className={styles.cancellationWarning}>
-                      Need to make changes? You can cancel your order while it is still in the processing stage.
+                      Need to make changes? You can cancel your order while it is still in the processing or packing stage (before shipping).
                     </p>
                     <button 
                       onClick={handleCancelOrder} 
@@ -779,8 +791,8 @@ export default function TrackOrderPage() {
                               {histOrder.status === "Cancelled" && histOrder.deletedByAdmin ? "Cancelled by owner" : histOrder.status}
                             </span>
                             {histOrder.status === "Cancelled" && histOrder.cancellationReason && (
-                              <div style={{ marginTop: '6px', fontSize: '0.75rem', color: '#7f1d1d', backgroundColor: '#fef2f2', padding: '4px 6px', borderRadius: '4px', borderLeft: '2px solid #ef4444' }}>
-                                <span style={{ fontWeight: 600 }}>Reason:</span> {histOrder.cancellationReason}
+                              <div style={{ marginTop: '4px', fontSize: '0.75rem' }}>
+                                <span style={{ fontWeight: 600, color: '#000000' }}>Reason:</span> <span style={{ color: '#6b7280' }}>{histOrder.cancellationReason}</span>
                               </div>
                             )}
                           </td>
@@ -1068,14 +1080,25 @@ export default function TrackOrderPage() {
       {/* Custom Order Cancel Confirmation Modal */}
       {showCancelConfirmModal && (
         <div className={styles.modalOverlay} onClick={() => setShowCancelConfirmModal(false)}>
-          <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
+          <div className={styles.modalContent} onClick={(e) => e.stopPropagation()} style={{ maxWidth: "440px" }}>
             <div className={styles.modalHeader}>
               <h3 className={styles.modalTitle}>Cancel Order</h3>
               <button className={styles.modalCloseBtn} onClick={() => setShowCancelConfirmModal(false)}>✕</button>
             </div>
-            <p className={styles.modalBodyText}>
-              Are you sure you want to cancel this order? This action cannot be undone.
+            <p className={styles.modalBodyText} style={{ marginBottom: "16px" }}>
+              Are you sure you want to cancel this order? Please select a reason for cancellation:
             </p>
+            <div style={{ marginBottom: "20px" }}>
+              <label style={{ display: "block", fontSize: "0.85rem", fontWeight: 500, color: "#374151", marginBottom: "6px" }}>
+                Reason for Cancellation
+              </label>
+              <CustomSelect
+                value={selectedCancelReason}
+                options={CANCELLATION_REASONS}
+                onChange={(val) => setSelectedCancelReason(val)}
+                maxWidth="100%"
+              />
+            </div>
             <div className={styles.modalFooterBtns}>
               <button className={styles.modalCancelBtn} onClick={() => setShowCancelConfirmModal(false)}>
                 Keep Order

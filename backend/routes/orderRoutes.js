@@ -773,13 +773,20 @@ router.post("/api/orders/:id/cancel", async (req, res) => {
       });
     }
 
-    if (!["Pending", "Processing", "Confirmed"].includes(order.status)) {
-      return res.status(400).json({ error: `Cannot cancel order. Status is already '${order.status}' (orders can only be cancelled before packing/shipping)` });
+    if (!["Pending", "Processing", "Confirmed", "Packed"].includes(order.status)) {
+      return res.status(400).json({ error: `Cannot cancel order. Status is already '${order.status}' (orders can only be cancelled before shipping)` });
     }
 
+    const { cancellationReason } = req.body;
     order.status = "Cancelled";
+    if (cancellationReason) {
+      order.cancellationReason = cancellationReason;
+    }
     if (!order.timeline) order.timeline = [];
-    order.timeline.push({ event: "Order Cancelled by Customer" });
+    const eventMsg = cancellationReason
+      ? `Order Cancelled by Customer: ${cancellationReason}`
+      : "Order Cancelled by Customer";
+    order.timeline.push({ event: eventMsg });
     await order.save();
 
     // Restore stock for each product in the cancelled order
