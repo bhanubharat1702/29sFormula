@@ -903,6 +903,18 @@
   box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.05);
 }
 
+/* Hide number input spinner arrows */
+.textInput[type="number"]::-webkit-outer-spin-button,
+.textInput[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.textInput[type="number"] {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
 .textareaInput {
   resize: vertical;
 }
@@ -967,13 +979,14 @@
   text-transform: uppercase;
   border-bottom: 1px solid #e5e7eb;
   letter-spacing: 0.05em;
+  vertical-align: middle;
 }
 
 .inventoryTable td {
   padding: 12px 16px;
   font-size: 0.85rem;
   border-bottom: 1px solid #f3f4f6;
-  vertical-align: top;
+  vertical-align: middle;
 }
 
 .inventoryTable tr:hover td {
@@ -993,6 +1006,10 @@
   font-weight: 600;
   color: #000000;
   margin-bottom: 3px;
+}
+
+.tableName:last-child {
+  margin-bottom: 0;
 }
 
 .tableDesc {

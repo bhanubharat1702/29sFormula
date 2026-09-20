@@ -65,3 +65,15 @@ html.lenis, html.lenis body {
   min-height: 80px;
 }
 
+/* Hide number input up/down arrow spinners */
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type="number"] {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+

@@ -706,6 +706,7 @@ export default function AdminModals(props: any) {
                                   type="number"
                                   value={opt.quantity}
                                   min="0"
+                                  placeholder="e.g. 10"
                                   onChange={(e) => {
                                     const updated = [...options];
                                     updated[index].quantity = e.target.value === "" ? "" : (parseInt(e.target.value) || 0);
@@ -721,6 +722,7 @@ export default function AdminModals(props: any) {
                                   type="number"
                                   value={opt.price}
                                   min="1"
+                                  placeholder="e.g. 99"
                                   onChange={(e) => {
                                     const updated = [...options];
                                     updated[index].price = e.target.value === "" ? "" : (parseFloat(e.target.value) || 0);
@@ -736,7 +738,7 @@ export default function AdminModals(props: any) {
                                   type="number"
                                   value={opt.strikePrice || ""}
                                   min="0"
-                                  placeholder="Optional"
+                                  placeholder="e.g. 199"
                                   onChange={(e) => {
                                     const updated = [...options];
                                     updated[index].strikePrice = e.target.value === "" ? "" : (parseFloat(e.target.value) || 0);
@@ -751,6 +753,7 @@ export default function AdminModals(props: any) {
                                   type="number"
                                   value={opt.makingPrice}
                                   min="0"
+                                  placeholder="e.g. 49"
                                   onChange={(e) => {
                                     const updated = [...options];
                                     updated[index].makingPrice = e.target.value === "" ? "" : (parseInt(e.target.value) || 0);
@@ -1071,25 +1074,25 @@ export default function AdminModals(props: any) {
                               </div>
                               <div>
                                 <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: '#4b5563', marginBottom: '4px' }}>Quantity *</label>
-                                <input type="number" value={opt.quantity} min="0" onChange={(e) => { const updated = [...options]; updated[index].quantity = e.target.value === "" ? "" : (parseInt(e.target.value) || 0); setOptions(updated); }} required={mobileCrudStep === 2} className={styles.textInput} style={{ padding: "8px", fontSize: "0.85rem", width: "100%", boxSizing: "border-box" }} />
+                                <input type="number" value={opt.quantity} min="0" placeholder="Quantity" onChange={(e) => { const updated = [...options]; updated[index].quantity = e.target.value === "" ? "" : (parseInt(e.target.value) || 0); setOptions(updated); }} required={mobileCrudStep === 2} className={styles.textInput} style={{ padding: "8px", fontSize: "0.85rem", width: "100%", boxSizing: "border-box" }} />
                               </div>
                             </div>
 
                             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
                               <div>
                                 <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: '#4b5563', marginBottom: '4px' }}>Price (₹) *</label>
-                                <input type="number" value={opt.price} min="1" onChange={(e) => { const updated = [...options]; updated[index].price = e.target.value === "" ? "" : (parseFloat(e.target.value) || 0); setOptions(updated); }} required={mobileCrudStep === 2} className={styles.textInput} style={{ padding: "8px", fontSize: "0.85rem", width: "100%", boxSizing: "border-box" }} />
+                                <input type="number" value={opt.price} min="1" placeholder="Price" onChange={(e) => { const updated = [...options]; updated[index].price = e.target.value === "" ? "" : (parseFloat(e.target.value) || 0); setOptions(updated); }} required={mobileCrudStep === 2} className={styles.textInput} style={{ padding: "8px", fontSize: "0.85rem", width: "100%", boxSizing: "border-box" }} />
                               </div>
                               <div>
                                 <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: '#4b5563', marginBottom: '4px' }}>Strike Price</label>
-                                <input type="number" value={opt.strikePrice || ""} min="0" placeholder="Optional" onChange={(e) => { const updated = [...options]; updated[index].strikePrice = e.target.value === "" ? "" : (parseFloat(e.target.value) || 0); setOptions(updated); }} className={styles.textInput} style={{ padding: "8px", fontSize: "0.85rem", width: "100%", boxSizing: "border-box" }} />
+                                <input type="number" value={opt.strikePrice || ""} min="0" placeholder="Strike Price" onChange={(e) => { const updated = [...options]; updated[index].strikePrice = e.target.value === "" ? "" : (parseFloat(e.target.value) || 0); setOptions(updated); }} className={styles.textInput} style={{ padding: "8px", fontSize: "0.85rem", width: "100%", boxSizing: "border-box" }} />
                               </div>
                             </div>
 
                             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
                               <div>
                                 <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: '#4b5563', marginBottom: '4px' }}>Making Price *</label>
-                                <input type="number" value={opt.makingPrice} min="0" onChange={(e) => { const updated = [...options]; updated[index].makingPrice = e.target.value === "" ? "" : (parseInt(e.target.value) || 0); setOptions(updated); }} required={mobileCrudStep === 2} className={styles.textInput} style={{ padding: "8px", fontSize: "0.85rem", width: "100%", boxSizing: "border-box" }} />
+                                <input type="number" value={opt.makingPrice} min="0" placeholder="Making Price" onChange={(e) => { const updated = [...options]; updated[index].makingPrice = e.target.value === "" ? "" : (parseInt(e.target.value) || 0); setOptions(updated); }} required={mobileCrudStep === 2} className={styles.textInput} style={{ padding: "8px", fontSize: "0.85rem", width: "100%", boxSizing: "border-box" }} />
                               </div>
                               <div style={{ position: 'relative', zIndex: openCategoryIndex === index ? 99999 : 1 }}>
                                 <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: '#4b5563', marginBottom: '4px' }}>Category *</label>
