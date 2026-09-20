@@ -160,6 +160,31 @@ router.post("/api/settings", async (req, res) => {
     if (req.body.videoBgType !== undefined) settings.videoBgType = req.body.videoBgType;
     if (req.body.videoBgColor !== undefined) settings.videoBgColor = req.body.videoBgColor;
     if (req.body.videoBgImage !== undefined) settings.videoBgImage = req.body.videoBgImage;
+
+    // Mobile Video Layout Fields
+    if (req.body.mobileVideoTemplate !== undefined) settings.mobileVideoTemplate = req.body.mobileVideoTemplate;
+    if (req.body.mobileVideoTitle !== undefined) settings.mobileVideoTitle = req.body.mobileVideoTitle;
+    if (req.body.mobileVideoTitleFontType !== undefined) settings.mobileVideoTitleFontType = req.body.mobileVideoTitleFontType;
+    if (req.body.mobileVideoTitleFontColor !== undefined) settings.mobileVideoTitleFontColor = req.body.mobileVideoTitleFontColor;
+    if (req.body.mobileVideoTitleFontSize !== undefined) settings.mobileVideoTitleFontSize = req.body.mobileVideoTitleFontSize;
+    if (req.body.mobileVideoTitleFontAlignment !== undefined) settings.mobileVideoTitleFontAlignment = req.body.mobileVideoTitleFontAlignment;
+    if (req.body.mobileVideoTitleFontWeight !== undefined) settings.mobileVideoTitleFontWeight = req.body.mobileVideoTitleFontWeight;
+    if (req.body.showMobileVideoTitle !== undefined) settings.showMobileVideoTitle = req.body.showMobileVideoTitle;
+
+    if (req.body.mobileVideoSubtitle !== undefined) settings.mobileVideoSubtitle = req.body.mobileVideoSubtitle;
+    if (req.body.mobileVideoSubtitleFontType !== undefined) settings.mobileVideoSubtitleFontType = req.body.mobileVideoSubtitleFontType;
+    if (req.body.mobileVideoSubtitleFontColor !== undefined) settings.mobileVideoSubtitleFontColor = req.body.mobileVideoSubtitleFontColor;
+    if (req.body.mobileVideoSubtitleFontSize !== undefined) settings.mobileVideoSubtitleFontSize = req.body.mobileVideoSubtitleFontSize;
+    if (req.body.mobileVideoSubtitleFontAlignment !== undefined) settings.mobileVideoSubtitleFontAlignment = req.body.mobileVideoSubtitleFontAlignment;
+    if (req.body.mobileVideoSubtitleFontWeight !== undefined) settings.mobileVideoSubtitleFontWeight = req.body.mobileVideoSubtitleFontWeight;
+    if (req.body.showMobileVideoSubtitle !== undefined) settings.showMobileVideoSubtitle = req.body.showMobileVideoSubtitle;
+
+    if (req.body.mobileVideoButtonText !== undefined) settings.mobileVideoButtonText = req.body.mobileVideoButtonText;
+    if (req.body.mobileVideoButtonStyle !== undefined) settings.mobileVideoButtonStyle = req.body.mobileVideoButtonStyle;
+    if (req.body.mobileVideoButtonSize !== undefined) settings.mobileVideoButtonSize = req.body.mobileVideoButtonSize;
+    if (req.body.mobileVideoButtonColor !== undefined) settings.mobileVideoButtonColor = req.body.mobileVideoButtonColor;
+    if (req.body.mobileVideoButtonTextColor !== undefined) settings.mobileVideoButtonTextColor = req.body.mobileVideoButtonTextColor;
+    if (req.body.showMobileVideoButton !== undefined) settings.showMobileVideoButton = req.body.showMobileVideoButton;
     if (lifestyleText !== undefined) settings.lifestyleText = lifestyleText;
     if (lifestyleImage !== undefined) settings.lifestyleImage = lifestyleImage;
     if (req.body.primaryColor !== undefined) settings.primaryColor = req.body.primaryColor;

@@ -150,6 +150,31 @@ export default function Home() {
   const [mobileHeroButtonTextColor, setMobileHeroButtonTextColor] = useState<string>("#ffffff");
   const [showMobileHeroButton, setShowMobileHeroButton] = useState<boolean>(true);
 
+  // Mobile-specific Video Layout state (unlinked)
+  const [mobileVideoTemplate, setMobileVideoTemplate] = useState<string>("center");
+  const [mobileVideoTitle, setMobileVideoTitle] = useState<string>("");
+  const [mobileVideoTitleFontType, setMobileVideoTitleFontType] = useState<string>("Outfit");
+  const [mobileVideoTitleFontColor, setMobileVideoTitleFontColor] = useState<string>("#ffffff");
+  const [mobileVideoTitleFontSize, setMobileVideoTitleFontSize] = useState<string>("2.5rem");
+  const [mobileVideoTitleFontAlignment, setMobileVideoTitleFontAlignment] = useState<string>("center");
+  const [mobileVideoTitleFontWeight, setMobileVideoTitleFontWeight] = useState<string>("700");
+  const [showMobileVideoTitle, setShowMobileVideoTitle] = useState<boolean>(true);
+
+  const [mobileVideoSubtitle, setMobileVideoSubtitle] = useState<string>("");
+  const [mobileVideoSubtitleFontType, setMobileVideoSubtitleFontType] = useState<string>("Outfit");
+  const [mobileVideoSubtitleFontColor, setMobileVideoSubtitleFontColor] = useState<string>("#ffffff");
+  const [mobileVideoSubtitleFontSize, setMobileVideoSubtitleFontSize] = useState<string>("0.85rem");
+  const [mobileVideoSubtitleFontAlignment, setMobileVideoSubtitleFontAlignment] = useState<string>("center");
+  const [mobileVideoSubtitleFontWeight, setMobileVideoSubtitleFontWeight] = useState<string>("500");
+  const [showMobileVideoSubtitle, setShowMobileVideoSubtitle] = useState<boolean>(true);
+
+  const [mobileVideoButtonText, setMobileVideoButtonText] = useState<string>("Shop Now");
+  const [mobileVideoButtonStyle, setMobileVideoButtonStyle] = useState<string>("outline");
+  const [mobileVideoButtonSize, setMobileVideoButtonSize] = useState<string>("sm");
+  const [mobileVideoButtonColor, setMobileVideoButtonColor] = useState<string>("#ffffff");
+  const [mobileVideoButtonTextColor, setMobileVideoButtonTextColor] = useState<string>("#121212");
+  const [showMobileVideoButton, setShowMobileVideoButton] = useState<boolean>(true);
+
 
   const [videoTitle, setVideoTitle] = useState<string>("NEW ARRIVALS");
   const [videoSubtitle, setVideoSubtitle] = useState<string>("Drop's live. Smells divine. Feels better.");
@@ -179,7 +204,7 @@ export default function Home() {
   const [videoBgImage, setVideoBgImage] = useState<string>("");
 
   useEffect(() => {
-    [heroTitleFontType, heroManifestoFontType, videoTitleFontType, videoSubtitleFontType].forEach(font => {
+    [heroTitleFontType, heroManifestoFontType, videoTitleFontType, videoSubtitleFontType, mobileHeroTitleFontType, mobileHeroManifestoFontType, mobileVideoTitleFontType, mobileVideoSubtitleFontType].forEach(font => {
       if (!font) return;
       const systemFonts = ["SF Pro", "New York", "SF Mono", "Segoe UI", "Helvetica Neue", "Georgia", "Garamond"];
       if (systemFonts.includes(font)) return;
@@ -191,7 +216,7 @@ export default function Home() {
       link.href = `https://fonts.googleapis.com/css2?family=${font.replace(/\s+/g, "+")}:wght@300;400;500;600;700;800;900&display=swap`;
       document.head.appendChild(link);
     });
-  }, [heroTitleFontType, heroManifestoFontType, videoTitleFontType, videoSubtitleFontType]);
+  }, [heroTitleFontType, heroManifestoFontType, videoTitleFontType, videoSubtitleFontType, mobileHeroTitleFontType, mobileHeroManifestoFontType, mobileVideoTitleFontType, mobileVideoSubtitleFontType]);
   const [lifestyleText, setLifestyleText] = useState<string>("Intense notes, Raw elements. This is 29sFORMULA.");
   const [lifestyleImage, setLifestyleImage] = useState<string>("https://images.unsplash.com/photo-1615655096345-61a54750068d?auto=format&fit=crop&w=1800&q=80");
   const [primaryColor, setPrimaryColor] = useState<string>(
@@ -594,6 +619,31 @@ export default function Home() {
             if (data.videoBgType !== undefined) { setVideoBgType(data.videoBgType); localStorage.setItem("settings_videoBgType", data.videoBgType); }
             if (data.videoBgColor !== undefined) { setVideoBgColor(data.videoBgColor); localStorage.setItem("settings_videoBgColor", data.videoBgColor); }
             if (data.videoBgImage !== undefined) { setVideoBgImage(data.videoBgImage); localStorage.setItem("settings_videoBgImage", data.videoBgImage); }
+            
+            // Mobile Video Layout Loading (unlinked)
+            if (data.mobileVideoTemplate !== undefined) setMobileVideoTemplate(data.mobileVideoTemplate);
+            if (data.mobileVideoTitle !== undefined) setMobileVideoTitle(data.mobileVideoTitle);
+            if (data.mobileVideoTitleFontType !== undefined) setMobileVideoTitleFontType(data.mobileVideoTitleFontType);
+            if (data.mobileVideoTitleFontColor !== undefined) setMobileVideoTitleFontColor(data.mobileVideoTitleFontColor);
+            if (data.mobileVideoTitleFontSize !== undefined) setMobileVideoTitleFontSize(data.mobileVideoTitleFontSize);
+            if (data.mobileVideoTitleFontAlignment !== undefined) setMobileVideoTitleFontAlignment(data.mobileVideoTitleFontAlignment);
+            if (data.mobileVideoTitleFontWeight !== undefined) setMobileVideoTitleFontWeight(data.mobileVideoTitleFontWeight);
+            if (data.showMobileVideoTitle !== undefined) setShowMobileVideoTitle(data.showMobileVideoTitle);
+
+            if (data.mobileVideoSubtitle !== undefined) setMobileVideoSubtitle(data.mobileVideoSubtitle);
+            if (data.mobileVideoSubtitleFontType !== undefined) setMobileVideoSubtitleFontType(data.mobileVideoSubtitleFontType);
+            if (data.mobileVideoSubtitleFontColor !== undefined) setMobileVideoSubtitleFontColor(data.mobileVideoSubtitleFontColor);
+            if (data.mobileVideoSubtitleFontSize !== undefined) setMobileVideoSubtitleFontSize(data.mobileVideoSubtitleFontSize);
+            if (data.mobileVideoSubtitleFontAlignment !== undefined) setMobileVideoSubtitleFontAlignment(data.mobileVideoSubtitleFontAlignment);
+            if (data.mobileVideoSubtitleFontWeight !== undefined) setMobileVideoSubtitleFontWeight(data.mobileVideoSubtitleFontWeight);
+            if (data.showMobileVideoSubtitle !== undefined) setShowMobileVideoSubtitle(data.showMobileVideoSubtitle);
+
+            if (data.mobileVideoButtonText !== undefined) setMobileVideoButtonText(data.mobileVideoButtonText);
+            if (data.mobileVideoButtonStyle !== undefined) setMobileVideoButtonStyle(data.mobileVideoButtonStyle);
+            if (data.mobileVideoButtonSize !== undefined) setMobileVideoButtonSize(data.mobileVideoButtonSize);
+            if (data.mobileVideoButtonColor !== undefined) setMobileVideoButtonColor(data.mobileVideoButtonColor);
+            if (data.mobileVideoButtonTextColor !== undefined) setMobileVideoButtonTextColor(data.mobileVideoButtonTextColor);
+            if (data.showMobileVideoButton !== undefined) setShowMobileVideoButton(data.showMobileVideoButton);
             if (data.lifestyleText !== undefined) {
               setLifestyleText(data.lifestyleText);
               localStorage.setItem("settings_lifestyleText", data.lifestyleText);
@@ -871,84 +921,126 @@ export default function Home() {
         );
       })()}
 
-      {/* 5. New Arrivals Video Section */}
+      {/* 5. Video Banner Section */}
       {showVideo && (
-        <section
-          className={styles.videoSection}
-          style={{
-            backgroundColor: videoBgType === "color" ? (videoBgColor || videoFallbackColor) : videoFallbackColor,
-            backgroundImage: videoBgType === "image" && videoBgImage ? `url(${videoBgImage})` : "none",
-            backgroundSize: "cover",
-            backgroundPosition: "center",
-            display: "flex",
-            alignItems: videoTemplate === "bottom" ? "flex-end" : videoTemplate === "top" ? "flex-start" : "center",
-            justifyContent: "center",
-            position: "relative",
-            minHeight: "100vh"
-          }}
-        >
-          {videoBgType === "video" && videoUrl && (
-            <video 
-              ref={videoRef}
-              key={videoUrl}
-              className={styles.bgVideo}
-              autoPlay
-              muted
-              loop
-              playsInline
-              preload="auto"
+        (() => {
+          const activeVideoTemplate = isMobile ? (mobileVideoTemplate || videoTemplate || "center") : videoTemplate;
+          const activeVideoTitle = isMobile ? (mobileVideoTitle !== "" && mobileVideoTitle !== undefined ? mobileVideoTitle : videoTitle) : videoTitle;
+          const activeVideoTitleFontType = isMobile ? (mobileVideoTitleFontType || videoTitleFontType) : videoTitleFontType;
+          const activeVideoTitleFontColor = isMobile ? (mobileVideoTitleFontColor || videoTitleFontColor) : videoTitleFontColor;
+          const activeVideoTitleFontSize = isMobile ? (mobileVideoTitleFontSize || "2.5rem") : videoTitleFontSize;
+          const activeVideoTitleFontAlignment = isMobile ? (mobileVideoTitleFontAlignment || videoTitleFontAlignment || "center") : videoTitleFontAlignment;
+          const activeVideoTitleFontWeight = isMobile ? (mobileVideoTitleFontWeight || videoTitleFontWeight) : videoTitleFontWeight;
+          const activeShowVideoTitle = isMobile ? (showMobileVideoTitle !== undefined ? showMobileVideoTitle : showVideoTitle) : showVideoTitle;
+
+          const activeVideoSubtitle = isMobile ? (mobileVideoSubtitle !== "" && mobileVideoSubtitle !== undefined ? mobileVideoSubtitle : videoSubtitle) : videoSubtitle;
+          const activeVideoSubtitleFontType = isMobile ? (mobileVideoSubtitleFontType || videoSubtitleFontType) : videoSubtitleFontType;
+          const activeVideoSubtitleFontColor = isMobile ? (mobileVideoSubtitleFontColor || videoSubtitleFontColor) : videoSubtitleFontColor;
+          const activeVideoSubtitleFontSize = isMobile ? (mobileVideoSubtitleFontSize || "0.85rem") : videoSubtitleFontSize;
+          const activeVideoSubtitleFontAlignment = isMobile ? (mobileVideoSubtitleFontAlignment || videoSubtitleFontAlignment || "center") : videoSubtitleFontAlignment;
+          const activeVideoSubtitleFontWeight = isMobile ? (mobileVideoSubtitleFontWeight || videoSubtitleFontWeight) : videoSubtitleFontWeight;
+          const activeShowVideoSubtitle = isMobile ? (showMobileVideoSubtitle !== undefined ? showMobileVideoSubtitle : showVideoSubtitle) : showVideoSubtitle;
+
+          const activeVideoButtonText = isMobile ? (mobileVideoButtonText !== "" && mobileVideoButtonText !== undefined ? mobileVideoButtonText : videoButtonText) : videoButtonText;
+          const activeVideoButtonStyle = isMobile ? (mobileVideoButtonStyle || videoButtonStyle) : videoButtonStyle;
+          const activeVideoButtonSize = isMobile ? (mobileVideoButtonSize || videoButtonSize) : videoButtonSize;
+          const activeVideoButtonColor = isMobile ? (mobileVideoButtonColor !== "" && mobileVideoButtonColor !== undefined ? mobileVideoButtonColor : videoButtonColor) : videoButtonColor;
+          const activeVideoButtonTextColor = isMobile ? (mobileVideoButtonTextColor || videoButtonTextColor) : videoButtonTextColor;
+          const activeShowVideoButton = isMobile ? (showMobileVideoButton !== undefined ? showMobileVideoButton : showVideoButton) : showVideoButton;
+
+          return (
+            <section 
+              className={styles.videoSection}
+              style={{
+                backgroundColor: videoBgType === "color" ? videoBgColor : videoFallbackColor,
+                backgroundImage: videoBgType === "image" && videoBgImage ? `url(${videoBgImage})` : "none",
+                backgroundSize: "cover",
+                backgroundPosition: "center",
+                display: "flex",
+                alignItems: activeVideoTemplate === "bottom" ? "flex-end" : activeVideoTemplate === "top" ? "flex-start" : "center",
+                justifyContent: "center",
+                position: "relative",
+                minHeight: "100vh"
+              }}
             >
-              <source src={videoUrl} type="video/mp4" />
-              <source src={videoUrl} type="video/webm" />
-              <source src={videoUrl} type="video/ogg" />
-              Your browser does not support the video tag.
-            </video>
-          )}
-          
-          {(videoBgType === "video" || videoBgType === "image") && <div className={styles.videoOverlay} style={{ backgroundColor: "rgba(0,0,0,0.4)", position: "absolute", inset: 0 }} />}
-          
-          <div className={styles.videoContent} style={{ position: "relative", zIndex: 10, textAlign: videoTitleFontAlignment as any, padding: "20px" }}>
-            {showVideoTitle && (
-              <h2 style={{
-                fontFamily: videoTitleFontType,
-                color: videoTitleFontColor,
-                fontSize: videoTitleFontSize,
-                fontWeight: videoTitleFontWeight,
-                margin: "0 0 10px 0"
-              }}>
-                {videoTitle}
-              </h2>
-            )}
-            {showVideoSubtitle && (
-              <p style={{
-                fontFamily: videoSubtitleFontType,
-                color: videoSubtitleFontColor,
-                fontSize: videoSubtitleFontSize,
-                fontWeight: videoSubtitleFontWeight,
-                margin: "0 0 20px 0"
-              }}>
-                {videoSubtitle}
-              </p>
-            )}
-            {showVideoButton && (
-              <Link href="/shop">
-                <button style={{
-                  padding: videoButtonSize === "sm" ? "8px 16px" : videoButtonSize === "lg" ? "16px 32px" : "12px 24px",
-                  fontSize: videoButtonSize === "sm" ? "0.9rem" : videoButtonSize === "lg" ? "1.2rem" : "1rem",
-                  fontWeight: 600,
-                  cursor: "pointer",
-                  borderRadius: "4px",
-                  transition: "all 0.3s ease",
-                  backgroundColor: videoButtonStyle === "solid" ? videoButtonColor : "transparent",
-                  color: videoButtonStyle === "solid" ? videoButtonTextColor : videoButtonColor,
-                  border: `2px solid ${videoButtonColor}`
-                }}>
-                  {videoButtonText}
-                </button>
-              </Link>
-            )}
-          </div>
-        </section>
+              {videoBgType === "video" && videoUrl && (
+                <video 
+                  ref={videoRef}
+                  key={videoUrl}
+                  className={styles.bgVideo}
+                  autoPlay
+                  muted
+                  loop
+                  playsInline
+                  preload="auto"
+                >
+                  <source src={videoUrl} type="video/mp4" />
+                  <source src={videoUrl} type="video/webm" />
+                  <source src={videoUrl} type="video/ogg" />
+                  Your browser does not support the video tag.
+                </video>
+              )}
+              
+              {(videoBgType === "video" || videoBgType === "image") && <div className={styles.videoOverlay} style={{ backgroundColor: "rgba(0,0,0,0.4)", position: "absolute", inset: 0 }} />}
+              
+              <div className={styles.videoContent} style={{ position: "relative", zIndex: 10, textAlign: activeVideoTitleFontAlignment as any, padding: "20px" }}>
+                {activeShowVideoTitle && (
+                  <h2 style={{
+                    fontFamily: activeVideoTitleFontType,
+                    color: activeVideoTitleFontColor,
+                    fontSize: activeVideoTitleFontSize,
+                    fontWeight: activeVideoTitleFontWeight,
+                    margin: "0 0 10px 0"
+                  }}>
+                    {activeVideoTitle}
+                  </h2>
+                )}
+                {activeShowVideoSubtitle && (
+                  <p style={{
+                    fontFamily: activeVideoSubtitleFontType,
+                    color: activeVideoSubtitleFontColor,
+                    fontSize: activeVideoSubtitleFontSize,
+                    fontWeight: activeVideoSubtitleFontWeight,
+                    textAlign: activeVideoSubtitleFontAlignment as any,
+                    margin: "0 0 20px 0"
+                  }}>
+                    {activeVideoSubtitle}
+                  </p>
+                )}
+                {activeShowVideoButton && (() => {
+                  const btnColor = activeVideoButtonColor ? activeVideoButtonColor : (primaryColor || "#ffffff");
+                  const isSolid = activeVideoButtonStyle === "solid";
+                  const isOutline = activeVideoButtonStyle === "outline";
+
+                  const paddings: Record<string, string> = { sm: "10px 24px", md: "14px 36px", lg: "18px 48px" };
+                  const fontSizes: Record<string, string> = { sm: "0.75rem", md: "0.85rem", lg: "0.95rem" };
+
+                  return (
+                    <Link href="/shop" style={{ textDecoration: "none", display: "inline-block" }}>
+                      <button style={{
+                        display: "inline-block",
+                        padding: paddings[activeVideoButtonSize] || paddings.md,
+                        fontSize: fontSizes[activeVideoButtonSize] || fontSizes.md,
+                        fontWeight: 700,
+                        cursor: "pointer",
+                        borderRadius: "4px",
+                        transition: "all 0.3s ease",
+                        backgroundColor: isSolid ? btnColor : "transparent",
+                        color: isSolid ? (activeVideoButtonTextColor || "#121212") : (activeVideoButtonTextColor || btnColor),
+                        border: isSolid || isOutline ? `2px solid ${btnColor}` : "none",
+                        textDecoration: activeVideoButtonStyle === "minimal" ? "underline" : "none",
+                        textTransform: "uppercase",
+                        letterSpacing: "0.08em"
+                      }}>
+                        {activeVideoButtonText || "Shop Now"}
+                      </button>
+                    </Link>
+                  );
+                })()}
+              </div>
+            </section>
+          );
+        })()
       )}
 
       {/* 6. Latest Arrivals Products Section */}

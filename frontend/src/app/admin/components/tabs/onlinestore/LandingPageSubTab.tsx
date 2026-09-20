@@ -674,7 +674,9 @@ export default function LandingPageSubTab({
                                   )}
                                 </div>
                               )}
-
+                              {videoBgType === "video" && (
+                                <div className={styles.inputGroup}>
+                                  <label className={styles.inputLabel}>Background Video</label>
                                   {uploadingVideo ? (
                                     <div style={{ marginTop: "6px", marginBottom: "8px" }}>
                                       <p style={{ fontSize: "0.82rem", color: "#111827", margin: "0 0 4px 0" }}>
@@ -724,6 +726,8 @@ export default function LandingPageSubTab({
                                       />
                                     </label>
                                   )}
+                                </div>
+                              )}
                             </div>
                             <button
                               type="button"

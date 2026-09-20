@@ -102,6 +102,31 @@ const settingsSchema = new mongoose.Schema({
   videoBgColor: { type: String, default: "#121212" },
   videoBgImage: { type: String, default: "" },
 
+  // Mobile-specific Video Layout
+  mobileVideoTemplate: { type: String, default: "center" },
+  mobileVideoTitle: { type: String, default: "" },
+  mobileVideoTitleFontType: { type: String, default: "Outfit" },
+  mobileVideoTitleFontColor: { type: String, default: "#ffffff" },
+  mobileVideoTitleFontSize: { type: String, default: "2.5rem" },
+  mobileVideoTitleFontAlignment: { type: String, default: "center" },
+  mobileVideoTitleFontWeight: { type: String, default: "700" },
+  showMobileVideoTitle: { type: Boolean, default: true },
+
+  mobileVideoSubtitle: { type: String, default: "" },
+  mobileVideoSubtitleFontType: { type: String, default: "Outfit" },
+  mobileVideoSubtitleFontColor: { type: String, default: "#ffffff" },
+  mobileVideoSubtitleFontSize: { type: String, default: "0.85rem" },
+  mobileVideoSubtitleFontAlignment: { type: String, default: "center" },
+  mobileVideoSubtitleFontWeight: { type: String, default: "500" },
+  showMobileVideoSubtitle: { type: Boolean, default: true },
+
+  mobileVideoButtonText: { type: String, default: "Shop Now" },
+  mobileVideoButtonStyle: { type: String, default: "outline" },
+  mobileVideoButtonSize: { type: String, default: "sm" },
+  mobileVideoButtonColor: { type: String, default: "#ffffff" },
+  mobileVideoButtonTextColor: { type: String, default: "#121212" },
+  showMobileVideoButton: { type: Boolean, default: true },
+
   lifestyleText: { type: String, default: "Intense notes, Raw elements. This is 29sFORMULA." },
   lifestyleImage: { type: String, default: "https://images.unsplash.com/photo-1615655096345-61a54750068d?auto=format&fit=crop&w=1800&q=80" },
   primaryColor: { type: String, default: "#57bc74" },

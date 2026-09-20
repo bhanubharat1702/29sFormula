@@ -362,6 +362,31 @@ export default function AdminDashboard() {
   const [videoBgType, setVideoBgType] = useState<string>("video");
   const [videoBgColor, setVideoBgColor] = useState<string>("#121212");
   const [videoBgImage, setVideoBgImage] = useState<string>("");
+
+  // Mobile-specific Video Layout state (unlinked)
+  const [mobileVideoTemplate, setMobileVideoTemplate] = useState<string>("center");
+  const [mobileVideoTitle, setMobileVideoTitle] = useState<string>("");
+  const [mobileVideoTitleFontType, setMobileVideoTitleFontType] = useState<string>("Outfit");
+  const [mobileVideoTitleFontColor, setMobileVideoTitleFontColor] = useState<string>("#ffffff");
+  const [mobileVideoTitleFontSize, setMobileVideoTitleFontSize] = useState<string>("2.5rem");
+  const [mobileVideoTitleFontAlignment, setMobileVideoTitleFontAlignment] = useState<string>("center");
+  const [mobileVideoTitleFontWeight, setMobileVideoTitleFontWeight] = useState<string>("700");
+  const [showMobileVideoTitle, setShowMobileVideoTitle] = useState<boolean>(true);
+
+  const [mobileVideoSubtitle, setMobileVideoSubtitle] = useState<string>("");
+  const [mobileVideoSubtitleFontType, setMobileVideoSubtitleFontType] = useState<string>("Outfit");
+  const [mobileVideoSubtitleFontColor, setMobileVideoSubtitleFontColor] = useState<string>("#ffffff");
+  const [mobileVideoSubtitleFontSize, setMobileVideoSubtitleFontSize] = useState<string>("0.85rem");
+  const [mobileVideoSubtitleFontAlignment, setMobileVideoSubtitleFontAlignment] = useState<string>("center");
+  const [mobileVideoSubtitleFontWeight, setMobileVideoSubtitleFontWeight] = useState<string>("500");
+  const [showMobileVideoSubtitle, setShowMobileVideoSubtitle] = useState<boolean>(true);
+
+  const [mobileVideoButtonText, setMobileVideoButtonText] = useState<string>("Shop Now");
+  const [mobileVideoButtonStyle, setMobileVideoButtonStyle] = useState<string>("outline");
+  const [mobileVideoButtonSize, setMobileVideoButtonSize] = useState<string>("sm");
+  const [mobileVideoButtonColor, setMobileVideoButtonColor] = useState<string>("#ffffff");
+  const [mobileVideoButtonTextColor, setMobileVideoButtonTextColor] = useState<string>("#121212");
+  const [showMobileVideoButton, setShowMobileVideoButton] = useState<boolean>(true);
   const [showLifestyle, setShowLifestyle] = useState<boolean>(true);
   const [supportText, setSupportText] = useState<string>("For support inquiries, please contact us.");
   const [careersText, setCareersText] = useState<string>("Join our team! Check out our open positions.");
@@ -536,6 +561,29 @@ export default function AdminDashboard() {
       videoBgType: data.videoBgType || "video",
       videoBgColor: data.videoBgColor || "#121212",
       videoBgImage: data.videoBgImage || "",
+      mobileVideoTemplate: data.mobileVideoTemplate || data.videoTemplate || "center",
+      mobileVideoTitle: data.mobileVideoTitle !== undefined ? data.mobileVideoTitle : "",
+      mobileVideoTitleFontType: data.mobileVideoTitleFontType || data.videoTitleFontType || "Outfit",
+      mobileVideoTitleFontColor: data.mobileVideoTitleFontColor || data.videoTitleFontColor || "#ffffff",
+      mobileVideoTitleFontSize: data.mobileVideoTitleFontSize || "2.5rem",
+      mobileVideoTitleFontAlignment: data.mobileVideoTitleFontAlignment || data.videoTitleFontAlignment || "center",
+      mobileVideoTitleFontWeight: data.mobileVideoTitleFontWeight || data.videoTitleFontWeight || "700",
+      showMobileVideoTitle: data.showMobileVideoTitle !== undefined ? data.showMobileVideoTitle : true,
+
+      mobileVideoSubtitle: data.mobileVideoSubtitle !== undefined ? data.mobileVideoSubtitle : "",
+      mobileVideoSubtitleFontType: data.mobileVideoSubtitleFontType || data.videoSubtitleFontType || "Outfit",
+      mobileVideoSubtitleFontColor: data.mobileVideoSubtitleFontColor || data.videoSubtitleFontColor || "#ffffff",
+      mobileVideoSubtitleFontSize: data.mobileVideoSubtitleFontSize || "0.85rem",
+      mobileVideoSubtitleFontAlignment: data.mobileVideoSubtitleFontAlignment || data.videoSubtitleFontAlignment || "center",
+      mobileVideoSubtitleFontWeight: data.mobileVideoSubtitleFontWeight || data.videoSubtitleFontWeight || "500",
+      showMobileVideoSubtitle: data.showMobileVideoSubtitle !== undefined ? data.showMobileVideoSubtitle : true,
+
+      mobileVideoButtonText: data.mobileVideoButtonText !== undefined ? data.mobileVideoButtonText : (data.videoButtonText || "Shop Now"),
+      mobileVideoButtonStyle: data.mobileVideoButtonStyle !== undefined ? data.mobileVideoButtonStyle : (data.videoButtonStyle || "outline"),
+      mobileVideoButtonSize: data.mobileVideoButtonSize !== undefined ? data.mobileVideoButtonSize : "sm",
+      mobileVideoButtonColor: data.mobileVideoButtonColor !== undefined ? data.mobileVideoButtonColor : "#ffffff",
+      mobileVideoButtonTextColor: data.mobileVideoButtonTextColor !== undefined ? data.mobileVideoButtonTextColor : (data.videoButtonTextColor || "#121212"),
+      showMobileVideoButton: data.showMobileVideoButton !== undefined ? data.showMobileVideoButton : true,
       lifestyleText: data.lifestyleText || "",
       lifestyleImage: data.lifestyleImage || "https://images.unsplash.com/photo-1615655096345-61a54750068d?auto=format&fit=crop&w=1800&q=80",
       primaryColor: data.primaryColor || "#57bc74",
@@ -681,6 +729,29 @@ export default function AdminDashboard() {
     videoBgType !== originalSettings.videoBgType ||
     videoBgColor !== originalSettings.videoBgColor ||
     videoBgImage !== originalSettings.videoBgImage ||
+    mobileVideoTemplate !== originalSettings.mobileVideoTemplate ||
+    mobileVideoTitle !== originalSettings.mobileVideoTitle ||
+    mobileVideoTitleFontType !== originalSettings.mobileVideoTitleFontType ||
+    mobileVideoTitleFontColor !== originalSettings.mobileVideoTitleFontColor ||
+    mobileVideoTitleFontSize !== originalSettings.mobileVideoTitleFontSize ||
+    mobileVideoTitleFontAlignment !== originalSettings.mobileVideoTitleFontAlignment ||
+    mobileVideoTitleFontWeight !== originalSettings.mobileVideoTitleFontWeight ||
+    showMobileVideoTitle !== originalSettings.showMobileVideoTitle ||
+
+    mobileVideoSubtitle !== originalSettings.mobileVideoSubtitle ||
+    mobileVideoSubtitleFontType !== originalSettings.mobileVideoSubtitleFontType ||
+    mobileVideoSubtitleFontColor !== originalSettings.mobileVideoSubtitleFontColor ||
+    mobileVideoSubtitleFontSize !== originalSettings.mobileVideoSubtitleFontSize ||
+    mobileVideoSubtitleFontAlignment !== originalSettings.mobileVideoSubtitleFontAlignment ||
+    mobileVideoSubtitleFontWeight !== originalSettings.mobileVideoSubtitleFontWeight ||
+    showMobileVideoSubtitle !== originalSettings.showMobileVideoSubtitle ||
+
+    mobileVideoButtonText !== originalSettings.mobileVideoButtonText ||
+    mobileVideoButtonStyle !== originalSettings.mobileVideoButtonStyle ||
+    mobileVideoButtonSize !== originalSettings.mobileVideoButtonSize ||
+    mobileVideoButtonColor !== originalSettings.mobileVideoButtonColor ||
+    mobileVideoButtonTextColor !== originalSettings.mobileVideoButtonTextColor ||
+    showMobileVideoButton !== originalSettings.showMobileVideoButton ||
     lifestyleText !== originalSettings.lifestyleText ||
     lifestyleImage !== originalSettings.lifestyleImage ||
     primaryColor !== originalSettings.primaryColor ||
@@ -908,21 +979,21 @@ export default function AdminDashboard() {
         setVideoTitle(data.videoTitle || "");
         setVideoSubtitle(data.videoSubtitle || "");
         setVideoUrl(data.videoUrl || "");
-        setVideoFallbackColor(data.videoFallbackColor || "#57bc74");
-        if (data.videoTitleFontType) setVideoTitleFontType(data.videoTitleFontType);
-        if (data.videoTitleFontColor) setVideoTitleFontColor(data.videoTitleFontColor);
-        if (data.videoTitleFontSize) setVideoTitleFontSize(data.videoTitleFontSize);
-        if (data.videoTitleFontAlignment) setVideoTitleFontAlignment(data.videoTitleFontAlignment);
-        if (data.videoTitleFontWeight) setVideoTitleFontWeight(data.videoTitleFontWeight);
-        if (data.videoSubtitleFontType) setVideoSubtitleFontType(data.videoSubtitleFontType);
-        if (data.videoSubtitleFontColor) setVideoSubtitleFontColor(data.videoSubtitleFontColor);
-        if (data.videoSubtitleFontSize) setVideoSubtitleFontSize(data.videoSubtitleFontSize);
-        if (data.videoSubtitleFontAlignment) setVideoSubtitleFontAlignment(data.videoSubtitleFontAlignment);
-        if (data.videoSubtitleFontWeight) setVideoSubtitleFontWeight(data.videoSubtitleFontWeight);
+        setVideoFallbackColor(data.videoFallbackColor || "#121212");
+        setVideoTitleFontType(data.videoTitleFontType || "Outfit");
+        setVideoTitleFontColor(data.videoTitleFontColor || "#ffffff");
+        setVideoTitleFontSize(data.videoTitleFontSize || "3.5rem");
+        setVideoTitleFontAlignment(data.videoTitleFontAlignment || "center");
+        setVideoTitleFontWeight(data.videoTitleFontWeight || "700");
+        setVideoSubtitleFontType(data.videoSubtitleFontType || "Outfit");
+        setVideoSubtitleFontColor(data.videoSubtitleFontColor || "#ffffff");
+        setVideoSubtitleFontSize(data.videoSubtitleFontSize || "1.1rem");
+        setVideoSubtitleFontAlignment(data.videoSubtitleFontAlignment || "center");
+        setVideoSubtitleFontWeight(data.videoSubtitleFontWeight || "500");
         setVideoTemplate(data.videoTemplate || "center");
-        if (data.showVideoTitle !== undefined) setShowVideoTitle(data.showVideoTitle);
-        if (data.showVideoSubtitle !== undefined) setShowVideoSubtitle(data.showVideoSubtitle);
-        if (data.showVideoButton !== undefined) setShowVideoButton(data.showVideoButton);
+        setShowVideoTitle(data.showVideoTitle !== undefined ? data.showVideoTitle : true);
+        setShowVideoSubtitle(data.showVideoSubtitle !== undefined ? data.showVideoSubtitle : true);
+        setShowVideoButton(data.showVideoButton !== undefined ? data.showVideoButton : true);
         setVideoButtonText(data.videoButtonText || "Shop Now");
         setVideoButtonStyle(data.videoButtonStyle || "outline");
         setVideoButtonSize(data.videoButtonSize || "md");
@@ -931,6 +1002,31 @@ export default function AdminDashboard() {
         setVideoBgType(data.videoBgType || "video");
         setVideoBgColor(data.videoBgColor || "#121212");
         setVideoBgImage(data.videoBgImage || "");
+
+        // Mobile video layout setters (unlinked)
+        setMobileVideoTemplate(data.mobileVideoTemplate || data.videoTemplate || "center");
+        setMobileVideoTitle(data.mobileVideoTitle !== undefined ? data.mobileVideoTitle : "");
+        setMobileVideoTitleFontType(data.mobileVideoTitleFontType || data.videoTitleFontType || "Outfit");
+        setMobileVideoTitleFontColor(data.mobileVideoTitleFontColor || data.videoTitleFontColor || "#ffffff");
+        setMobileVideoTitleFontSize(data.mobileVideoTitleFontSize || "2.5rem");
+        setMobileVideoTitleFontAlignment(data.mobileVideoTitleFontAlignment || data.videoTitleFontAlignment || "center");
+        setMobileVideoTitleFontWeight(data.mobileVideoTitleFontWeight || data.videoTitleFontWeight || "700");
+        setShowMobileVideoTitle(data.showMobileVideoTitle !== undefined ? data.showMobileVideoTitle : true);
+
+        setMobileVideoSubtitle(data.mobileVideoSubtitle !== undefined ? data.mobileVideoSubtitle : "");
+        setMobileVideoSubtitleFontType(data.mobileVideoSubtitleFontType || data.videoSubtitleFontType || "Outfit");
+        setMobileVideoSubtitleFontColor(data.mobileVideoSubtitleFontColor || data.videoSubtitleFontColor || "#ffffff");
+        setMobileVideoSubtitleFontSize(data.mobileVideoSubtitleFontSize || "0.85rem");
+        setMobileVideoSubtitleFontAlignment(data.mobileVideoSubtitleFontAlignment || data.videoSubtitleFontAlignment || "center");
+        setMobileVideoSubtitleFontWeight(data.mobileVideoSubtitleFontWeight || data.videoSubtitleFontWeight || "500");
+        setShowMobileVideoSubtitle(data.showMobileVideoSubtitle !== undefined ? data.showMobileVideoSubtitle : true);
+
+        setMobileVideoButtonText(data.mobileVideoButtonText !== undefined ? data.mobileVideoButtonText : (data.videoButtonText || "Shop Now"));
+        setMobileVideoButtonStyle(data.mobileVideoButtonStyle !== undefined ? data.mobileVideoButtonStyle : (data.videoButtonStyle || "outline"));
+        setMobileVideoButtonSize(data.mobileVideoButtonSize !== undefined ? data.mobileVideoButtonSize : "sm");
+        setMobileVideoButtonColor(data.mobileVideoButtonColor !== undefined ? data.mobileVideoButtonColor : "#ffffff");
+        setMobileVideoButtonTextColor(data.mobileVideoButtonTextColor !== undefined ? data.mobileVideoButtonTextColor : (data.videoButtonTextColor || "#121212"));
+        setShowMobileVideoButton(data.showMobileVideoButton !== undefined ? data.showMobileVideoButton : true);
         setLifestyleText(data.lifestyleText || "");
         setLifestyleImage(data.lifestyleImage || "https://images.unsplash.com/photo-1615655096345-61a54750068d?auto=format&fit=crop&w=1800&q=80");
         setPrimaryColor(data.primaryColor || "#57bc74");
@@ -1270,6 +1366,31 @@ export default function AdminDashboard() {
         videoBgType,
         videoBgColor,
         videoBgImage,
+
+        // Mobile Video Layout Payload
+        mobileVideoTemplate,
+        mobileVideoTitle,
+        mobileVideoTitleFontType,
+        mobileVideoTitleFontColor,
+        mobileVideoTitleFontSize,
+        mobileVideoTitleFontAlignment,
+        mobileVideoTitleFontWeight,
+        showMobileVideoTitle,
+
+        mobileVideoSubtitle,
+        mobileVideoSubtitleFontType,
+        mobileVideoSubtitleFontColor,
+        mobileVideoSubtitleFontSize,
+        mobileVideoSubtitleFontAlignment,
+        mobileVideoSubtitleFontWeight,
+        showMobileVideoSubtitle,
+
+        mobileVideoButtonText,
+        mobileVideoButtonStyle,
+        mobileVideoButtonSize,
+        mobileVideoButtonColor,
+        mobileVideoButtonTextColor,
+        showMobileVideoButton,
         lifestyleText,
         lifestyleImage,
         primaryColor,
@@ -1526,6 +1647,31 @@ export default function AdminDashboard() {
           videoBgType,
           videoBgColor,
           videoBgImage,
+
+          // Mobile Video Layout Payload
+          mobileVideoTemplate,
+          mobileVideoTitle,
+          mobileVideoTitleFontType,
+          mobileVideoTitleFontColor,
+          mobileVideoTitleFontSize,
+          mobileVideoTitleFontAlignment,
+          mobileVideoTitleFontWeight,
+          showMobileVideoTitle,
+
+          mobileVideoSubtitle,
+          mobileVideoSubtitleFontType,
+          mobileVideoSubtitleFontColor,
+          mobileVideoSubtitleFontSize,
+          mobileVideoSubtitleFontAlignment,
+          mobileVideoSubtitleFontWeight,
+          showMobileVideoSubtitle,
+
+          mobileVideoButtonText,
+          mobileVideoButtonStyle,
+          mobileVideoButtonSize,
+          mobileVideoButtonColor,
+          mobileVideoButtonTextColor,
+          showMobileVideoButton,
           lifestyleText,
           lifestyleImage,
           primaryColor,
@@ -3574,10 +3720,10 @@ export default function AdminDashboard() {
             if (config.showMobileHeroManifesto !== undefined) setShowMobileHeroManifesto(config.showMobileHeroManifesto);
 
             if (config.mobileButtonText !== undefined) setMobileHeroButtonText(config.mobileButtonText);
-            if (config.mobileButtonStyle) setMobileHeroButtonStyle(config.mobileButtonStyle);
-            if (config.mobileButtonSize) setMobileHeroButtonSize(config.mobileButtonSize);
+            if (config.mobileButtonStyle !== undefined) setMobileHeroButtonStyle(config.mobileButtonStyle);
+            if (config.mobileButtonSize !== undefined) setMobileHeroButtonSize(config.mobileButtonSize);
             if (config.mobileButtonColor !== undefined) setMobileHeroButtonColor(config.mobileButtonColor);
-            if (config.mobileButtonTextColor) setMobileHeroButtonTextColor(config.mobileButtonTextColor);
+            if (config.mobileButtonTextColor !== undefined) setMobileHeroButtonTextColor(config.mobileButtonTextColor);
             if (config.showMobileHeroButton !== undefined) setShowMobileHeroButton(config.showMobileHeroButton);
 
             setIsHeroCustomizerModalOpen(false);
@@ -3620,6 +3766,30 @@ export default function AdminDashboard() {
             bgColor: videoBgColor,
             bgImage: videoBgImage,
             bgVideo: videoUrl,
+
+            mobileLayoutTemplate: mobileVideoTemplate,
+            mobileTitleText: mobileVideoTitle,
+            mobileTitleFontType: mobileVideoTitleFontType,
+            mobileTitleFontColor: mobileVideoTitleFontColor,
+            mobileTitleFontSize: mobileVideoTitleFontSize,
+            mobileTitleFontAlignment: mobileVideoTitleFontAlignment,
+            mobileTitleFontWeight: mobileVideoTitleFontWeight,
+            showMobileHeroTitle: showMobileVideoTitle,
+
+            mobileManifestoText: mobileVideoSubtitle,
+            mobileManifestoFontType: mobileVideoSubtitleFontType,
+            mobileManifestoFontColor: mobileVideoSubtitleFontColor,
+            mobileManifestoFontSize: mobileVideoSubtitleFontSize,
+            mobileManifestoFontAlignment: mobileVideoSubtitleFontAlignment,
+            mobileManifestoFontWeight: mobileVideoSubtitleFontWeight,
+            showMobileHeroManifesto: showMobileVideoSubtitle,
+
+            mobileButtonText: mobileVideoButtonText,
+            mobileButtonStyle: mobileVideoButtonStyle,
+            mobileButtonSize: mobileVideoButtonSize,
+            mobileButtonColor: mobileVideoButtonColor,
+            mobileButtonTextColor: mobileVideoButtonTextColor,
+            showMobileHeroButton: showMobileVideoButton,
           }}
           onApply={(config) => {
             setVideoTitle(config.titleText);
@@ -3645,11 +3815,37 @@ export default function AdminDashboard() {
             setVideoButtonTextColor(config.buttonTextColor);
             setShowVideoButton(config.showButton);
 
-            setVideoTemplate(config.layoutTemplate || "center");
-            setVideoBgType(config.bgType || "video");
-            setVideoBgColor(config.bgColor || "#121212");
-            setVideoBgImage(config.bgImage || "");
-            setVideoUrl(config.bgVideo || "");
+            setVideoTemplate(config.layoutTemplate);
+            if (config.bgType) setVideoBgType(config.bgType);
+            if (config.bgColor) setVideoBgColor(config.bgColor);
+            if (config.bgImage !== undefined) setVideoBgImage(config.bgImage);
+            if (config.bgVideo !== undefined) setVideoUrl(config.bgVideo);
+
+            if (config.mobileLayoutTemplate) setMobileVideoTemplate(config.mobileLayoutTemplate);
+            if (config.mobileTitleText !== undefined) setMobileVideoTitle(config.mobileTitleText);
+            if (config.mobileTitleFontType) setMobileVideoTitleFontType(config.mobileTitleFontType);
+            if (config.mobileTitleFontColor) setMobileVideoTitleFontColor(config.mobileTitleFontColor);
+            if (config.mobileTitleFontSize) setMobileVideoTitleFontSize(config.mobileTitleFontSize);
+            if (config.mobileTitleFontAlignment) setMobileVideoTitleFontAlignment(config.mobileTitleFontAlignment);
+            if (config.mobileTitleFontWeight) setMobileVideoTitleFontWeight(config.mobileTitleFontWeight);
+            if (config.showMobileHeroTitle !== undefined) setShowMobileVideoTitle(config.showMobileHeroTitle);
+
+            if (config.mobileManifestoText !== undefined) setMobileVideoSubtitle(config.mobileManifestoText);
+            if (config.mobileManifestoFontType) setMobileVideoSubtitleFontType(config.mobileManifestoFontType);
+            if (config.mobileManifestoFontColor) setMobileVideoSubtitleFontColor(config.mobileManifestoFontColor);
+            if (config.mobileManifestoFontSize) setMobileVideoSubtitleFontSize(config.mobileManifestoFontSize);
+            if (config.mobileManifestoFontAlignment) setMobileVideoSubtitleFontAlignment(config.mobileManifestoFontAlignment);
+            if (config.mobileManifestoFontWeight) setMobileVideoSubtitleFontWeight(config.mobileManifestoFontWeight);
+            if (config.showMobileHeroManifesto !== undefined) setShowMobileVideoSubtitle(config.showMobileHeroManifesto);
+
+            if (config.mobileButtonText !== undefined) setMobileVideoButtonText(config.mobileButtonText);
+            if (config.mobileButtonStyle !== undefined) setMobileVideoButtonStyle(config.mobileButtonStyle);
+            if (config.mobileButtonSize !== undefined) setMobileVideoButtonSize(config.mobileButtonSize);
+            if (config.mobileButtonColor !== undefined) setMobileVideoButtonColor(config.mobileButtonColor);
+            if (config.mobileButtonTextColor !== undefined) setMobileVideoButtonTextColor(config.mobileButtonTextColor);
+            if (config.showMobileHeroButton !== undefined) setShowMobileVideoButton(config.showMobileHeroButton);
+
+
 
             setIsVideoCustomizerModalOpen(false);
           }}
