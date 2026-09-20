@@ -1,4 +1,5 @@
 import dotenv from "dotenv";
+import { getBrandInfo } from "./brandHelper.js";
 
 dotenv.config();
 
@@ -21,8 +22,16 @@ export const sendEmail = async ({ to, subject, html, text }) => {
     throw new Error("Email service API key is not configured.");
   }
 
-  const senderEmail = process.env.EMAIL_USER || "29sformula@gmail.com";
-  const senderName = "29sFORMULA";
+  const senderEmail = process.env.EMAIL_USER || "gopibhanubharat@gmail.com";
+  let senderName = "Store";
+  try {
+    const brandInfo = await getBrandInfo();
+    if (brandInfo && brandInfo.brandName) {
+      senderName = brandInfo.brandName;
+    }
+  } catch (e) {
+    console.warn("Could not fetch brandName for email senderName:", e.message);
+  }
 
   try {
     const response = await fetch("https://api.brevo.com/v3/smtp/email", {

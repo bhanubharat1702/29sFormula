@@ -20,7 +20,7 @@ const router = express.Router();
 
 const sendReturnUpdateEmail = async (order, customerEmail, customerName, returnStatus, adminNotes) => {
   try {
-    const { brandName, brandTagline, primaryColor, frontendUrl } = await getBrandInfo();
+    const { brandName, brandLogoUrl, headerHtml, brandTagline, primaryColor, frontendUrl } = await getBrandInfo();
     let subject = `Update on your Return Request - ${order.orderId}`;
     let heading = "Return Request Update";
     let message = "";
@@ -55,7 +55,7 @@ const sendReturnUpdateEmail = async (order, customerEmail, customerName, returnS
       html: `
         <div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; color: #1a1a1a; padding: 40px 30px; border: 1px solid #e5e5e5; border-radius: 4px; background-color: #fafafa;">
           <div style="text-align: center; margin-bottom: 30px;">
-            <h1 style="letter-spacing: 2px; font-weight: 600; margin: 0; color: #000;">${brandName}</h1>
+            ${headerHtml}
             <p style="text-transform: uppercase; letter-spacing: 1.5px; font-size: 11px; color: #666; margin-top: 5px;">${brandTagline}</p>
           </div>
           <hr style="border: none; border-top: 1px solid #eaeaea; margin-bottom: 30px;" />
@@ -81,7 +81,7 @@ const sendReturnUpdateEmail = async (order, customerEmail, customerName, returnS
 
 const sendOrderUpdateEmail = async (order, customerEmail, customerName) => {
   try {
-    const { brandName, brandTagline, primaryColor, frontendUrl } = await getBrandInfo();
+    const { brandName, brandLogoUrl, headerHtml, brandTagline, primaryColor, frontendUrl } = await getBrandInfo();
     let subject = `Order Update - ${order.orderId}`;
     let heading = "An Update on Your Order";
     let message = `The status of your order is now: <strong style="font-weight: 600; color: #111;">${order.status}</strong>`;
@@ -118,7 +118,7 @@ const sendOrderUpdateEmail = async (order, customerEmail, customerName) => {
       html: `
         <div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; color: #1a1a1a; padding: 40px 30px; border: 1px solid #e5e5e5; border-radius: 4px; background-color: #fafafa;">
           <div style="text-align: center; margin-bottom: 30px;">
-            <h1 style="letter-spacing: 2px; font-weight: 600; margin: 0; color: #000;">${brandName}</h1>
+            ${headerHtml}
             <p style="text-transform: uppercase; letter-spacing: 1.5px; font-size: 11px; color: #666; margin-top: 5px;">${brandTagline}</p>
           </div>
           <hr style="border: none; border-top: 1px solid #eaeaea; margin-bottom: 30px;" />
@@ -157,7 +157,7 @@ const sendAdminNewOrderEmail = async (order) => {
   if (!adminEmail) return;
 
   try {
-    const { brandName, frontendUrl } = await getBrandInfo();
+    const { brandName, brandLogoUrl, headerHtml, frontendUrl } = await getBrandInfo();
     const itemsHtml = (order.cartItems || []).map(item => `
       <tr>
         <td style="padding: 12px 10px; border-bottom: 1px solid #eee; font-size: 14px; color: #333;">
@@ -184,13 +184,13 @@ const sendAdminNewOrderEmail = async (order) => {
 
     await sendEmail({
       to: adminEmail,
-      subject: `🛒 New Order Received — ${order.orderId} (&#8377;${(order.totalAmount || 0).toLocaleString('en-IN')})`,
+      subject: `🛒 New Order Received — ${order.orderId} (₹${(order.totalAmount || 0).toLocaleString('en-IN')})`,
       html: `
         <div style="font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; max-width:640px; margin:0 auto; background:#ffffff; border:1px solid #e0e0e0; border-radius:6px; overflow:hidden;">
 
           <!-- Header -->
           <div style="background:#0a0a0a; padding:28px 32px; text-align:center;">
-            <h1 style="margin:0; letter-spacing:3px; font-weight:600; color:#fff; font-size:22px;">${brandName}</h1>
+            ${headerHtml}
             <p style="margin:6px 0 0; font-size:11px; letter-spacing:2px; text-transform:uppercase; color:#aaa;">Admin Order Alert</p>
           </div>
 
@@ -274,12 +274,12 @@ const sendAdminNewOrderEmail = async (order) => {
 
 const sendOrderConfirmationEmail = async (order, customerEmail, customerName) => {
   try {
-    const { brandName, primaryColor } = await getBrandInfo();
-    const itemsHtml = order.cartItems.map(item => `
+    const { brandName, brandLogoUrl, headerHtml, brandTagline, primaryColor } = await getBrandInfo();
+    const itemsHtml = (order.cartItems || []).map(item => `
       <tr>
         <td style="padding: 10px; border-bottom: 1px solid #eee;">${item.name} (${item.size})</td>
-        <td style="padding: 10px; border-bottom: 1px solid #eee;">${item.quantity}</td>
-        <td style="padding: 10px; border-bottom: 1px solid #eee;">₹${item.price * item.quantity}</td>
+        <td style="padding: 10px; border-bottom: 1px solid #eee; text-align: center;">${item.quantity}</td>
+        <td style="padding: 10px; border-bottom: 1px solid #eee; text-align: right;">₹${item.price * item.quantity}</td>
       </tr>
     `).join("");
 
@@ -287,9 +287,13 @@ const sendOrderConfirmationEmail = async (order, customerEmail, customerName) =>
       to: customerEmail,
       subject: `Order Confirmation - ${order.orderId}`,
       html: `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; color: #333;">
-          <h2 style="color: ${primaryColor};">Thank you for your order, ${customerName}!</h2>
-          <p>We've received your order for ${brandName} and are currently processing it. Here are the details:</p>
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; color: #333; padding: 24px; border: 1px solid #e5e5e5; border-radius: 8px; background-color: #ffffff;">
+          <div style="text-align: center; margin-bottom: 25px; padding-bottom: 20px; border-bottom: 1px solid #eeeeee;">
+            ${headerHtml}
+            <p style="text-transform: uppercase; letter-spacing: 1.5px; font-size: 11px; color: #666666; margin-top: 6px;">${brandTagline}</p>
+          </div>
+          <h2 style="color: ${primaryColor}; margin-top: 0;">Thank you for your order, ${customerName}!</h2>
+          <p>We've received your order and are currently processing it. Here are the details:</p>
           
           <div style="background-color: #f9fafb; padding: 15px; border-radius: 8px; margin: 20px 0;">
             <strong>Order ID:</strong> ${order.orderId}<br>
@@ -302,8 +306,8 @@ const sendOrderConfirmationEmail = async (order, customerEmail, customerName) =>
             <thead>
               <tr style="background-color: #f3f4f6;">
                 <th style="padding: 10px; text-align: left;">Item</th>
-                <th style="padding: 10px; text-align: left;">Qty</th>
-                <th style="padding: 10px; text-align: left;">Price</th>
+                <th style="padding: 10px; text-align: center;">Qty</th>
+                <th style="padding: 10px; text-align: right;">Price</th>
               </tr>
             </thead>
             <tbody>
@@ -1136,8 +1140,15 @@ router.post("/api/orders/razorpay-verify", async (req, res) => {
       await syncCustomerStats(orderPayload.customerEmail);
     }
 
-    // Send confirmation email
+    // Send confirmation email to customer & admin notification
     sendOrderConfirmationEmail(newOrder, orderPayload.customerEmail, orderPayload.customerName);
+    sendAdminNewOrderEmail({
+      ...newOrder.toObject(),
+      customerName: orderPayload.customerName,
+      customerEmail: orderPayload.customerEmail,
+      customerPhone: orderPayload.customerPhone,
+      shippingAddress: orderPayload.shippingAddress
+    });
 
     res.json({ success: true, orderId });
   } catch (error) {
