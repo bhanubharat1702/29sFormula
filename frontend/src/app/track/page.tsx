@@ -339,12 +339,24 @@ export default function TrackOrderPage() {
   };
 
   const isReturnEligible = (order: any) => {
+    if (!order) return false;
     // If a request is already submitted, they are no longer eligible to create another one
     if (order.returnRequest || order.status === "Return Requested" || order.status === "Return Approved" || order.status === "Return Rejected") return false;
     if (order.status !== "Delivered") return false;
-    const orderDate = order.updatedAt ? new Date(order.updatedAt) : new Date(order.createdAt);
+
+    let deliveryDate = order.deliveredAt;
+    if (!deliveryDate && order.timeline && Array.isArray(order.timeline)) {
+      const deliveredEvent = order.timeline.find((t: any) => t.event && t.event.toLowerCase().includes("delivered"));
+      if (deliveredEvent && deliveredEvent.date) {
+        deliveryDate = deliveredEvent.date;
+      }
+    }
+    if (!deliveryDate) {
+      deliveryDate = order.updatedAt || order.createdAt;
+    }
+
     const now = new Date();
-    const diffTime = Math.abs(now.getTime() - orderDate.getTime());
+    const diffTime = Math.abs(now.getTime() - new Date(deliveryDate).getTime());
     const diffDays = diffTime / (1000 * 60 * 60 * 24);
     return diffDays <= 7;
   };

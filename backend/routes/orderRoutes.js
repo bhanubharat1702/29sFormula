@@ -500,6 +500,9 @@ router.put("/api/orders/:id", async (req, res) => {
     if (status !== undefined) {
       $set.status = status;
       $push.timeline.$each.push({ event: `Order Status updated to ${status}` });
+      if (status === "Delivered") {
+        $set.deliveredAt = new Date();
+      }
     }
     if (refundStatus !== undefined) {
       $set.refundStatus = refundStatus;
@@ -778,6 +781,38 @@ router.post("/api/orders/:id/return", async (req, res) => {
 
     if (order.status !== "Delivered") {
       return res.status(400).json({ error: `Cannot request return. Status is currently '${order.status}' (must be Delivered)` });
+    }
+
+    // Enforce 7-day return window limit
+    const RETURN_WINDOW_DAYS = 7;
+    let deliveryDate = order.deliveredAt;
+
+    if (!deliveryDate && order.timeline && Array.isArray(order.timeline)) {
+      const deliveredEvent = order.timeline.find(t => 
+        t.event && t.event.toLowerCase().includes("delivered")
+      );
+      if (deliveredEvent && deliveredEvent.date) {
+        deliveryDate = new Date(deliveredEvent.date);
+      }
+    }
+
+    if (!deliveryDate) {
+      deliveryDate = order.updatedAt || order.createdAt;
+    }
+
+    const now = new Date();
+    const timeDiffMs = now.getTime() - new Date(deliveryDate).getTime();
+    const daysSinceDelivery = timeDiffMs / (1000 * 60 * 60 * 24);
+
+    if (daysSinceDelivery > RETURN_WINDOW_DAYS) {
+      const formattedDeliveryDate = new Date(deliveryDate).toLocaleDateString("en-IN", {
+        day: "numeric",
+        month: "short",
+        year: "numeric"
+      });
+      return res.status(400).json({
+        error: `Return window expired. Returns can only be filed within ${RETURN_WINDOW_DAYS} days of delivery. (Order was delivered on ${formattedDeliveryDate})`
+      });
     }
 
     // Check if return request already exists
