@@ -12,6 +12,7 @@ import { sendEmail } from "../utils/emailService.js";
 import { getBrandInfo } from "../utils/brandHelper.js";
 import Razorpay from "razorpay";
 import { getNextOrderId } from "../models/Counter.js";
+import { deductStockAtomically } from "../utils/stockHelper.js";
 
 const router = express.Router();
 
@@ -382,6 +383,12 @@ router.post("/api/orders", async (req, res) => {
     // Override client's totalAmount with the securely calculated server total
     const secureTotalAmount = calculatedTotal;
 
+    // Perform atomic stock deduction (prevents race condition & negative stock)
+    const stockDeduction = await deductStockAtomically(resolvedCartItems);
+    if (!stockDeduction.success) {
+      return res.status(400).json({ error: stockDeduction.error });
+    }
+
     let customer = await Customer.findOne({ email });
     if (customer) {
       customer.totalOrders += 1;
@@ -426,20 +433,6 @@ router.post("/api/orders", async (req, res) => {
     });
 
     await newOrder.save();
-
-    // Reduce stock for each product variant and base product
-    for (const item of resolvedCartItems) {
-      if (item.productId) {
-        await ProductVariant.updateOne(
-          { productId: item.productId, size: item.size },
-          { $inc: { quantity: -item.quantity } }
-        );
-        await Product.updateOne(
-          { _id: item.productId },
-          { $inc: { quantity: -item.quantity } }
-        );
-      }
-    }
 
     // Invalidate products cache
     invalidateProductsCache();
@@ -1024,13 +1017,17 @@ router.post("/api/orders/razorpay-verify", async (req, res) => {
       }
     }
 
+    const itemsToDeduct = resolvedCartItems.length > 0 ? resolvedCartItems : orderPayload.cartItems;
+    // Perform atomic stock deduction
+    const stockDeduction = await deductStockAtomically(itemsToDeduct);
+
     const newOrder = new Order({
       ...orderPayload,
-      cartItems: resolvedCartItems.length > 0 ? resolvedCartItems : orderPayload.cartItems,
+      cartItems: itemsToDeduct,
       orderId,
       customerId: customer._id,
       paymentMethod: "Razorpay",
-      status: "Processing",
+      status: stockDeduction.success ? "Processing" : "Stock Pending",
       paymentDetails: {
         razorpay_payment_id,
         razorpay_order_id,
@@ -1039,20 +1036,6 @@ router.post("/api/orders/razorpay-verify", async (req, res) => {
     });
 
     await newOrder.save();
-
-    // Deduct stock
-    for (const item of newOrder.cartItems) {
-      if (item.productId && mongoose.Types.ObjectId.isValid(item.productId)) {
-        await ProductVariant.updateOne(
-          { productId: item.productId, size: item.size },
-          { $inc: { quantity: -item.quantity } }
-        );
-        await Product.updateOne(
-          { _id: item.productId },
-          { $inc: { quantity: -item.quantity } }
-        );
-      }
-    }
     invalidateProductsCache();
 
     // Send confirmation email
