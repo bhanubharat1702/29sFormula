@@ -13,6 +13,8 @@ import { getBrandInfo } from "../utils/brandHelper.js";
 import Razorpay from "razorpay";
 import { getNextOrderId } from "../models/Counter.js";
 import { deductStockAtomically } from "../utils/stockHelper.js";
+import { verifyOrderOwnership } from "../utils/authHelper.js";
+import { syncCustomerStats } from "../utils/customerHelper.js";
 
 const router = express.Router();
 
@@ -434,6 +436,9 @@ router.post("/api/orders", async (req, res) => {
 
     await newOrder.save();
 
+    // Sync Customer analytics (totalOrders & totalSpend based on active non-cancelled orders)
+    await syncCustomerStats(email);
+
     // Invalidate products cache
     invalidateProductsCache();
 
@@ -546,6 +551,11 @@ router.put("/api/orders/:id", async (req, res) => {
       }
     }
 
+    // Sync Customer analytics on status/refund update
+    if (mappedOrder.customerEmail) {
+      await syncCustomerStats(mappedOrder.customerEmail);
+    }
+
     res.json(mappedOrder);
   } catch (error) {
     console.error("Failed to update order status:", error);
@@ -610,6 +620,11 @@ router.delete("/api/orders/:id", async (req, res) => {
         }
       }
       invalidateProductsCache();
+    }
+
+    // Sync Customer analytics after order cancellation
+    if (order.customerEmail) {
+      await syncCustomerStats(order.customerEmail);
     }
 
     res.json({ success: true, message: "Order deleted successfully" });
@@ -724,9 +739,22 @@ router.get("/api/orders/track", async (req, res) => {
 
 router.post("/api/orders/:id/cancel", async (req, res) => {
   try {
-    const order = await Order.findById(req.params.id);
+    let order;
+    if (mongoose.Types.ObjectId.isValid(req.params.id)) {
+      order = await Order.findById(req.params.id);
+    } else {
+      order = await Order.findOne({ orderId: req.params.id.toUpperCase() });
+    }
+
     if (!order) {
       return res.status(404).json({ error: "Order not found" });
+    }
+
+    // Verify ownership security authorization (Prevents IDOR / BOLA attacks)
+    if (!verifyOrderOwnership(order, req)) {
+      return res.status(403).json({
+        error: "Unauthorized: You do not have permission to modify this order. Verification email or phone is required and must match order records."
+      });
     }
 
     if (order.status !== "Processing") {
@@ -756,6 +784,11 @@ router.post("/api/orders/:id/cancel", async (req, res) => {
     // Invalidate products cache
     invalidateProductsCache();
 
+    // Sync Customer analytics after customer cancellation
+    if (order.customerEmail) {
+      await syncCustomerStats(order.customerEmail);
+    }
+
     res.json(order);
   } catch (error) {
     console.error("Order cancellation failed:", error);
@@ -774,9 +807,22 @@ router.post("/api/orders/:id/return", async (req, res) => {
       return res.status(400).json({ error: "Invalid returnType. Must be 'Refund' or 'Replacement'." });
     }
 
-    const order = await Order.findById(req.params.id);
+    let order;
+    if (mongoose.Types.ObjectId.isValid(req.params.id)) {
+      order = await Order.findById(req.params.id);
+    } else {
+      order = await Order.findOne({ orderId: req.params.id.toUpperCase() });
+    }
+
     if (!order) {
       return res.status(404).json({ error: "Order not found" });
+    }
+
+    // Verify ownership security authorization (Prevents IDOR / BOLA attacks)
+    if (!verifyOrderOwnership(order, req)) {
+      return res.status(403).json({
+        error: "Unauthorized: You do not have permission to modify this order. Verification email or phone is required and must match order records."
+      });
     }
 
     if (order.status !== "Delivered") {
@@ -1072,6 +1118,11 @@ router.post("/api/orders/razorpay-verify", async (req, res) => {
 
     await newOrder.save();
     invalidateProductsCache();
+
+    // Sync Customer analytics
+    if (orderPayload.customerEmail) {
+      await syncCustomerStats(orderPayload.customerEmail);
+    }
 
     // Send confirmation email
     sendOrderConfirmationEmail(newOrder, orderPayload.customerEmail, orderPayload.customerName);

@@ -246,7 +246,12 @@ export default function TrackOrderPage() {
 
     try {
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:5001'}/api/orders/${currentOrder._id}/cancel`, {
-        method: "POST"
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: currentOrder.customerEmail,
+          phone: currentOrder.customerPhone
+        })
       });
       const data = await res.json();
       if (!res.ok) {
@@ -303,13 +308,16 @@ export default function TrackOrderPage() {
     setError(null);
 
     try {
+      const targetOrder = currentOrder && currentOrder._id === modalOrderId ? currentOrder : history.find(o => o._id === modalOrderId);
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:5001'}/api/orders/${modalOrderId}/return`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           reason: returnReason,
           returnType: returnType,
-          images: proofImages
+          images: proofImages,
+          email: targetOrder?.customerEmail || currentOrder?.customerEmail,
+          phone: targetOrder?.customerPhone || currentOrder?.customerPhone
         })
       });
       const data = await res.json();
