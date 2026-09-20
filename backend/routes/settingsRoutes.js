@@ -185,8 +185,35 @@ router.post("/api/settings", async (req, res) => {
     if (req.body.mobileVideoButtonColor !== undefined) settings.mobileVideoButtonColor = req.body.mobileVideoButtonColor;
     if (req.body.mobileVideoButtonTextColor !== undefined) settings.mobileVideoButtonTextColor = req.body.mobileVideoButtonTextColor;
     if (req.body.showMobileVideoButton !== undefined) settings.showMobileVideoButton = req.body.showMobileVideoButton;
+    // Lifestyle Banner Desktop & Mobile Fields
     if (lifestyleText !== undefined) settings.lifestyleText = lifestyleText;
+    if (req.body.lifestyleTextFontType !== undefined) settings.lifestyleTextFontType = req.body.lifestyleTextFontType;
+    if (req.body.lifestyleTextFontColor !== undefined) settings.lifestyleTextFontColor = req.body.lifestyleTextFontColor;
+    if (req.body.lifestyleTextFontSize !== undefined) settings.lifestyleTextFontSize = req.body.lifestyleTextFontSize;
+    if (req.body.lifestyleTextFontAlignment !== undefined) settings.lifestyleTextFontAlignment = req.body.lifestyleTextFontAlignment;
+    if (req.body.lifestyleTextFontWeight !== undefined) settings.lifestyleTextFontWeight = req.body.lifestyleTextFontWeight;
+    if (req.body.showLifestyleText !== undefined) settings.showLifestyleText = req.body.showLifestyleText;
+    if (req.body.showLifestyleButton !== undefined) settings.showLifestyleButton = req.body.showLifestyleButton;
+    if (req.body.lifestyleButtonText !== undefined) settings.lifestyleButtonText = req.body.lifestyleButtonText;
+    if (req.body.lifestyleButtonStyle !== undefined) settings.lifestyleButtonStyle = req.body.lifestyleButtonStyle;
+    if (req.body.lifestyleButtonSize !== undefined) settings.lifestyleButtonSize = req.body.lifestyleButtonSize;
+    if (req.body.lifestyleButtonColor !== undefined) settings.lifestyleButtonColor = req.body.lifestyleButtonColor;
+    if (req.body.lifestyleButtonTextColor !== undefined) settings.lifestyleButtonTextColor = req.body.lifestyleButtonTextColor;
     if (lifestyleImage !== undefined) settings.lifestyleImage = lifestyleImage;
+
+    if (req.body.mobileLifestyleText !== undefined) settings.mobileLifestyleText = req.body.mobileLifestyleText;
+    if (req.body.mobileLifestyleTextFontType !== undefined) settings.mobileLifestyleTextFontType = req.body.mobileLifestyleTextFontType;
+    if (req.body.mobileLifestyleTextFontColor !== undefined) settings.mobileLifestyleTextFontColor = req.body.mobileLifestyleTextFontColor;
+    if (req.body.mobileLifestyleTextFontSize !== undefined) settings.mobileLifestyleTextFontSize = req.body.mobileLifestyleTextFontSize;
+    if (req.body.mobileLifestyleTextFontAlignment !== undefined) settings.mobileLifestyleTextFontAlignment = req.body.mobileLifestyleTextFontAlignment;
+    if (req.body.mobileLifestyleTextFontWeight !== undefined) settings.mobileLifestyleTextFontWeight = req.body.mobileLifestyleTextFontWeight;
+    if (req.body.showMobileLifestyleText !== undefined) settings.showMobileLifestyleText = req.body.showMobileLifestyleText;
+    if (req.body.showMobileLifestyleButton !== undefined) settings.showMobileLifestyleButton = req.body.showMobileLifestyleButton;
+    if (req.body.mobileLifestyleButtonText !== undefined) settings.mobileLifestyleButtonText = req.body.mobileLifestyleButtonText;
+    if (req.body.mobileLifestyleButtonStyle !== undefined) settings.mobileLifestyleButtonStyle = req.body.mobileLifestyleButtonStyle;
+    if (req.body.mobileLifestyleButtonSize !== undefined) settings.mobileLifestyleButtonSize = req.body.mobileLifestyleButtonSize;
+    if (req.body.mobileLifestyleButtonColor !== undefined) settings.mobileLifestyleButtonColor = req.body.mobileLifestyleButtonColor;
+    if (req.body.mobileLifestyleButtonTextColor !== undefined) settings.mobileLifestyleButtonTextColor = req.body.mobileLifestyleButtonTextColor;
     if (req.body.primaryColor !== undefined) settings.primaryColor = req.body.primaryColor;
     if (req.body.brandLogoType !== undefined) settings.brandLogoType = req.body.brandLogoType;
     if (req.body.brandLogoValue !== undefined) settings.brandLogoValue = req.body.brandLogoValue;

@@ -18,6 +18,7 @@ export default function LandingPageSubTab({
   activeCustomizerSection,
   setIsHeroCustomizerModalOpen,
   setIsVideoCustomizerModalOpen,
+  setIsLifestyleCustomizerModalOpen,
   setHeroBackup,
   setDrafts,
   heroTitleFontType,
@@ -221,7 +222,7 @@ export default function LandingPageSubTab({
                               <div style={{ display: "flex", gap: "8px", position: "relative" }}>
                                 <input
                                   type="text"
-                                  value={heroTitle}
+                                  value={heroTitle || ""}
                                   onChange={(e: any) => setHeroTitle(e.target.value)}
                                   placeholder="29sFORMULA"
                                   className={styles.textInput}
@@ -232,7 +233,7 @@ export default function LandingPageSubTab({
                             <div className={styles.inputGroup}>
                               <label className={styles.inputLabel}>Brand Manifesto (Hero Subtext)</label>
                               <textarea
-                                value={heroManifesto}
+                                value={heroManifesto || ""}
                                 onChange={(e: any) => setHeroManifesto(e.target.value)}
                                 placeholder="SCENT IS THE DIFFERENCE YOU FEEL AND NEVER FAKE..."
                                 className={styles.textareaInput}
@@ -516,7 +517,7 @@ export default function LandingPageSubTab({
                                 <label className={styles.inputLabel}>Headline Title</label>
                                 <input
                                   type="text"
-                                  value={videoTitle}
+                                  value={videoTitle || ""}
                                   onChange={(e: any) => setVideoTitle(e.target.value)}
                                   placeholder="NEW ARRIVALS"
                                   className={styles.textInput}
@@ -527,7 +528,7 @@ export default function LandingPageSubTab({
                                 <label className={styles.inputLabel}>Subtitle Description</label>
                                 <input
                                   type="text"
-                                  value={videoSubtitle}
+                                  value={videoSubtitle || ""}
                                   onChange={(e: any) => setVideoSubtitle(e.target.value)}
                                   placeholder="Drop's live. Smells divine..."
                                   className={styles.textInput}
@@ -779,6 +780,34 @@ export default function LandingPageSubTab({
 
                         {activeCustomizerSection === "lifestyle" && (
                           <div className={styles.accordionContent}>
+                            <div style={{ marginBottom: "20px", display: "flex", justifyContent: "flex-end" }}>
+                              <button
+                                type="button"
+                                onClick={() => setIsLifestyleCustomizerModalOpen && setIsLifestyleCustomizerModalOpen(true)}
+                                style={{
+                                  backgroundColor: "#3b82f6",
+                                  border: "none",
+                                  cursor: "pointer",
+                                  color: "#ffffff",
+                                  display: "flex",
+                                  alignItems: "center",
+                                  gap: "6px",
+                                  fontSize: "0.85rem",
+                                  fontWeight: 600,
+                                  padding: "8px 12px",
+                                  borderRadius: "6px",
+                                  boxShadow: "0 1px 2px rgba(0,0,0,0.05)",
+                                  transition: "background 0.2s"
+                                }}
+                                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "#2563eb"}
+                                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "#3b82f6"}
+                              >
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" style={{ width: "16px", height: "16px" }}>
+                                  <path strokeLinecap="round" strokeLinejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.83 21.75a.75.75 0 0 1-.322.206l-4 1a.75.75 0 0 1-.905-.905l1-4a.75.75 0 0 1 .206-.322l15.118-15.118L16.863 4.487Zm0 0L19.5 7.125" />
+                                </svg>
+                                <span>Advanced Customizer</span>
+                              </button>
+                            </div>
                             <div className={styles.toggleRow} style={{ marginBottom: "15px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                               <span className={styles.toggleLabel} style={{ fontWeight: 600, fontSize: "0.85rem", color: "#374151" }}>Display Lifestyle Banner on Storefront</span>
                               <CustomCheckbox
@@ -791,7 +820,7 @@ export default function LandingPageSubTab({
                               <label className={styles.inputLabel}>Lifestyle Overlay Text Copy</label>
                               <input
                                 type="text"
-                                value={lifestyleText}
+                                value={lifestyleText || ""}
                                 onChange={(e: any) => setLifestyleText(e.target.value)}
                                 placeholder="Intense notes, Raw elements. This is 29sFORMULA."
                                 className={styles.textInput}

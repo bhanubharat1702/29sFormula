@@ -190,7 +190,7 @@ export default function GiftSetPageSubTab({
                   onClick={() => setActiveCustomizerSection(activeCustomizerSection === "visibility" ? null : "visibility")}
                 >
                   <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                    <h2 className={styles.cardHeaderTitleNoBorder}>1. Storefront Page Visibility</h2>
+                    <h2 className={styles.cardHeaderTitleNoBorder}>Storefront Page Visibility</h2>
                   </div>
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -255,7 +255,7 @@ export default function GiftSetPageSubTab({
                   className={styles.accordionHeader}
                   onClick={() => setActiveCustomizerSection(activeCustomizerSection === "header" ? null : "header")}
                 >
-                  <h2 className={styles.cardHeaderTitleNoBorder}>2. Header Banner, Background & Typography</h2>
+                  <h2 className={styles.cardHeaderTitleNoBorder}>Header Banner, Background & Typography</h2>
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     fill="none"
@@ -628,7 +628,7 @@ export default function GiftSetPageSubTab({
                   className={styles.accordionHeader}
                   onClick={() => setActiveCustomizerSection(activeCustomizerSection === "sizes" ? null : "sizes")}
                 >
-                  <h2 className={styles.cardHeaderTitleNoBorder}>3. Size Options & Selection Rules</h2>
+                  <h2 className={styles.cardHeaderTitleNoBorder}>Size Options & Selection Rules</h2>
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     fill="none"
@@ -770,7 +770,7 @@ export default function GiftSetPageSubTab({
                   className={styles.accordionHeader}
                   onClick={() => setActiveCustomizerSection(activeCustomizerSection === "button" ? null : "button")}
                 >
-                  <h2 className={styles.cardHeaderTitleNoBorder}>4. CTA Add to Cart Button</h2>
+                  <h2 className={styles.cardHeaderTitleNoBorder}>CTA Add to Cart Button</h2>
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     fill="none"

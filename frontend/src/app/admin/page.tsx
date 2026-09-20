@@ -387,6 +387,33 @@ export default function AdminDashboard() {
   const [mobileVideoButtonColor, setMobileVideoButtonColor] = useState<string>("#ffffff");
   const [mobileVideoButtonTextColor, setMobileVideoButtonTextColor] = useState<string>("#121212");
   const [showMobileVideoButton, setShowMobileVideoButton] = useState<boolean>(true);
+  const [isLifestyleCustomizerModalOpen, setIsLifestyleCustomizerModalOpen] = useState(false);
+  const [lifestyleTextFontType, setLifestyleTextFontType] = useState<string>("Outfit");
+  const [lifestyleTextFontColor, setLifestyleTextFontColor] = useState<string>("#ffffff");
+  const [lifestyleTextFontSize, setLifestyleTextFontSize] = useState<string>("2.5rem");
+  const [lifestyleTextFontAlignment, setLifestyleTextFontAlignment] = useState<string>("center");
+  const [lifestyleTextFontWeight, setLifestyleTextFontWeight] = useState<string>("700");
+  const [showLifestyleText, setShowLifestyleText] = useState<boolean>(true);
+  const [showLifestyleButton, setShowLifestyleButton] = useState<boolean>(true);
+  const [lifestyleButtonText, setLifestyleButtonText] = useState<string>("Explore Now");
+  const [lifestyleButtonStyle, setLifestyleButtonStyle] = useState<string>("solid");
+  const [lifestyleButtonSize, setLifestyleButtonSize] = useState<string>("md");
+  const [lifestyleButtonColor, setLifestyleButtonColor] = useState<string>("");
+  const [lifestyleButtonTextColor, setLifestyleButtonTextColor] = useState<string>("#ffffff");
+
+  const [mobileLifestyleText, setMobileLifestyleText] = useState<string>("");
+  const [mobileLifestyleTextFontType, setMobileLifestyleTextFontType] = useState<string>("Outfit");
+  const [mobileLifestyleTextFontColor, setMobileLifestyleTextFontColor] = useState<string>("#ffffff");
+  const [mobileLifestyleTextFontSize, setMobileLifestyleTextFontSize] = useState<string>("1.8rem");
+  const [mobileLifestyleTextFontAlignment, setMobileLifestyleTextFontAlignment] = useState<string>("center");
+  const [mobileLifestyleTextFontWeight, setMobileLifestyleTextFontWeight] = useState<string>("700");
+  const [showMobileLifestyleText, setShowMobileLifestyleText] = useState<boolean>(true);
+  const [showMobileLifestyleButton, setShowMobileLifestyleButton] = useState<boolean>(true);
+  const [mobileLifestyleButtonText, setMobileLifestyleButtonText] = useState<string>("Explore Now");
+  const [mobileLifestyleButtonStyle, setMobileLifestyleButtonStyle] = useState<string>("solid");
+  const [mobileLifestyleButtonSize, setMobileLifestyleButtonSize] = useState<string>("sm");
+  const [mobileLifestyleButtonColor, setMobileLifestyleButtonColor] = useState<string>("");
+  const [mobileLifestyleButtonTextColor, setMobileLifestyleButtonTextColor] = useState<string>("#ffffff");
   const [showLifestyle, setShowLifestyle] = useState<boolean>(true);
   const [supportText, setSupportText] = useState<string>("For support inquiries, please contact us.");
   const [careersText, setCareersText] = useState<string>("Join our team! Check out our open positions.");
@@ -586,6 +613,32 @@ export default function AdminDashboard() {
       showMobileVideoButton: data.showMobileVideoButton !== undefined ? data.showMobileVideoButton : true,
       lifestyleText: data.lifestyleText || "",
       lifestyleImage: data.lifestyleImage || "https://images.unsplash.com/photo-1615655096345-61a54750068d?auto=format&fit=crop&w=1800&q=80",
+      lifestyleTextFontType: data.lifestyleTextFontType || "Outfit",
+      lifestyleTextFontColor: data.lifestyleTextFontColor || "#ffffff",
+      lifestyleTextFontSize: data.lifestyleTextFontSize || "2.5rem",
+      lifestyleTextFontAlignment: data.lifestyleTextFontAlignment || "center",
+      lifestyleTextFontWeight: data.lifestyleTextFontWeight || "700",
+      showLifestyleText: data.showLifestyleText !== undefined ? data.showLifestyleText : true,
+      showLifestyleButton: data.showLifestyleButton !== undefined ? data.showLifestyleButton : true,
+      lifestyleButtonText: data.lifestyleButtonText !== undefined ? data.lifestyleButtonText : "Explore Now",
+      lifestyleButtonStyle: data.lifestyleButtonStyle !== undefined ? data.lifestyleButtonStyle : "solid",
+      lifestyleButtonSize: data.lifestyleButtonSize !== undefined ? data.lifestyleButtonSize : "md",
+      lifestyleButtonColor: data.lifestyleButtonColor !== undefined ? data.lifestyleButtonColor : "",
+      lifestyleButtonTextColor: data.lifestyleButtonTextColor !== undefined ? data.lifestyleButtonTextColor : "#ffffff",
+
+      mobileLifestyleText: data.mobileLifestyleText !== undefined ? data.mobileLifestyleText : "",
+      mobileLifestyleTextFontType: data.mobileLifestyleTextFontType || data.lifestyleTextFontType || "Outfit",
+      mobileLifestyleTextFontColor: data.mobileLifestyleTextFontColor || data.lifestyleTextFontColor || "#ffffff",
+      mobileLifestyleTextFontSize: data.mobileLifestyleTextFontSize || "1.8rem",
+      mobileLifestyleTextFontAlignment: data.mobileLifestyleTextFontAlignment || data.lifestyleTextFontAlignment || "center",
+      mobileLifestyleTextFontWeight: data.mobileLifestyleTextFontWeight || data.lifestyleTextFontWeight || "700",
+      showMobileLifestyleText: data.showMobileLifestyleText !== undefined ? data.showMobileLifestyleText : true,
+      showMobileLifestyleButton: data.showMobileLifestyleButton !== undefined ? data.showMobileLifestyleButton : true,
+      mobileLifestyleButtonText: data.mobileLifestyleButtonText !== undefined ? data.mobileLifestyleButtonText : (data.lifestyleButtonText || "Explore Now"),
+      mobileLifestyleButtonStyle: data.mobileLifestyleButtonStyle !== undefined ? data.mobileLifestyleButtonStyle : (data.lifestyleButtonStyle || "solid"),
+      mobileLifestyleButtonSize: data.mobileLifestyleButtonSize !== undefined ? data.mobileLifestyleButtonSize : "sm",
+      mobileLifestyleButtonColor: data.mobileLifestyleButtonColor !== undefined ? data.mobileLifestyleButtonColor : (data.lifestyleButtonColor || ""),
+      mobileLifestyleButtonTextColor: data.mobileLifestyleButtonTextColor !== undefined ? data.mobileLifestyleButtonTextColor : (data.lifestyleButtonTextColor || "#ffffff"),
       primaryColor: data.primaryColor || "#57bc74",
       brandLogoType: data.brandLogoType || "text",
       brandLogoValue: data.brandLogoValue || "29sFORMULA",
@@ -754,6 +807,32 @@ export default function AdminDashboard() {
     showMobileVideoButton !== originalSettings.showMobileVideoButton ||
     lifestyleText !== originalSettings.lifestyleText ||
     lifestyleImage !== originalSettings.lifestyleImage ||
+    lifestyleTextFontType !== originalSettings.lifestyleTextFontType ||
+    lifestyleTextFontColor !== originalSettings.lifestyleTextFontColor ||
+    lifestyleTextFontSize !== originalSettings.lifestyleTextFontSize ||
+    lifestyleTextFontAlignment !== originalSettings.lifestyleTextFontAlignment ||
+    lifestyleTextFontWeight !== originalSettings.lifestyleTextFontWeight ||
+    showLifestyleText !== originalSettings.showLifestyleText ||
+    showLifestyleButton !== originalSettings.showLifestyleButton ||
+    lifestyleButtonText !== originalSettings.lifestyleButtonText ||
+    lifestyleButtonStyle !== originalSettings.lifestyleButtonStyle ||
+    lifestyleButtonSize !== originalSettings.lifestyleButtonSize ||
+    lifestyleButtonColor !== originalSettings.lifestyleButtonColor ||
+    lifestyleButtonTextColor !== originalSettings.lifestyleButtonTextColor ||
+
+    mobileLifestyleText !== originalSettings.mobileLifestyleText ||
+    mobileLifestyleTextFontType !== originalSettings.mobileLifestyleTextFontType ||
+    mobileLifestyleTextFontColor !== originalSettings.mobileLifestyleTextFontColor ||
+    mobileLifestyleTextFontSize !== originalSettings.mobileLifestyleTextFontSize ||
+    mobileLifestyleTextFontAlignment !== originalSettings.mobileLifestyleTextFontAlignment ||
+    mobileLifestyleTextFontWeight !== originalSettings.mobileLifestyleTextFontWeight ||
+    showMobileLifestyleText !== originalSettings.showMobileLifestyleText ||
+    showMobileLifestyleButton !== originalSettings.showMobileLifestyleButton ||
+    mobileLifestyleButtonText !== originalSettings.mobileLifestyleButtonText ||
+    mobileLifestyleButtonStyle !== originalSettings.mobileLifestyleButtonStyle ||
+    mobileLifestyleButtonSize !== originalSettings.mobileLifestyleButtonSize ||
+    mobileLifestyleButtonColor !== originalSettings.mobileLifestyleButtonColor ||
+    mobileLifestyleButtonTextColor !== originalSettings.mobileLifestyleButtonTextColor ||
     primaryColor !== originalSettings.primaryColor ||
     brandLogoType !== originalSettings.brandLogoType ||
     brandLogoValue !== originalSettings.brandLogoValue ||
@@ -872,6 +951,32 @@ export default function AdminDashboard() {
     if (JSON.stringify(faqs) !== JSON.stringify(originalSettings.faqs || [])) changes.push("Frequently Asked Questions (FAQ) list");
     if (lifestyleText !== (originalSettings.lifestyleText || "")) changes.push("Lifestyle overlay text copy");
     if (lifestyleImage !== (originalSettings.lifestyleImage || "")) changes.push("Lifestyle banner background image");
+    if (lifestyleTextFontType !== (originalSettings.lifestyleTextFontType || "Outfit")) changes.push("Lifestyle text font type");
+    if (lifestyleTextFontColor !== (originalSettings.lifestyleTextFontColor || "#ffffff")) changes.push("Lifestyle text font color");
+    if (lifestyleTextFontSize !== (originalSettings.lifestyleTextFontSize || "2.5rem")) changes.push("Lifestyle text font size");
+    if (lifestyleTextFontAlignment !== (originalSettings.lifestyleTextFontAlignment || "center")) changes.push("Lifestyle text font alignment");
+    if (lifestyleTextFontWeight !== (originalSettings.lifestyleTextFontWeight || "700")) changes.push("Lifestyle text font weight");
+    if (showLifestyleText !== (originalSettings.showLifestyleText ?? true)) changes.push("Lifestyle text toggle");
+    if (showLifestyleButton !== (originalSettings.showLifestyleButton ?? true)) changes.push("Lifestyle button toggle");
+    if (lifestyleButtonText !== (originalSettings.lifestyleButtonText || "Explore Now")) changes.push("Lifestyle button text");
+    if (lifestyleButtonStyle !== (originalSettings.lifestyleButtonStyle || "solid")) changes.push("Lifestyle button style");
+    if (lifestyleButtonSize !== (originalSettings.lifestyleButtonSize || "md")) changes.push("Lifestyle button size");
+    if (lifestyleButtonColor !== (originalSettings.lifestyleButtonColor || "")) changes.push("Lifestyle button color");
+    if (lifestyleButtonTextColor !== (originalSettings.lifestyleButtonTextColor || "#ffffff")) changes.push("Lifestyle button text color");
+
+    if (mobileLifestyleText !== (originalSettings.mobileLifestyleText || "")) changes.push("Mobile lifestyle overlay text copy");
+    if (mobileLifestyleTextFontType !== (originalSettings.mobileLifestyleTextFontType || "Outfit")) changes.push("Mobile lifestyle text font type");
+    if (mobileLifestyleTextFontColor !== (originalSettings.mobileLifestyleTextFontColor || "#ffffff")) changes.push("Mobile lifestyle text font color");
+    if (mobileLifestyleTextFontSize !== (originalSettings.mobileLifestyleTextFontSize || "1.8rem")) changes.push("Mobile lifestyle text font size");
+    if (mobileLifestyleTextFontAlignment !== (originalSettings.mobileLifestyleTextFontAlignment || "center")) changes.push("Mobile lifestyle text font alignment");
+    if (mobileLifestyleTextFontWeight !== (originalSettings.mobileLifestyleTextFontWeight || "700")) changes.push("Mobile lifestyle text font weight");
+    if (showMobileLifestyleText !== (originalSettings.showMobileLifestyleText ?? true)) changes.push("Mobile lifestyle text toggle");
+    if (showMobileLifestyleButton !== (originalSettings.showMobileLifestyleButton ?? true)) changes.push("Mobile lifestyle button toggle");
+    if (mobileLifestyleButtonText !== (originalSettings.mobileLifestyleButtonText || "Explore Now")) changes.push("Mobile lifestyle button text");
+    if (mobileLifestyleButtonStyle !== (originalSettings.mobileLifestyleButtonStyle || "solid")) changes.push("Mobile lifestyle button style");
+    if (mobileLifestyleButtonSize !== (originalSettings.mobileLifestyleButtonSize || "sm")) changes.push("Mobile lifestyle button size");
+    if (mobileLifestyleButtonColor !== (originalSettings.mobileLifestyleButtonColor || "")) changes.push("Mobile lifestyle button color");
+    if (mobileLifestyleButtonTextColor !== (originalSettings.mobileLifestyleButtonTextColor || "#ffffff")) changes.push("Mobile lifestyle button text color");
     if (primaryColor !== (originalSettings.primaryColor || "#57bc74")) changes.push("Primary brand theme color");
     if (brandLogoType !== (originalSettings.brandLogoType || "text") || brandLogoValue !== (originalSettings.brandLogoValue || "29sFORMULA")) changes.push("Brand Logo");
     if (heroBgType !== (originalSettings.heroBgType || "color")) changes.push("Hero section background layout type");
@@ -1026,9 +1131,34 @@ export default function AdminDashboard() {
         setMobileVideoButtonSize(data.mobileVideoButtonSize !== undefined ? data.mobileVideoButtonSize : "sm");
         setMobileVideoButtonColor(data.mobileVideoButtonColor !== undefined ? data.mobileVideoButtonColor : "#ffffff");
         setMobileVideoButtonTextColor(data.mobileVideoButtonTextColor !== undefined ? data.mobileVideoButtonTextColor : (data.videoButtonTextColor || "#121212"));
-        setShowMobileVideoButton(data.showMobileVideoButton !== undefined ? data.showMobileVideoButton : true);
         setLifestyleText(data.lifestyleText || "");
         setLifestyleImage(data.lifestyleImage || "https://images.unsplash.com/photo-1615655096345-61a54750068d?auto=format&fit=crop&w=1800&q=80");
+        setLifestyleTextFontType(data.lifestyleTextFontType || "Outfit");
+        setLifestyleTextFontColor(data.lifestyleTextFontColor || "#ffffff");
+        setLifestyleTextFontSize(data.lifestyleTextFontSize || "2.5rem");
+        setLifestyleTextFontAlignment(data.lifestyleTextFontAlignment || "center");
+        setLifestyleTextFontWeight(data.lifestyleTextFontWeight || "700");
+        setShowLifestyleText(data.showLifestyleText !== undefined ? data.showLifestyleText : true);
+        setShowLifestyleButton(data.showLifestyleButton !== undefined ? data.showLifestyleButton : true);
+        setLifestyleButtonText(data.lifestyleButtonText !== undefined ? data.lifestyleButtonText : "Explore Now");
+        setLifestyleButtonStyle(data.lifestyleButtonStyle || "solid");
+        setLifestyleButtonSize(data.lifestyleButtonSize || "md");
+        setLifestyleButtonColor(data.lifestyleButtonColor || "");
+        setLifestyleButtonTextColor(data.lifestyleButtonTextColor || "#ffffff");
+
+        setMobileLifestyleText(data.mobileLifestyleText !== undefined ? data.mobileLifestyleText : "");
+        setMobileLifestyleTextFontType(data.mobileLifestyleTextFontType || data.lifestyleTextFontType || "Outfit");
+        setMobileLifestyleTextFontColor(data.mobileLifestyleTextFontColor || data.lifestyleTextFontColor || "#ffffff");
+        setMobileLifestyleTextFontSize(data.mobileLifestyleTextFontSize || "1.8rem");
+        setMobileLifestyleTextFontAlignment(data.mobileLifestyleTextFontAlignment || data.lifestyleTextFontAlignment || "center");
+        setMobileLifestyleTextFontWeight(data.mobileLifestyleTextFontWeight || data.lifestyleTextFontWeight || "700");
+        setShowMobileLifestyleText(data.showMobileLifestyleText !== undefined ? data.showMobileLifestyleText : true);
+        setShowMobileLifestyleButton(data.showMobileLifestyleButton !== undefined ? data.showMobileLifestyleButton : true);
+        setMobileLifestyleButtonText(data.mobileLifestyleButtonText !== undefined ? data.mobileLifestyleButtonText : (data.lifestyleButtonText || "Explore Now"));
+        setMobileLifestyleButtonStyle(data.mobileLifestyleButtonStyle || data.lifestyleButtonStyle || "solid");
+        setMobileLifestyleButtonSize(data.mobileLifestyleButtonSize || "sm");
+        setMobileLifestyleButtonColor(data.mobileLifestyleButtonColor !== undefined ? data.mobileLifestyleButtonColor : data.lifestyleButtonColor);
+        setMobileLifestyleButtonTextColor(data.mobileLifestyleButtonTextColor || data.lifestyleButtonTextColor || "#ffffff");
         setPrimaryColor(data.primaryColor || "#57bc74");
         setBrandLogoType(data.brandLogoType || "text");
         setBrandLogoValue(data.brandLogoValue || "29sFORMULA");
@@ -1393,6 +1523,32 @@ export default function AdminDashboard() {
         showMobileVideoButton,
         lifestyleText,
         lifestyleImage,
+        lifestyleTextFontType,
+        lifestyleTextFontColor,
+        lifestyleTextFontSize,
+        lifestyleTextFontAlignment,
+        lifestyleTextFontWeight,
+        showLifestyleText,
+        showLifestyleButton,
+        lifestyleButtonText,
+        lifestyleButtonStyle,
+        lifestyleButtonSize,
+        lifestyleButtonColor,
+        lifestyleButtonTextColor,
+
+        mobileLifestyleText,
+        mobileLifestyleTextFontType,
+        mobileLifestyleTextFontColor,
+        mobileLifestyleTextFontSize,
+        mobileLifestyleTextFontAlignment,
+        mobileLifestyleTextFontWeight,
+        showMobileLifestyleText,
+        showMobileLifestyleButton,
+        mobileLifestyleButtonText,
+        mobileLifestyleButtonStyle,
+        mobileLifestyleButtonSize,
+        mobileLifestyleButtonColor,
+        mobileLifestyleButtonTextColor,
         primaryColor,
         brandLogoType,
         brandLogoValue,
@@ -1514,6 +1670,32 @@ export default function AdminDashboard() {
       setVideoBgImage(originalSettings.videoBgImage || "");
       setLifestyleText(originalSettings.lifestyleText || "");
       setLifestyleImage(originalSettings.lifestyleImage || "https://images.unsplash.com/photo-1615655096345-61a54750068d?auto=format&fit=crop&w=1800&q=80");
+      setLifestyleTextFontType(originalSettings.lifestyleTextFontType || "Outfit");
+      setLifestyleTextFontColor(originalSettings.lifestyleTextFontColor || "#ffffff");
+      setLifestyleTextFontSize(originalSettings.lifestyleTextFontSize || "2.5rem");
+      setLifestyleTextFontAlignment(originalSettings.lifestyleTextFontAlignment || "center");
+      setLifestyleTextFontWeight(originalSettings.lifestyleTextFontWeight || "700");
+      if (originalSettings.showLifestyleText !== undefined) setShowLifestyleText(originalSettings.showLifestyleText);
+      if (originalSettings.showLifestyleButton !== undefined) setShowLifestyleButton(originalSettings.showLifestyleButton);
+      setLifestyleButtonText(originalSettings.lifestyleButtonText || "Explore Now");
+      setLifestyleButtonStyle(originalSettings.lifestyleButtonStyle || "solid");
+      setLifestyleButtonSize(originalSettings.lifestyleButtonSize || "md");
+      setLifestyleButtonColor(originalSettings.lifestyleButtonColor || "");
+      setLifestyleButtonTextColor(originalSettings.lifestyleButtonTextColor || "#ffffff");
+
+      setMobileLifestyleText(originalSettings.mobileLifestyleText || "");
+      setMobileLifestyleTextFontType(originalSettings.mobileLifestyleTextFontType || "Outfit");
+      setMobileLifestyleTextFontColor(originalSettings.mobileLifestyleTextFontColor || "#ffffff");
+      setMobileLifestyleTextFontSize(originalSettings.mobileLifestyleTextFontSize || "1.8rem");
+      setMobileLifestyleTextFontAlignment(originalSettings.mobileLifestyleTextFontAlignment || "center");
+      setMobileLifestyleTextFontWeight(originalSettings.mobileLifestyleTextFontWeight || "700");
+      if (originalSettings.showMobileLifestyleText !== undefined) setShowMobileLifestyleText(originalSettings.showMobileLifestyleText);
+      if (originalSettings.showMobileLifestyleButton !== undefined) setShowMobileLifestyleButton(originalSettings.showMobileLifestyleButton);
+      setMobileLifestyleButtonText(originalSettings.mobileLifestyleButtonText || "Explore Now");
+      setMobileLifestyleButtonStyle(originalSettings.mobileLifestyleButtonStyle || "solid");
+      setMobileLifestyleButtonSize(originalSettings.mobileLifestyleButtonSize || "sm");
+      setMobileLifestyleButtonColor(originalSettings.mobileLifestyleButtonColor || "");
+      setMobileLifestyleButtonTextColor(originalSettings.mobileLifestyleButtonTextColor || "#ffffff");
       setHeroBgType(originalSettings.heroBgType || "color");
       setHeroBgColor(originalSettings.heroBgColor || "#57bc74");
       setHeroBgImage(originalSettings.heroBgImage || "");
@@ -1674,6 +1856,32 @@ export default function AdminDashboard() {
           showMobileVideoButton,
           lifestyleText,
           lifestyleImage,
+          lifestyleTextFontType,
+          lifestyleTextFontColor,
+          lifestyleTextFontSize,
+          lifestyleTextFontAlignment,
+          lifestyleTextFontWeight,
+          showLifestyleText,
+          showLifestyleButton,
+          lifestyleButtonText,
+          lifestyleButtonStyle,
+          lifestyleButtonSize,
+          lifestyleButtonColor,
+          lifestyleButtonTextColor,
+
+          mobileLifestyleText,
+          mobileLifestyleTextFontType,
+          mobileLifestyleTextFontColor,
+          mobileLifestyleTextFontSize,
+          mobileLifestyleTextFontAlignment,
+          mobileLifestyleTextFontWeight,
+          showMobileLifestyleText,
+          showMobileLifestyleButton,
+          mobileLifestyleButtonText,
+          mobileLifestyleButtonStyle,
+          mobileLifestyleButtonSize,
+          mobileLifestyleButtonColor,
+          mobileLifestyleButtonTextColor,
           primaryColor,
           brandLogoType,
           brandLogoValue,
@@ -3116,6 +3324,7 @@ export default function AdminDashboard() {
             setActiveCustomizerSection={setActiveCustomizerSection}
             setIsHeroCustomizerModalOpen={setIsHeroCustomizerModalOpen}
             setIsVideoCustomizerModalOpen={setIsVideoCustomizerModalOpen}
+            setIsLifestyleCustomizerModalOpen={setIsLifestyleCustomizerModalOpen}
             activeCustomizerSection={activeCustomizerSection}
             heroTitleFontType={heroTitleFontType}
             heroTitleFontSize={heroTitleFontSize}
@@ -3850,6 +4059,84 @@ export default function AdminDashboard() {
             setIsVideoCustomizerModalOpen(false);
           }}
           sectionName="Video Section"
+          primaryColor={primaryColor}
+        />
+      )}
+
+      {isLifestyleCustomizerModalOpen && (
+        <CustomizeLayoutModal
+          isOpen={true}
+          onClose={() => setIsLifestyleCustomizerModalOpen(false)}
+          initialConfig={{
+            titleText: lifestyleText,
+            titleFontType: lifestyleTextFontType,
+            titleFontColor: lifestyleTextFontColor,
+            titleFontSize: lifestyleTextFontSize,
+            titleFontAlignment: lifestyleTextFontAlignment,
+            titleFontWeight: lifestyleTextFontWeight,
+            showTitle: showLifestyleText,
+
+            showButton: showLifestyleButton,
+            buttonText: lifestyleButtonText,
+            buttonStyle: lifestyleButtonStyle,
+            buttonSize: lifestyleButtonSize,
+            buttonColor: lifestyleButtonColor,
+            buttonTextColor: lifestyleButtonTextColor,
+
+            bgType: "image",
+            bgImage: lifestyleImage,
+
+            mobileTitleText: mobileLifestyleText !== undefined ? mobileLifestyleText : lifestyleText,
+            mobileTitleFontType: mobileLifestyleTextFontType,
+            mobileTitleFontColor: mobileLifestyleTextFontColor,
+            mobileTitleFontSize: mobileLifestyleTextFontSize,
+            mobileTitleFontAlignment: mobileLifestyleTextFontAlignment,
+            mobileTitleFontWeight: mobileLifestyleTextFontWeight,
+            showMobileHeroTitle: showMobileLifestyleText !== undefined ? showMobileLifestyleText : showLifestyleText,
+
+            showMobileHeroButton: showMobileLifestyleButton,
+            mobileButtonText: mobileLifestyleButtonText,
+            mobileButtonStyle: mobileLifestyleButtonStyle,
+            mobileButtonSize: mobileLifestyleButtonSize,
+            mobileButtonColor: mobileLifestyleButtonColor,
+            mobileButtonTextColor: mobileLifestyleButtonTextColor,
+          }}
+          onApply={(config) => {
+            if (config.titleText !== undefined) setLifestyleText(config.titleText);
+            if (config.titleFontType !== undefined) setLifestyleTextFontType(config.titleFontType);
+            if (config.titleFontColor !== undefined) setLifestyleTextFontColor(config.titleFontColor);
+            if (config.titleFontSize !== undefined) setLifestyleTextFontSize(config.titleFontSize);
+            if (config.titleFontAlignment !== undefined) setLifestyleTextFontAlignment(config.titleFontAlignment);
+            if (config.titleFontWeight !== undefined) setLifestyleTextFontWeight(config.titleFontWeight);
+            if (config.showTitle !== undefined) setShowLifestyleText(config.showTitle);
+
+            if (config.showButton !== undefined) setShowLifestyleButton(config.showButton);
+            if (config.buttonText !== undefined) setLifestyleButtonText(config.buttonText);
+            if (config.buttonStyle !== undefined) setLifestyleButtonStyle(config.buttonStyle);
+            if (config.buttonSize !== undefined) setLifestyleButtonSize(config.buttonSize);
+            if (config.buttonColor !== undefined) setLifestyleButtonColor(config.buttonColor);
+            if (config.buttonTextColor !== undefined) setLifestyleButtonTextColor(config.buttonTextColor);
+
+            if (config.bgImage && config.bgImage.trim() !== "") setLifestyleImage(config.bgImage);
+
+            if (config.mobileTitleText !== undefined) setMobileLifestyleText(config.mobileTitleText);
+            if (config.mobileTitleFontType !== undefined) setMobileLifestyleTextFontType(config.mobileTitleFontType);
+            if (config.mobileTitleFontColor !== undefined) setMobileLifestyleTextFontColor(config.mobileTitleFontColor);
+            if (config.mobileTitleFontSize !== undefined) setMobileLifestyleTextFontSize(config.mobileTitleFontSize);
+            if (config.mobileTitleFontAlignment !== undefined) setMobileLifestyleTextFontAlignment(config.mobileTitleFontAlignment);
+            if (config.mobileTitleFontWeight !== undefined) setMobileLifestyleTextFontWeight(config.mobileTitleFontWeight);
+            if (config.showMobileHeroTitle !== undefined) setShowMobileLifestyleText(config.showMobileHeroTitle);
+
+            if (config.showMobileHeroButton !== undefined) setShowMobileLifestyleButton(config.showMobileHeroButton);
+            if (config.mobileButtonText !== undefined) setMobileLifestyleButtonText(config.mobileButtonText);
+            if (config.mobileButtonStyle !== undefined) setMobileLifestyleButtonStyle(config.mobileButtonStyle);
+            if (config.mobileButtonSize !== undefined) setMobileLifestyleButtonSize(config.mobileButtonSize);
+            if (config.mobileButtonColor !== undefined) setMobileLifestyleButtonColor(config.mobileButtonColor);
+            if (config.mobileButtonTextColor !== undefined) setMobileLifestyleButtonTextColor(config.mobileButtonTextColor);
+
+            setIsLifestyleCustomizerModalOpen(false);
+          }}
+          sectionName="Lifestyle Banner"
           primaryColor={primaryColor}
         />
       )}

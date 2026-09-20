@@ -9,7 +9,7 @@ interface CustomizeLayoutModalProps {
   isOpen: boolean;
   onClose: () => void;
   onApply: (config: LayoutCustomizationConfig) => void;
-  initialConfig: LayoutCustomizationConfig;
+  initialConfig: Partial<LayoutCustomizationConfig>;
   sectionName?: string;
   primaryColor?: string;
 }
@@ -24,34 +24,34 @@ export default function CustomizeLayoutModal({
 }: CustomizeLayoutModalProps) {
 
   // Local copies of the config
-  const [titleText, setTitleText] = useState(initialConfig.titleText);
-  const [showTitle, setShowTitle] = useState(initialConfig.showTitle);
-  const [titleFontType, setTitleFontType] = useState(initialConfig.titleFontType);
-  const [titleFontSize, setTitleFontSize] = useState(initialConfig.titleFontSize);
-  const [titleFontColor, setTitleFontColor] = useState(initialConfig.titleFontColor);
-  const [titleFontWeight, setTitleFontWeight] = useState(initialConfig.titleFontWeight);
-  const [titleFontAlignment, setTitleFontAlignment] = useState(initialConfig.titleFontAlignment);
+  const [titleText, setTitleText] = useState(initialConfig.titleText || "");
+  const [showTitle, setShowTitle] = useState(initialConfig.showTitle !== undefined ? initialConfig.showTitle : true);
+  const [titleFontType, setTitleFontType] = useState(initialConfig.titleFontType || "Outfit");
+  const [titleFontSize, setTitleFontSize] = useState(initialConfig.titleFontSize || "2.5rem");
+  const [titleFontColor, setTitleFontColor] = useState(initialConfig.titleFontColor || "#ffffff");
+  const [titleFontWeight, setTitleFontWeight] = useState(initialConfig.titleFontWeight || "700");
+  const [titleFontAlignment, setTitleFontAlignment] = useState(initialConfig.titleFontAlignment || "center");
 
-  const [manifestoText, setManifestoText] = useState(initialConfig.manifestoText);
-  const [showManifesto, setShowManifesto] = useState(initialConfig.showManifesto);
-  const [manifestoFontType, setManifestoFontType] = useState(initialConfig.manifestoFontType);
-  const [manifestoFontSize, setManifestoFontSize] = useState(initialConfig.manifestoFontSize);
-  const [manifestoFontColor, setManifestoFontColor] = useState(initialConfig.manifestoFontColor);
-  const [manifestoFontWeight, setManifestoFontWeight] = useState(initialConfig.manifestoFontWeight);
-  const [manifestoFontAlignment, setManifestoFontAlignment] = useState(initialConfig.manifestoFontAlignment);
+  const [manifestoText, setManifestoText] = useState(initialConfig.manifestoText || "");
+  const [showManifesto, setShowManifesto] = useState(initialConfig.showManifesto !== undefined ? initialConfig.showManifesto : true);
+  const [manifestoFontType, setManifestoFontType] = useState(initialConfig.manifestoFontType || "Outfit");
+  const [manifestoFontSize, setManifestoFontSize] = useState(initialConfig.manifestoFontSize || "1.1rem");
+  const [manifestoFontColor, setManifestoFontColor] = useState(initialConfig.manifestoFontColor || "#ffffff");
+  const [manifestoFontWeight, setManifestoFontWeight] = useState(initialConfig.manifestoFontWeight || "500");
+  const [manifestoFontAlignment, setManifestoFontAlignment] = useState(initialConfig.manifestoFontAlignment || "center");
 
-  const [buttonText, setButtonText] = useState(initialConfig.buttonText);
-  const [showButton, setShowButton] = useState(initialConfig.showButton);
-  const [buttonStyle, setButtonStyle] = useState(initialConfig.buttonStyle);
-  const [buttonSize, setButtonSize] = useState(initialConfig.buttonSize);
-  const [buttonColor, setButtonColor] = useState(initialConfig.buttonColor);
-  const [buttonTextColor, setButtonTextColor] = useState(initialConfig.buttonTextColor);
+  const [buttonText, setButtonText] = useState(initialConfig.buttonText || "Shop Now");
+  const [showButton, setShowButton] = useState(initialConfig.showButton !== undefined ? initialConfig.showButton : true);
+  const [buttonStyle, setButtonStyle] = useState(initialConfig.buttonStyle || "solid");
+  const [buttonSize, setButtonSize] = useState(initialConfig.buttonSize || "md");
+  const [buttonColor, setButtonColor] = useState(initialConfig.buttonColor || "");
+  const [buttonTextColor, setButtonTextColor] = useState(initialConfig.buttonTextColor || "#ffffff");
 
-  const [layoutTemplate, setLayoutTemplate] = useState(initialConfig.layoutTemplate);
-  const [bgType, setBgType] = useState(initialConfig.bgType);
-  const [bgColor, setBgColor] = useState(initialConfig.bgColor);
-  const [bgImage, setBgImage] = useState(initialConfig.bgImage);
-  const [bgVideo, setBgVideo] = useState(initialConfig.bgVideo);
+  const [layoutTemplate, setLayoutTemplate] = useState(initialConfig.layoutTemplate || "center");
+  const [bgType, setBgType] = useState(initialConfig.bgType || "color");
+  const [bgColor, setBgColor] = useState(initialConfig.bgColor || "#121212");
+  const [bgImage, setBgImage] = useState(initialConfig.bgImage || "");
+  const [bgVideo, setBgVideo] = useState(initialConfig.bgVideo || "");
 
   // Local state for UI
   const [selectedElement, setSelectedElement] = useState<"title" | "manifesto" | "button" | null>("title");
@@ -59,28 +59,40 @@ export default function CustomizeLayoutModal({
 
   // Mobile-specific layout states (Completely Unlinked from Desktop)
   const [mobileLayoutTemplate, setMobileLayoutTemplate] = useState(initialConfig.mobileLayoutTemplate || initialConfig.layoutTemplate || "center");
-  const [mobileTitleText, setMobileTitleText] = useState(initialConfig.mobileTitleText !== undefined ? initialConfig.mobileTitleText : initialConfig.titleText);
+  const [mobileTitleText, setMobileTitleText] = useState(initialConfig.mobileTitleText ? initialConfig.mobileTitleText : (initialConfig.titleText || ""));
   const [mobileTitleFontType, setMobileTitleFontType] = useState(initialConfig.mobileTitleFontType || initialConfig.titleFontType || "Outfit");
   const [mobileTitleFontColor, setMobileTitleFontColor] = useState(initialConfig.mobileTitleFontColor || initialConfig.titleFontColor || "#111827");
   const [mobileTitleFontSize, setMobileTitleFontSize] = useState(initialConfig.mobileTitleFontSize || "2.5rem");
   const [mobileTitleFontAlignment, setMobileTitleFontAlignment] = useState(initialConfig.mobileTitleFontAlignment || initialConfig.titleFontAlignment || "center");
   const [mobileTitleFontWeight, setMobileTitleFontWeight] = useState(initialConfig.mobileTitleFontWeight || initialConfig.titleFontWeight || "700");
-  const [mobileShowTitle, setMobileShowTitle] = useState(initialConfig.showMobileHeroTitle !== undefined ? initialConfig.showMobileHeroTitle : initialConfig.showTitle);
+  const [mobileShowTitle, setMobileShowTitle] = useState(
+    initialConfig.showMobileHeroTitle !== undefined
+      ? initialConfig.showMobileHeroTitle
+      : (initialConfig.showTitle !== undefined ? initialConfig.showTitle : true)
+  );
 
-  const [mobileManifestoText, setMobileManifestoText] = useState(initialConfig.mobileManifestoText !== undefined ? initialConfig.mobileManifestoText : initialConfig.manifestoText);
+  const [mobileManifestoText, setMobileManifestoText] = useState(initialConfig.mobileManifestoText ? initialConfig.mobileManifestoText : (initialConfig.manifestoText || ""));
   const [mobileManifestoFontType, setMobileManifestoFontType] = useState(initialConfig.mobileManifestoFontType || initialConfig.manifestoFontType || "Outfit");
   const [mobileManifestoFontColor, setMobileManifestoFontColor] = useState(initialConfig.mobileManifestoFontColor || initialConfig.manifestoFontColor || "#ffffff");
   const [mobileManifestoFontSize, setMobileManifestoFontSize] = useState(initialConfig.mobileManifestoFontSize || "0.85rem");
   const [mobileManifestoFontAlignment, setMobileManifestoFontAlignment] = useState(initialConfig.mobileManifestoFontAlignment || initialConfig.manifestoFontAlignment || "center");
   const [mobileManifestoFontWeight, setMobileManifestoFontWeight] = useState(initialConfig.mobileManifestoFontWeight || initialConfig.manifestoFontWeight || "500");
-  const [mobileShowManifesto, setMobileShowManifesto] = useState(initialConfig.showMobileHeroManifesto !== undefined ? initialConfig.showMobileHeroManifesto : initialConfig.showManifesto);
+  const [mobileShowManifesto, setMobileShowManifesto] = useState(
+    initialConfig.showMobileHeroManifesto !== undefined
+      ? initialConfig.showMobileHeroManifesto
+      : (initialConfig.showManifesto !== undefined ? initialConfig.showManifesto : true)
+  );
 
-  const [mobileButtonText, setMobileButtonText] = useState(initialConfig.mobileButtonText !== undefined ? initialConfig.mobileButtonText : initialConfig.buttonText);
+  const [mobileButtonText, setMobileButtonText] = useState(initialConfig.mobileButtonText ? initialConfig.mobileButtonText : (initialConfig.buttonText || "Shop Now"));
   const [mobileButtonStyle, setMobileButtonStyle] = useState(initialConfig.mobileButtonStyle || initialConfig.buttonStyle || "solid");
   const [mobileButtonSize, setMobileButtonSize] = useState(initialConfig.mobileButtonSize || "sm");
   const [mobileButtonColor, setMobileButtonColor] = useState(initialConfig.mobileButtonColor !== undefined ? initialConfig.mobileButtonColor : initialConfig.buttonColor);
   const [mobileButtonTextColor, setMobileButtonTextColor] = useState(initialConfig.mobileButtonTextColor || initialConfig.buttonTextColor || "#ffffff");
-  const [mobileShowButton, setMobileShowButton] = useState(initialConfig.showMobileHeroButton !== undefined ? initialConfig.showMobileHeroButton : initialConfig.showButton);
+  const [mobileShowButton, setMobileShowButton] = useState(
+    initialConfig.showMobileHeroButton !== undefined
+      ? initialConfig.showMobileHeroButton
+      : (initialConfig.showButton !== undefined ? initialConfig.showButton : true)
+  );
 
   // Dynamic getters/setters based on active preview device
   const isMobileDevice = previewDevice === 'mobile';
@@ -191,6 +203,12 @@ export default function CustomizeLayoutModal({
     link.href = `https://fonts.googleapis.com/css2?family=${fontToLoad.replace(/\s+/g, "+")}:wght@300;400;500;600;700;800;900&display=swap`;
     document.head.appendChild(link);
   }, [drafts, selectedElement, hoveredFontType]);
+
+  useEffect(() => {
+    if (sectionName === "Lifestyle Banner" && selectedElement === "manifesto") {
+      setSelectedElement("title");
+    }
+  }, [sectionName, selectedElement]);
 
   // Drag and drop event handlers
   useEffect(() => {
@@ -575,7 +593,11 @@ export default function CustomizeLayoutModal({
                       Selected Element
                     </span>
                     <h5 style={{ fontSize: "1.05rem", fontWeight: 700, margin: "2px 0 0 0", color: "#0f172a", textTransform: "capitalize" }}>
-                      {selectedElement === "title" ? "Hero Title" : selectedElement === "manifesto" ? "Hero Manifesto" : "CTA Button"}
+                      {selectedElement === "title" 
+                        ? (sectionName === "Lifestyle Banner" ? "Lifestyle Overlay Text Copy" : sectionName === "Video Section" ? "Video Overlay Title Copy" : "Hero Title") 
+                        : selectedElement === "manifesto" 
+                          ? (sectionName === "Video Section" ? "Video Overlay Subtitle Copy" : "Hero Manifesto") 
+                          : "CTA Button"}
                     </h5>
                   </div>
 
@@ -607,7 +629,7 @@ export default function CustomizeLayoutModal({
                     </label>
                     {selectedElement === "manifesto" ? (
                       <textarea
-                        value={currentManifestoText}
+                        value={currentManifestoText || ""}
                         onChange={(e) => setCurrentManifestoText(e.target.value)}
                         disabled={!currentShowManifesto}
                         rows={4}
@@ -626,7 +648,7 @@ export default function CustomizeLayoutModal({
                     ) : (
                       <input
                         type="text"
-                        value={selectedElement === "title" ? currentTitleText : currentButtonText}
+                        value={(selectedElement === "title" ? currentTitleText : currentButtonText) || ""}
                         onChange={(e) => {
                           if (selectedElement === "title") setCurrentTitleText(e.target.value);
                           else setCurrentButtonText(e.target.value);
@@ -857,7 +879,7 @@ export default function CustomizeLayoutModal({
                         <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
                           <input
                             type="color"
-                            value={selectedElement === "title" ? currentTitleFontColor : currentManifestoFontColor}
+                            value={(selectedElement === "title" ? currentTitleFontColor : currentManifestoFontColor) || "#ffffff"}
                             onChange={(e) => {
                               if (selectedElement === "title") setCurrentTitleFontColor(e.target.value);
                               else setCurrentManifestoFontColor(e.target.value);
@@ -874,7 +896,7 @@ export default function CustomizeLayoutModal({
                           />
                           <input
                             type="text"
-                            value={selectedElement === "title" ? currentTitleFontColor : currentManifestoFontColor}
+                            value={(selectedElement === "title" ? currentTitleFontColor : currentManifestoFontColor) || ""}
                             onChange={(e) => {
                               if (selectedElement === "title") setCurrentTitleFontColor(e.target.value);
                               else setCurrentManifestoFontColor(e.target.value);
@@ -1085,7 +1107,7 @@ export default function CustomizeLayoutModal({
                           <input
                             type="text"
                             placeholder="e.g. #ff0000 (falls back to brand primary color if empty)"
-                            value={currentButtonColor}
+                            value={currentButtonColor || ""}
                             onChange={(e) => setCurrentButtonColor(e.target.value)}
                             style={{
                               padding: "10px",
@@ -1121,7 +1143,7 @@ export default function CustomizeLayoutModal({
                           />
                           <input
                             type="text"
-                            value={currentButtonTextColor}
+                            value={currentButtonTextColor || ""}
                             onChange={(e) => setCurrentButtonTextColor(e.target.value)}
                             style={{
                               padding: "10px",
@@ -1383,49 +1405,51 @@ export default function CustomizeLayoutModal({
                     </div>
 
                     {/* 2. Hero Manifesto Element */}
-                    <div
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setSelectedElement("manifesto");
-                      }}
-                      style={{
-                        cursor: "pointer",
-                        border: selectedElement === "manifesto" ? "2px dashed #2563eb" : "1px dashed transparent",
-                        padding: "8px",
-                        borderRadius: "6px",
-                        transition: "all 0.2s",
-                        opacity: currentShowManifesto ? 1 : 0.45,
-                        backgroundColor: selectedElement === "manifesto" ? "rgba(37, 99, 235, 0.08)" : "transparent",
-                        position: "relative"
-                      }}
-                    >
-                      {selectedElement === "manifesto" && (
-                        <div style={{ position: "absolute", top: "-18px", left: "0", fontSize: "0.6rem", fontWeight: 800, backgroundColor: "#2563eb", color: "#fff", padding: "2px 6px", borderRadius: "3px", textTransform: "uppercase" }}>
-                          Active Manifesto ({previewDevice})
-                        </div>
-                      )}
-                      {currentShowManifesto ? (
-                        <p style={{
-                          fontFamily: selectedElement === "manifesto" && hoveredFontType ? `"${hoveredFontType}", sans-serif` : `"${currentManifestoFontType}", sans-serif`,
-                          color: currentManifestoFontColor,
-                          fontSize: selectedElement === "manifesto" && hoveredFontSize ? hoveredFontSize : currentManifestoFontSize,
-                          fontWeight: Number(selectedElement === "manifesto" && hoveredFontWeight ? hoveredFontWeight : currentManifestoFontWeight),
-                          textAlign: currentManifestoFontAlignment as any || "inherit",
-                          margin: 0,
-                          lineHeight: "1.6",
-                          textTransform: "uppercase",
-                          letterSpacing: "0.03em",
-                          wordBreak: "break-word",
-                          overflowWrap: "break-word"
-                        }}>
-                          {currentManifestoText || ""}
-                        </p>
-                      ) : (
-                        <span style={{ fontSize: "0.85rem", color: "#94a3b8", fontStyle: "italic", fontWeight: 600 }}>
-                          [Manifesto Element Hidden - Click to edit & enable]
-                        </span>
-                      )}
-                    </div>
+                    {sectionName !== "Lifestyle Banner" && (
+                      <div
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSelectedElement("manifesto");
+                        }}
+                        style={{
+                          cursor: "pointer",
+                          border: selectedElement === "manifesto" ? "2px dashed #2563eb" : "1px dashed transparent",
+                          padding: "8px",
+                          borderRadius: "6px",
+                          transition: "all 0.2s",
+                          opacity: currentShowManifesto ? 1 : 0.45,
+                          backgroundColor: selectedElement === "manifesto" ? "rgba(37, 99, 235, 0.08)" : "transparent",
+                          position: "relative"
+                        }}
+                      >
+                        {selectedElement === "manifesto" && (
+                          <div style={{ position: "absolute", top: "-18px", left: "0", fontSize: "0.6rem", fontWeight: 800, backgroundColor: "#2563eb", color: "#fff", padding: "2px 6px", borderRadius: "3px", textTransform: "uppercase" }}>
+                            Active Manifesto ({previewDevice})
+                          </div>
+                        )}
+                        {currentShowManifesto ? (
+                          <p style={{
+                            fontFamily: selectedElement === "manifesto" && hoveredFontType ? `"${hoveredFontType}", sans-serif` : `"${currentManifestoFontType}", sans-serif`,
+                            color: currentManifestoFontColor,
+                            fontSize: selectedElement === "manifesto" && hoveredFontSize ? hoveredFontSize : currentManifestoFontSize,
+                            fontWeight: Number(selectedElement === "manifesto" && hoveredFontWeight ? hoveredFontWeight : currentManifestoFontWeight),
+                            textAlign: currentManifestoFontAlignment as any || "inherit",
+                            margin: 0,
+                            lineHeight: "1.6",
+                            textTransform: "uppercase",
+                            letterSpacing: "0.03em",
+                            wordBreak: "break-word",
+                            overflowWrap: "break-word"
+                          }}>
+                            {currentManifestoText || ""}
+                          </p>
+                        ) : (
+                          <span style={{ fontSize: "0.85rem", color: "#94a3b8", fontStyle: "italic", fontWeight: 600 }}>
+                            [Manifesto Element Hidden - Click to edit & enable]
+                          </span>
+                        )}
+                      </div>
+                    )}
 
                     {/* 3. Hero Button Element */}
                     <div

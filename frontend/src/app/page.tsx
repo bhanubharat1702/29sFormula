@@ -72,10 +72,10 @@ export default function Home() {
   const [heroBgColor, setHeroBgColor] = useState<string>("#121212");
   const [heroBgImage, setHeroBgImage] = useState<string | null>(null);
   const [heroBgVideo, setHeroBgVideo] = useState<string | null>(null);
-  
+
   const [heroTitle, setHeroTitle] = useState<string>("");
   const [heroTitleFontType, setHeroTitleFontType] = useState<string>("Outfit");
-  
+
   const [allReviews, setAllReviews] = useState<any[]>([]);
 
   // Auto-slide reviews every 4 seconds
@@ -95,10 +95,10 @@ export default function Home() {
 
   // Computed Review Stats
   const totalReviews = allReviews.length;
-  const avgRating = totalReviews > 0 
-    ? (allReviews.reduce((sum, r) => sum + r.rating, 0) / totalReviews).toFixed(1) 
+  const avgRating = totalReviews > 0
+    ? (allReviews.reduce((sum, r) => sum + r.rating, 0) / totalReviews).toFixed(1)
     : "5.0";
-    
+
   const getRatingPercent = (star: number) => {
     if (totalReviews === 0) return 0;
     const count = allReviews.filter(r => r.rating === star).length;
@@ -203,8 +203,37 @@ export default function Home() {
   const [videoBgColor, setVideoBgColor] = useState<string>("#121212");
   const [videoBgImage, setVideoBgImage] = useState<string>("");
 
+  const [lifestyleText, setLifestyleText] = useState<string>("Intense notes, Raw elements. This is 29sFORMULA.");
+  const [lifestyleImage, setLifestyleImage] = useState<string>("https://images.unsplash.com/photo-1615655096345-61a54750068d?auto=format&fit=crop&w=1800&q=80");
+  const [lifestyleTextFontType, setLifestyleTextFontType] = useState<string>("Outfit");
+  const [lifestyleTextFontColor, setLifestyleTextFontColor] = useState<string>("#ffffff");
+  const [lifestyleTextFontSize, setLifestyleTextFontSize] = useState<string>("2.5rem");
+  const [lifestyleTextFontAlignment, setLifestyleTextFontAlignment] = useState<string>("center");
+  const [lifestyleTextFontWeight, setLifestyleTextFontWeight] = useState<string>("700");
+  const [showLifestyleText, setShowLifestyleText] = useState<boolean>(true);
+  const [showLifestyleButton, setShowLifestyleButton] = useState<boolean>(true);
+  const [lifestyleButtonText, setLifestyleButtonText] = useState<string>("Explore Now");
+  const [lifestyleButtonStyle, setLifestyleButtonStyle] = useState<string>("solid");
+  const [lifestyleButtonSize, setLifestyleButtonSize] = useState<string>("md");
+  const [lifestyleButtonColor, setLifestyleButtonColor] = useState<string>("");
+  const [lifestyleButtonTextColor, setLifestyleButtonTextColor] = useState<string>("#ffffff");
+
+  const [mobileLifestyleText, setMobileLifestyleText] = useState<string>("");
+  const [mobileLifestyleTextFontType, setMobileLifestyleTextFontType] = useState<string>("Outfit");
+  const [mobileLifestyleTextFontColor, setMobileLifestyleTextFontColor] = useState<string>("#ffffff");
+  const [mobileLifestyleTextFontSize, setMobileLifestyleTextFontSize] = useState<string>("1.8rem");
+  const [mobileLifestyleTextFontAlignment, setMobileLifestyleTextFontAlignment] = useState<string>("center");
+  const [mobileLifestyleTextFontWeight, setMobileLifestyleTextFontWeight] = useState<string>("700");
+  const [showMobileLifestyleText, setShowMobileLifestyleText] = useState<boolean>(true);
+  const [showMobileLifestyleButton, setShowMobileLifestyleButton] = useState<boolean>(true);
+  const [mobileLifestyleButtonText, setMobileLifestyleButtonText] = useState<string>("Explore Now");
+  const [mobileLifestyleButtonStyle, setMobileLifestyleButtonStyle] = useState<string>("solid");
+  const [mobileLifestyleButtonSize, setMobileLifestyleButtonSize] = useState<string>("sm");
+  const [mobileLifestyleButtonColor, setMobileLifestyleButtonColor] = useState<string>("");
+  const [mobileLifestyleButtonTextColor, setMobileLifestyleButtonTextColor] = useState<string>("#ffffff");
+
   useEffect(() => {
-    [heroTitleFontType, heroManifestoFontType, videoTitleFontType, videoSubtitleFontType, mobileHeroTitleFontType, mobileHeroManifestoFontType, mobileVideoTitleFontType, mobileVideoSubtitleFontType].forEach(font => {
+    [heroTitleFontType, heroManifestoFontType, videoTitleFontType, videoSubtitleFontType, mobileHeroTitleFontType, mobileHeroManifestoFontType, mobileVideoTitleFontType, mobileVideoSubtitleFontType, lifestyleTextFontType, mobileLifestyleTextFontType].forEach(font => {
       if (!font) return;
       const systemFonts = ["SF Pro", "New York", "SF Mono", "Segoe UI", "Helvetica Neue", "Georgia", "Garamond"];
       if (systemFonts.includes(font)) return;
@@ -216,9 +245,7 @@ export default function Home() {
       link.href = `https://fonts.googleapis.com/css2?family=${font.replace(/\s+/g, "+")}:wght@300;400;500;600;700;800;900&display=swap`;
       document.head.appendChild(link);
     });
-  }, [heroTitleFontType, heroManifestoFontType, videoTitleFontType, videoSubtitleFontType, mobileHeroTitleFontType, mobileHeroManifestoFontType, mobileVideoTitleFontType, mobileVideoSubtitleFontType]);
-  const [lifestyleText, setLifestyleText] = useState<string>("Intense notes, Raw elements. This is 29sFORMULA.");
-  const [lifestyleImage, setLifestyleImage] = useState<string>("https://images.unsplash.com/photo-1615655096345-61a54750068d?auto=format&fit=crop&w=1800&q=80");
+  }, [heroTitleFontType, heroManifestoFontType, videoTitleFontType, videoSubtitleFontType, mobileHeroTitleFontType, mobileHeroManifestoFontType, mobileVideoTitleFontType, mobileVideoSubtitleFontType, lifestyleTextFontType, mobileLifestyleTextFontType]);
   const [primaryColor, setPrimaryColor] = useState<string>(
     "#57bc74"
   );
@@ -277,7 +304,7 @@ export default function Home() {
     setCompletedOrderId(orderId);
     setCompletedOrderDetails(orderDetails);
     setShowSuccessModal(true);
-    
+
     // Clear cart locally and on backend
     clearCart();
   };
@@ -303,13 +330,13 @@ export default function Home() {
     const handleStorageChange = () => loadCart();
     window.addEventListener("storage", handleStorageChange);
     window.addEventListener("cartUpdated", handleStorageChange);
-    
+
     const checkMobile = () => {
       setIsMobile(window.innerWidth <= 768);
     };
     checkMobile();
     window.addEventListener("resize", checkMobile);
-    
+
     return () => {
       window.removeEventListener("storage", handleStorageChange);
       window.removeEventListener("cartUpdated", handleStorageChange);
@@ -324,9 +351,9 @@ export default function Home() {
       if (current) {
         try {
           itemsList = JSON.parse(current);
-        } catch (e) {}
+        } catch (e) { }
       }
-      
+
       const maxStock = ((product as any).variants && (product as any).variants.find((v: any) => v.size === size)?.quantity) ?? product.quantity;
 
       const existingIdx = itemsList.findIndex((item: any) => item._id === product._id && item.size === size);
@@ -339,12 +366,12 @@ export default function Home() {
           itemsList[existingIdx].quantity += qty;
         }
       } else {
-        const variantPrice = (product.options && product.options.find((o: any) => o.size === size)?.price) 
-                          || (product.variants && product.variants.find((v: any) => v.size === size)?.price)
-                          || product.price;
-        const variantStrikePrice = ((product as any).options && (product as any).options.find((o: any) => o.size === size)?.strikePrice) 
-                          || ((product as any).variants && (product as any).variants.find((v: any) => v.size === size)?.strikePrice)
-                          || product.strikePrice;
+        const variantPrice = (product.options && product.options.find((o: any) => o.size === size)?.price)
+          || (product.variants && product.variants.find((v: any) => v.size === size)?.price)
+          || product.price;
+        const variantStrikePrice = ((product as any).options && (product as any).options.find((o: any) => o.size === size)?.strikePrice)
+          || ((product as any).variants && (product as any).variants.find((v: any) => v.size === size)?.strikePrice)
+          || product.strikePrice;
 
         let qtyToPush = qty;
         if (qty > maxStock) {
@@ -416,7 +443,7 @@ export default function Home() {
       if (cachedHeroTitleFontSize) setHeroTitleFontSize(cachedHeroTitleFontSize);
       const cachedHeroTitleFontAlignment = localStorage.getItem("settings_heroTitleFontAlignment");
       if (cachedHeroTitleFontAlignment) setHeroTitleFontAlignment(cachedHeroTitleFontAlignment);
-            const cachedHeroTemplate = localStorage.getItem("settings_heroTemplate");
+      const cachedHeroTemplate = localStorage.getItem("settings_heroTemplate");
       if (cachedHeroTemplate) setHeroTemplate(cachedHeroTemplate);
       const cachedShowHeroTitle = localStorage.getItem("settings_showHeroTitle");
       if (cachedShowHeroTitle) setShowHeroTitle(cachedShowHeroTitle === "true");
@@ -448,7 +475,7 @@ export default function Home() {
       if (cachedShowLifestyle) setShowLifestyle(cachedShowLifestyle === "true");
       const cachedShowGiftSetPage = localStorage.getItem("settings_showGiftSetPage");
       if (cachedShowGiftSetPage !== null) setShowGiftSetPage(cachedShowGiftSetPage === "true");
-      
+
       // Load cached arrays list to avoid slow loading layout shifts
       const cachedArrivals = localStorage.getItem("storefront_arrivals");
       if (cachedArrivals) setArrivals(JSON.parse(cachedArrivals));
@@ -473,7 +500,7 @@ export default function Home() {
             setBestSellers(payload.bestSellers);
             localStorage.setItem("storefront_bestSellers", JSON.stringify(payload.bestSellers));
           }
-          
+
           if (payload.reviews && Array.isArray(payload.reviews)) {
             const formatted = payload.reviews.map((r: any) => ({
               name: r.author || r.authorName || "Anonymous",
@@ -619,7 +646,7 @@ export default function Home() {
             if (data.videoBgType !== undefined) { setVideoBgType(data.videoBgType); localStorage.setItem("settings_videoBgType", data.videoBgType); }
             if (data.videoBgColor !== undefined) { setVideoBgColor(data.videoBgColor); localStorage.setItem("settings_videoBgColor", data.videoBgColor); }
             if (data.videoBgImage !== undefined) { setVideoBgImage(data.videoBgImage); localStorage.setItem("settings_videoBgImage", data.videoBgImage); }
-            
+
             // Mobile Video Layout Loading (unlinked)
             if (data.mobileVideoTemplate !== undefined) setMobileVideoTemplate(data.mobileVideoTemplate);
             if (data.mobileVideoTitle !== undefined) setMobileVideoTitle(data.mobileVideoTitle);
@@ -652,6 +679,32 @@ export default function Home() {
               setLifestyleImage(data.lifestyleImage);
               localStorage.setItem("settings_lifestyleImage", data.lifestyleImage);
             }
+            if (data.lifestyleTextFontType !== undefined) setLifestyleTextFontType(data.lifestyleTextFontType);
+            if (data.lifestyleTextFontColor !== undefined) setLifestyleTextFontColor(data.lifestyleTextFontColor);
+            if (data.lifestyleTextFontSize !== undefined) setLifestyleTextFontSize(data.lifestyleTextFontSize);
+            if (data.lifestyleTextFontAlignment !== undefined) setLifestyleTextFontAlignment(data.lifestyleTextFontAlignment);
+            if (data.lifestyleTextFontWeight !== undefined) setLifestyleTextFontWeight(data.lifestyleTextFontWeight);
+            if (data.showLifestyleText !== undefined) setShowLifestyleText(data.showLifestyleText);
+            if (data.showLifestyleButton !== undefined) setShowLifestyleButton(data.showLifestyleButton);
+            if (data.lifestyleButtonText !== undefined) setLifestyleButtonText(data.lifestyleButtonText);
+            if (data.lifestyleButtonStyle !== undefined) setLifestyleButtonStyle(data.lifestyleButtonStyle);
+            if (data.lifestyleButtonSize !== undefined) setLifestyleButtonSize(data.lifestyleButtonSize);
+            if (data.lifestyleButtonColor !== undefined) setLifestyleButtonColor(data.lifestyleButtonColor);
+            if (data.lifestyleButtonTextColor !== undefined) setLifestyleButtonTextColor(data.lifestyleButtonTextColor);
+
+            if (data.mobileLifestyleText !== undefined) setMobileLifestyleText(data.mobileLifestyleText);
+            if (data.mobileLifestyleTextFontType !== undefined) setMobileLifestyleTextFontType(data.mobileLifestyleTextFontType);
+            if (data.mobileLifestyleTextFontColor !== undefined) setMobileLifestyleTextFontColor(data.mobileLifestyleTextFontColor);
+            if (data.mobileLifestyleTextFontSize !== undefined) setMobileLifestyleTextFontSize(data.mobileLifestyleTextFontSize);
+            if (data.mobileLifestyleTextFontAlignment !== undefined) setMobileLifestyleTextFontAlignment(data.mobileLifestyleTextFontAlignment);
+            if (data.mobileLifestyleTextFontWeight !== undefined) setMobileLifestyleTextFontWeight(data.mobileLifestyleTextFontWeight);
+            if (data.showMobileLifestyleText !== undefined) setShowMobileLifestyleText(data.showMobileLifestyleText);
+            if (data.showMobileLifestyleButton !== undefined) setShowMobileLifestyleButton(data.showMobileLifestyleButton);
+            if (data.mobileLifestyleButtonText !== undefined) setMobileLifestyleButtonText(data.mobileLifestyleButtonText);
+            if (data.mobileLifestyleButtonStyle !== undefined) setMobileLifestyleButtonStyle(data.mobileLifestyleButtonStyle);
+            if (data.mobileLifestyleButtonSize !== undefined) setMobileLifestyleButtonSize(data.mobileLifestyleButtonSize);
+            if (data.mobileLifestyleButtonColor !== undefined) setMobileLifestyleButtonColor(data.mobileLifestyleButtonColor);
+            if (data.mobileLifestyleButtonTextColor !== undefined) setMobileLifestyleButtonTextColor(data.mobileLifestyleButtonTextColor);
             if (data.primaryColor !== undefined) {
               setPrimaryColor(data.primaryColor);
               if (typeof document !== "undefined") document.documentElement.style.setProperty("--primary-brand-color", data.primaryColor);
@@ -698,7 +751,7 @@ export default function Home() {
     setActiveFaq(activeFaq === index ? null : index);
   };
 
-  
+
   const totalArrivalsPages = Math.ceil(arrivals.length / itemsPerPage);
   const displayedArrivals = isMobile ? arrivals.slice((arrivalsPage - 1) * itemsPerPage, arrivalsPage * itemsPerPage) : arrivals.slice(0, 4);
 
@@ -722,7 +775,7 @@ export default function Home() {
     const distance = touchStartX - touchEndX;
     const isLeftSwipe = distance > minSwipeDistance;
     const isRightSwipe = distance < -minSwipeDistance;
-    
+
     if (isLeftSwipe && arrivalsPage < totalArrivalsPages) {
       setArrivalsDirection("forward");
       setArrivalsPage(p => p + 1);
@@ -738,7 +791,7 @@ export default function Home() {
     const distance = touchStartX - touchEndX;
     const isLeftSwipe = distance > minSwipeDistance;
     const isRightSwipe = distance < -minSwipeDistance;
-    
+
     if (isLeftSwipe && bestSellersPage < totalBestSellersPages) {
       setBestSellersDirection("forward");
       setBestSellersPage(p => p + 1);
@@ -770,7 +823,7 @@ export default function Home() {
           100% { opacity: 0; transform: translateX(30px); }
         }
       `}</style>
-      
+
       {/* 2.5 Top Marquee Ticker */}
       {globalSettings?.showTicker && globalSettings?.tickerText && (
         <div className={styles.tickerContainer} style={{ backgroundColor: globalSettings?.tickerBgColor || "#ffffff", color: globalSettings?.tickerTextColor || "#000000" }}>
@@ -790,7 +843,7 @@ export default function Home() {
       {/* 3. Navigation Header */}
       <Navbar onCartClick={() => setShowCartDrawer(true)} />
 
-      
+
       {/* 4. Hero Section */}
       {(() => {
         const activeHeroTemplate = isMobile ? (mobileHeroTemplate || heroTemplate || "center") : heroTemplate;
@@ -819,7 +872,7 @@ export default function Home() {
         const activeShowHeroButton = isMobile ? (showMobileHeroButton !== undefined ? showMobileHeroButton : showHeroButton) : showHeroButton;
 
         return (
-          <section 
+          <section
             className={styles.hero}
             style={{
               backgroundColor: heroBgType === "color" ? (heroBgColor || "var(--primary-brand-color, #57bc74)") : "#121212",
@@ -830,18 +883,18 @@ export default function Home() {
               overflow: "hidden",
               display: "flex",
               flexDirection: "column",
-              justifyContent: 
-                activeHeroTemplate === "top-left" || activeHeroTemplate === "right-top" || activeHeroTemplate === "top-center" ? "flex-start" : 
-                activeHeroTemplate === "bottom-left" || activeHeroTemplate === "right-bottom" || activeHeroTemplate === "bottom-center" ? "flex-end" : "center",
-              alignItems: 
-                activeHeroTemplate === "center" || activeHeroTemplate.endsWith("center") ? "center" : 
-                activeHeroTemplate.startsWith("right") ? "flex-end" : "flex-start",
-              padding: 
-                activeHeroTemplate === "bottom-left" || activeHeroTemplate === "right-bottom" || activeHeroTemplate === "bottom-center" ? "100px 5vw" : 
-                activeHeroTemplate === "top-left" || activeHeroTemplate === "right-top" || activeHeroTemplate === "top-center" ? "100px 5vw" : "0 5vw",
-              textAlign: 
-                activeHeroTemplate === "center" || activeHeroTemplate.endsWith("center") ? "center" : 
-                activeHeroTemplate.startsWith("right") ? "right" : "left",
+              justifyContent:
+                activeHeroTemplate === "top-left" || activeHeroTemplate === "right-top" || activeHeroTemplate === "top-center" ? "flex-start" :
+                  activeHeroTemplate === "bottom-left" || activeHeroTemplate === "right-bottom" || activeHeroTemplate === "bottom-center" ? "flex-end" : "center",
+              alignItems:
+                activeHeroTemplate === "center" || activeHeroTemplate.endsWith("center") ? "center" :
+                  activeHeroTemplate.startsWith("right") ? "flex-end" : "flex-start",
+              padding:
+                activeHeroTemplate === "bottom-left" || activeHeroTemplate === "right-bottom" || activeHeroTemplate === "bottom-center" ? "100px 5vw" :
+                  activeHeroTemplate === "top-left" || activeHeroTemplate === "right-top" || activeHeroTemplate === "top-center" ? "100px 5vw" : "0 5vw",
+              textAlign:
+                activeHeroTemplate === "center" || activeHeroTemplate.endsWith("center") ? "center" :
+                  activeHeroTemplate.startsWith("right") ? "right" : "left",
               minHeight: "80vh"
             }}
           >
@@ -887,16 +940,16 @@ export default function Home() {
                 const btnColor = activeHeroButtonColor ? activeHeroButtonColor : (primaryColor || "#000");
                 const isSolid = activeHeroButtonStyle === "solid";
                 const isOutline = activeHeroButtonStyle === "outline";
-                
+
                 const paddings: Record<string, string> = { sm: "10px 24px", md: "14px 36px", lg: "18px 48px" };
                 const fontSizes: Record<string, string> = { sm: "0.75rem", md: "0.85rem", lg: "0.95rem" };
-                
+
                 return (
-                  <div style={{ 
-                    marginTop: "10px", 
-                    alignSelf: 
-                      activeHeroTemplate === "center" || activeHeroTemplate.endsWith("center") ? "center" : 
-                      activeHeroTemplate.startsWith("right") ? "flex-end" : "flex-start" 
+                  <div style={{
+                    marginTop: "10px",
+                    alignSelf:
+                      activeHeroTemplate === "center" || activeHeroTemplate.endsWith("center") ? "center" :
+                        activeHeroTemplate.startsWith("right") ? "flex-end" : "flex-start"
                   }}>
                     <Link href="/shop" style={{
                       display: "inline-block",
@@ -949,7 +1002,7 @@ export default function Home() {
           const activeShowVideoButton = isMobile ? (showMobileVideoButton !== undefined ? showMobileVideoButton : showVideoButton) : showVideoButton;
 
           return (
-            <section 
+            <section
               className={styles.videoSection}
               style={{
                 backgroundColor: videoBgType === "color" ? videoBgColor : videoFallbackColor,
@@ -964,7 +1017,7 @@ export default function Home() {
               }}
             >
               {videoBgType === "video" && videoUrl && (
-                <video 
+                <video
                   ref={videoRef}
                   key={videoUrl}
                   className={styles.bgVideo}
@@ -980,9 +1033,9 @@ export default function Home() {
                   Your browser does not support the video tag.
                 </video>
               )}
-              
+
               {(videoBgType === "video" || videoBgType === "image") && <div className={styles.videoOverlay} style={{ backgroundColor: "rgba(0,0,0,0.4)", position: "absolute", inset: 0 }} />}
-              
+
               <div className={styles.videoContent} style={{ position: "relative", zIndex: 10, textAlign: activeVideoTitleFontAlignment as any, padding: "20px" }}>
                 {activeShowVideoTitle && (
                   <h2 style={{
@@ -1049,7 +1102,7 @@ export default function Home() {
           <h2 className={styles.arrivalsTitle}>LATEST ARRIVALS</h2>
           <Link href="/shop?category=arrivals" className={styles.viewAllLink}>VIEW ALL</Link>
         </div>
-        <div 
+        <div
           key={`arrivals-${arrivalsPage}`}
           className={`${arrivals.length > 0 ? styles.arrivalsGrid : styles.emptyStateGrid} ${styles.slideAnimated} ${arrivalsDirection === "forward" ? styles.slideForward : styles.slideBackward}`}
           onTouchStart={isMobile ? handleTouchStart : undefined}
@@ -1058,8 +1111,8 @@ export default function Home() {
         >
           {arrivals.length > 0 ? (
             displayedArrivals.map((product) => (
-              <Link 
-                key={product._id} 
+              <Link
+                key={product._id}
                 href={`/product/${product._id}`}
                 onClick={(e) => {
                   if (product.quantity === 0) {
@@ -1067,33 +1120,33 @@ export default function Home() {
                     e.stopPropagation();
                   }
                 }}
-                style={{ 
-                  textDecoration: "none", 
-                  color: "inherit", 
+                style={{
+                  textDecoration: "none",
+                  color: "inherit",
                   display: "block",
                   cursor: product.quantity === 0 ? "not-allowed" : "pointer"
                 }}
               >
                 <div className={styles.productCard} style={product.quantity === 0 ? { pointerEvents: "none" } : {}}>
                   <div className={styles.productImageContainer} style={product.quantity === 0 ? { filter: "grayscale(1)", opacity: 0.7 } : {}}>
-                    <img 
-                      className={`${styles.productImage} ${styles.productImageFront}`} 
-                      src={product.imageFront} 
+                    <img
+                      className={`${styles.productImage} ${styles.productImageFront}`}
+                      src={product.imageFront}
                       alt={product.name}
                       loading="lazy"
                     />
                     {product.imageBack && (
-                      <img 
-                        className={`${styles.productImage} ${styles.productImageBack}`} 
-                        src={product.imageBack} 
+                      <img
+                        className={`${styles.productImage} ${styles.productImageBack}`}
+                        src={product.imageBack}
                         alt={`${product.name} Alternate`}
                         loading="lazy"
                       />
                     )}
-                    
+
                     {/* Arrow controls */}
-                    <button 
-                      aria-label="Previous image" 
+                    <button
+                      aria-label="Previous image"
                       className={`${styles.sliderArrow} ${styles.sliderArrowLeft}`}
                       onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}
                     >
@@ -1101,8 +1154,8 @@ export default function Home() {
                         <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18" />
                       </svg>
                     </button>
-                    <button 
-                      aria-label="Next image" 
+                    <button
+                      aria-label="Next image"
                       className={`${styles.sliderArrow} ${styles.sliderArrowRight}`}
                       onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}
                     >
@@ -1110,9 +1163,9 @@ export default function Home() {
                         <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
                       </svg>
                     </button>
-    
-                    <button 
-                      aria-label="Add to cart" 
+
+                    <button
+                      aria-label="Add to cart"
                       className={styles.addToCartCircle}
                       onClick={(e) => { e.preventDefault(); e.stopPropagation(); addToCart(product); }}
                     >
@@ -1123,46 +1176,46 @@ export default function Home() {
                   </div>
                   <div className={styles.productInfo}>
                     <h3 className={styles.productTitle}>{product.name}</h3>
-                      {(() => {
-                        const cheapestVariant = product.variants && product.variants.length > 0
-                          ? [...product.variants].sort((a, b) => a.price - b.price)[0]
-                          : null;
+                    {(() => {
+                      const cheapestVariant = product.variants && product.variants.length > 0
+                        ? [...product.variants].sort((a, b) => a.price - b.price)[0]
+                        : null;
 
-                        const displayPrice = cheapestVariant ? cheapestVariant.price : product.price;
-                        const displayStrikePrice = cheapestVariant ? cheapestVariant.strikePrice : product.strikePrice;
+                      const displayPrice = cheapestVariant ? cheapestVariant.price : product.price;
+                      const displayStrikePrice = cheapestVariant ? cheapestVariant.strikePrice : product.strikePrice;
 
-                        return (
-                          <p className={styles.productPrice}>
-                            {displayStrikePrice && displayStrikePrice > displayPrice && (
-                              <span style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "2px" }}>
-                                <span style={{ display: "inline-flex", alignItems: "center", gap: "8px" }}>
-                                  <span style={{ color: "#ef4444", fontSize: "0.75em", fontWeight: 400 }}>
-                                    -{Math.round(((displayStrikePrice - displayPrice) / displayStrikePrice) * 100)}%
-                                  </span>
-                                  <span style={{ fontSize: "1.5em", fontWeight: 400, color: "#111" }}>
-                                    ₹ {displayPrice.toLocaleString("en-IN")}.00
-                                  </span>
+                      return (
+                        <p className={styles.productPrice}>
+                          {displayStrikePrice && displayStrikePrice > displayPrice && (
+                            <span style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "2px" }}>
+                              <span style={{ display: "inline-flex", alignItems: "center", gap: "8px" }}>
+                                <span style={{ color: "#ef4444", fontSize: "0.75em", fontWeight: 400 }}>
+                                  -{Math.round(((displayStrikePrice - displayPrice) / displayStrikePrice) * 100)}%
                                 </span>
-                                <span style={{ color: "#9ca3af", fontSize: "0.85em" }}>
-                                  M.R.P: <del>₹ {displayStrikePrice.toLocaleString("en-IN")}.00</del>
+                                <span style={{ fontSize: "1.5em", fontWeight: 400, color: "#111" }}>
+                                  ₹ {displayPrice.toLocaleString("en-IN")}.00
                                 </span>
                               </span>
-                            )}
-                            {(!displayStrikePrice || displayStrikePrice <= displayPrice) && (
-                              <span style={{ fontSize: "1.5em", fontWeight: 400, color: "#111" }}>
-                                ₹ {displayPrice.toLocaleString("en-IN")}.00
+                              <span style={{ color: "#9ca3af", fontSize: "0.85em" }}>
+                                M.R.P: <del>₹ {displayStrikePrice.toLocaleString("en-IN")}.00</del>
                               </span>
-                            )}
-                          </p>
-                        );
-                      })()}
+                            </span>
+                          )}
+                          {(!displayStrikePrice || displayStrikePrice <= displayPrice) && (
+                            <span style={{ fontSize: "1.5em", fontWeight: 400, color: "#111" }}>
+                              ₹ {displayPrice.toLocaleString("en-IN")}.00
+                            </span>
+                          )}
+                        </p>
+                      );
+                    })()}
                     {product.quantity !== undefined && product.quantity <= 5 && (
                       <p style={{ color: "#dc2626", fontSize: "0.72rem", fontWeight: 700, marginTop: "4px", letterSpacing: "0.02em" }}>
                         {product.quantity === 0 ? "OUT OF STOCK" : `ONLY ${product.quantity} LEFT`}
                       </p>
                     )}
                     {isMobile && (
-                      <span 
+                      <span
                         className={styles.productAddToBag}
                         onClick={(e) => {
                           e.preventDefault();
@@ -1185,7 +1238,7 @@ export default function Home() {
         </div>
         {isMobile && totalArrivalsPages > 1 && (
           <div className={styles.mobilePagination}>
-            <button 
+            <button
               className={styles.paginationBtn}
               onClick={() => {
                 setArrivalsDirection("backward");
@@ -1198,7 +1251,7 @@ export default function Home() {
               </svg>
             </button>
             <span>{arrivalsPage} / {totalArrivalsPages}</span>
-            <button 
+            <button
               className={styles.paginationBtn}
               onClick={() => {
                 setArrivalsDirection("forward");
@@ -1215,15 +1268,86 @@ export default function Home() {
       </section>
 
       {/* 7. Lifestyle Banner Section */}
-      {showLifestyle && (
-        <section 
-          className={styles.lifestyleBanner}
-          style={{ backgroundImage: `url(${lifestyleImage})` }}
-        >
-          <div className={styles.lifestyleOverlay} />
-          <p className={styles.lifestyleText}>{lifestyleText}</p>
-        </section>
-      )}
+      {(() => {
+        const activeShowLifestyleText = isMobile ? (showMobileLifestyleText !== undefined ? showMobileLifestyleText : showLifestyleText) : showLifestyleText;
+        const activeLifestyleText = isMobile ? (mobileLifestyleText !== "" && mobileLifestyleText !== undefined ? mobileLifestyleText : lifestyleText) : lifestyleText;
+        const activeTextFontType = isMobile ? (mobileLifestyleTextFontType || lifestyleTextFontType) : lifestyleTextFontType;
+        const activeTextFontColor = isMobile ? (mobileLifestyleTextFontColor || lifestyleTextFontColor) : lifestyleTextFontColor;
+        const activeTextFontSize = isMobile ? (mobileLifestyleTextFontSize || "1.8rem") : lifestyleTextFontSize;
+        const activeTextFontAlignment = isMobile ? (mobileLifestyleTextFontAlignment || lifestyleTextFontAlignment || "center") : lifestyleTextFontAlignment;
+        const activeTextFontWeight = isMobile ? (mobileLifestyleTextFontWeight || lifestyleTextFontWeight) : lifestyleTextFontWeight;
+
+        const activeShowLifestyleButton = isMobile ? (showMobileLifestyleButton !== undefined ? showMobileLifestyleButton : showLifestyleButton) : showLifestyleButton;
+        const activeLifestyleButtonText = isMobile ? (mobileLifestyleButtonText || lifestyleButtonText) : lifestyleButtonText;
+        const activeLifestyleButtonStyle = isMobile ? (mobileLifestyleButtonStyle || lifestyleButtonStyle) : lifestyleButtonStyle;
+        const activeLifestyleButtonSize = isMobile ? (mobileLifestyleButtonSize || "sm") : lifestyleButtonSize;
+        const activeLifestyleButtonColor = isMobile ? (mobileLifestyleButtonColor !== undefined ? mobileLifestyleButtonColor : lifestyleButtonColor) : lifestyleButtonColor;
+        const activeLifestyleButtonTextColor = isMobile ? (mobileLifestyleButtonTextColor || lifestyleButtonTextColor) : lifestyleButtonTextColor;
+
+        if (!showLifestyle && !activeShowLifestyleText && !activeShowLifestyleButton) return null;
+
+        const buttonPadding = activeLifestyleButtonSize === "sm" ? "8px 18px" : activeLifestyleButtonSize === "lg" ? "16px 36px" : "12px 28px";
+        const buttonFontSize = activeLifestyleButtonSize === "sm" ? "0.82rem" : activeLifestyleButtonSize === "lg" ? "1.05rem" : "0.92rem";
+        const effectiveButtonBg = activeLifestyleButtonStyle === "outline" ? "transparent" : (activeLifestyleButtonColor || primaryColor || "#ffffff");
+        const effectiveButtonBorder = activeLifestyleButtonStyle === "outline" ? `2px solid ${activeLifestyleButtonColor || "#ffffff"}` : "none";
+
+        return (
+          <section
+            className={styles.lifestyleBanner}
+            style={{
+              backgroundImage: `url(${lifestyleImage})`,
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
+              padding: "60px 20px"
+            }}
+          >
+            <div className={styles.lifestyleOverlay} />
+            <div style={{ position: "relative", zIndex: 2, display: "flex", flexDirection: "column", alignItems: "center", gap: "20px", maxWidth: "900px", width: "100%", textAlign: activeTextFontAlignment as any || "center" }}>
+              {activeShowLifestyleText && (
+                <p
+                  className={styles.lifestyleText}
+                  style={{
+                    fontFamily: `"${activeTextFontType}", sans-serif`,
+                    color: activeTextFontColor,
+                    fontSize: activeTextFontSize,
+                    fontWeight: Number(activeTextFontWeight) || 700,
+                    textAlign: activeTextFontAlignment as any || "center",
+                    margin: 0
+                  }}
+                >
+                  {activeLifestyleText}
+                </p>
+              )}
+
+              {activeShowLifestyleButton && (
+                <Link
+                  href="/shop"
+                  style={{
+                    display: "inline-block",
+                    padding: buttonPadding,
+                    fontSize: buttonFontSize,
+                    fontFamily: `"${activeTextFontType}", sans-serif`,
+                    fontWeight: 700,
+                    textTransform: "uppercase",
+                    letterSpacing: "0.08em",
+                    borderRadius: "4px",
+                    backgroundColor: effectiveButtonBg,
+                    color: activeLifestyleButtonTextColor || "#ffffff",
+                    border: effectiveButtonBorder,
+                    textDecoration: "none",
+                    cursor: "pointer",
+                    transition: "all 0.2s ease"
+                  }}
+                >
+                  {activeLifestyleButtonText}
+                </Link>
+              )}
+            </div>
+          </section>
+        );
+      })()}
 
       {/* 8. Best Sellers Products Section */}
       <section className={styles.arrivalsSection}>
@@ -1231,7 +1355,7 @@ export default function Home() {
           <h2 className={styles.arrivalsTitle}>BEST SELLERS</h2>
           <Link href="/shop?category=bestsellers" className={styles.viewAllLink}>SHOP ALL</Link>
         </div>
-        <div 
+        <div
           key={`bestsellers-${bestSellersPage}`}
           className={`${bestSellers.length > 0 ? styles.arrivalsGrid : styles.emptyStateGrid} ${styles.slideAnimated} ${bestSellersDirection === "forward" ? styles.slideForward : styles.slideBackward}`}
           onTouchStart={isMobile ? handleTouchStart : undefined}
@@ -1240,8 +1364,8 @@ export default function Home() {
         >
           {bestSellers.length > 0 ? (
             displayedBestSellers.map((product) => (
-              <Link 
-                key={product._id} 
+              <Link
+                key={product._id}
                 href={`/product/${product._id}`}
                 onClick={(e) => {
                   if (product.quantity === 0) {
@@ -1249,33 +1373,33 @@ export default function Home() {
                     e.stopPropagation();
                   }
                 }}
-                style={{ 
-                  textDecoration: "none", 
-                  color: "inherit", 
+                style={{
+                  textDecoration: "none",
+                  color: "inherit",
                   display: "block",
                   cursor: product.quantity === 0 ? "not-allowed" : "pointer"
                 }}
               >
                 <div className={styles.productCard} style={product.quantity === 0 ? { pointerEvents: "none" } : {}}>
                   <div className={styles.productImageContainer} style={product.quantity === 0 ? { filter: "grayscale(1)", opacity: 0.7 } : {}}>
-                    <img 
-                      className={`${styles.productImage} ${styles.productImageFront}`} 
-                      src={product.imageFront} 
+                    <img
+                      className={`${styles.productImage} ${styles.productImageFront}`}
+                      src={product.imageFront}
                       alt={product.name}
                       loading="lazy"
                     />
                     {product.imageBack && (
-                      <img 
-                        className={`${styles.productImage} ${styles.productImageBack}`} 
-                        src={product.imageBack} 
+                      <img
+                        className={`${styles.productImage} ${styles.productImageBack}`}
+                        src={product.imageBack}
                         alt={`${product.name} Alternate`}
                         loading="lazy"
                       />
                     )}
-                    
+
                     {/* Arrow controls */}
-                    <button 
-                      aria-label="Previous image" 
+                    <button
+                      aria-label="Previous image"
                       className={`${styles.sliderArrow} ${styles.sliderArrowLeft}`}
                       onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}
                     >
@@ -1283,8 +1407,8 @@ export default function Home() {
                         <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18" />
                       </svg>
                     </button>
-                    <button 
-                      aria-label="Next image" 
+                    <button
+                      aria-label="Next image"
                       className={`${styles.sliderArrow} ${styles.sliderArrowRight}`}
                       onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}
                     >
@@ -1292,9 +1416,9 @@ export default function Home() {
                         <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
                       </svg>
                     </button>
-    
-                    <button 
-                      aria-label="Add to cart" 
+
+                    <button
+                      aria-label="Add to cart"
                       className={styles.addToCartCircle}
                       onClick={(e) => { e.preventDefault(); e.stopPropagation(); addToCart(product); }}
                     >
@@ -1305,46 +1429,46 @@ export default function Home() {
                   </div>
                   <div className={styles.productInfo}>
                     <h3 className={styles.productTitle}>{product.name}</h3>
-                      {(() => {
-                        const cheapestVariant = product.variants && product.variants.length > 0
-                          ? [...product.variants].sort((a, b) => a.price - b.price)[0]
-                          : null;
+                    {(() => {
+                      const cheapestVariant = product.variants && product.variants.length > 0
+                        ? [...product.variants].sort((a, b) => a.price - b.price)[0]
+                        : null;
 
-                        const displayPrice = cheapestVariant ? cheapestVariant.price : product.price;
-                        const displayStrikePrice = cheapestVariant ? cheapestVariant.strikePrice : product.strikePrice;
+                      const displayPrice = cheapestVariant ? cheapestVariant.price : product.price;
+                      const displayStrikePrice = cheapestVariant ? cheapestVariant.strikePrice : product.strikePrice;
 
-                        return (
-                          <p className={styles.productPrice}>
-                            {displayStrikePrice && displayStrikePrice > displayPrice && (
-                              <span style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "2px" }}>
-                                <span style={{ display: "inline-flex", alignItems: "center", gap: "8px" }}>
-                                  <span style={{ color: "#ef4444", fontSize: "0.75em", fontWeight: 400 }}>
-                                    -{Math.round(((displayStrikePrice - displayPrice) / displayStrikePrice) * 100)}%
-                                  </span>
-                                  <span style={{ fontSize: "1.5em", fontWeight: 400, color: "#111" }}>
-                                    ₹ {displayPrice.toLocaleString("en-IN")}.00
-                                  </span>
+                      return (
+                        <p className={styles.productPrice}>
+                          {displayStrikePrice && displayStrikePrice > displayPrice && (
+                            <span style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "2px" }}>
+                              <span style={{ display: "inline-flex", alignItems: "center", gap: "8px" }}>
+                                <span style={{ color: "#ef4444", fontSize: "0.75em", fontWeight: 400 }}>
+                                  -{Math.round(((displayStrikePrice - displayPrice) / displayStrikePrice) * 100)}%
                                 </span>
-                                <span style={{ color: "#9ca3af", fontSize: "0.85em" }}>
-                                  M.R.P: <del>₹ {displayStrikePrice.toLocaleString("en-IN")}.00</del>
+                                <span style={{ fontSize: "1.5em", fontWeight: 400, color: "#111" }}>
+                                  ₹ {displayPrice.toLocaleString("en-IN")}.00
                                 </span>
                               </span>
-                            )}
-                            {(!displayStrikePrice || displayStrikePrice <= displayPrice) && (
-                              <span style={{ fontSize: "1.5em", fontWeight: 400, color: "#111" }}>
-                                ₹ {displayPrice.toLocaleString("en-IN")}.00
+                              <span style={{ color: "#9ca3af", fontSize: "0.85em" }}>
+                                M.R.P: <del>₹ {displayStrikePrice.toLocaleString("en-IN")}.00</del>
                               </span>
-                            )}
-                          </p>
-                        );
-                      })()}
+                            </span>
+                          )}
+                          {(!displayStrikePrice || displayStrikePrice <= displayPrice) && (
+                            <span style={{ fontSize: "1.5em", fontWeight: 400, color: "#111" }}>
+                              ₹ {displayPrice.toLocaleString("en-IN")}.00
+                            </span>
+                          )}
+                        </p>
+                      );
+                    })()}
                     {product.quantity !== undefined && product.quantity <= 5 && (
                       <p style={{ color: "#dc2626", fontSize: "0.72rem", fontWeight: 700, marginTop: "4px", letterSpacing: "0.02em" }}>
                         {product.quantity === 0 ? "OUT OF STOCK" : `ONLY ${product.quantity} LEFT`}
                       </p>
                     )}
                     {isMobile && (
-                      <span 
+                      <span
                         className={styles.productAddToBag}
                         onClick={(e) => {
                           e.preventDefault();
@@ -1367,7 +1491,7 @@ export default function Home() {
         </div>
         {isMobile && totalBestSellersPages > 1 && (
           <div className={styles.mobilePagination}>
-            <button 
+            <button
               className={styles.paginationBtn}
               onClick={() => {
                 setBestSellersDirection("backward");
@@ -1380,7 +1504,7 @@ export default function Home() {
               </svg>
             </button>
             <span>{bestSellersPage} / {totalBestSellersPages}</span>
-            <button 
+            <button
               className={styles.paginationBtn}
               onClick={() => {
                 setBestSellersDirection("forward");
@@ -1508,8 +1632,8 @@ export default function Home() {
               position: "relative"
             }}>
               <div style={{
-                animation: reviewFade 
-                  ? (slideDirection === "forward" ? "slideInFromRight 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards" : "slideInFromLeft 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards") 
+                animation: reviewFade
+                  ? (slideDirection === "forward" ? "slideInFromRight 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards" : "slideInFromLeft 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards")
                   : (slideDirection === "forward" ? "slideOutToLeft 0.3s ease forwards" : "slideOutToRight 0.3s ease forwards"),
               }}>
                 {totalReviews === 0 ? (
@@ -1626,7 +1750,7 @@ export default function Home() {
           <div className={styles.giftSetBannerCard}>
             <div className={styles.giftSetContentLeft}>
               <div className={styles.giftSetBadge}>
-                <span className={styles.giftSetSparkle}>✦</span> LIMITED COLLECTION
+                LIMITED COLLECTION
               </div>
               <h2 className={styles.giftSetTitle}>Gift Set Builder</h2>
               <p className={styles.giftSetSubtitle}>

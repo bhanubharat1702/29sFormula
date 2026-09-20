@@ -5,10 +5,16 @@ interface CustomCheckboxProps extends React.InputHTMLAttributes<HTMLInputElement
   label?: string | React.ReactNode;
 }
 
-export default function CustomCheckbox({ label, className, style, ...props }: CustomCheckboxProps) {
+export default function CustomCheckbox({ label, className, style, checked, ...props }: CustomCheckboxProps) {
+  const isControlled = checked !== undefined || 'checked' in props;
+  const inputProps: React.InputHTMLAttributes<HTMLInputElement> = { ...props };
+  if (isControlled) {
+    inputProps.checked = Boolean(checked);
+  }
+
   return (
     <label className={`${styles.checkbox} ${className || ''}`} style={style}>
-      <input type="checkbox" {...props} />
+      <input type="checkbox" {...inputProps} />
       <div className={styles.checkmark}>
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
           <g
