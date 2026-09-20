@@ -24,7 +24,7 @@ const orderSchema = new mongoose.Schema({
   ],
   totalAmount: { type: Number, required: true },
   paymentMethod: { type: String, default: "COD" },
-  status: { type: String, default: "Processing" },
+  status: { type: String, default: "Pending" },
   deliveredAt: { type: Date },
   deletedByAdmin: { type: Boolean, default: false },
   cancellationReason: { type: String },

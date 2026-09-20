@@ -129,7 +129,7 @@ export default function ActiveOrdersSubTab({
                         <>
                           <div style={{ position: "fixed", inset: 0, zIndex: 100 }} onClick={() => setIsStatusFilterOpen(false)} />
                           <div style={{ position: "absolute", top: "42px", left: 0, width: "100%", background: "#fff", border: "1px solid #e5e7eb", borderRadius: "8px", boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.1)", zIndex: 110, overflow: "hidden" }}>
-                            {["All", "Processing", "Shipped"].map((opt) => (
+                            {["All", "Pending", "Confirmed", "Packed", "Shipped", "Out for Delivery"].map((opt) => (
                               <div
                                 key={opt}
                                 onClick={() => { setOrderStatusFilter(opt); setIsStatusFilterOpen(false); }}

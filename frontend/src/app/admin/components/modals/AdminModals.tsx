@@ -1750,8 +1750,11 @@ export default function AdminModals(props: any) {
                         onChange={(e) => handleUpdateOrderStatus(selectedOrder._id, e.target.value)}
                         style={{ padding: "6px 10px", border: "1px solid #d1d5db", borderRadius: "4px", fontSize: "0.85rem", background: "#fff", cursor: "pointer", color: "#000" }}
                       >
-                        <option value="Processing">Processing</option>
+                        <option value="Pending">Pending</option>
+                        <option value="Confirmed">Confirmed</option>
+                        <option value="Packed">Packed</option>
                         <option value="Shipped">Shipped</option>
+                        <option value="Out for Delivery">Out for Delivery</option>
                         <option value="Delivered">Delivered</option>
                         <option value="Return Requested">Return Requested</option>
                         <option value="Returned">Returned</option>
@@ -2067,8 +2070,11 @@ export default function AdminModals(props: any) {
                                 onChange={(e) => handleUpdateOrderStatus(selectedOrder._id, e.target.value)}
                                 style={{ width: "100%", padding: "10px", border: "1px solid #d1d5db", borderRadius: "6px", fontSize: "0.9rem", background: "#fff" }}
                               >
-                                <option value="Processing">Processing</option>
+                                <option value="Pending">Pending</option>
+                                <option value="Confirmed">Confirmed</option>
+                                <option value="Packed">Packed</option>
                                 <option value="Shipped">Shipped</option>
+                                <option value="Out for Delivery">Out for Delivery</option>
                                 <option value="Delivered">Delivered</option>
                                 <option value="Return Requested">Return Requested</option>
                                 <option value="Returned">Returned</option>

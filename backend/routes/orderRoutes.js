@@ -86,10 +86,22 @@ const sendOrderUpdateEmail = async (order, customerEmail, customerName) => {
     let heading = "An Update on Your Order";
     let message = `The status of your order is now: <strong style="font-weight: 600; color: #111;">${order.status}</strong>`;
 
-    if (order.status === "Shipped") {
+    if (order.status === "Confirmed") {
+      subject = `Your ${brandName} Order is Confirmed - ${order.orderId}`;
+      heading = "Your order has been confirmed.";
+      message = "We have reviewed and confirmed your order. Our team is preparing your items for packing.";
+    } else if (order.status === "Packed") {
+      subject = `Your ${brandName} Order is Packed - ${order.orderId}`;
+      heading = "Your order is packed and ready.";
+      message = "Your package has been carefully packed and assigned an AWB tracking label. It will be dispatched shortly.";
+    } else if (order.status === "Shipped") {
       subject = `Your ${brandName} Order is on its way - ${order.orderId}`;
       heading = "Your order is en route.";
       message = "Your package has been carefully prepared and handed over to our shipping partners. It is currently making its way to you.";
+    } else if (order.status === "Out for Delivery") {
+      subject = `Your ${brandName} Order is Out for Delivery - ${order.orderId}`;
+      heading = "Your order is arriving today!";
+      message = "Exciting news! Your package is with our delivery agent and will be delivered to your doorstep today.";
     } else if (order.status === "Delivered") {
       subject = `Your ${brandName} Order has arrived - ${order.orderId}`;
       heading = "Your order has been delivered.";
@@ -430,8 +442,8 @@ router.post("/api/orders", async (req, res) => {
       cartItems: resolvedCartItems,
       totalAmount: secureTotalAmount,
       paymentMethod: paymentMethod || "COD",
-      status: "Processing",
-      timeline: [{ event: "Order Placed" }]
+      status: "Pending",
+      timeline: [{ event: "Order Placed (Pending Review)" }]
     });
 
     await newOrder.save();
@@ -757,8 +769,8 @@ router.post("/api/orders/:id/cancel", async (req, res) => {
       });
     }
 
-    if (order.status !== "Processing") {
-      return res.status(400).json({ error: `Cannot cancel order. Status is already '${order.status}'` });
+    if (!["Pending", "Processing", "Confirmed"].includes(order.status)) {
+      return res.status(400).json({ error: `Cannot cancel order. Status is already '${order.status}' (orders can only be cancelled before packing/shipping)` });
     }
 
     order.status = "Cancelled";
@@ -1108,7 +1120,7 @@ router.post("/api/orders/razorpay-verify", async (req, res) => {
       orderId,
       customerId: customer._id,
       paymentMethod: "Razorpay",
-      status: stockDeduction.success ? "Processing" : "Stock Pending",
+      status: stockDeduction.success ? "Pending" : "Stock Pending",
       paymentDetails: {
         razorpay_payment_id,
         razorpay_order_id,
