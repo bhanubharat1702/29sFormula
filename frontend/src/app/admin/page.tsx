@@ -2059,20 +2059,20 @@ export default function AdminDashboard() {
     }
   };
 
-  const handleUpdateOrderStatus = (orderId: string, status: string) => {
+  const handleUpdateOrderStatus = (orderId: string, status: string, rtoCharges?: number) => {
     fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:5001'}/api/orders/${orderId}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ status })
+      body: JSON.stringify({ status, rtoCharges })
     })
       .then(res => {
         if (!res.ok) throw new Error("Failed to update status");
         return res.json();
       })
       .then(updated => {
-        setOrders(prev => prev.map(o => o._id === updated._id ? { ...o, status: updated.status } : o));
+        setOrders(prev => prev.map(o => o._id === updated._id ? { ...o, ...updated } : o));
         if (selectedOrder && selectedOrder._id === updated._id) {
-          setSelectedOrder({ ...selectedOrder, status: updated.status });
+          setSelectedOrder((prev: any) => prev ? { ...prev, ...updated } : null);
         }
         setSuccessMessage("Order status updated to " + status);
         setTimeout(() => setSuccessMessage(null), 3000);

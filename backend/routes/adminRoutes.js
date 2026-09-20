@@ -33,7 +33,7 @@ router.get("/api/admin/dashboard-stats", async (req, res) => {
       Product.countDocuments({ category: "Latest Arrivals" }),
       Product.countDocuments({ category: "Best Seller" }),
       Customer.find({}, "createdAt").lean(),
-      Order.find({}, "totalAmount status deletedByAdmin createdAt cartItems").lean(),
+      Order.find({}, "totalAmount status deletedByAdmin createdAt cartItems rtoCharges").lean(),
       Order.aggregate([
         { $match: { ...dateFilter, deletedByAdmin: false, status: { $nin: ["Cancelled"] } } },
         { $unwind: "$cartItems" },
@@ -178,7 +178,7 @@ router.get("/api/admin/dashboard-stats", async (req, res) => {
         d.setHours(d.getHours() - i);
         d.setMinutes(0);
         const key = formatterHour.format(d);
-        historicalDataMap[key] = { date: key, sales: 0, orders: 0, profit: 0 };
+        historicalDataMap[key] = { date: key, sales: 0, orders: 0, profit: 0, rtoExpenses: 0 };
       }
       dateKeyFn = (dateObj) => {
         const d = new Date(dateObj);
@@ -191,7 +191,7 @@ router.get("/api/admin/dashboard-stats", async (req, res) => {
         const d = new Date();
         d.setDate(d.getDate() - i);
         const key = formatter.format(d);
-        historicalDataMap[key] = { date: key, sales: 0, orders: 0, profit: 0 };
+        historicalDataMap[key] = { date: key, sales: 0, orders: 0, profit: 0, rtoExpenses: 0 };
       }
       dateKeyFn = (dateObj) => formatter.format(new Date(dateObj));
     } else if (timeline === "year" || timeline === "all") {
@@ -200,7 +200,7 @@ router.get("/api/admin/dashboard-stats", async (req, res) => {
         const d = new Date();
         d.setMonth(d.getMonth() - i);
         const key = formatterMonth.format(d);
-        historicalDataMap[key] = { date: key, sales: 0, orders: 0, profit: 0 };
+        historicalDataMap[key] = { date: key, sales: 0, orders: 0, profit: 0, rtoExpenses: 0 };
       }
       dateKeyFn = (dateObj) => formatterMonth.format(new Date(dateObj));
     } else {
@@ -209,7 +209,7 @@ router.get("/api/admin/dashboard-stats", async (req, res) => {
         const d = new Date();
         d.setDate(d.getDate() - i);
         const key = formatter.format(d);
-        historicalDataMap[key] = { date: key, sales: 0, orders: 0, profit: 0 };
+        historicalDataMap[key] = { date: key, sales: 0, orders: 0, profit: 0, rtoExpenses: 0 };
       }
       dateKeyFn = (dateObj) => formatter.format(new Date(dateObj));
     }
@@ -221,6 +221,7 @@ router.get("/api/admin/dashboard-stats", async (req, res) => {
       if (historicalDataMap[dateString]) {
         historicalDataMap[dateString].sales += (o.totalAmount || 0);
         historicalDataMap[dateString].orders += 1;
+        historicalDataMap[dateString].rtoExpenses += (o.rtoCharges || 0);
         
         let totalMakingCost = 0;
         if (o.cartItems && Array.isArray(o.cartItems)) {

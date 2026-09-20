@@ -518,9 +518,22 @@ router.get("/api/orders", async (req, res) => {
 
 router.put("/api/orders/:id", async (req, res) => {
   try {
-    const { status, refundStatus } = req.body;
+    const { status, refundStatus, rtoCharges } = req.body;
+    const existingOrder = await Order.findById(req.params.id);
+    if (!existingOrder) {
+      return res.status(404).json({ error: "Order not found" });
+    }
+
     const $set = {};
     const $push = { timeline: { $each: [] } };
+
+    if (rtoCharges !== undefined) {
+      const chargeVal = Math.max(0, Number(rtoCharges) || 0);
+      $set.rtoCharges = chargeVal;
+      if (chargeVal > 0) {
+        $push.timeline.$each.push({ event: `RTO Expense recorded: ₹${chargeVal.toLocaleString("en-IN")}` });
+      }
+    }
 
     if (status !== undefined) {
       $set.status = status;
@@ -528,14 +541,39 @@ router.put("/api/orders/:id", async (req, res) => {
       if (status === "Delivered") {
         $set.deliveredAt = new Date();
       }
+      if (status === "RTO Delivered") {
+        // Auto mark refund as Refunded for RTO Delivered
+        $set.refundStatus = "Refunded";
+        $push.timeline.$each.push({ event: "Full refund processed to original payment method (RTO Delivered)" });
+
+        // Restock inventory for items if transitioning to RTO Delivered for the first time
+        if (existingOrder.status !== "RTO Delivered" && existingOrder.cartItems && Array.isArray(existingOrder.cartItems)) {
+          for (const item of existingOrder.cartItems) {
+            if (item.productId && mongoose.Types.ObjectId.isValid(item.productId)) {
+              if (item.size) {
+                await ProductVariant.updateOne(
+                  { productId: item.productId, size: item.size },
+                  { $inc: { quantity: item.quantity || 1 } }
+                );
+              }
+              await Product.updateOne(
+                { _id: item.productId },
+                { $inc: { quantity: item.quantity || 1 } }
+              );
+            }
+          }
+          invalidateProductsCache();
+        }
+      }
     }
-    if (refundStatus !== undefined) {
+
+    if (refundStatus !== undefined && status !== "RTO Delivered") {
       $set.refundStatus = refundStatus;
       $push.timeline.$each.push({ event: `Refund Status updated to ${refundStatus}` });
     }
 
     if (Object.keys($set).length === 0) {
-      return res.status(400).json({ error: "Fulfillment status or refund status is required" });
+      return res.status(400).json({ error: "Fulfillment status, refund status, or RTO charges is required" });
     }
 
     const updateQuery = { $set };
@@ -549,10 +587,6 @@ router.put("/api/orders/:id", async (req, res) => {
       { returnDocument: "after" }
     ).populate("customerId").lean();
 
-    if (!updatedOrder) {
-      return res.status(404).json({ error: "Order not found" });
-    }
-
     const customer = updatedOrder.customerId;
     const mappedOrder = {
       ...updatedOrder,
@@ -564,7 +598,7 @@ router.put("/api/orders/:id", async (req, res) => {
 
     // Send update email
     if (mappedOrder.customerEmail) {
-      if (refundStatus === "Refunded") {
+      if (refundStatus === "Refunded" || status === "RTO Delivered") {
         sendReturnUpdateEmail(updatedOrder, mappedOrder.customerEmail, mappedOrder.customerName, "Payment Refunded", "");
       } else if (status !== undefined) {
         sendOrderUpdateEmail(updatedOrder, mappedOrder.customerEmail, mappedOrder.customerName);

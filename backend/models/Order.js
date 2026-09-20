@@ -29,6 +29,7 @@ const orderSchema = new mongoose.Schema({
   deletedByAdmin: { type: Boolean, default: false },
   cancellationReason: { type: String },
   refundStatus: { type: String, default: "Not Refunded" },
+  rtoCharges: { type: Number, default: 0 },
   timeline: [
     {
       event: { type: String, required: true },

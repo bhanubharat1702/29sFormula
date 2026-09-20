@@ -16,9 +16,11 @@ const getValidNextStatuses = (currentStatus: string): string[] => {
     case "Shipped":
       return ["Out for Delivery"];
     case "Out for Delivery":
-      return ["Delivered", "Delivery Attempted", "Cancelled"];
+      return ["Delivered", "Delivery Attempted", "RTO Initiated", "Cancelled"];
     case "Delivery Attempted":
-      return ["Out for Delivery", "Delivered", "Cancelled", "Returned"];
+      return ["Out for Delivery", "Delivered", "RTO Initiated", "Cancelled"];
+    case "RTO Initiated":
+      return ["RTO Delivered"];
     case "Return Requested":
       return ["Returned", "Cancelled"];
     default:
@@ -40,6 +42,10 @@ const getStatusBadgeStyle = (status: string) => {
       return { bg: "#ccfbf1", color: "#0f766e", dot: "#0d9488" };
     case "Delivery Attempted":
       return { bg: "#ffedd5", color: "#c2410c", dot: "#ea580c" };
+    case "RTO Initiated":
+      return { bg: "#fff7ed", color: "#c2410c", dot: "#ea580c" };
+    case "RTO Delivered":
+      return { bg: "#fef2f2", color: "#991b1b", dot: "#dc2626" };
     case "Delivered":
       return { bg: "#eaf7ee", color: "#15803d", dot: "#16a34a" };
     case "Returned":
@@ -501,6 +507,9 @@ export default function AdminModals(props: any) {
   const [mobileCrudStep, setMobileCrudStep] = useState(1);
   const [visibleError, setVisibleError] = useState<string | null>(null);
   const [fadeOutError, setFadeOutError] = useState(false);
+  const [showRtoChargeModal, setShowRtoChargeModal] = useState(false);
+  const [rtoChargeTargetId, setRtoChargeTargetId] = useState<string | null>(null);
+  const [rtoChargeAmount, setRtoChargeAmount] = useState<string>("");
 
   useEffect(() => {
     if (error && showCrudModal && window.innerWidth <= 768) {
@@ -2073,7 +2082,15 @@ export default function AdminModals(props: any) {
                     <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
                       <CustomStatusSelect
                         currentStatus={selectedOrder.status}
-                        onSelect={(newStatus) => handleUpdateOrderStatus(selectedOrder._id, newStatus)}
+                        onSelect={(newStatus) => {
+                          if (newStatus === "RTO Delivered") {
+                            setRtoChargeTargetId(selectedOrder._id);
+                            setRtoChargeAmount("");
+                            setShowRtoChargeModal(true);
+                          } else {
+                            handleUpdateOrderStatus(selectedOrder._id, newStatus);
+                          }
+                        }}
                       />
                     </div>
                   </div>
@@ -2396,7 +2413,15 @@ export default function AdminModals(props: any) {
                               <label style={{ display: "block", fontSize: "0.8rem", fontWeight: 400, color: "#4b5563", marginBottom: "6px" }}>Order Status</label>
                               <CustomStatusSelect
                                 currentStatus={selectedOrder.status}
-                                onSelect={(newStatus) => handleUpdateOrderStatus(selectedOrder._id, newStatus)}
+                                onSelect={(newStatus) => {
+                                  if (newStatus === "RTO Delivered") {
+                                    setRtoChargeTargetId(selectedOrder._id);
+                                    setRtoChargeAmount("");
+                                    setShowRtoChargeModal(true);
+                                  } else {
+                                    handleUpdateOrderStatus(selectedOrder._id, newStatus);
+                                  }
+                                }}
                                 maxWidth="100%"
                               />
                             </div>
@@ -2858,6 +2883,93 @@ export default function AdminModals(props: any) {
                 }}
               >
                 Confirm {returnStatusAction.newStatus}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* RTO Charge Entry Popup Modal */}
+      {showRtoChargeModal && (
+        <div className={styles.modalOverlay} style={{ zIndex: 9999 }}>
+          <div className={styles.unsavedModal} style={{ maxWidth: "480px", display: "flex", flexDirection: "column", padding: "24px" }}>
+            <div className={styles.modalHeader} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", width: "100%", borderBottom: "1px solid #e5e7eb", paddingBottom: "12px", marginBottom: "16px" }}>
+              <h2 style={{ fontSize: "1.1rem", fontWeight: 700, margin: 0, color: "#111827" }}>Enter RTO Logistics Charges</h2>
+              <button
+                type="button"
+                onClick={() => setShowRtoChargeModal(false)}
+                style={{ background: "none", border: "none", fontSize: "1.2rem", cursor: "pointer", color: "#6b7280" }}
+              >
+                ✕
+              </button>
+            </div>
+
+            <div style={{ marginBottom: "16px", backgroundColor: "#f0fdf4", border: "1px solid #bbf7d0", padding: "12px 14px", borderRadius: "8px", fontSize: "0.85rem", color: "#166534", lineHeight: 1.5 }}>
+              <div style={{ fontWeight: 600, marginBottom: "4px" }}>💡 Full Customer Refund Policy</div>
+              Updating status to <strong>RTO Delivered</strong> will automatically issue a <strong>100% full refund</strong> for the customer. Entering RTO charges below records the reverse shipping expense for internal business accounting.
+            </div>
+
+            <div style={{ marginBottom: "20px" }}>
+              <label style={{ display: "block", fontSize: "0.85rem", fontWeight: 600, color: "#374151", marginBottom: "6px" }}>
+                RTO Charges / Reverse Shipping Expense (₹) *
+              </label>
+              <input
+                type="number"
+                min="0"
+                placeholder="e.g. 60"
+                value={rtoChargeAmount}
+                onChange={(e) => setRtoChargeAmount(e.target.value)}
+                style={{
+                  width: "100%",
+                  padding: "10px 14px",
+                  border: "1px solid #d1d5db",
+                  borderRadius: "8px",
+                  fontSize: "0.95rem",
+                  outline: "none",
+                  boxSizing: "border-box"
+                }}
+                autoFocus
+              />
+            </div>
+
+            <div style={{ display: "flex", justifyContent: "flex-end", gap: "10px" }}>
+              <button
+                type="button"
+                onClick={() => setShowRtoChargeModal(false)}
+                style={{
+                  padding: "8px 16px",
+                  borderRadius: "8px",
+                  border: "1px solid #d1d5db",
+                  backgroundColor: "#fff",
+                  color: "#374151",
+                  fontWeight: 500,
+                  fontSize: "0.85rem",
+                  cursor: "pointer"
+                }}
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  if (rtoChargeTargetId) {
+                    const amount = Number(rtoChargeAmount) || 0;
+                    handleUpdateOrderStatus(rtoChargeTargetId, "RTO Delivered", amount);
+                    setShowRtoChargeModal(false);
+                  }
+                }}
+                style={{
+                  padding: "8px 18px",
+                  borderRadius: "8px",
+                  border: "none",
+                  backgroundColor: "#111827",
+                  color: "#ffffff",
+                  fontWeight: 600,
+                  fontSize: "0.85rem",
+                  cursor: "pointer"
+                }}
+              >
+                Confirm RTO Delivery
               </button>
             </div>
           </div>

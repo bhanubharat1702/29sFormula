@@ -23,6 +23,7 @@ export interface DashboardStats {
     sales: number;
     orders: number;
     profit?: number;
+    rtoExpenses?: number;
   }[];
   totalProfitThisMonth?: number;
   recentOrders?: any[];

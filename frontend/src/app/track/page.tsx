@@ -492,12 +492,12 @@ export default function TrackOrderPage() {
                       </div>
 
                       {/* Line connector */}
-                      <div className={`${styles.stepLine} ${["Confirmed", "Packed", "Shipped", "Out for Delivery", "Delivery Attempted", "Delivered", "Return Requested", "Return Approved", "Return Rejected"].includes(order.status) ? styles.lineActive : ""}`} />
+                      <div className={`${styles.stepLine} ${["Confirmed", "Packed", "Shipped", "Out for Delivery", "Delivery Attempted", "RTO Initiated", "RTO Delivered", "Delivered", "Return Requested", "Return Approved", "Return Rejected"].includes(order.status) ? styles.lineActive : ""}`} />
 
                       {/* Step 2: Confirmed */}
-                      <div className={`${styles.timelineStep} ${["Confirmed", "Packed", "Shipped", "Out for Delivery", "Delivery Attempted", "Delivered", "Return Requested", "Return Approved", "Return Rejected"].includes(order.status) ? styles.stepActive : ""}`}>
+                      <div className={`${styles.timelineStep} ${["Confirmed", "Packed", "Shipped", "Out for Delivery", "Delivery Attempted", "RTO Initiated", "RTO Delivered", "Delivered", "Return Requested", "Return Approved", "Return Rejected"].includes(order.status) ? styles.stepActive : ""}`}>
                         <div className={styles.stepCircle}>
-                          {["Confirmed", "Packed", "Shipped", "Out for Delivery", "Delivery Attempted", "Delivered", "Return Requested", "Return Approved", "Return Rejected"].includes(order.status) ? "✓" : "2"}
+                          {["Confirmed", "Packed", "Shipped", "Out for Delivery", "Delivery Attempted", "RTO Initiated", "RTO Delivered", "Delivered", "Return Requested", "Return Approved", "Return Rejected"].includes(order.status) ? "✓" : "2"}
                         </div>
                         <div className={styles.stepInfo}>
                           <span className={styles.stepTitle}>Confirmed</span>
@@ -506,12 +506,12 @@ export default function TrackOrderPage() {
                       </div>
 
                       {/* Line connector */}
-                      <div className={`${styles.stepLine} ${["Packed", "Shipped", "Out for Delivery", "Delivery Attempted", "Delivered", "Return Requested", "Return Approved", "Return Rejected"].includes(order.status) ? styles.lineActive : ""}`} />
+                      <div className={`${styles.stepLine} ${["Packed", "Shipped", "Out for Delivery", "Delivery Attempted", "RTO Initiated", "RTO Delivered", "Delivered", "Return Requested", "Return Approved", "Return Rejected"].includes(order.status) ? styles.lineActive : ""}`} />
 
                       {/* Step 3: Packed */}
-                      <div className={`${styles.timelineStep} ${["Packed", "Shipped", "Out for Delivery", "Delivery Attempted", "Delivered", "Return Requested", "Return Approved", "Return Rejected"].includes(order.status) ? styles.stepActive : ""}`}>
+                      <div className={`${styles.timelineStep} ${["Packed", "Shipped", "Out for Delivery", "Delivery Attempted", "RTO Initiated", "RTO Delivered", "Delivered", "Return Requested", "Return Approved", "Return Rejected"].includes(order.status) ? styles.stepActive : ""}`}>
                         <div className={styles.stepCircle}>
-                          {["Packed", "Shipped", "Out for Delivery", "Delivery Attempted", "Delivered", "Return Requested", "Return Approved", "Return Rejected"].includes(order.status) ? "✓" : "3"}
+                          {["Packed", "Shipped", "Out for Delivery", "Delivery Attempted", "RTO Initiated", "RTO Delivered", "Delivered", "Return Requested", "Return Approved", "Return Rejected"].includes(order.status) ? "✓" : "3"}
                         </div>
                         <div className={styles.stepInfo}>
                           <span className={styles.stepTitle}>Packed</span>
@@ -520,12 +520,12 @@ export default function TrackOrderPage() {
                       </div>
 
                       {/* Line connector */}
-                      <div className={`${styles.stepLine} ${["Shipped", "Out for Delivery", "Delivery Attempted", "Delivered", "Return Requested", "Return Approved", "Return Rejected"].includes(order.status) ? styles.lineActive : ""}`} />
+                      <div className={`${styles.stepLine} ${["Shipped", "Out for Delivery", "Delivery Attempted", "RTO Initiated", "RTO Delivered", "Delivered", "Return Requested", "Return Approved", "Return Rejected"].includes(order.status) ? styles.lineActive : ""}`} />
 
                       {/* Step 4: Shipped */}
-                      <div className={`${styles.timelineStep} ${["Shipped", "Out for Delivery", "Delivery Attempted", "Delivered", "Return Requested", "Return Approved", "Return Rejected"].includes(order.status) ? styles.stepActive : ""}`}>
+                      <div className={`${styles.timelineStep} ${["Shipped", "Out for Delivery", "Delivery Attempted", "RTO Initiated", "RTO Delivered", "Delivered", "Return Requested", "Return Approved", "Return Rejected"].includes(order.status) ? styles.stepActive : ""}`}>
                         <div className={styles.stepCircle}>
-                          {["Shipped", "Out for Delivery", "Delivery Attempted", "Delivered", "Return Requested", "Return Approved", "Return Rejected"].includes(order.status) ? "✓" : "4"}
+                          {["Shipped", "Out for Delivery", "Delivery Attempted", "RTO Initiated", "RTO Delivered", "Delivered", "Return Requested", "Return Approved", "Return Rejected"].includes(order.status) ? "✓" : "4"}
                         </div>
                         <div className={styles.stepInfo}>
                           <span className={styles.stepTitle}>Shipped</span>
@@ -534,34 +534,36 @@ export default function TrackOrderPage() {
                       </div>
 
                       {/* Line connector */}
-                      <div className={`${styles.stepLine} ${["Out for Delivery", "Delivery Attempted", "Delivered", "Return Requested", "Return Approved", "Return Rejected"].includes(order.status) ? styles.lineActive : ""}`} />
+                      <div className={`${styles.stepLine} ${["Out for Delivery", "Delivery Attempted", "RTO Initiated", "RTO Delivered", "Delivered", "Return Requested", "Return Approved", "Return Rejected"].includes(order.status) ? styles.lineActive : ""}`} />
 
-                      {/* Step 5: Out for Delivery */}
-                      <div className={`${styles.timelineStep} ${["Out for Delivery", "Delivery Attempted", "Delivered", "Return Requested", "Return Approved", "Return Rejected"].includes(order.status) ? (order.status === "Delivery Attempted" ? styles.stepActiveWarning || styles.stepActive : styles.stepActive) : ""}`}>
-                        <div className={styles.stepCircle} style={order.status === "Delivery Attempted" ? { backgroundColor: "#f59e0b", borderColor: "#f59e0b", color: "#fff" } : undefined}>
-                          {order.status === "Delivery Attempted" ? "!" : (["Out for Delivery", "Delivered", "Return Requested", "Return Approved", "Return Rejected"].includes(order.status) ? "✓" : "5")}
+                      {/* Step 5: Out for Delivery / Delivery Attempted / RTO Initiated */}
+                      <div className={`${styles.timelineStep} ${["Out for Delivery", "Delivery Attempted", "RTO Initiated", "RTO Delivered", "Delivered", "Return Requested", "Return Approved", "Return Rejected"].includes(order.status) ? ((order.status === "Delivery Attempted" || order.status === "RTO Initiated") ? styles.stepActiveWarning || styles.stepActive : styles.stepActive) : ""}`}>
+                        <div className={styles.stepCircle} style={(order.status === "Delivery Attempted" || order.status === "RTO Initiated") ? { backgroundColor: "#f59e0b", borderColor: "#f59e0b", color: "#fff" } : undefined}>
+                          {(order.status === "Delivery Attempted" || order.status === "RTO Initiated") ? "!" : (["Out for Delivery", "RTO Delivered", "Delivered", "Return Requested", "Return Approved", "Return Rejected"].includes(order.status) ? "✓" : "5")}
                         </div>
                         <div className={styles.stepInfo}>
-                          <span className={styles.stepTitle}>{order.status === "Delivery Attempted" ? "Delivery Attempted" : "Out for Delivery"}</span>
+                          <span className={styles.stepTitle}>{order.status === "Delivery Attempted" ? "Delivery Attempted" : order.status === "RTO Initiated" ? "RTO Initiated" : "Out for Delivery"}</span>
                           <span className={styles.stepDesc}>
                             {order.status === "Delivery Attempted" 
                               ? "Courier attempted delivery. Re-attempt will be scheduled."
+                              : order.status === "RTO Initiated"
+                              ? "Delivery could not be completed. Package returning to warehouse."
                               : "Courier is out for doorstep delivery."}
                           </span>
                         </div>
                       </div>
 
                       {/* Line connector */}
-                      <div className={`${styles.stepLine} ${["Delivered", "Return Requested", "Return Approved", "Return Rejected"].includes(order.status) ? styles.lineActive : ""}`} />
+                      <div className={`${styles.stepLine} ${["Delivered", "RTO Delivered", "Return Requested", "Return Approved", "Return Rejected"].includes(order.status) ? styles.lineActive : ""}`} />
 
-                      {/* Step 6: Delivered */}
-                      <div className={`${styles.timelineStep} ${(["Delivered", "Return Requested", "Return Approved", "Return Rejected"].includes(order.status) || order.returnRequest) ? styles.stepActive : ""}`}>
-                        <div className={styles.stepCircle}>
-                          {(["Delivered", "Return Requested", "Return Approved", "Return Rejected"].includes(order.status) || order.returnRequest) ? "✓" : "6"}
+                      {/* Step 6: Delivered / RTO Delivered */}
+                      <div className={`${styles.timelineStep} ${(["Delivered", "RTO Delivered", "Return Requested", "Return Approved", "Return Rejected"].includes(order.status) || order.returnRequest) ? styles.stepActive : ""}`}>
+                        <div className={styles.stepCircle} style={order.status === "RTO Delivered" ? { backgroundColor: "#ef4444", borderColor: "#ef4444", color: "#fff" } : undefined}>
+                          {(["Delivered", "RTO Delivered", "Return Requested", "Return Approved", "Return Rejected"].includes(order.status) || order.returnRequest) ? "✓" : "6"}
                         </div>
                         <div className={styles.stepInfo}>
-                          <span className={styles.stepTitle}>Delivered</span>
-                          <span className={styles.stepDesc}>Doorstep delivery completed.</span>
+                          <span className={styles.stepTitle}>{order.status === "RTO Delivered" ? "Returned to Warehouse (Refunded)" : "Delivered"}</span>
+                          <span className={styles.stepDesc}>{order.status === "RTO Delivered" ? "Package returned to seller. 100% Full Refund issued." : "Doorstep delivery completed."}</span>
                         </div>
                       </div>
 
