@@ -2004,29 +2004,52 @@ export default function AdminModals(props: any) {
                   <h3 style={{ fontSize: "0.8rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", margin: "0 0 4px 0", color: "#888" }}>Total Amount</h3>
 
                   {(() => {
-                    const originalTotal = selectedOrder.cartItems.reduce((acc: number, item: any) => acc + (item.price * item.quantity), 0);
-                    const discount = originalTotal - selectedOrder.totalAmount;
+                    const subtotalVal = selectedOrder.subtotal !== undefined && selectedOrder.subtotal !== 0
+                      ? selectedOrder.subtotal
+                      : selectedOrder.cartItems.reduce((acc: number, item: any) => acc + (item.price * item.quantity), 0);
+                    const discountCodeVal = selectedOrder.discountCode || "";
+                    const discountVal = selectedOrder.discountAmount !== undefined && selectedOrder.discountAmount !== 0
+                      ? selectedOrder.discountAmount
+                      : Math.max(0, subtotalVal - selectedOrder.totalAmount);
+                    const shippingVal = selectedOrder.shippingCharge || 0;
+                    const taxVal = selectedOrder.taxAmount || 0;
 
                     return (
                       <>
-                        {discount > 0 && (
-                          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                            <span style={{ fontSize: "0.85rem", color: "#6b7280" }}>Subtotal</span>
-                            <span style={{ fontSize: "0.85rem", color: "#111" }}>₹{originalTotal.toLocaleString("en-IN")}.00</span>
-                          </div>
-                        )}
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                          <span style={{ fontSize: "0.85rem", color: "#6b7280" }}>Subtotal</span>
+                          <span style={{ fontSize: "0.85rem", color: "#111" }}>₹{subtotalVal.toLocaleString("en-IN")}.00</span>
+                        </div>
 
-                        {discount > 0 && (
+                        {discountVal > 0 && (
                           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                             <span style={{ fontSize: "0.85rem", color: "#10b981", display: "flex", alignItems: "center", gap: "6px" }}>
-                              <span style={{ padding: "2px 6px", backgroundColor: "#eaf7ee", borderRadius: "4px", fontWeight: 700, fontSize: "0.7rem", border: "1px solid #bbf7d0" }}>COUPON APPLIED</span>
+                              {discountCodeVal ? (
+                                <span style={{ padding: "2px 6px", backgroundColor: "#eaf7ee", borderRadius: "4px", fontWeight: 700, fontSize: "0.7rem", border: "1px solid #bbf7d0" }}>{discountCodeVal}</span>
+                              ) : (
+                                <span style={{ padding: "2px 6px", backgroundColor: "#eaf7ee", borderRadius: "4px", fontWeight: 700, fontSize: "0.7rem", border: "1px solid #bbf7d0" }}>COUPON APPLIED</span>
+                              )}
                               Discount
                             </span>
-                            <span style={{ fontSize: "0.85rem", color: "#10b981", fontWeight: 700 }}>-₹{discount.toLocaleString("en-IN")}.00</span>
+                            <span style={{ fontSize: "0.85rem", color: "#10b981", fontWeight: 700 }}>-₹{discountVal.toLocaleString("en-IN")}.00</span>
                           </div>
                         )}
 
-                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: discount > 0 ? "4px" : "0" }}>
+                        {shippingVal > 0 && (
+                          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                            <span style={{ fontSize: "0.85rem", color: "#6b7280" }}>Shipping</span>
+                            <span style={{ fontSize: "0.85rem", color: "#111" }}>₹{shippingVal.toLocaleString("en-IN")}.00</span>
+                          </div>
+                        )}
+
+                        {taxVal > 0 && (
+                          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                            <span style={{ fontSize: "0.85rem", color: "#6b7280" }}>Tax</span>
+                            <span style={{ fontSize: "0.85rem", color: "#111" }}>₹{taxVal.toLocaleString("en-IN")}.00</span>
+                          </div>
+                        )}
+
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: "4px" }}>
                           <span style={{ fontSize: "0.85rem", color: "#111", fontWeight: 500 }}>
                             Paid via {selectedOrder.paymentMethod === "Razorpay" ? "Online" : selectedOrder.paymentMethod}
                           </span>
@@ -2357,25 +2380,52 @@ export default function AdminModals(props: any) {
 
                       <div style={{ borderTop: "1px solid #eaeaea", paddingTop: "15px", display: "flex", flexDirection: "column", gap: "8px", marginTop: "15px" }}>
                         {(() => {
-                          const originalTotal = selectedOrder.cartItems.reduce((acc: number, item: any) => acc + (item.price * item.quantity), 0);
-                          const discount = originalTotal - selectedOrder.totalAmount;
+                          const subtotalVal = selectedOrder.subtotal !== undefined && selectedOrder.subtotal !== 0
+                            ? selectedOrder.subtotal
+                            : selectedOrder.cartItems.reduce((acc: number, item: any) => acc + (item.price * item.quantity), 0);
+                          const discountCodeVal = selectedOrder.discountCode || "";
+                          const discountVal = selectedOrder.discountAmount !== undefined && selectedOrder.discountAmount !== 0
+                            ? selectedOrder.discountAmount
+                            : Math.max(0, subtotalVal - selectedOrder.totalAmount);
+                          const shippingVal = selectedOrder.shippingCharge || 0;
+                          const taxVal = selectedOrder.taxAmount || 0;
+
                           return (
                             <>
-                              {discount > 0 && (
-                                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                                  <span style={{ fontSize: "0.85rem", color: "#6b7280" }}>Subtotal</span>
-                                  <span style={{ fontSize: "0.85rem", color: "#111" }}>₹{originalTotal.toLocaleString("en-IN")}</span>
-                                </div>
-                              )}
-                              {discount > 0 && (
+                              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                                <span style={{ fontSize: "0.85rem", color: "#6b7280" }}>Subtotal</span>
+                                <span style={{ fontSize: "0.85rem", color: "#111" }}>₹{subtotalVal.toLocaleString("en-IN")}</span>
+                              </div>
+
+                              {discountVal > 0 && (
                                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                                   <span style={{ fontSize: "0.85rem", color: "#10b981", display: "flex", alignItems: "center", gap: "6px" }}>
+                                    {discountCodeVal ? (
+                                      <span style={{ padding: "2px 6px", backgroundColor: "#eaf7ee", borderRadius: "4px", fontWeight: 700, fontSize: "0.7rem", border: "1px solid #bbf7d0" }}>{discountCodeVal}</span>
+                                    ) : (
+                                      <span style={{ padding: "2px 6px", backgroundColor: "#eaf7ee", borderRadius: "4px", fontWeight: 700, fontSize: "0.7rem", border: "1px solid #bbf7d0" }}>COUPON APPLIED</span>
+                                    )}
                                     Discount
                                   </span>
-                                  <span style={{ fontSize: "0.85rem", color: "#10b981", fontWeight: 400 }}>-₹{discount.toLocaleString("en-IN")}</span>
+                                  <span style={{ fontSize: "0.85rem", color: "#10b981", fontWeight: 400 }}>-₹{discountVal.toLocaleString("en-IN")}</span>
                                 </div>
                               )}
-                              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: discount > 0 ? "4px" : "0" }}>
+
+                              {shippingVal > 0 && (
+                                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                                  <span style={{ fontSize: "0.85rem", color: "#6b7280" }}>Shipping</span>
+                                  <span style={{ fontSize: "0.85rem", color: "#111" }}>₹{shippingVal.toLocaleString("en-IN")}</span>
+                                </div>
+                              )}
+
+                              {taxVal > 0 && (
+                                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                                  <span style={{ fontSize: "0.85rem", color: "#6b7280" }}>Tax</span>
+                                  <span style={{ fontSize: "0.85rem", color: "#111" }}>₹{taxVal.toLocaleString("en-IN")}</span>
+                                </div>
+                              )}
+
+                              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: "4px" }}>
                                 <span style={{ fontSize: "0.85rem", color: "#111", fontWeight: 400 }}>
                                   Paid via {selectedOrder.paymentMethod === "Razorpay" ? "Online" : selectedOrder.paymentMethod}
                                 </span>

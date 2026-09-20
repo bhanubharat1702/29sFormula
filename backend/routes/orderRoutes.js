@@ -335,7 +335,20 @@ const sendOrderConfirmationEmail = async (order, customerEmail, customerName) =>
 
 router.post("/api/orders", async (req, res) => {
   try {
-    const { customerName, customerEmail, customerPhone, shippingAddress, cartItems, totalAmount, paymentMethod } = req.body;
+    const {
+      customerName,
+      customerEmail,
+      customerPhone,
+      shippingAddress,
+      cartItems,
+      totalAmount,
+      paymentMethod,
+      subtotal: reqSubtotal,
+      discountCode,
+      discountAmount: reqDiscountAmount,
+      shippingCharge: reqShippingCharge,
+      taxAmount: reqTaxAmount
+    } = req.body;
 
     if (!customerName || !customerEmail || !customerPhone || !shippingAddress || !cartItems || !Array.isArray(cartItems) || cartItems.length === 0) {
       return res.status(400).json({ error: "Missing required order details" });
@@ -402,8 +415,15 @@ router.post("/api/orders", async (req, res) => {
       calculatedTotal += actualPrice * item.quantity;
     }
 
-    // Override client's totalAmount with the securely calculated server total
-    const secureTotalAmount = calculatedTotal;
+    // Financial audit calculations
+    const subtotal = reqSubtotal !== undefined ? Number(reqSubtotal) || 0 : calculatedTotal;
+    const discountCodeVal = (discountCode || "").toString().trim();
+    const discountAmount = Math.max(0, Number(reqDiscountAmount) || 0);
+    const shippingCharge = Math.max(0, Number(reqShippingCharge) || 0);
+    const taxAmount = Math.max(0, Number(reqTaxAmount) || 0);
+    const secureTotalAmount = totalAmount !== undefined
+      ? Number(totalAmount)
+      : Math.max(0, subtotal - discountAmount + shippingCharge + taxAmount);
 
     // Perform atomic stock deduction (prevents race condition & negative stock)
     const stockDeduction = await deductStockAtomically(resolvedCartItems);
@@ -448,8 +468,13 @@ router.post("/api/orders", async (req, res) => {
       customerPhone,
       shippingAddress,
       cartItems: resolvedCartItems,
+      subtotal,
+      discountCode: discountCodeVal,
+      discountAmount,
+      shippingCharge,
+      taxAmount,
       totalAmount: secureTotalAmount,
-      paymentMethod: paymentMethod || "COD",
+      paymentMethod: paymentMethod || "Razorpay",
       status: "Pending",
       timeline: [{ event: "Order Placed (Pending Review)" }]
     });
@@ -1163,11 +1188,28 @@ router.post("/api/orders/razorpay-verify", async (req, res) => {
     // Perform atomic stock deduction
     const stockDeduction = await deductStockAtomically(itemsToDeduct);
 
+    const subtotalVal = orderPayload.subtotal !== undefined
+      ? Number(orderPayload.subtotal) || 0
+      : (itemsToDeduct || []).reduce((acc, item) => acc + (item.price || 0) * (item.quantity || 1), 0);
+    const discountCodeVal = (orderPayload.discountCode || "").toString().trim();
+    const discountAmountVal = Math.max(0, Number(orderPayload.discountAmount) || 0);
+    const shippingChargeVal = Math.max(0, Number(orderPayload.shippingCharge) || 0);
+    const taxAmountVal = Math.max(0, Number(orderPayload.taxAmount) || 0);
+    const totalAmountVal = orderPayload.totalAmount !== undefined
+      ? Number(orderPayload.totalAmount)
+      : Math.max(0, subtotalVal - discountAmountVal + shippingChargeVal + taxAmountVal);
+
     const newOrder = new Order({
       ...orderPayload,
       cartItems: itemsToDeduct,
       orderId,
       customerId: customer._id,
+      subtotal: subtotalVal,
+      discountCode: discountCodeVal,
+      discountAmount: discountAmountVal,
+      shippingCharge: shippingChargeVal,
+      taxAmount: taxAmountVal,
+      totalAmount: totalAmountVal,
       paymentMethod: "Razorpay",
       status: stockDeduction.success ? "Pending" : "Stock Pending",
       paymentDetails: {

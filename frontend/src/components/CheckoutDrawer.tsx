@@ -420,6 +420,11 @@ export default function CheckoutDrawer({ isOpen, onClose, cartItems, primaryColo
         quantity: item.quantity,
         image: item.imageFront || ""
       })),
+      subtotal: subtotalAmount,
+      discountCode: appliedCouponCode || "",
+      discountAmount: discount,
+      shippingCharge: 0,
+      taxAmount: 0,
       totalAmount,
       paymentMethod
     };

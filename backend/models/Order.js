@@ -22,6 +22,11 @@ const orderSchema = new mongoose.Schema({
       giftSetDetails: { type: mongoose.Schema.Types.Mixed }
     }
   ],
+  subtotal: { type: Number, default: 0 },
+  discountCode: { type: String, default: "" },
+  discountAmount: { type: Number, default: 0 },
+  shippingCharge: { type: Number, default: 0 },
+  taxAmount: { type: Number, default: 0 },
   totalAmount: { type: Number, required: true },
   paymentMethod: { type: String, default: "COD" },
   status: { type: String, default: "Pending" },
