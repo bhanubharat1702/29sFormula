@@ -61,3 +61,7 @@ html.lenis, html.lenis body {
   pointer-events: none;
 }
 
+.ql-editor {
+  min-height: 80px;
+}
+

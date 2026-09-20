@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import styles from "../../page.module.css";
 import CustomCheckbox from "@/components/CustomCheckbox/CustomCheckbox";
 import dynamic from 'next/dynamic';
+import 'react-quill-new/dist/quill.snow.css';
 
 const ReactQuill = dynamic(() => import('react-quill-new'), { ssr: false });
 const getValidNextStatuses = (currentStatus: string): string[] => {
@@ -503,7 +504,7 @@ export default function AdminModals(props: any) {
         if (!el) return;
         el.scrollIntoView({ behavior: 'smooth', block: 'center' });
         if (el.tagName === 'INPUT') {
-            (el as HTMLInputElement).focus({ preventScroll: true });
+          (el as HTMLInputElement).focus({ preventScroll: true });
         }
         const originalBoxShadow = el.style.boxShadow;
         el.style.boxShadow = '0 0 0 2px #ef4444';
@@ -538,21 +539,21 @@ export default function AdminModals(props: any) {
         setMobileCrudStep(3);
       }
     }
-    
+
     // Smooth auto-hide error logic
     if (error && showCrudModal) {
       setVisibleError(error);
       setFadeOutError(false);
-      
+
       const fadeTimer = setTimeout(() => {
         setFadeOutError(true);
       }, 4500);
-      
+
       const removeTimer = setTimeout(() => {
         setVisibleError(null);
         if (setError) setError(null);
       }, 5000);
-      
+
       return () => {
         clearTimeout(fadeTimer);
         clearTimeout(removeTimer);
@@ -580,11 +581,11 @@ export default function AdminModals(props: any) {
                   </h3>
                 </div>
                 <div className={styles.showOnMobile} style={{ display: "flex", alignItems: "center", gap: "6px", marginLeft: "32px" }}>
-                    <span style={{ fontSize: "0.75rem", fontWeight: 600, color: mobileCrudStep === 1 ? "#000" : "#9ca3af" }}>Details</span>
-                    <span style={{ fontSize: "0.75rem", color: "#d1d5db" }}>/</span>
-                    <span style={{ fontSize: "0.75rem", fontWeight: 600, color: mobileCrudStep === 2 ? "#000" : "#9ca3af" }}>Variants</span>
-                    <span style={{ fontSize: "0.75rem", color: "#d1d5db" }}>/</span>
-                    <span style={{ fontSize: "0.75rem", fontWeight: 600, color: mobileCrudStep === 3 ? "#000" : "#9ca3af" }}>Images</span>
+                  <span style={{ fontSize: "0.75rem", fontWeight: 600, color: mobileCrudStep === 1 ? "#000" : "#9ca3af" }}>Details</span>
+                  <span style={{ fontSize: "0.75rem", color: "#d1d5db" }}>/</span>
+                  <span style={{ fontSize: "0.75rem", fontWeight: 600, color: mobileCrudStep === 2 ? "#000" : "#9ca3af" }}>Variants</span>
+                  <span style={{ fontSize: "0.75rem", color: "#d1d5db" }}>/</span>
+                  <span style={{ fontSize: "0.75rem", fontWeight: 600, color: mobileCrudStep === 3 ? "#000" : "#9ca3af" }}>Images</span>
                 </div>
               </div>
               <button
@@ -603,623 +604,621 @@ export default function AdminModals(props: any) {
             <form onSubmit={handleSubmit} style={{ width: "100%", display: "flex", flexDirection: "column", flex: 1, overflow: "hidden", minHeight: 0 }}>
               <div style={{ flex: 1, overflowY: "auto", paddingRight: "6px", marginBottom: "14px", minHeight: 0 }}>
                 {visibleError && showCrudModal && (
-                  <div className={styles.errorBanner} style={{ 
-                      position: "sticky",
-                      top: 0,
-                      zIndex: 100,
-                      marginBottom: fadeOutError ? 0 : "14px", 
-                      padding: fadeOutError ? 0 : "12px", 
-                      borderRadius: "6px", 
-                      backgroundColor: "#fef2f2", 
-                      color: "#dc2626", 
-                      fontSize: "0.85rem", 
-                      borderLeft: fadeOutError ? "0px solid #ef4444" : "4px solid #ef4444",
-                      opacity: fadeOutError ? 0 : 1,
-                      maxHeight: fadeOutError ? 0 : "100px",
-                      overflow: "hidden",
-                      transition: "all 0.5s ease-out"
+                  <div className={styles.errorBanner} style={{
+                    position: "sticky",
+                    top: 0,
+                    zIndex: 100,
+                    marginBottom: fadeOutError ? 0 : "14px",
+                    padding: fadeOutError ? 0 : "12px",
+                    borderRadius: "6px",
+                    backgroundColor: "#fef2f2",
+                    color: "#dc2626",
+                    fontSize: "0.85rem",
+                    borderLeft: fadeOutError ? "0px solid #ef4444" : "4px solid #ef4444",
+                    opacity: fadeOutError ? 0 : 1,
+                    maxHeight: fadeOutError ? 0 : "100px",
+                    overflow: "hidden",
+                    transition: "all 0.5s ease-out"
                   }}>
                     {visibleError}
                   </div>
                 )}
 
-                
+
                 {/* Desktop View (All cards visible) */}
                 <div className={styles.hideOnMobile}>
-{/* Card 1: Product details */}
-                <div style={{ backgroundColor: "#ffffff", border: "1px solid #e5e7eb", borderRadius: "10px", padding: "18px", marginBottom: "14px", boxShadow: "0 1px 3px rgba(0,0,0,0.05)" }}>
-                  <h4 style={{ fontSize: "0.92rem", fontWeight: 700, color: "#111827", textTransform: "uppercase", letterSpacing: "0.03em", margin: "0 0 14px 0" }}>Product details</h4>
+                  {/* Card 1: Product details */}
+                  <div style={{ backgroundColor: "#ffffff", border: "1px solid #e5e7eb", borderRadius: "10px", padding: "18px", marginBottom: "14px", boxShadow: "0 1px 3px rgba(0,0,0,0.05)" }}>
+                    <h4 style={{ fontSize: "0.92rem", fontWeight: 700, color: "#111827", textTransform: "uppercase", letterSpacing: "0.03em", margin: "0 0 14px 0" }}>Product details</h4>
 
-                  <div className={styles.inputGroup} style={{ marginBottom: "14px" }}>
-                    <label className={styles.inputLabel}>PerfumeName *</label>
-                    <input
-                      type="text"
-                      value={name}
-                      onChange={(e) => setName(e.target.value)}
-                      className={styles.textInput}
-                      style={{ padding: "8px 12px", fontSize: "0.85rem" }}
-                      required
-                    />
-                  </div>
-
-                  <div className={styles.inputGroup} style={{ marginBottom: "14px" }}>
-                    <label className={styles.inputLabel}>Description *</label>
-                    <div style={{ backgroundColor: "#ffffff" }}>
-                      <ReactQuill
-                        theme="snow"
-                        value={description}
-                        onChange={setDescription}
-                        style={{ height: "150px", marginBottom: "40px" }}
-                      />
-                    </div>
-                  </div>
-
-                  <div className={styles.inputGroup}>
-                    <label className={styles.inputLabel}>Additional Information *</label>
-                    <div style={{ backgroundColor: "#ffffff" }}>
-                      <ReactQuill
-                        theme="snow"
-                        value={additionalInformation}
-                        onChange={setAdditionalInformation}
-                        style={{ height: "150px", marginBottom: "40px" }}
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                {/* Card 2: Product Variants & Sizing Table */}
-                <div style={{ backgroundColor: "#ffffff", border: "1px solid #e5e7eb", borderRadius: "10px", padding: "18px", marginBottom: "14px", boxShadow: "0 1px 3px rgba(0,0,0,0.05)" }}>
-                  <h4 style={{ fontSize: "0.92rem", fontWeight: 700, color: "#111827", textTransform: "uppercase", letterSpacing: "0.03em", margin: "0 0 14px 0" }}>Product Variants & Sizing</h4>
-
-                  <div style={{ overflow: "visible" }}>
-                    <table style={{ width: "100%", borderCollapse: "collapse", minWidth: "500px" }}>
-                      <thead>
-                        <tr style={{ borderBottom: "2px solid #e5e7eb", textAlign: "left" }}>
-                          <th style={{ padding: "8px 6px", fontSize: "0.8rem", fontWeight: 600, color: "#4b5563" }}>Size*</th>
-                          <th style={{ padding: "8px 6px", fontSize: "0.8rem", fontWeight: 600, color: "#4b5563" }}>Quantity*</th>
-                          <th style={{ padding: "8px 6px", fontSize: "0.8rem", fontWeight: 600, color: "#4b5563" }}>Price*</th>
-                          <th style={{ padding: "8px 6px", fontSize: "0.8rem", fontWeight: 600, color: "#4b5563" }}>Strike Price</th>
-                          <th style={{ padding: "8px 6px", fontSize: "0.8rem", fontWeight: 600, color: "#4b5563" }}>Making Price*</th>
-                          <th style={{ padding: "8px 6px", fontSize: "0.8rem", fontWeight: 600, color: "#4b5563", minWidth: "180px" }}>Category*</th>
-                          <th style={{ padding: "8px 6px", width: "40px" }}></th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {options.map((opt: any, index: number) => (
-                          <tr key={index} style={{ borderBottom: "1px solid #f3f4f6" }}>
-                            <td style={{ padding: "8px 4px" }}>
-                              <input
-                                type="text"
-                                value={opt.size}
-                                placeholder="e.g. 50ml"
-                                onChange={(e) => {
-                                  const updated = [...options];
-                                  updated[index].size = e.target.value;
-                                  setOptions(updated);
-                                }}
-                                required
-                                className={styles.textInput}
-                                style={{ padding: "6px 8px", fontSize: "0.8rem", width: "100%", boxSizing: "border-box" }}
-                              />
-                            </td>
-                            <td style={{ padding: "8px 4px" }}>
-                              <input
-                                type="number"
-                                value={opt.quantity}
-                                min="0"
-                                onChange={(e) => {
-                                  const updated = [...options];
-                                  updated[index].quantity = e.target.value === "" ? "" : (parseInt(e.target.value) || 0);
-                                  setOptions(updated);
-                                }}
-                                required
-                                className={styles.textInput}
-                                style={{ padding: "6px 8px", fontSize: "0.8rem", width: "100%", boxSizing: "border-box" }}
-                              />
-                            </td>
-                            <td style={{ padding: "8px 4px" }}>
-                              <input
-                                type="number"
-                                value={opt.price}
-                                min="1"
-                                onChange={(e) => {
-                                  const updated = [...options];
-                                  updated[index].price = e.target.value === "" ? "" : (parseFloat(e.target.value) || 0);
-                                  setOptions(updated);
-                                }}
-                                required
-                                className={styles.textInput}
-                                style={{ padding: "6px 8px", fontSize: "0.8rem", width: "100%", boxSizing: "border-box" }}
-                              />
-                            </td>
-                            <td style={{ padding: "8px 4px" }}>
-                              <input
-                                type="number"
-                                value={opt.strikePrice || ""}
-                                min="0"
-                                placeholder="Optional"
-                                onChange={(e) => {
-                                  const updated = [...options];
-                                  updated[index].strikePrice = e.target.value === "" ? "" : (parseFloat(e.target.value) || 0);
-                                  setOptions(updated);
-                                }}
-                                className={styles.textInput}
-                                style={{ padding: "6px 8px", fontSize: "0.8rem", width: "100%", boxSizing: "border-box" }}
-                              />
-                            </td>
-                            <td style={{ padding: "8px 4px" }}>
-                              <input
-                                type="number"
-                                value={opt.makingPrice}
-                                min="0"
-                                onChange={(e) => {
-                                  const updated = [...options];
-                                  updated[index].makingPrice = e.target.value === "" ? "" : (parseInt(e.target.value) || 0);
-                                  setOptions(updated);
-                                }}
-                                required
-                                className={styles.textInput}
-                                style={{ padding: "6px 8px", fontSize: "0.8rem", width: "100%", boxSizing: "border-box" }}
-                              />
-                            </td>
-                            <td style={{ padding: "8px 4px", position: "relative", zIndex: openCategoryIndex === index ? 99999 : 1 }}>
-                              <div
-                                className={styles.selectInput}
-                                style={{ padding: "6px 8px", fontSize: "0.8rem", width: "100%", height: "34px", boxSizing: "border-box", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "space-between" }}
-                                onClick={() => setOpenCategoryIndex(openCategoryIndex === index ? null : index)}
-                              >
-                                <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                                  {opt.category && opt.category.length > 0 ? opt.category.join(", ") : "Select..."}
-                                </span>
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" style={{ width: "12px", height: "12px", flexShrink: 0 }}>
-                                  <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
-                                </svg>
-                              </div>
-                              {openCategoryIndex === index && (
-                                <>
-                                  <div
-                                    style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, zIndex: 40 }}
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      setOpenCategoryIndex(null);
-                                    }}
-                                  />
-                                  <div style={{
-                                    position: "absolute",
-                                    top: "100%",
-                                    left: "4px",
-                                    right: "4px",
-                                    zIndex: 99999,
-                                    backgroundColor: "#fff",
-                                    border: "1px solid #d1d5db",
-                                    borderRadius: "6px",
-                                    boxShadow: "0 4px 6px -1px rgba(0,0,0,0.1)",
-                                    maxHeight: "250px",
-                                    overflowY: "auto",
-                                    marginTop: "4px"
-                                  }}>
-                                    {allCategories.map((cat: string) => {
-                                      const isSelected = opt.category && opt.category.includes(cat);
-                                      return (
-                                        <div
-                                          key={cat}
-                                          onClick={(e) => {
-                                            e.stopPropagation();
-                                            const updated = [...options];
-                                            if (!updated[index].category) updated[index].category = [];
-                                            if (isSelected) {
-                                              updated[index].category = updated[index].category.filter((c: any) => c !== cat);
-                                            } else {
-                                              updated[index].category.push(cat);
-                                            }
-                                            setOptions(updated);
-                                          }}
-                                          style={{
-                                            padding: "8px 12px",
-                                            cursor: "pointer",
-                                            backgroundColor: isSelected ? "#4b5563" : "#fff",
-                                            color: isSelected ? "#fff" : "#374151",
-                                            fontSize: "0.8rem",
-                                            transition: "background-color 0.2s, color 0.2s"
-                                          }}
-                                          onMouseEnter={(e) => {
-                                            if (!isSelected) e.currentTarget.style.backgroundColor = "#f3f4f6";
-                                          }}
-                                          onMouseLeave={(e) => {
-                                            if (!isSelected) e.currentTarget.style.backgroundColor = "#fff";
-                                          }}
-                                        >
-                                          {cat}
-                                        </div>
-                                      );
-                                    })}
-                                  </div>
-                                </>
-                              )}
-                            </td>
-                            <td style={{ padding: "8px 4px", textAlign: "center" }}>
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  if (options.length > 1) {
-                                    setOptions(options.filter((_: any, idx: number) => idx !== index));
-                                  }
-                                }}
-                                style={{
-                                  background: "none",
-                                  border: "none",
-                                  color: options.length <= 1 ? "#fca5a5" : "#ef4444",
-                                  cursor: options.length <= 1 ? "not-allowed" : "pointer",
-                                  fontSize: "1rem",
-                                  padding: "4px"
-                                }}
-                                title="Remove Variant"
-                              >
-                                ✕
-                              </button>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setOptions([...options, { size: "", quantity: "", price: "", strikePrice: "", makingPrice: "", category: [] }]);
-                    }}
-                    style={{
-                      marginTop: "12px",
-                      display: "inline-flex",
-                      alignItems: "center",
-                      gap: "6px",
-                      padding: "6px 12px",
-                      fontSize: "0.8rem",
-                      fontWeight: 600,
-                      color: "#000000",
-                      backgroundColor: "#f3f4f6",
-                      border: "1px solid #d1d5db",
-                      borderRadius: "6px",
-                      cursor: "pointer",
-                      transition: "background-color 0.2s"
-                    }}
-                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "#e5e7eb"}
-                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "#f3f4f6"}
-                  >
-                    + Add Variant
-                  </button>
-                </div>
-
-                {/* Card 3: Perfume Images */}
-                <div style={{ backgroundColor: "#ffffff", border: "1px solid #e5e7eb", borderRadius: "10px", padding: "18px", marginBottom: "14px", boxShadow: "0 1px 3px rgba(0,0,0,0.05)" }}>
-                  <h4 style={{ fontSize: "0.92rem", fontWeight: 700, color: "#111827", textTransform: "uppercase", letterSpacing: "0.03em", margin: "0 0 14px 0" }}>Product Images</h4>
-
-                  <div className={styles.inputGroup} style={{ marginBottom: "14px" }}>
-                    <label className={styles.inputLabel} style={{ marginBottom: "6px" }}>Perfume Images (Upload 3 to 6 images) *</label>
-                    <label style={{ display: "block" }}>
+                    <div className={styles.inputGroup} style={{ marginBottom: "14px" }}>
+                      <label className={styles.inputLabel}>Product Name *</label>
                       <input
-                        type="file"
-                        accept="image/*"
-                        multiple
-                        style={{ display: "none" }}
-                        onChange={handleMultipleFilesUpload}
-                        disabled={uploading}
+                        type="text"
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
+                        className={styles.textInput}
+                        style={{ padding: "8px 12px", fontSize: "0.85rem" }}
+                        required
                       />
-                      <div style={{
-                        border: "2px dashed #d1d5db",
-                        borderRadius: "8px",
-                        padding: "16px 12px",
-                        textAlign: "center",
-                        backgroundColor: "#fafafa",
-                        cursor: uploading ? "not-allowed" : "pointer",
-                        transition: "all 0.2s",
+                    </div>
+
+                    <div className={styles.inputGroup} style={{ marginBottom: "14px" }}>
+                      <label className={styles.inputLabel}>Description *</label>
+                      <div style={{ backgroundColor: "#ffffff" }}>
+                        <ReactQuill
+                          theme="snow"
+                          value={description}
+                          onChange={setDescription}
+                        />
+                      </div>
+                    </div>
+
+                    <div className={styles.inputGroup}>
+                      <label className={styles.inputLabel}>Additional Information *</label>
+                      <div style={{ backgroundColor: "#ffffff" }}>
+                        <ReactQuill
+                          theme="snow"
+                          value={additionalInformation}
+                          onChange={setAdditionalInformation}
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Card 2: Product Variants & Sizing Table */}
+                  <div style={{ backgroundColor: "#ffffff", border: "1px solid #e5e7eb", borderRadius: "10px", padding: "18px", marginBottom: "14px", boxShadow: "0 1px 3px rgba(0,0,0,0.05)" }}>
+                    <h4 style={{ fontSize: "0.92rem", fontWeight: 700, color: "#111827", textTransform: "uppercase", letterSpacing: "0.03em", margin: "0 0 14px 0" }}>Product Variants & Sizing</h4>
+
+                    <div style={{ overflow: "visible" }}>
+                      <table style={{ width: "100%", borderCollapse: "collapse", minWidth: "500px" }}>
+                        <thead>
+                          <tr style={{ borderBottom: "2px solid #e5e7eb", textAlign: "left" }}>
+                            <th style={{ padding: "8px 6px", fontSize: "0.8rem", fontWeight: 600, color: "#4b5563" }}>Size*</th>
+                            <th style={{ padding: "8px 6px", fontSize: "0.8rem", fontWeight: 600, color: "#4b5563" }}>Quantity*</th>
+                            <th style={{ padding: "8px 6px", fontSize: "0.8rem", fontWeight: 600, color: "#4b5563" }}>Price*</th>
+                            <th style={{ padding: "8px 6px", fontSize: "0.8rem", fontWeight: 600, color: "#4b5563" }}>Strike Price</th>
+                            <th style={{ padding: "8px 6px", fontSize: "0.8rem", fontWeight: 600, color: "#4b5563" }}>Making Price*</th>
+                            <th style={{ padding: "8px 6px", fontSize: "0.8rem", fontWeight: 600, color: "#4b5563", minWidth: "180px" }}>Category*</th>
+                            <th style={{ padding: "8px 6px", width: "40px" }}></th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {options.map((opt: any, index: number) => (
+                            <tr key={index} style={{ borderBottom: "1px solid #f3f4f6" }}>
+                              <td style={{ padding: "8px 4px" }}>
+                                <input
+                                  type="text"
+                                  value={opt.size}
+                                  placeholder="e.g. 50ml"
+                                  onChange={(e) => {
+                                    const updated = [...options];
+                                    updated[index].size = e.target.value;
+                                    setOptions(updated);
+                                  }}
+                                  required
+                                  className={styles.textInput}
+                                  style={{ padding: "6px 8px", fontSize: "0.8rem", width: "100%", boxSizing: "border-box" }}
+                                />
+                              </td>
+                              <td style={{ padding: "8px 4px" }}>
+                                <input
+                                  type="number"
+                                  value={opt.quantity}
+                                  min="0"
+                                  onChange={(e) => {
+                                    const updated = [...options];
+                                    updated[index].quantity = e.target.value === "" ? "" : (parseInt(e.target.value) || 0);
+                                    setOptions(updated);
+                                  }}
+                                  required
+                                  className={styles.textInput}
+                                  style={{ padding: "6px 8px", fontSize: "0.8rem", width: "100%", boxSizing: "border-box" }}
+                                />
+                              </td>
+                              <td style={{ padding: "8px 4px" }}>
+                                <input
+                                  type="number"
+                                  value={opt.price}
+                                  min="1"
+                                  onChange={(e) => {
+                                    const updated = [...options];
+                                    updated[index].price = e.target.value === "" ? "" : (parseFloat(e.target.value) || 0);
+                                    setOptions(updated);
+                                  }}
+                                  required
+                                  className={styles.textInput}
+                                  style={{ padding: "6px 8px", fontSize: "0.8rem", width: "100%", boxSizing: "border-box" }}
+                                />
+                              </td>
+                              <td style={{ padding: "8px 4px" }}>
+                                <input
+                                  type="number"
+                                  value={opt.strikePrice || ""}
+                                  min="0"
+                                  placeholder="Optional"
+                                  onChange={(e) => {
+                                    const updated = [...options];
+                                    updated[index].strikePrice = e.target.value === "" ? "" : (parseFloat(e.target.value) || 0);
+                                    setOptions(updated);
+                                  }}
+                                  className={styles.textInput}
+                                  style={{ padding: "6px 8px", fontSize: "0.8rem", width: "100%", boxSizing: "border-box" }}
+                                />
+                              </td>
+                              <td style={{ padding: "8px 4px" }}>
+                                <input
+                                  type="number"
+                                  value={opt.makingPrice}
+                                  min="0"
+                                  onChange={(e) => {
+                                    const updated = [...options];
+                                    updated[index].makingPrice = e.target.value === "" ? "" : (parseInt(e.target.value) || 0);
+                                    setOptions(updated);
+                                  }}
+                                  required
+                                  className={styles.textInput}
+                                  style={{ padding: "6px 8px", fontSize: "0.8rem", width: "100%", boxSizing: "border-box" }}
+                                />
+                              </td>
+                              <td style={{ padding: "8px 4px", position: "relative", zIndex: openCategoryIndex === index ? 99999 : 1 }}>
+                                <div
+                                  className={styles.selectInput}
+                                  style={{ padding: "6px 8px", fontSize: "0.8rem", width: "100%", height: "34px", boxSizing: "border-box", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "space-between" }}
+                                  onClick={() => setOpenCategoryIndex(openCategoryIndex === index ? null : index)}
+                                >
+                                  <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                                    {opt.category && opt.category.length > 0 ? opt.category.join(", ") : "Select..."}
+                                  </span>
+                                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" style={{ width: "12px", height: "12px", flexShrink: 0 }}>
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+                                  </svg>
+                                </div>
+                                {openCategoryIndex === index && (
+                                  <>
+                                    <div
+                                      style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, zIndex: 40 }}
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        setOpenCategoryIndex(null);
+                                      }}
+                                    />
+                                    <div style={{
+                                      position: "absolute",
+                                      top: "100%",
+                                      left: "4px",
+                                      right: "4px",
+                                      zIndex: 99999,
+                                      backgroundColor: "#fff",
+                                      border: "1px solid #d1d5db",
+                                      borderRadius: "6px",
+                                      boxShadow: "0 4px 6px -1px rgba(0,0,0,0.1)",
+                                      maxHeight: "250px",
+                                      overflowY: "auto",
+                                      marginTop: "4px"
+                                    }}>
+                                      {allCategories.map((cat: string) => {
+                                        const isSelected = opt.category && opt.category.includes(cat);
+                                        return (
+                                          <div
+                                            key={cat}
+                                            onClick={(e) => {
+                                              e.stopPropagation();
+                                              const updated = [...options];
+                                              if (!updated[index].category) updated[index].category = [];
+                                              if (isSelected) {
+                                                updated[index].category = updated[index].category.filter((c: any) => c !== cat);
+                                              } else {
+                                                updated[index].category.push(cat);
+                                              }
+                                              setOptions(updated);
+                                            }}
+                                            style={{
+                                              padding: "8px 12px",
+                                              cursor: "pointer",
+                                              backgroundColor: isSelected ? "#4b5563" : "#fff",
+                                              color: isSelected ? "#fff" : "#374151",
+                                              fontSize: "0.8rem",
+                                              transition: "background-color 0.2s, color 0.2s"
+                                            }}
+                                            onMouseEnter={(e) => {
+                                              if (!isSelected) e.currentTarget.style.backgroundColor = "#f3f4f6";
+                                            }}
+                                            onMouseLeave={(e) => {
+                                              if (!isSelected) e.currentTarget.style.backgroundColor = "#fff";
+                                            }}
+                                          >
+                                            {cat}
+                                          </div>
+                                        );
+                                      })}
+                                    </div>
+                                  </>
+                                )}
+                              </td>
+                              <td style={{ padding: "8px 4px", textAlign: "center" }}>
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    if (options.length > 1) {
+                                      setOptions(options.filter((_: any, idx: number) => idx !== index));
+                                    }
+                                  }}
+                                  style={{
+                                    background: "none",
+                                    border: "none",
+                                    color: options.length <= 1 ? "#fca5a5" : "#ef4444",
+                                    cursor: options.length <= 1 ? "not-allowed" : "pointer",
+                                    fontSize: "1rem",
+                                    padding: "4px"
+                                  }}
+                                  title="Remove Variant"
+                                >
+                                  ✕
+                                </button>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setOptions([...options, { size: "", quantity: "", price: "", strikePrice: "", makingPrice: "", category: [] }]);
                       }}
-                        onMouseEnter={(e) => { if (!uploading) { e.currentTarget.style.borderColor = "#000000"; e.currentTarget.style.backgroundColor = "#f3f4f6"; } }}
-                        onMouseLeave={(e) => { if (!uploading) { e.currentTarget.style.borderColor = "#d1d5db"; e.currentTarget.style.backgroundColor = "#fafafa"; } }}
-                      >
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" style={{ width: "24px", height: "24px", color: "#9ca3af", margin: "0 auto 4px auto" }}>
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M12 16.5V9.75m0 0 3 3m-3-3-3 3M6.75 19.5a4.5 4.5 0 0 1-1.41-8.775 5.25 5.25 0 0 1 10.233-2.33 3 3 0 0 1 3.758 3.848A3.752 3.752 0 0 1 18 19.5H6.75Z" />
-                        </svg>
-                        <span style={{ display: "block", fontSize: "0.82rem", fontWeight: 600, color: "#111827" }}>
-                          {uploading ? "Uploading Images..." : "Choose Image Files to Upload"}
+                      style={{
+                        marginTop: "12px",
+                        display: "inline-flex",
+                        alignItems: "center",
+                        gap: "6px",
+                        padding: "6px 12px",
+                        fontSize: "0.8rem",
+                        fontWeight: 600,
+                        color: "#000000",
+                        backgroundColor: "#f3f4f6",
+                        border: "1px solid #d1d5db",
+                        borderRadius: "6px",
+                        cursor: "pointer",
+                        transition: "background-color 0.2s"
+                      }}
+                      onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "#e5e7eb"}
+                      onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "#f3f4f6"}
+                    >
+                      + Add Variant
+                    </button>
+                  </div>
+
+                  {/* Card 3: Perfume Images */}
+                  <div style={{ backgroundColor: "#ffffff", border: "1px solid #e5e7eb", borderRadius: "10px", padding: "18px", marginBottom: "14px", boxShadow: "0 1px 3px rgba(0,0,0,0.05)" }}>
+                    <h4 style={{ fontSize: "0.92rem", fontWeight: 700, color: "#111827", textTransform: "uppercase", letterSpacing: "0.03em", margin: "0 0 14px 0" }}>Product Images</h4>
+
+                    <div className={styles.inputGroup} style={{ marginBottom: "14px" }}>
+                      <label className={styles.inputLabel} style={{ marginBottom: "6px" }}>Perfume Images (Upload 3 to 6 images) *</label>
+                      <label style={{ display: "block" }}>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          multiple
+                          style={{ display: "none" }}
+                          onChange={handleMultipleFilesUpload}
+                          disabled={uploading}
+                        />
+                        <div style={{
+                          border: "2px dashed #d1d5db",
+                          borderRadius: "8px",
+                          padding: "16px 12px",
+                          textAlign: "center",
+                          backgroundColor: "#fafafa",
+                          cursor: uploading ? "not-allowed" : "pointer",
+                          transition: "all 0.2s",
+                        }}
+                          onMouseEnter={(e) => { if (!uploading) { e.currentTarget.style.borderColor = "#000000"; e.currentTarget.style.backgroundColor = "#f3f4f6"; } }}
+                          onMouseLeave={(e) => { if (!uploading) { e.currentTarget.style.borderColor = "#d1d5db"; e.currentTarget.style.backgroundColor = "#fafafa"; } }}
+                        >
+                          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" style={{ width: "24px", height: "24px", color: "#9ca3af", margin: "0 auto 4px auto" }}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M12 16.5V9.75m0 0 3 3m-3-3-3 3M6.75 19.5a4.5 4.5 0 0 1-1.41-8.775 5.25 5.25 0 0 1 10.233-2.33 3 3 0 0 1 3.758 3.848A3.752 3.752 0 0 1 18 19.5H6.75Z" />
+                          </svg>
+                          <span style={{ display: "block", fontSize: "0.82rem", fontWeight: 600, color: "#111827" }}>
+                            {uploading ? "Uploading Images..." : "Choose Image Files to Upload"}
+                          </span>
+                          <span style={{ display: "block", fontSize: "0.7rem", color: "#6b7280", marginTop: "2px" }}>
+                            JPG or PNG files • 3 to 6 images • Minimum 3 required
+                          </span>
+                        </div>
+                      </label>
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: "6px" }}>
+                        <span style={{ fontSize: "0.72rem", color: images.length >= 3 ? "#10b981" : "#ef4444", fontWeight: 600 }}>
+                          {images.length >= 3 ? `✓ Met requirement (${images.length} uploaded)` : `✗ Need ${3 - images.length} more image(s)`}
                         </span>
-                        <span style={{ display: "block", fontSize: "0.7rem", color: "#6b7280", marginTop: "2px" }}>
-                          JPG or PNG files • 3 to 6 images • Minimum 3 required
+                        <span style={{ fontSize: "0.72rem", color: "#6b7280" }}>
+                          Max limit: 6 images
                         </span>
                       </div>
-                    </label>
-                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: "6px" }}>
-                      <span style={{ fontSize: "0.72rem", color: images.length >= 3 ? "#10b981" : "#ef4444", fontWeight: 600 }}>
-                        {images.length >= 3 ? `✓ Met requirement (${images.length} uploaded)` : `✗ Need ${3 - images.length} more image(s)`}
-                      </span>
-                      <span style={{ fontSize: "0.72rem", color: "#6b7280" }}>
-                        Max limit: 6 images
-                      </span>
                     </div>
-                  </div>
 
-                  {images.length > 0 && (
-                    <div style={{ backgroundColor: "#f9fafb", padding: "10px", borderRadius: "8px", border: "1px solid #e5e7eb" }}>
-                      <label className={styles.inputLabel} style={{ marginBottom: "6px", display: "block", fontSize: "0.68rem", color: "#4b5563" }}>
-                        Tap an image to set as FRONT COVER (★ indicates Cover)
-                      </label>
-                      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(85px, 1fr))", gap: "8px" }}>
-                        {images.map((url: string, index: number) => {
-                          const isCover = imageFront === url;
-                          return (
-                            <div
-                              key={index}
-                              style={{
-                                position: "relative",
-                                borderRadius: "8px",
-                                border: isCover ? "2px solid #000000" : "1px solid #e5e7eb",
-                                padding: "3px",
-                                backgroundColor: "#ffffff",
-                                display: "flex",
-                                flexDirection: "column",
-                                alignItems: "center",
-                                cursor: "pointer",
-                                transition: "all 0.2s ease",
-                                boxShadow: isCover ? "0 4px 6px -1px rgba(0, 0, 0, 0.1)" : "none"
-                              }}
-                              onClick={() => setImageFront(url)}
-                              onMouseEnter={(e) => { if (!isCover) e.currentTarget.style.borderColor = "#9ca3af"; }}
-                              onMouseLeave={(e) => { if (!isCover) e.currentTarget.style.borderColor = "#e5e7eb"; }}
-                            >
-                              <img
-                                src={url}
-                                alt={`Uploaded perfume ${index + 1}`}
-                                style={{ width: "100%", height: "60px", objectFit: "cover", borderRadius: "5px" }}
-                              />
-
-                              <span style={{
-                                fontSize: "0.58rem",
-                                fontWeight: 700,
-                                color: isCover ? "#000000" : "#9ca3af",
-                                textTransform: "uppercase",
-                                letterSpacing: "0.02em",
-                                marginTop: "4px",
-                                display: "flex",
-                                alignItems: "center",
-                                gap: "2px"
-                              }}>
-                                {isCover ? "★ Cover" : "Set Cover"}
-                              </span>
-
-                              <button
-                                type="button"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleRemoveImage(index);
-                                }}
+                    {images.length > 0 && (
+                      <div style={{ backgroundColor: "#f9fafb", padding: "10px", borderRadius: "8px", border: "1px solid #e5e7eb" }}>
+                        <label className={styles.inputLabel} style={{ marginBottom: "6px", display: "block", fontSize: "0.68rem", color: "#4b5563" }}>
+                          Tap an image to set as FRONT COVER (★ indicates Cover)
+                        </label>
+                        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(85px, 1fr))", gap: "8px" }}>
+                          {images.map((url: string, index: number) => {
+                            const isCover = imageFront === url;
+                            return (
+                              <div
+                                key={index}
                                 style={{
-                                  position: "absolute",
-                                  top: "-5px",
-                                  right: "-5px",
-                                  backgroundColor: "#ef4444",
-                                  color: "#ffffff",
-                                  border: "none",
-                                  borderRadius: "50%",
-                                  width: "16px",
-                                  height: "16px",
-                                  fontSize: "0.65rem",
+                                  position: "relative",
+                                  borderRadius: "8px",
+                                  border: isCover ? "2px solid #000000" : "1px solid #e5e7eb",
+                                  padding: "3px",
+                                  backgroundColor: "#ffffff",
+                                  display: "flex",
+                                  flexDirection: "column",
+                                  alignItems: "center",
+                                  cursor: "pointer",
+                                  transition: "all 0.2s ease",
+                                  boxShadow: isCover ? "0 4px 6px -1px rgba(0, 0, 0, 0.1)" : "none"
+                                }}
+                                onClick={() => setImageFront(url)}
+                                onMouseEnter={(e) => { if (!isCover) e.currentTarget.style.borderColor = "#9ca3af"; }}
+                                onMouseLeave={(e) => { if (!isCover) e.currentTarget.style.borderColor = "#e5e7eb"; }}
+                              >
+                                <img
+                                  src={url}
+                                  alt={`Uploaded perfume ${index + 1}`}
+                                  style={{ width: "100%", height: "60px", objectFit: "cover", borderRadius: "5px" }}
+                                />
+
+                                <span style={{
+                                  fontSize: "0.58rem",
                                   fontWeight: 700,
+                                  color: isCover ? "#000000" : "#9ca3af",
+                                  textTransform: "uppercase",
+                                  letterSpacing: "0.02em",
+                                  marginTop: "4px",
                                   display: "flex",
                                   alignItems: "center",
-                                  justifyContent: "center",
-                                  cursor: "pointer",
-                                  boxShadow: "0 1px 3px rgba(0,0,0,0.25)"
-                                }}
-                                title="Remove Image"
-                              >
-                                ✕
-                              </button>
-                            </div>
-                          );
-                        })}
+                                  gap: "2px"
+                                }}>
+                                  {isCover ? "★ Cover" : "Set Cover"}
+                                </span>
+
+                                <button
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleRemoveImage(index);
+                                  }}
+                                  style={{
+                                    position: "absolute",
+                                    top: "-5px",
+                                    right: "-5px",
+                                    backgroundColor: "#ef4444",
+                                    color: "#ffffff",
+                                    border: "none",
+                                    borderRadius: "50%",
+                                    width: "16px",
+                                    height: "16px",
+                                    fontSize: "0.65rem",
+                                    fontWeight: 700,
+                                    display: "flex",
+                                    alignItems: "center",
+                                    justifyContent: "center",
+                                    cursor: "pointer",
+                                    boxShadow: "0 1px 3px rgba(0,0,0,0.25)"
+                                  }}
+                                  title="Remove Image"
+                                >
+                                  ✕
+                                </button>
+                              </div>
+                            );
+                          })}
+                        </div>
                       </div>
-                    </div>
-                  )}
+                    )}
+                  </div>
                 </div>
+
+
               </div>
 
-              
-                </div>
+              {/* Mobile View (Slider) */}
+              <div className={styles.showOnMobile}>
 
-                {/* Mobile View (Slider) */}
-                <div className={styles.showOnMobile}>
-                  
-                  {/* Step 1: Details */}
-                  <div id="mobile-step-1" style={{ display: mobileCrudStep === 1 ? 'block' : 'none' }}>
-                    <div style={{ backgroundColor: "#ffffff", border: "1px solid #e5e7eb", borderRadius: "10px", padding: "18px", marginBottom: "14px", boxShadow: "0 1px 3px rgba(0,0,0,0.05)" }}>
-                      <h4 style={{ fontSize: "0.92rem", fontWeight: 700, color: "#111827", textTransform: "uppercase", letterSpacing: "0.03em", margin: "0 0 14px 0" }}>Product details</h4>
-                      <div className={styles.inputGroup} style={{ marginBottom: "14px" }}>
-                        <label className={styles.inputLabel}>PerfumeName *</label>
-                        <input id="mobile-name" type="text" value={name} onChange={(e) => setName(e.target.value)} className={styles.textInput} style={{ padding: "8px 12px", fontSize: "0.85rem" }} required={mobileCrudStep === 1} />
+                {/* Step 1: Details */}
+                <div id="mobile-step-1" style={{ display: mobileCrudStep === 1 ? 'block' : 'none' }}>
+                  <div style={{ backgroundColor: "#ffffff", border: "1px solid #e5e7eb", borderRadius: "10px", padding: "18px", marginBottom: "14px", boxShadow: "0 1px 3px rgba(0,0,0,0.05)" }}>
+                    <h4 style={{ fontSize: "0.92rem", fontWeight: 700, color: "#111827", textTransform: "uppercase", letterSpacing: "0.03em", margin: "0 0 14px 0" }}>Product details</h4>
+                    <div className={styles.inputGroup} style={{ marginBottom: "14px" }}>
+                      <label className={styles.inputLabel}>PerfumeName *</label>
+                      <input id="mobile-name" type="text" value={name} onChange={(e) => setName(e.target.value)} className={styles.textInput} style={{ padding: "8px 12px", fontSize: "0.85rem" }} required={mobileCrudStep === 1} />
+                    </div>
+                    <div className={styles.inputGroup} style={{ marginBottom: "14px" }}>
+                      <label className={styles.inputLabel}>Description *</label>
+                      <div id="mobile-description" style={{ backgroundColor: "#ffffff" }}>
+                        <ReactQuill theme="snow" value={description} onChange={setDescription} />
                       </div>
-                      <div className={styles.inputGroup} style={{ marginBottom: "14px" }}>
-                        <label className={styles.inputLabel}>Description *</label>
-                        <div id="mobile-description" style={{ backgroundColor: "#ffffff" }}>
-                          <ReactQuill theme="snow" value={description} onChange={setDescription} style={{ height: "150px", marginBottom: "40px" }} />
-                        </div>
-                      </div>
-                      <div className={styles.inputGroup}>
-                        <label className={styles.inputLabel}>Additional Information *</label>
-                        <div id="mobile-additional-info" style={{ backgroundColor: "#ffffff" }}>
-                          <ReactQuill theme="snow" value={additionalInformation} onChange={setAdditionalInformation} style={{ height: "150px", marginBottom: "40px" }} />
-                        </div>
+                    </div>
+                    <div className={styles.inputGroup}>
+                      <label className={styles.inputLabel}>Additional Information *</label>
+                      <div id="mobile-additional-info" style={{ backgroundColor: "#ffffff" }}>
+                        <ReactQuill theme="snow" value={additionalInformation} onChange={setAdditionalInformation} />
                       </div>
                     </div>
                   </div>
+                </div>
 
-                  {/* Step 2: Variants (Card Layout) */}
-                  <div id="mobile-step-2" style={{ display: mobileCrudStep === 2 ? 'block' : 'none' }}>
-                    <div style={{ backgroundColor: "#ffffff", border: "1px solid #e5e7eb", borderRadius: "10px", padding: "18px", marginBottom: "14px", boxShadow: "0 1px 3px rgba(0,0,0,0.05)" }}>
-                      <h4 style={{ fontSize: "0.92rem", fontWeight: 700, color: "#111827", textTransform: "uppercase", letterSpacing: "0.03em", margin: "0 0 14px 0" }}>Product Variants & Sizing</h4>
-                      
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', paddingRight: '4px' }}>
-                        {options.map((opt: any, index: number) => (
-                          <div key={index} style={{ border: '1px solid #e5e7eb', borderRadius: '8px', padding: '16px', backgroundColor: '#fafafa', position: 'relative', zIndex: openCategoryIndex === index ? 99999 : 1 }}>
-                                <button type="button" onClick={() => { if (options.length > 1) { setOptions(options.filter((_: any, idx: number) => idx !== index)); } }} style={{ position: 'absolute', top: '12px', right: '12px', background: 'none', border: 'none', color: options.length <= 1 ? '#fca5a5' : '#ef4444', cursor: options.length <= 1 ? 'not-allowed' : 'pointer', fontSize: '1rem', zIndex: 2 }} title="Remove Variant">✕</button>
-                            <h5 style={{ margin: '0 0 12px 0', fontSize: '0.9rem', color: '#374151', fontWeight: 600 }}>Variant {index + 1}</h5>
-                            
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-                                <div>
-                                  <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: '#4b5563', marginBottom: '4px' }}>Size *</label>
-                                  <input type="text" value={opt.size} placeholder="e.g. 50ml" onChange={(e) => { const updated = [...options]; updated[index].size = e.target.value; setOptions(updated); }} required={mobileCrudStep === 2} className={styles.textInput} style={{ padding: "8px", fontSize: "0.85rem", width: "100%", boxSizing: "border-box" }} />
-                                </div>
-                                <div>
-                                  <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: '#4b5563', marginBottom: '4px' }}>Quantity *</label>
-                                  <input type="number" value={opt.quantity} min="0" onChange={(e) => { const updated = [...options]; updated[index].quantity = e.target.value === "" ? "" : (parseInt(e.target.value) || 0); setOptions(updated); }} required={mobileCrudStep === 2} className={styles.textInput} style={{ padding: "8px", fontSize: "0.85rem", width: "100%", boxSizing: "border-box" }} />
-                                </div>
+                {/* Step 2: Variants (Card Layout) */}
+                <div id="mobile-step-2" style={{ display: mobileCrudStep === 2 ? 'block' : 'none' }}>
+                  <div style={{ backgroundColor: "#ffffff", border: "1px solid #e5e7eb", borderRadius: "10px", padding: "18px", marginBottom: "14px", boxShadow: "0 1px 3px rgba(0,0,0,0.05)" }}>
+                    <h4 style={{ fontSize: "0.92rem", fontWeight: 700, color: "#111827", textTransform: "uppercase", letterSpacing: "0.03em", margin: "0 0 14px 0" }}>Product Variants & Sizing</h4>
+
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', paddingRight: '4px' }}>
+                      {options.map((opt: any, index: number) => (
+                        <div key={index} style={{ border: '1px solid #e5e7eb', borderRadius: '8px', padding: '16px', backgroundColor: '#fafafa', position: 'relative', zIndex: openCategoryIndex === index ? 99999 : 1 }}>
+                          <button type="button" onClick={() => { if (options.length > 1) { setOptions(options.filter((_: any, idx: number) => idx !== index)); } }} style={{ position: 'absolute', top: '12px', right: '12px', background: 'none', border: 'none', color: options.length <= 1 ? '#fca5a5' : '#ef4444', cursor: options.length <= 1 ? 'not-allowed' : 'pointer', fontSize: '1rem', zIndex: 2 }} title="Remove Variant">✕</button>
+                          <h5 style={{ margin: '0 0 12px 0', fontSize: '0.9rem', color: '#374151', fontWeight: 600 }}>Variant {index + 1}</h5>
+
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                              <div>
+                                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: '#4b5563', marginBottom: '4px' }}>Size *</label>
+                                <input type="text" value={opt.size} placeholder="e.g. 50ml" onChange={(e) => { const updated = [...options]; updated[index].size = e.target.value; setOptions(updated); }} required={mobileCrudStep === 2} className={styles.textInput} style={{ padding: "8px", fontSize: "0.85rem", width: "100%", boxSizing: "border-box" }} />
                               </div>
-                              
-                              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-                                <div>
-                                  <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: '#4b5563', marginBottom: '4px' }}>Price (₹) *</label>
-                                  <input type="number" value={opt.price} min="1" onChange={(e) => { const updated = [...options]; updated[index].price = e.target.value === "" ? "" : (parseFloat(e.target.value) || 0); setOptions(updated); }} required={mobileCrudStep === 2} className={styles.textInput} style={{ padding: "8px", fontSize: "0.85rem", width: "100%", boxSizing: "border-box" }} />
-                                </div>
-                                <div>
-                                  <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: '#4b5563', marginBottom: '4px' }}>Strike Price</label>
-                                  <input type="number" value={opt.strikePrice || ""} min="0" placeholder="Optional" onChange={(e) => { const updated = [...options]; updated[index].strikePrice = e.target.value === "" ? "" : (parseFloat(e.target.value) || 0); setOptions(updated); }} className={styles.textInput} style={{ padding: "8px", fontSize: "0.85rem", width: "100%", boxSizing: "border-box" }} />
-                                </div>
+                              <div>
+                                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: '#4b5563', marginBottom: '4px' }}>Quantity *</label>
+                                <input type="number" value={opt.quantity} min="0" onChange={(e) => { const updated = [...options]; updated[index].quantity = e.target.value === "" ? "" : (parseInt(e.target.value) || 0); setOptions(updated); }} required={mobileCrudStep === 2} className={styles.textInput} style={{ padding: "8px", fontSize: "0.85rem", width: "100%", boxSizing: "border-box" }} />
                               </div>
-                              
-                              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-                                <div>
-                                  <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: '#4b5563', marginBottom: '4px' }}>Making Price *</label>
-                                  <input type="number" value={opt.makingPrice} min="0" onChange={(e) => { const updated = [...options]; updated[index].makingPrice = e.target.value === "" ? "" : (parseInt(e.target.value) || 0); setOptions(updated); }} required={mobileCrudStep === 2} className={styles.textInput} style={{ padding: "8px", fontSize: "0.85rem", width: "100%", boxSizing: "border-box" }} />
+                            </div>
+
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                              <div>
+                                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: '#4b5563', marginBottom: '4px' }}>Price (₹) *</label>
+                                <input type="number" value={opt.price} min="1" onChange={(e) => { const updated = [...options]; updated[index].price = e.target.value === "" ? "" : (parseFloat(e.target.value) || 0); setOptions(updated); }} required={mobileCrudStep === 2} className={styles.textInput} style={{ padding: "8px", fontSize: "0.85rem", width: "100%", boxSizing: "border-box" }} />
+                              </div>
+                              <div>
+                                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: '#4b5563', marginBottom: '4px' }}>Strike Price</label>
+                                <input type="number" value={opt.strikePrice || ""} min="0" placeholder="Optional" onChange={(e) => { const updated = [...options]; updated[index].strikePrice = e.target.value === "" ? "" : (parseFloat(e.target.value) || 0); setOptions(updated); }} className={styles.textInput} style={{ padding: "8px", fontSize: "0.85rem", width: "100%", boxSizing: "border-box" }} />
+                              </div>
+                            </div>
+
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                              <div>
+                                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: '#4b5563', marginBottom: '4px' }}>Making Price *</label>
+                                <input type="number" value={opt.makingPrice} min="0" onChange={(e) => { const updated = [...options]; updated[index].makingPrice = e.target.value === "" ? "" : (parseInt(e.target.value) || 0); setOptions(updated); }} required={mobileCrudStep === 2} className={styles.textInput} style={{ padding: "8px", fontSize: "0.85rem", width: "100%", boxSizing: "border-box" }} />
+                              </div>
+                              <div style={{ position: 'relative', zIndex: openCategoryIndex === index ? 99999 : 1 }}>
+                                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: '#4b5563', marginBottom: '4px' }}>Category *</label>
+                                <div className={styles.selectInput} style={{ padding: "8px", fontSize: "0.85rem", width: "100%", height: "35px", boxSizing: "border-box", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "space-between", backgroundColor: '#fff' }} onClick={() => setOpenCategoryIndex(openCategoryIndex === index ? null : index)}>
+                                  <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{opt.category && opt.category.length > 0 ? opt.category.join(", ") : "Select..."}</span>
+                                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" style={{ width: "12px", height: "12px", flexShrink: 0 }}><path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" /></svg>
                                 </div>
-                                <div style={{ position: 'relative', zIndex: openCategoryIndex === index ? 99999 : 1 }}>
-                                  <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: '#4b5563', marginBottom: '4px' }}>Category *</label>
-                                  <div className={styles.selectInput} style={{ padding: "8px", fontSize: "0.85rem", width: "100%", height: "35px", boxSizing: "border-box", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "space-between", backgroundColor: '#fff' }} onClick={() => setOpenCategoryIndex(openCategoryIndex === index ? null : index)}>
-                                    <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{opt.category && opt.category.length > 0 ? opt.category.join(", ") : "Select..."}</span>
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" style={{ width: "12px", height: "12px", flexShrink: 0 }}><path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" /></svg>
-                                  </div>
-                                  {openCategoryIndex === index && (
-                                    <>
-                                      <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, zIndex: 40 }} onClick={(e) => { e.stopPropagation(); setOpenCategoryIndex(null); }} />
-                                      <div style={{ position: "absolute", top: "100%", left: 0, right: 0, zIndex: 99999, backgroundColor: "#fff", border: "1px solid #d1d5db", borderRadius: "6px", boxShadow: "0 4px 6px -1px rgba(0,0,0,0.1)", maxHeight: "200px", overflowY: "auto", marginTop: "4px" }}>
-                                        {allCategories.map((cat: string) => {
-                                          const isSelected = opt.category && opt.category.includes(cat);
-                                          return (
-                                            <div key={cat} onClick={(e) => { e.stopPropagation(); const updated = [...options]; if (!updated[index].category) updated[index].category = []; if (isSelected) { updated[index].category = updated[index].category.filter((c: any) => c !== cat); } else { updated[index].category.push(cat); } setOptions(updated); }} style={{ padding: "10px 12px", cursor: "pointer", backgroundColor: isSelected ? "#4b5563" : "#fff", color: isSelected ? "#fff" : "#374151", fontSize: "0.85rem", borderBottom: '1px solid #f3f4f6' }}>
-                                              {cat}
-                                            </div>
-                                          );
-                                        })}
-                                      </div>
-                                    </>
-                                  )}
-                                </div>
+                                {openCategoryIndex === index && (
+                                  <>
+                                    <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, zIndex: 40 }} onClick={(e) => { e.stopPropagation(); setOpenCategoryIndex(null); }} />
+                                    <div style={{ position: "absolute", top: "100%", left: 0, right: 0, zIndex: 99999, backgroundColor: "#fff", border: "1px solid #d1d5db", borderRadius: "6px", boxShadow: "0 4px 6px -1px rgba(0,0,0,0.1)", maxHeight: "200px", overflowY: "auto", marginTop: "4px" }}>
+                                      {allCategories.map((cat: string) => {
+                                        const isSelected = opt.category && opt.category.includes(cat);
+                                        return (
+                                          <div key={cat} onClick={(e) => { e.stopPropagation(); const updated = [...options]; if (!updated[index].category) updated[index].category = []; if (isSelected) { updated[index].category = updated[index].category.filter((c: any) => c !== cat); } else { updated[index].category.push(cat); } setOptions(updated); }} style={{ padding: "10px 12px", cursor: "pointer", backgroundColor: isSelected ? "#4b5563" : "#fff", color: isSelected ? "#fff" : "#374151", fontSize: "0.85rem", borderBottom: '1px solid #f3f4f6' }}>
+                                            {cat}
+                                          </div>
+                                        );
+                                      })}
+                                    </div>
+                                  </>
+                                )}
                               </div>
                             </div>
                           </div>
-                        ))}
-                      </div>
-
-                      <button type="button" onClick={() => { setOptions([...options, { size: "", quantity: "", price: "", strikePrice: "", makingPrice: "", category: [] }]); }} style={{ marginTop: "16px", display: "inline-flex", alignItems: "center", justifyContent: 'center', gap: "6px", padding: "10px", fontSize: "0.85rem", fontWeight: 600, color: "#000000", backgroundColor: "#f3f4f6", border: "1px solid #d1d5db", borderRadius: "8px", cursor: "pointer", width: '100%' }}>
-                        + Add Another Variant
-                      </button>
-                    </div>
-                  </div>
-
-                  {/* Step 3: Images */}
-                  <div style={{ display: mobileCrudStep === 3 ? 'block' : 'none' }}>
-                    <div style={{ backgroundColor: "#ffffff", border: "1px solid #e5e7eb", borderRadius: "10px", padding: "18px", marginBottom: "14px", boxShadow: "0 1px 3px rgba(0,0,0,0.05)" }}>
-                      <h4 style={{ fontSize: "0.92rem", fontWeight: 700, color: "#111827", textTransform: "uppercase", letterSpacing: "0.03em", margin: "0 0 14px 0" }}>Product Images</h4>
-                      <div className={styles.inputGroup} style={{ marginBottom: "14px" }}>
-                        <label className={styles.inputLabel} style={{ marginBottom: "6px" }}>Perfume Images (Upload 3 to 6 images) *</label>
-                        <label style={{ display: "block" }}>
-                          <input type="file" accept="image/*" multiple style={{ display: "none" }} onChange={handleMultipleFilesUpload} disabled={uploading} />
-                          <div style={{ border: "2px dashed #d1d5db", borderRadius: "8px", padding: "20px 12px", textAlign: "center", backgroundColor: "#fafafa", cursor: uploading ? "not-allowed" : "pointer" }}>
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" style={{ width: "28px", height: "28px", color: "#9ca3af", margin: "0 auto 8px auto" }}><path strokeLinecap="round" strokeLinejoin="round" d="M12 16.5V9.75m0 0 3 3m-3-3-3 3M6.75 19.5a4.5 4.5 0 0 1-1.41-8.775 5.25 5.25 0 0 1 10.233-2.33 3 3 0 0 1 3.758 3.848A3.752 3.752 0 0 1 18 19.5H6.75Z" /></svg>
-                            <span style={{ display: "block", fontSize: "0.9rem", fontWeight: 600, color: "#111827" }}>{uploading ? "Uploading Images..." : "Tap to Select Images"}</span>
-                            <span style={{ display: "block", fontSize: "0.75rem", color: "#6b7280", marginTop: "4px" }}>JPG or PNG files • 3 to 6 images</span>
-                          </div>
-                        </label>
-                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: "8px" }}>
-                          <span style={{ fontSize: "0.75rem", color: images.length >= 3 ? "#10b981" : "#ef4444", fontWeight: 600 }}>{images.length >= 3 ? `✓ Met requirement (${images.length} uploaded)` : `✗ Need ${3 - images.length} more image(s)`}</span>
-                          <span style={{ fontSize: "0.75rem", color: "#6b7280" }}>Max: 6</span>
                         </div>
-                      </div>
-
-                      {images.length > 0 && (
-                        <div style={{ backgroundColor: "#f9fafb", padding: "12px", borderRadius: "8px", border: "1px solid #e5e7eb" }}>
-                          <label className={styles.inputLabel} style={{ marginBottom: "10px", display: "block", fontSize: "0.75rem", color: "#4b5563" }}>Tap an image to set as FRONT COVER</label>
-                          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(85px, 1fr))", gap: "8px" }}>
-                            {images.map((url: string, index: number) => {
-                              const isCover = imageFront === url;
-                              return (
-                                <div key={index} style={{ position: "relative", borderRadius: "8px", border: isCover ? "2px solid #000000" : "1px solid #e5e7eb", padding: "3px", backgroundColor: "#ffffff", display: "flex", flexDirection: "column", alignItems: "center", cursor: "pointer" }} onClick={() => setImageFront(url)}>
-                                  <img src={url} alt={`Uploaded perfume ${index + 1}`} style={{ width: "100%", height: "60px", objectFit: "cover", borderRadius: "5px" }} />
-                                  <span style={{ fontSize: "0.6rem", fontWeight: 700, color: isCover ? "#000000" : "#9ca3af", textTransform: "uppercase", marginTop: "4px", paddingBottom: "2px" }}>{isCover ? "★ Cover" : "Set Cover"}</span>
-                                  <button type="button" onClick={(e) => { e.stopPropagation(); handleRemoveImage(index); }} style={{ position: "absolute", top: "-6px", right: "-6px", backgroundColor: "#ef4444", color: "#ffffff", border: "none", borderRadius: "50%", width: "20px", height: "20px", fontSize: "0.75rem", fontWeight: 700, display: "flex", alignItems: "center", justifyContent: "center" }}>✕</button>
-                                </div>
-                              );
-                            })}
-                          </div>
-                        </div>
-                      )}
+                      ))}
                     </div>
-                  </div>
 
+                    <button type="button" onClick={() => { setOptions([...options, { size: "", quantity: "", price: "", strikePrice: "", makingPrice: "", category: [] }]); }} style={{ marginTop: "16px", display: "inline-flex", alignItems: "center", justifyContent: 'center', gap: "6px", padding: "10px", fontSize: "0.85rem", fontWeight: 600, color: "#000000", backgroundColor: "#f3f4f6", border: "1px solid #d1d5db", borderRadius: "8px", cursor: "pointer", width: '100%' }}>
+                      + Add Another Variant
+                    </button>
+                  </div>
                 </div>
+
+                {/* Step 3: Images */}
+                <div style={{ display: mobileCrudStep === 3 ? 'block' : 'none' }}>
+                  <div style={{ backgroundColor: "#ffffff", border: "1px solid #e5e7eb", borderRadius: "10px", padding: "18px", marginBottom: "14px", boxShadow: "0 1px 3px rgba(0,0,0,0.05)" }}>
+                    <h4 style={{ fontSize: "0.92rem", fontWeight: 700, color: "#111827", textTransform: "uppercase", letterSpacing: "0.03em", margin: "0 0 14px 0" }}>Product Images</h4>
+                    <div className={styles.inputGroup} style={{ marginBottom: "14px" }}>
+                      <label className={styles.inputLabel} style={{ marginBottom: "6px" }}>Perfume Images (Upload 3 to 6 images) *</label>
+                      <label style={{ display: "block" }}>
+                        <input type="file" accept="image/*" multiple style={{ display: "none" }} onChange={handleMultipleFilesUpload} disabled={uploading} />
+                        <div style={{ border: "2px dashed #d1d5db", borderRadius: "8px", padding: "20px 12px", textAlign: "center", backgroundColor: "#fafafa", cursor: uploading ? "not-allowed" : "pointer" }}>
+                          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" style={{ width: "28px", height: "28px", color: "#9ca3af", margin: "0 auto 8px auto" }}><path strokeLinecap="round" strokeLinejoin="round" d="M12 16.5V9.75m0 0 3 3m-3-3-3 3M6.75 19.5a4.5 4.5 0 0 1-1.41-8.775 5.25 5.25 0 0 1 10.233-2.33 3 3 0 0 1 3.758 3.848A3.752 3.752 0 0 1 18 19.5H6.75Z" /></svg>
+                          <span style={{ display: "block", fontSize: "0.9rem", fontWeight: 600, color: "#111827" }}>{uploading ? "Uploading Images..." : "Tap to Select Images"}</span>
+                          <span style={{ display: "block", fontSize: "0.75rem", color: "#6b7280", marginTop: "4px" }}>JPG or PNG files • 3 to 6 images</span>
+                        </div>
+                      </label>
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: "8px" }}>
+                        <span style={{ fontSize: "0.75rem", color: images.length >= 3 ? "#10b981" : "#ef4444", fontWeight: 600 }}>{images.length >= 3 ? `✓ Met requirement (${images.length} uploaded)` : `✗ Need ${3 - images.length} more image(s)`}</span>
+                        <span style={{ fontSize: "0.75rem", color: "#6b7280" }}>Max: 6</span>
+                      </div>
+                    </div>
+
+                    {images.length > 0 && (
+                      <div style={{ backgroundColor: "#f9fafb", padding: "12px", borderRadius: "8px", border: "1px solid #e5e7eb" }}>
+                        <label className={styles.inputLabel} style={{ marginBottom: "10px", display: "block", fontSize: "0.75rem", color: "#4b5563" }}>Tap an image to set as FRONT COVER</label>
+                        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(85px, 1fr))", gap: "8px" }}>
+                          {images.map((url: string, index: number) => {
+                            const isCover = imageFront === url;
+                            return (
+                              <div key={index} style={{ position: "relative", borderRadius: "8px", border: isCover ? "2px solid #000000" : "1px solid #e5e7eb", padding: "3px", backgroundColor: "#ffffff", display: "flex", flexDirection: "column", alignItems: "center", cursor: "pointer" }} onClick={() => setImageFront(url)}>
+                                <img src={url} alt={`Uploaded perfume ${index + 1}`} style={{ width: "100%", height: "60px", objectFit: "cover", borderRadius: "5px" }} />
+                                <span style={{ fontSize: "0.6rem", fontWeight: 700, color: isCover ? "#000000" : "#9ca3af", textTransform: "uppercase", marginTop: "4px", paddingBottom: "2px" }}>{isCover ? "★ Cover" : "Set Cover"}</span>
+                                <button type="button" onClick={(e) => { e.stopPropagation(); handleRemoveImage(index); }} style={{ position: "absolute", top: "-6px", right: "-6px", backgroundColor: "#ef4444", color: "#ffffff", border: "none", borderRadius: "50%", width: "20px", height: "20px", fontSize: "0.75rem", fontWeight: 700, display: "flex", alignItems: "center", justifyContent: "center" }}>✕</button>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+              </div>
               <div className={`${styles.modalActionRow} ${styles.mobileFooterOverride}`} style={{ borderTop: "1px solid #e5e7eb", paddingTop: "14px", display: "flex", justifyContent: "flex-end", gap: "10px", flexShrink: 0, backgroundColor: "#f3f4f6" }}>
                 {/* Desktop Buttons */}
                 <div className={styles.hideOnMobile} style={{ display: 'flex', gap: '10px' }}>
-                    <button
-                      type="button"
-                      onClick={() => { setShowCrudModal(false); resetForm(); setMobileCrudStep(1); }}
-                      className={styles.secondaryActionBtn}
-                      style={{ padding: "8px 16px", fontSize: "0.85rem" }}
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      type="submit"
-                      className={styles.primaryActionBtn}
-                      style={{ padding: "8px 16px", fontSize: "0.85rem" }}
-                    >
-                      {isEditing ? "Save Changes" : "Create Product"}
-                    </button>
+                  <button
+                    type="button"
+                    onClick={() => { setShowCrudModal(false); resetForm(); setMobileCrudStep(1); }}
+                    className={styles.secondaryActionBtn}
+                    style={{ padding: "8px 16px", fontSize: "0.85rem" }}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    className={styles.primaryActionBtn}
+                    style={{ padding: "8px 16px", fontSize: "0.85rem" }}
+                  >
+                    {isEditing ? "Save Changes" : "Create Product"}
+                  </button>
                 </div>
 
                 {/* Mobile Slider Navigation Buttons */}
                 <div className={styles.showOnMobile} style={{ display: 'flex', width: '100%', gap: '10px' }}>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (mobileCrudStep === 1) { setShowCrudModal(false); resetForm(); setMobileCrudStep(1); }
+                      else { setMobileCrudStep(mobileCrudStep - 1); }
+                    }}
+                    className={styles.secondaryActionBtn}
+                    style={{ padding: "12px 16px", fontSize: "0.95rem", flex: '1', textAlign: 'center' }}
+                  >
+                    {mobileCrudStep === 1 ? "Cancel" : "Back"}
+                  </button>
+
+                  {mobileCrudStep < 3 ? (
                     <button
-                        type="button"
-                        onClick={() => {
-                            if (mobileCrudStep === 1) { setShowCrudModal(false); resetForm(); setMobileCrudStep(1); }
-                            else { setMobileCrudStep(mobileCrudStep - 1); }
-                        }}
-                        className={styles.secondaryActionBtn}
-                        style={{ padding: "12px 16px", fontSize: "0.95rem", flex: '1', textAlign: 'center' }}
+                      type="button"
+                      onClick={() => setMobileCrudStep(mobileCrudStep + 1)}
+                      className={styles.primaryActionBtn}
+                      style={{ padding: "12px 16px", fontSize: "0.95rem", flex: '2', textAlign: 'center' }}
                     >
-                        {mobileCrudStep === 1 ? "Cancel" : "Back"}
+                      Next Step
                     </button>
-                    
-                    {mobileCrudStep < 3 ? (
-                        <button
-                            type="button"
-                            onClick={() => setMobileCrudStep(mobileCrudStep + 1)}
-                            className={styles.primaryActionBtn}
-                            style={{ padding: "12px 16px", fontSize: "0.95rem", flex: '2', textAlign: 'center' }}
-                        >
-                            Next Step
-                        </button>
-                    ) : (
-                        <button
-                            type="submit"
-                            className={styles.primaryActionBtn}
-                            style={{ padding: "12px 16px", fontSize: "0.95rem", flex: '2', textAlign: 'center' }}
-                            formNoValidate
-                        >
-                            {isEditing ? "Save Changes" : "Create Product"}
-                        </button>
-                    )}
+                  ) : (
+                    <button
+                      type="submit"
+                      className={styles.primaryActionBtn}
+                      style={{ padding: "12px 16px", fontSize: "0.95rem", flex: '2', textAlign: 'center' }}
+                      formNoValidate
+                    >
+                      {isEditing ? "Save Changes" : "Create Product"}
+                    </button>
+                  )}
                 </div>
               </div>
             </form>
@@ -1924,7 +1923,7 @@ export default function AdminModals(props: any) {
             </div>
 
             <div className={styles.hideOnMobile} style={{ display: "flex", gap: "40px", textAlign: "left", alignItems: "stretch", flex: 1, minHeight: 0, overflow: "hidden" }}>
-              
+
               {/* LEFT COLUMN: Items Purchased & Total */}
               <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: "20px", minHeight: 0 }}>
                 <div style={{ flex: 1, display: "flex", flexDirection: "column", minHeight: 0 }}>
@@ -1933,10 +1932,10 @@ export default function AdminModals(props: any) {
                     {selectedOrder.cartItems.map((item: any, idx: number) => (
                       <div key={idx} style={{ display: "flex", alignItems: "flex-start", gap: "15px", borderBottom: "1px solid #f3f4f6", paddingBottom: "10px" }}>
                         {item.image && (
-                          <img 
-                            src={item.image} 
-                            alt={item.name} 
-                            style={{ width: "45px", height: "45px", objectFit: "cover", borderRadius: "4px", border: "1px solid #eaeaea" }} 
+                          <img
+                            src={item.image}
+                            alt={item.name}
+                            style={{ width: "45px", height: "45px", objectFit: "cover", borderRadius: "4px", border: "1px solid #eaeaea" }}
                             onError={(e) => { e.currentTarget.style.display = 'none'; }}
                           />
                         )}
@@ -1987,11 +1986,11 @@ export default function AdminModals(props: any) {
 
                 <div style={{ borderTop: "1px solid #eaeaea", paddingTop: "15px", display: "flex", flexDirection: "column", gap: "8px", marginTop: "auto" }}>
                   <h3 style={{ fontSize: "0.8rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", margin: "0 0 4px 0", color: "#888" }}>Total Amount</h3>
-                  
+
                   {(() => {
                     const originalTotal = selectedOrder.cartItems.reduce((acc: number, item: any) => acc + (item.price * item.quantity), 0);
                     const discount = originalTotal - selectedOrder.totalAmount;
-                    
+
                     return (
                       <>
                         {discount > 0 && (
@@ -2000,7 +1999,7 @@ export default function AdminModals(props: any) {
                             <span style={{ fontSize: "0.85rem", color: "#111" }}>₹{originalTotal.toLocaleString("en-IN")}.00</span>
                           </div>
                         )}
-                        
+
                         {discount > 0 && (
                           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                             <span style={{ fontSize: "0.85rem", color: "#10b981", display: "flex", alignItems: "center", gap: "6px" }}>
@@ -2010,7 +2009,7 @@ export default function AdminModals(props: any) {
                             <span style={{ fontSize: "0.85rem", color: "#10b981", fontWeight: 700 }}>-₹{discount.toLocaleString("en-IN")}.00</span>
                           </div>
                         )}
-                        
+
                         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: discount > 0 ? "4px" : "0" }}>
                           <span style={{ fontSize: "0.85rem", color: "#111", fontWeight: 500 }}>
                             Paid via {selectedOrder.paymentMethod === "Razorpay" ? "Online" : selectedOrder.paymentMethod}
@@ -2049,12 +2048,12 @@ export default function AdminModals(props: any) {
                     <div style={{ display: "flex", alignItems: "flex-start", gap: "8px" }}>
                       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6b7280" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginTop: "3px", flexShrink: 0 }}><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
                       <span style={{ fontSize: "0.88rem", color: "#111827", lineHeight: "1.4" }}>
-                        {typeof selectedOrder.shippingAddress === 'string' 
-                          ? selectedOrder.shippingAddress 
-                          : (selectedOrder.shippingAddress 
-                              ? `${selectedOrder.shippingAddress.fullName || ''}, ${selectedOrder.shippingAddress.address || ''}, ${selectedOrder.shippingAddress.city || ''}, ${selectedOrder.shippingAddress.state || ''} ${selectedOrder.shippingAddress.zip || ''}`.replace(/(^[,\s]+)|([,\s]+$)/g, '')
-                              : "N/A"
-                            )
+                        {typeof selectedOrder.shippingAddress === 'string'
+                          ? selectedOrder.shippingAddress
+                          : (selectedOrder.shippingAddress
+                            ? `${selectedOrder.shippingAddress.fullName || ''}, ${selectedOrder.shippingAddress.address || ''}, ${selectedOrder.shippingAddress.city || ''}, ${selectedOrder.shippingAddress.state || ''} ${selectedOrder.shippingAddress.zip || ''}`.replace(/(^[,\s]+)|([,\s]+$)/g, '')
+                            : "N/A"
+                          )
                         }
                       </span>
                     </div>
@@ -2100,135 +2099,135 @@ export default function AdminModals(props: any) {
                 {/* ORDER TIMELINE */}
                 <div style={{ marginTop: "10px", paddingTop: "20px", borderTop: "1px dashed #e5e7eb", flex: 1, display: "flex", flexDirection: "column", minHeight: 0 }}>
                   <h3 style={{ fontSize: "0.85rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", margin: "0 0 16px 0", color: "#6b7280", flexShrink: 0 }}>Order Timeline</h3>
-                  
+
                   <div style={{ flex: 1, overflowY: "auto", paddingRight: "5px", minHeight: 0 }}>
                     <div style={{ display: "flex", flexDirection: "column", gap: "16px", position: "relative", paddingLeft: "10px" }}>
                       <div style={{ position: "absolute", left: "14px", top: "4px", bottom: "4px", width: "2px", backgroundColor: "#e5e7eb", zIndex: 0 }}></div>
-                    {(() => {
-                      const allEvents: any[] = [];
-                      const statusSequence = ["Pending", "Confirmed", "Packed", "Shipped", "Out for Delivery", "Delivered"];
-                      const statusIndex = statusSequence.indexOf(selectedOrder.status);
-                      
-                      // 1. Order Placed
-                      allEvents.push({
-                        event: "Order Placed",
-                        date: selectedOrder.createdAt || new Date().toISOString(),
-                        color: "#10b981"
-                      });
-                      
-                      const hasEvent = (match: string) => selectedOrder.timeline?.some((e: any) => e.event.toLowerCase().includes(match.toLowerCase()));
+                      {(() => {
+                        const allEvents: any[] = [];
+                        const statusSequence = ["Pending", "Confirmed", "Packed", "Shipped", "Out for Delivery", "Delivered"];
+                        const statusIndex = statusSequence.indexOf(selectedOrder.status);
 
-                      // 2. Confirmed
-                      if ((statusIndex >= 1 || selectedOrder.status === "Cancelled" || selectedOrder.returnRequest) && !hasEvent("confirmed")) {
+                        // 1. Order Placed
                         allEvents.push({
-                          event: "Order Confirmed",
-                          date: selectedOrder.createdAt, 
+                          event: "Order Placed",
+                          date: selectedOrder.createdAt || new Date().toISOString(),
                           color: "#10b981"
                         });
-                      }
 
-                      // 3. Packed
-                      if ((statusIndex >= 2 || selectedOrder.returnRequest) && !hasEvent("packed")) {
-                        allEvents.push({
-                          event: "Order Packed",
-                          date: selectedOrder.updatedAt || selectedOrder.createdAt,
-                          color: "#10b981"
-                        });
-                      }
+                        const hasEvent = (match: string) => selectedOrder.timeline?.some((e: any) => e.event.toLowerCase().includes(match.toLowerCase()));
 
-                      // 4. Shipped
-                      if ((statusIndex >= 3 || selectedOrder.returnRequest) && !hasEvent("shipped")) {
-                        allEvents.push({
-                          event: "Shipped",
-                          date: selectedOrder.updatedAt || selectedOrder.createdAt,
-                          color: "#10b981"
-                        });
-                      }
-
-                      // 5. Out for Delivery
-                      if ((statusIndex >= 4 || selectedOrder.returnRequest) && !hasEvent("out for delivery")) {
-                        allEvents.push({
-                          event: "Out for Delivery",
-                          date: selectedOrder.updatedAt || selectedOrder.createdAt,
-                          color: "#10b981"
-                        });
-                      }
-
-                      // 6. Delivered
-                      if ((statusIndex >= 5 || selectedOrder.returnRequest) && !hasEvent("delivered")) {
-                        allEvents.push({
-                          event: "Delivered",
-                          date: selectedOrder.updatedAt || selectedOrder.createdAt,
-                          color: "#10b981"
-                        });
-                      }
-
-                      // 7. Add all custom events from DB (Cancelled, manual status updates)
-                      if (selectedOrder.timeline && selectedOrder.timeline.length > 0) {
-                        selectedOrder.timeline.forEach((e: any) => {
-                          if (e.event === "Order Placed" || e.event.toLowerCase().includes("order placed")) return; // Skip dup
-                          
-                          let color = "#10b981"; 
-                          if (e.event.toLowerCase().includes("cancelled") || e.event.toLowerCase().includes("rejected") || e.event.toLowerCase().includes("failed")) {
-                            color = "#ef4444"; 
-                          } else if (e.event.toLowerCase().includes("return request") || e.event.toLowerCase().includes("pending")) {
-                            color = "#f59e0b"; 
-                          }
-                          
+                        // 2. Confirmed
+                        if ((statusIndex >= 1 || selectedOrder.status === "Cancelled" || selectedOrder.returnRequest) && !hasEvent("confirmed")) {
                           allEvents.push({
-                            event: e.event,
-                            date: e.date || selectedOrder.updatedAt,
-                            color
+                            event: "Order Confirmed",
+                            date: selectedOrder.createdAt,
+                            color: "#10b981"
                           });
-                        });
-                      }
-
-                      // 8. Return Support
-                      if (selectedOrder.returnRequest && !hasEvent("return request")) {
-                        allEvents.push({
-                          event: "Return Requested",
-                          date: selectedOrder.returnRequest.createdAt,
-                          color: "#f59e0b"
-                        });
-                        if (selectedOrder.returnRequest.status !== "Pending") {
-                           allEvents.push({
-                             event: `Return ${selectedOrder.returnRequest.status}`,
-                             date: selectedOrder.returnRequest.updatedAt,
-                             color: selectedOrder.returnRequest.status === "Approved" ? "#10b981" : "#ef4444"
-                           });
                         }
-                      }
-                      
-                      // 9. Refund Status Support
-                      if (selectedOrder.refundStatus === "Refunded" && !hasEvent("refund")) {
-                        allEvents.push({
-                          event: "Refund Processed",
-                          date: selectedOrder.updatedAt,
-                          color: "#10b981"
-                        });
-                      } else if (selectedOrder.refundStatus === "Pending" && !hasEvent("refund")) {
-                         allEvents.push({
-                          event: "Refund Pending",
-                          date: selectedOrder.updatedAt,
-                          color: "#f59e0b"
-                        });
-                      }
 
-                      // Sort chronologically
-                      allEvents.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+                        // 3. Packed
+                        if ((statusIndex >= 2 || selectedOrder.returnRequest) && !hasEvent("packed")) {
+                          allEvents.push({
+                            event: "Order Packed",
+                            date: selectedOrder.updatedAt || selectedOrder.createdAt,
+                            color: "#10b981"
+                          });
+                        }
 
-                      return allEvents.map((event, idx) => (
-                        <div key={idx} style={{ display: "flex", gap: "12px", position: "relative", zIndex: 1 }}>
-                          <div style={{ width: "10px", height: "10px", borderRadius: "50%", backgroundColor: event.color, marginTop: "4px", flexShrink: 0, boxShadow: `0 0 0 3px #fff, 0 0 0 4px ${event.color}` }}></div>
-                          <div>
-                            <p style={{ margin: 0, fontSize: "0.85rem", fontWeight: 400, color: "#111827" }}>{event.event}</p>
-                            <p style={{ margin: "2px 0 0 0", fontSize: "0.75rem", color: "#6b7280" }}>
-                              {new Date(event.date).toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" })}
-                            </p>
+                        // 4. Shipped
+                        if ((statusIndex >= 3 || selectedOrder.returnRequest) && !hasEvent("shipped")) {
+                          allEvents.push({
+                            event: "Shipped",
+                            date: selectedOrder.updatedAt || selectedOrder.createdAt,
+                            color: "#10b981"
+                          });
+                        }
+
+                        // 5. Out for Delivery
+                        if ((statusIndex >= 4 || selectedOrder.returnRequest) && !hasEvent("out for delivery")) {
+                          allEvents.push({
+                            event: "Out for Delivery",
+                            date: selectedOrder.updatedAt || selectedOrder.createdAt,
+                            color: "#10b981"
+                          });
+                        }
+
+                        // 6. Delivered
+                        if ((statusIndex >= 5 || selectedOrder.returnRequest) && !hasEvent("delivered")) {
+                          allEvents.push({
+                            event: "Delivered",
+                            date: selectedOrder.updatedAt || selectedOrder.createdAt,
+                            color: "#10b981"
+                          });
+                        }
+
+                        // 7. Add all custom events from DB (Cancelled, manual status updates)
+                        if (selectedOrder.timeline && selectedOrder.timeline.length > 0) {
+                          selectedOrder.timeline.forEach((e: any) => {
+                            if (e.event === "Order Placed" || e.event.toLowerCase().includes("order placed")) return; // Skip dup
+
+                            let color = "#10b981";
+                            if (e.event.toLowerCase().includes("cancelled") || e.event.toLowerCase().includes("rejected") || e.event.toLowerCase().includes("failed")) {
+                              color = "#ef4444";
+                            } else if (e.event.toLowerCase().includes("return request") || e.event.toLowerCase().includes("pending")) {
+                              color = "#f59e0b";
+                            }
+
+                            allEvents.push({
+                              event: e.event,
+                              date: e.date || selectedOrder.updatedAt,
+                              color
+                            });
+                          });
+                        }
+
+                        // 8. Return Support
+                        if (selectedOrder.returnRequest && !hasEvent("return request")) {
+                          allEvents.push({
+                            event: "Return Requested",
+                            date: selectedOrder.returnRequest.createdAt,
+                            color: "#f59e0b"
+                          });
+                          if (selectedOrder.returnRequest.status !== "Pending") {
+                            allEvents.push({
+                              event: `Return ${selectedOrder.returnRequest.status}`,
+                              date: selectedOrder.returnRequest.updatedAt,
+                              color: selectedOrder.returnRequest.status === "Approved" ? "#10b981" : "#ef4444"
+                            });
+                          }
+                        }
+
+                        // 9. Refund Status Support
+                        if (selectedOrder.refundStatus === "Refunded" && !hasEvent("refund")) {
+                          allEvents.push({
+                            event: "Refund Processed",
+                            date: selectedOrder.updatedAt,
+                            color: "#10b981"
+                          });
+                        } else if (selectedOrder.refundStatus === "Pending" && !hasEvent("refund")) {
+                          allEvents.push({
+                            event: "Refund Pending",
+                            date: selectedOrder.updatedAt,
+                            color: "#f59e0b"
+                          });
+                        }
+
+                        // Sort chronologically
+                        allEvents.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+
+                        return allEvents.map((event, idx) => (
+                          <div key={idx} style={{ display: "flex", gap: "12px", position: "relative", zIndex: 1 }}>
+                            <div style={{ width: "10px", height: "10px", borderRadius: "50%", backgroundColor: event.color, marginTop: "4px", flexShrink: 0, boxShadow: `0 0 0 3px #fff, 0 0 0 4px ${event.color}` }}></div>
+                            <div>
+                              <p style={{ margin: 0, fontSize: "0.85rem", fontWeight: 400, color: "#111827" }}>{event.event}</p>
+                              <p style={{ margin: "2px 0 0 0", fontSize: "0.75rem", color: "#6b7280" }}>
+                                {new Date(event.date).toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" })}
+                              </p>
+                            </div>
                           </div>
-                        </div>
-                      ));
-                    })()}
+                        ));
+                      })()}
                     </div>
                   </div>
                 </div>
@@ -2237,266 +2236,266 @@ export default function AdminModals(props: any) {
             </div>
 
             {/* MOBILE ACCORDION LAYOUT */}
-              <div className={styles.showOnMobile} style={{ width: "100%", display: "flex", flexDirection: "column", gap: "15px" }}>
-                
-                {/* User Info Card */}
-                <div style={{ backgroundColor: "#f9fafb", padding: "16px", borderRadius: "8px", display: "flex", flexDirection: "column", gap: "8px" }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "4px" }}>
-                    <span style={{ fontSize: "1.3rem", color: "#111827", fontWeight: 400 }}>
-                      {selectedOrder.customerName ? selectedOrder.customerName.charAt(0).toUpperCase() + selectedOrder.customerName.slice(1).toLowerCase() : "N/A"}
-                    </span>
+            <div className={styles.showOnMobile} style={{ width: "100%", display: "flex", flexDirection: "column", gap: "15px" }}>
+
+              {/* User Info Card */}
+              <div style={{ backgroundColor: "#f9fafb", padding: "16px", borderRadius: "8px", display: "flex", flexDirection: "column", gap: "8px" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "4px" }}>
+                  <span style={{ fontSize: "1.3rem", color: "#111827", fontWeight: 400 }}>
+                    {selectedOrder.customerName ? selectedOrder.customerName.charAt(0).toUpperCase() + selectedOrder.customerName.slice(1).toLowerCase() : "N/A"}
+                  </span>
+                </div>
+                <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6b7280" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+                  <span style={{ fontSize: "0.85rem", color: "#4b5563" }}>{selectedOrder.customerEmail}</span>
+                </div>
+                <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6b7280" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
+                  <span style={{ fontSize: "0.85rem", color: "#4b5563" }}>{selectedOrder.customerPhone}</span>
+                </div>
+                <div style={{ display: "flex", alignItems: "flex-start", gap: "8px" }}>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6b7280" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginTop: "3px", flexShrink: 0 }}><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+                  <span style={{ fontSize: "0.85rem", color: "#4b5563", lineHeight: "1.4" }}>
+                    {typeof selectedOrder.shippingAddress === 'string'
+                      ? selectedOrder.shippingAddress
+                      : (selectedOrder.shippingAddress
+                        ? `${selectedOrder.shippingAddress.fullName || ''}, ${selectedOrder.shippingAddress.address || ''}, ${selectedOrder.shippingAddress.city || ''}, ${selectedOrder.shippingAddress.state || ''} ${selectedOrder.shippingAddress.zip || ''}`.replace(/(^[,\s]+)|([,\s]+$)/g, '')
+                        : "N/A"
+                      )
+                    }
+                  </span>
+                </div>
+              </div>
+
+              {/* ACCORDIONS */}
+              <div style={{ border: "1px solid #e5e7eb", borderRadius: "8px", overflow: "hidden" }}>
+
+                {/* Items Accordion */}
+                <div className={styles.mobileAccordionItem}>
+                  <div
+                    className={styles.mobileAccordionHeader}
+                    onClick={() => setOpenMobileAccordion(openMobileAccordion === "items" ? "" : "items")}
+                  >
+                    <h3 style={{ fontSize: "0.9rem", fontWeight: 400, margin: 0, color: "#111" }}>Items Purchased</h3>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ transform: openMobileAccordion === "items" ? "rotate(180deg)" : "rotate(0deg)", transition: "transform 0.2s" }}><path d="M6 9l6 6 6-6" /></svg>
                   </div>
-                  <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6b7280" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
-                    <span style={{ fontSize: "0.85rem", color: "#4b5563" }}>{selectedOrder.customerEmail}</span>
-                  </div>
-                  <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6b7280" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
-                    <span style={{ fontSize: "0.85rem", color: "#4b5563" }}>{selectedOrder.customerPhone}</span>
-                  </div>
-                  <div style={{ display: "flex", alignItems: "flex-start", gap: "8px" }}>
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6b7280" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginTop: "3px", flexShrink: 0 }}><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
-                    <span style={{ fontSize: "0.85rem", color: "#4b5563", lineHeight: "1.4" }}>
-                      {typeof selectedOrder.shippingAddress === 'string' 
-                        ? selectedOrder.shippingAddress 
-                        : (selectedOrder.shippingAddress 
-                            ? `${selectedOrder.shippingAddress.fullName || ''}, ${selectedOrder.shippingAddress.address || ''}, ${selectedOrder.shippingAddress.city || ''}, ${selectedOrder.shippingAddress.state || ''} ${selectedOrder.shippingAddress.zip || ''}`.replace(/(^[,\s]+)|([,\s]+$)/g, '')
-                            : "N/A"
-                          )
-                      }
-                    </span>
-                  </div>
+                  {openMobileAccordion === "items" && (
+                    <div className={styles.mobileAccordionContent}>
+                      <div style={{ display: "flex", flexDirection: "column", gap: "12px", maxHeight: "40vh", overflowY: "auto", paddingRight: "5px" }}>
+                        {selectedOrder.cartItems.map((item: any, idx: number) => (
+                          <div key={idx} style={{ display: "flex", alignItems: "flex-start", gap: "15px", borderBottom: "1px solid #f3f4f6", paddingBottom: "10px" }}>
+                            {item.image && (
+                              <img src={item.image} alt={item.name} style={{ width: "45px", height: "45px", objectFit: "cover", borderRadius: "4px", border: "1px solid #eaeaea" }} onError={(e) => { e.currentTarget.style.display = 'none'; }} />
+                            )}
+                            <div style={{ flex: 1 }}>
+                              <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                                <h4 style={{ margin: 0, fontSize: "0.85rem", fontWeight: 400, color: "#111" }}>{item.name}</h4>
+                                {(item.isGiftSet || item.name?.toLowerCase().includes('gift set')) && (
+                                  <span style={{ backgroundColor: "#fef3c7", color: "#b45309", fontSize: "0.65rem", fontWeight: 700, padding: "1px 6px", borderRadius: "4px" }}>
+                                    GIFT SET
+                                  </span>
+                                )}
+                              </div>
+                              <div style={{ display: "flex", alignItems: "center", marginTop: "4px", gap: "6px" }}>
+                                <span style={{ fontSize: "0.75rem", color: "#6b7280" }}>Size: {item.size || 'Standard'}</span>
+                                <span style={{ fontSize: "0.75rem", color: "#cbd5e1" }}>|</span>
+                                <span style={{ fontSize: "0.75rem", color: "#6b7280" }}>Qty: {item.quantity}</span>
+                                {(item.isGiftSet || item.giftSetDetails?.length > 0 || item.giftSetItems?.length > 0 || item.name?.toLowerCase().includes('gift set')) && (
+                                  <div style={{ marginTop: "6px", backgroundColor: "#f8fafc", padding: "6px 8px", borderRadius: "4px", border: "1px solid #e2e8f0" }}>
+                                    <span style={{ fontSize: "0.7rem", fontWeight: 600, color: "#64748b", textTransform: "uppercase" }}>Included Items:</span>
+                                    <div style={{ display: "flex", flexDirection: "column", gap: "4px", marginTop: "4px" }}>
+                                      {item.giftSetDetails && item.giftSetDetails.length > 0 ? (
+                                        item.giftSetDetails.map((sub: any, sIdx: number) => (
+                                          <div key={sIdx} style={{ fontSize: "0.75rem", color: "#334155", display: "flex", alignItems: "center", gap: "6px" }}>
+                                            {sub.imageFront && <img src={sub.imageFront} alt={sub.name} style={{ width: "16px", height: "16px", borderRadius: "2px", objectFit: "cover" }} />}
+                                            <span>{sub.name || sub}</span>
+                                          </div>
+                                        ))
+                                      ) : item.giftSetItems && item.giftSetItems.length > 0 ? (
+                                        item.giftSetItems.map((subName: any, sIdx: number) => (
+                                          <div key={sIdx} style={{ fontSize: "0.75rem", color: "#334155", display: "flex", alignItems: "center", gap: "6px" }}>
+                                            <span style={{ width: "6px", height: "6px", borderRadius: "50%", backgroundColor: "#94a3b8" }}></span>
+                                            <span>{typeof subName === 'string' ? subName : subName.name}</span>
+                                          </div>
+                                        ))
+                                      ) : (
+                                        <div style={{ fontSize: "0.75rem", color: "#64748b" }}>Custom Fragrance Set ({item.size || '3 items'})</div>
+                                      )}
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                            <span style={{ fontSize: "0.85rem", fontWeight: 400, color: "#111" }}>₹{(item.price * item.quantity).toLocaleString("en-IN")}</span>
+                          </div>
+                        ))}
+                      </div>
+
+                      <div style={{ borderTop: "1px solid #eaeaea", paddingTop: "15px", display: "flex", flexDirection: "column", gap: "8px", marginTop: "15px" }}>
+                        {(() => {
+                          const originalTotal = selectedOrder.cartItems.reduce((acc: number, item: any) => acc + (item.price * item.quantity), 0);
+                          const discount = originalTotal - selectedOrder.totalAmount;
+                          return (
+                            <>
+                              {discount > 0 && (
+                                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                                  <span style={{ fontSize: "0.85rem", color: "#6b7280" }}>Subtotal</span>
+                                  <span style={{ fontSize: "0.85rem", color: "#111" }}>₹{originalTotal.toLocaleString("en-IN")}</span>
+                                </div>
+                              )}
+                              {discount > 0 && (
+                                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                                  <span style={{ fontSize: "0.85rem", color: "#10b981", display: "flex", alignItems: "center", gap: "6px" }}>
+                                    Discount
+                                  </span>
+                                  <span style={{ fontSize: "0.85rem", color: "#10b981", fontWeight: 400 }}>-₹{discount.toLocaleString("en-IN")}</span>
+                                </div>
+                              )}
+                              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: discount > 0 ? "4px" : "0" }}>
+                                <span style={{ fontSize: "0.85rem", color: "#111", fontWeight: 400 }}>
+                                  Paid via {selectedOrder.paymentMethod === "Razorpay" ? "Online" : selectedOrder.paymentMethod}
+                                </span>
+                                <span style={{ fontSize: "1.1rem", fontWeight: 400, color: "#000" }}>₹{selectedOrder.totalAmount.toLocaleString("en-IN")}</span>
+                              </div>
+                            </>
+                          );
+                        })()}
+                      </div>
+                    </div>
+                  )}
                 </div>
 
-                {/* ACCORDIONS */}
-                <div style={{ border: "1px solid #e5e7eb", borderRadius: "8px", overflow: "hidden" }}>
-                  
-                  {/* Items Accordion */}
+                {/* Status Accordion */}
+                {(getValidNextStatuses(selectedOrder.status).length > 0 || ["Return Requested", "Returned", "Return Approved", "Cancelled", "Delivered"].includes(selectedOrder.status)) && (
                   <div className={styles.mobileAccordionItem}>
-                    <div 
-                      className={styles.mobileAccordionHeader} 
-                      onClick={() => setOpenMobileAccordion(openMobileAccordion === "items" ? "" : "items")}
+                    <div
+                      className={styles.mobileAccordionHeader}
+                      onClick={() => setOpenMobileAccordion(openMobileAccordion === "status" ? "" : "status")}
                     >
-                      <h3 style={{ fontSize: "0.9rem", fontWeight: 400, margin: 0, color: "#111" }}>Items Purchased</h3>
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ transform: openMobileAccordion === "items" ? "rotate(180deg)" : "rotate(0deg)", transition: "transform 0.2s" }}><path d="M6 9l6 6 6-6"/></svg>
+                      <h3 style={{ fontSize: "0.9rem", fontWeight: 400, margin: 0, color: "#111" }}>
+                        {getValidNextStatuses(selectedOrder.status).length > 0 && ["Return Requested", "Returned", "Return Approved", "Cancelled", "Delivered"].includes(selectedOrder.status)
+                          ? "Update & Refund Status"
+                          : getValidNextStatuses(selectedOrder.status).length > 0
+                            ? "Update Status"
+                            : "Refund Status"}
+                      </h3>
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ transform: openMobileAccordion === "status" ? "rotate(180deg)" : "rotate(0deg)", transition: "transform 0.2s" }}><path d="M6 9l6 6 6-6" /></svg>
                     </div>
-                    {openMobileAccordion === "items" && (
+                    {openMobileAccordion === "status" && (
                       <div className={styles.mobileAccordionContent}>
-                        <div style={{ display: "flex", flexDirection: "column", gap: "12px", maxHeight: "40vh", overflowY: "auto", paddingRight: "5px" }}>
-                          {selectedOrder.cartItems.map((item: any, idx: number) => (
-                            <div key={idx} style={{ display: "flex", alignItems: "flex-start", gap: "15px", borderBottom: "1px solid #f3f4f6", paddingBottom: "10px" }}>
-                              {item.image && (
-                                <img src={item.image} alt={item.name} style={{ width: "45px", height: "45px", objectFit: "cover", borderRadius: "4px", border: "1px solid #eaeaea" }} onError={(e) => { e.currentTarget.style.display = 'none'; }} />
-                              )}
-                              <div style={{ flex: 1 }}>
-                                <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-                                  <h4 style={{ margin: 0, fontSize: "0.85rem", fontWeight: 400, color: "#111" }}>{item.name}</h4>
-                                  {(item.isGiftSet || item.name?.toLowerCase().includes('gift set')) && (
-                                    <span style={{ backgroundColor: "#fef3c7", color: "#b45309", fontSize: "0.65rem", fontWeight: 700, padding: "1px 6px", borderRadius: "4px" }}>
-                                      GIFT SET
-                                    </span>
-                                  )}
-                                </div>
-                                <div style={{ display: "flex", alignItems: "center", marginTop: "4px", gap: "6px" }}>
-                                  <span style={{ fontSize: "0.75rem", color: "#6b7280" }}>Size: {item.size || 'Standard'}</span>
-                                  <span style={{ fontSize: "0.75rem", color: "#cbd5e1" }}>|</span>
-                                  <span style={{ fontSize: "0.75rem", color: "#6b7280" }}>Qty: {item.quantity}</span>
-                                  {(item.isGiftSet || item.giftSetDetails?.length > 0 || item.giftSetItems?.length > 0 || item.name?.toLowerCase().includes('gift set')) && (
-                                    <div style={{ marginTop: "6px", backgroundColor: "#f8fafc", padding: "6px 8px", borderRadius: "4px", border: "1px solid #e2e8f0" }}>
-                                      <span style={{ fontSize: "0.7rem", fontWeight: 600, color: "#64748b", textTransform: "uppercase" }}>Included Items:</span>
-                                      <div style={{ display: "flex", flexDirection: "column", gap: "4px", marginTop: "4px" }}>
-                                        {item.giftSetDetails && item.giftSetDetails.length > 0 ? (
-                                          item.giftSetDetails.map((sub: any, sIdx: number) => (
-                                            <div key={sIdx} style={{ fontSize: "0.75rem", color: "#334155", display: "flex", alignItems: "center", gap: "6px" }}>
-                                              {sub.imageFront && <img src={sub.imageFront} alt={sub.name} style={{ width: "16px", height: "16px", borderRadius: "2px", objectFit: "cover" }} />}
-                                              <span>{sub.name || sub}</span>
-                                            </div>
-                                          ))
-                                        ) : item.giftSetItems && item.giftSetItems.length > 0 ? (
-                                          item.giftSetItems.map((subName: any, sIdx: number) => (
-                                            <div key={sIdx} style={{ fontSize: "0.75rem", color: "#334155", display: "flex", alignItems: "center", gap: "6px" }}>
-                                              <span style={{ width: "6px", height: "6px", borderRadius: "50%", backgroundColor: "#94a3b8" }}></span>
-                                              <span>{typeof subName === 'string' ? subName : subName.name}</span>
-                                            </div>
-                                          ))
-                                        ) : (
-                                          <div style={{ fontSize: "0.75rem", color: "#64748b" }}>Custom Fragrance Set ({item.size || '3 items'})</div>
-                                        )}
-                                      </div>
-                                    </div>
-                                  )}
+                        <div style={{ display: "flex", flexDirection: "column", gap: "15px" }}>
+                          {getValidNextStatuses(selectedOrder.status).length > 0 && (
+                            <div>
+                              <label style={{ display: "block", fontSize: "0.8rem", fontWeight: 400, color: "#4b5563", marginBottom: "6px" }}>Order Status</label>
+                              <CustomStatusSelect
+                                currentStatus={selectedOrder.status}
+                                onSelect={(newStatus) => handleUpdateOrderStatus(selectedOrder._id, newStatus)}
+                                maxWidth="100%"
+                              />
+                            </div>
+                          )}
+
+                          {["Return Requested", "Returned", "Return Approved", "Cancelled", "Delivered"].includes(selectedOrder.status) && (
+                            <div>
+                              <label style={{ display: "block", fontSize: "0.8rem", fontWeight: 400, color: "#4b5563", marginBottom: "6px" }}>Refund Status</label>
+                              <CustomRefundSelect
+                                currentRefundStatus={selectedOrder.refundStatus || "Not Refunded"}
+                                onSelect={(newRefundStatus) => handleUpdateRefundStatus(selectedOrder._id, newRefundStatus)}
+                                maxWidth="100%"
+                              />
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Timeline Accordion */}
+                <div className={styles.mobileAccordionItem} style={{ borderBottom: "none" }}>
+                  <div
+                    className={styles.mobileAccordionHeader}
+                    onClick={() => setOpenMobileAccordion(openMobileAccordion === "timeline" ? "" : "timeline")}
+                  >
+                    <h3 style={{ fontSize: "0.9rem", fontWeight: 400, margin: 0, color: "#111" }}>Order Timeline</h3>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ transform: openMobileAccordion === "timeline" ? "rotate(180deg)" : "rotate(0deg)", transition: "transform 0.2s" }}><path d="M6 9l6 6 6-6" /></svg>
+                  </div>
+                  {openMobileAccordion === "timeline" && (
+                    <div className={styles.mobileAccordionContent}>
+                      <div style={{ maxHeight: "40vh", overflowY: "auto", paddingRight: "5px", paddingLeft: "10px" }}>
+                        <div style={{ display: "flex", flexDirection: "column", gap: "16px", position: "relative" }}>
+                          <div style={{ position: "absolute", left: "4px", top: "4px", bottom: "4px", width: "2px", backgroundColor: "#e5e7eb", zIndex: 0 }}></div>
+                          {(() => {
+                            const allEvents: any[] = [];
+                            const statusSequence = ["Pending", "Confirmed", "Packed", "Shipped", "Out for Delivery", "Delivered"];
+                            const statusIndex = statusSequence.indexOf(selectedOrder.status);
+
+                            allEvents.push({ event: "Order Placed", date: selectedOrder.createdAt || new Date().toISOString(), color: "#10b981" });
+
+                            const hasEvent = (match: string) => selectedOrder.timeline?.some((e: any) => e.event.toLowerCase().includes(match.toLowerCase()));
+
+                            if ((statusIndex >= 1 || selectedOrder.status === "Cancelled" || selectedOrder.returnRequest) && !hasEvent("confirmed")) {
+                              allEvents.push({ event: "Order Confirmed", date: selectedOrder.createdAt, color: "#10b981" });
+                            }
+                            if ((statusIndex >= 2 || selectedOrder.returnRequest) && !hasEvent("packed")) {
+                              allEvents.push({ event: "Order Packed", date: selectedOrder.updatedAt || selectedOrder.createdAt, color: "#10b981" });
+                            }
+                            if ((statusIndex >= 3 || selectedOrder.returnRequest) && !hasEvent("shipped")) {
+                              allEvents.push({ event: "Shipped", date: selectedOrder.updatedAt || selectedOrder.createdAt, color: "#10b981" });
+                            }
+                            if ((statusIndex >= 4 || selectedOrder.returnRequest) && !hasEvent("out for delivery")) {
+                              allEvents.push({ event: "Out for Delivery", date: selectedOrder.updatedAt || selectedOrder.createdAt, color: "#10b981" });
+                            }
+                            if ((statusIndex >= 5 || selectedOrder.returnRequest) && !hasEvent("delivered")) {
+                              allEvents.push({ event: "Delivered", date: selectedOrder.updatedAt || selectedOrder.createdAt, color: "#10b981" });
+                            }
+
+                            if (selectedOrder.timeline && selectedOrder.timeline.length > 0) {
+                              selectedOrder.timeline.forEach((e: any) => {
+                                if (e.event === "Order Placed" || e.event.toLowerCase().includes("order placed")) return;
+                                let color = "#10b981";
+                                if (e.event.toLowerCase().includes("cancelled") || e.event.toLowerCase().includes("rejected") || e.event.toLowerCase().includes("failed")) color = "#ef4444";
+                                else if (e.event.toLowerCase().includes("return request") || e.event.toLowerCase().includes("pending")) color = "#f59e0b";
+
+                                allEvents.push({ event: e.event, date: e.date || selectedOrder.updatedAt, color });
+                              });
+                            }
+
+                            if (selectedOrder.returnRequest && !hasEvent("return request")) {
+                              allEvents.push({ event: "Return Requested", date: selectedOrder.returnRequest.createdAt, color: "#f59e0b" });
+                              if (selectedOrder.returnRequest.status !== "Pending") {
+                                allEvents.push({ event: `Return ${selectedOrder.returnRequest.status}`, date: selectedOrder.returnRequest.updatedAt, color: selectedOrder.returnRequest.status === "Approved" ? "#10b981" : "#ef4444" });
+                              }
+                            }
+
+                            if (selectedOrder.refundStatus === "Refunded" && !hasEvent("refund")) {
+                              allEvents.push({ event: "Refund Processed", date: selectedOrder.updatedAt, color: "#10b981" });
+                            } else if (selectedOrder.refundStatus === "Pending" && !hasEvent("refund")) {
+                              allEvents.push({ event: "Refund Pending", date: selectedOrder.updatedAt, color: "#f59e0b" });
+                            }
+
+                            allEvents.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+
+                            return allEvents.map((event, idx) => (
+                              <div key={idx} style={{ display: "flex", gap: "12px", position: "relative", zIndex: 1 }}>
+                                <div style={{ width: "10px", height: "10px", borderRadius: "50%", backgroundColor: event.color, marginTop: "4px", flexShrink: 0, boxShadow: `0 0 0 3px #fff, 0 0 0 4px ${event.color}` }}></div>
+                                <div>
+                                  <p style={{ margin: 0, fontSize: "0.85rem", fontWeight: 400, color: "#111827" }}>{event.event}</p>
+                                  <p style={{ margin: "2px 0 0 0", fontSize: "0.75rem", color: "#6b7280" }}>
+                                    {new Date(event.date).toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" })}
+                                  </p>
                                 </div>
                               </div>
-                              <span style={{ fontSize: "0.85rem", fontWeight: 400, color: "#111" }}>₹{(item.price * item.quantity).toLocaleString("en-IN")}</span>
-                            </div>
-                          ))}
-                        </div>
-                        
-                        <div style={{ borderTop: "1px solid #eaeaea", paddingTop: "15px", display: "flex", flexDirection: "column", gap: "8px", marginTop: "15px" }}>
-                          {(() => {
-                            const originalTotal = selectedOrder.cartItems.reduce((acc: number, item: any) => acc + (item.price * item.quantity), 0);
-                            const discount = originalTotal - selectedOrder.totalAmount;
-                            return (
-                              <>
-                                {discount > 0 && (
-                                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                                    <span style={{ fontSize: "0.85rem", color: "#6b7280" }}>Subtotal</span>
-                                    <span style={{ fontSize: "0.85rem", color: "#111" }}>₹{originalTotal.toLocaleString("en-IN")}</span>
-                                  </div>
-                                )}
-                                {discount > 0 && (
-                                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                                    <span style={{ fontSize: "0.85rem", color: "#10b981", display: "flex", alignItems: "center", gap: "6px" }}>
-                                      Discount
-                                    </span>
-                                    <span style={{ fontSize: "0.85rem", color: "#10b981", fontWeight: 400 }}>-₹{discount.toLocaleString("en-IN")}</span>
-                                  </div>
-                                )}
-                                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: discount > 0 ? "4px" : "0" }}>
-                                  <span style={{ fontSize: "0.85rem", color: "#111", fontWeight: 400 }}>
-                                    Paid via {selectedOrder.paymentMethod === "Razorpay" ? "Online" : selectedOrder.paymentMethod}
-                                  </span>
-                                  <span style={{ fontSize: "1.1rem", fontWeight: 400, color: "#000" }}>₹{selectedOrder.totalAmount.toLocaleString("en-IN")}</span>
-                                </div>
-                              </>
-                            );
+                            ));
                           })()}
                         </div>
                       </div>
-                    )}
-                  </div>
-
-                  {/* Status Accordion */}
-                  {(getValidNextStatuses(selectedOrder.status).length > 0 || ["Return Requested", "Returned", "Return Approved", "Cancelled", "Delivered"].includes(selectedOrder.status)) && (
-                    <div className={styles.mobileAccordionItem}>
-                      <div 
-                        className={styles.mobileAccordionHeader} 
-                        onClick={() => setOpenMobileAccordion(openMobileAccordion === "status" ? "" : "status")}
-                      >
-                        <h3 style={{ fontSize: "0.9rem", fontWeight: 400, margin: 0, color: "#111" }}>
-                          {getValidNextStatuses(selectedOrder.status).length > 0 && ["Return Requested", "Returned", "Return Approved", "Cancelled", "Delivered"].includes(selectedOrder.status)
-                            ? "Update & Refund Status"
-                            : getValidNextStatuses(selectedOrder.status).length > 0
-                            ? "Update Status"
-                            : "Refund Status"}
-                        </h3>
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ transform: openMobileAccordion === "status" ? "rotate(180deg)" : "rotate(0deg)", transition: "transform 0.2s" }}><path d="M6 9l6 6 6-6"/></svg>
-                      </div>
-                      {openMobileAccordion === "status" && (
-                        <div className={styles.mobileAccordionContent}>
-                          <div style={{ display: "flex", flexDirection: "column", gap: "15px" }}>
-                            {getValidNextStatuses(selectedOrder.status).length > 0 && (
-                              <div>
-                                <label style={{ display: "block", fontSize: "0.8rem", fontWeight: 400, color: "#4b5563", marginBottom: "6px" }}>Order Status</label>
-                                <CustomStatusSelect
-                                  currentStatus={selectedOrder.status}
-                                  onSelect={(newStatus) => handleUpdateOrderStatus(selectedOrder._id, newStatus)}
-                                  maxWidth="100%"
-                                />
-                              </div>
-                            )}
-                            
-                            {["Return Requested", "Returned", "Return Approved", "Cancelled", "Delivered"].includes(selectedOrder.status) && (
-                              <div>
-                                <label style={{ display: "block", fontSize: "0.8rem", fontWeight: 400, color: "#4b5563", marginBottom: "6px" }}>Refund Status</label>
-                                <CustomRefundSelect
-                                  currentRefundStatus={selectedOrder.refundStatus || "Not Refunded"}
-                                  onSelect={(newRefundStatus) => handleUpdateRefundStatus(selectedOrder._id, newRefundStatus)}
-                                  maxWidth="100%"
-                                />
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      )}
                     </div>
                   )}
-
-                  {/* Timeline Accordion */}
-                  <div className={styles.mobileAccordionItem} style={{ borderBottom: "none" }}>
-                    <div 
-                      className={styles.mobileAccordionHeader} 
-                      onClick={() => setOpenMobileAccordion(openMobileAccordion === "timeline" ? "" : "timeline")}
-                    >
-                      <h3 style={{ fontSize: "0.9rem", fontWeight: 400, margin: 0, color: "#111" }}>Order Timeline</h3>
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ transform: openMobileAccordion === "timeline" ? "rotate(180deg)" : "rotate(0deg)", transition: "transform 0.2s" }}><path d="M6 9l6 6 6-6"/></svg>
-                    </div>
-                    {openMobileAccordion === "timeline" && (
-                      <div className={styles.mobileAccordionContent}>
-                        <div style={{ maxHeight: "40vh", overflowY: "auto", paddingRight: "5px", paddingLeft: "10px" }}>
-                          <div style={{ display: "flex", flexDirection: "column", gap: "16px", position: "relative" }}>
-                            <div style={{ position: "absolute", left: "4px", top: "4px", bottom: "4px", width: "2px", backgroundColor: "#e5e7eb", zIndex: 0 }}></div>
-                            {(() => {
-                              const allEvents: any[] = [];
-                              const statusSequence = ["Pending", "Confirmed", "Packed", "Shipped", "Out for Delivery", "Delivered"];
-                              const statusIndex = statusSequence.indexOf(selectedOrder.status);
-                              
-                              allEvents.push({ event: "Order Placed", date: selectedOrder.createdAt || new Date().toISOString(), color: "#10b981" });
-                              
-                              const hasEvent = (match: string) => selectedOrder.timeline?.some((e: any) => e.event.toLowerCase().includes(match.toLowerCase()));
-
-                              if ((statusIndex >= 1 || selectedOrder.status === "Cancelled" || selectedOrder.returnRequest) && !hasEvent("confirmed")) {
-                                allEvents.push({ event: "Order Confirmed", date: selectedOrder.createdAt, color: "#10b981" });
-                              }
-                              if ((statusIndex >= 2 || selectedOrder.returnRequest) && !hasEvent("packed")) {
-                                allEvents.push({ event: "Order Packed", date: selectedOrder.updatedAt || selectedOrder.createdAt, color: "#10b981" });
-                              }
-                              if ((statusIndex >= 3 || selectedOrder.returnRequest) && !hasEvent("shipped")) {
-                                allEvents.push({ event: "Shipped", date: selectedOrder.updatedAt || selectedOrder.createdAt, color: "#10b981" });
-                              }
-                              if ((statusIndex >= 4 || selectedOrder.returnRequest) && !hasEvent("out for delivery")) {
-                                allEvents.push({ event: "Out for Delivery", date: selectedOrder.updatedAt || selectedOrder.createdAt, color: "#10b981" });
-                              }
-                              if ((statusIndex >= 5 || selectedOrder.returnRequest) && !hasEvent("delivered")) {
-                                allEvents.push({ event: "Delivered", date: selectedOrder.updatedAt || selectedOrder.createdAt, color: "#10b981" });
-                              }
-
-                              if (selectedOrder.timeline && selectedOrder.timeline.length > 0) {
-                                selectedOrder.timeline.forEach((e: any) => {
-                                  if (e.event === "Order Placed" || e.event.toLowerCase().includes("order placed")) return;
-                                  let color = "#10b981"; 
-                                  if (e.event.toLowerCase().includes("cancelled") || e.event.toLowerCase().includes("rejected") || e.event.toLowerCase().includes("failed")) color = "#ef4444"; 
-                                  else if (e.event.toLowerCase().includes("return request") || e.event.toLowerCase().includes("pending")) color = "#f59e0b"; 
-                                  
-                                  allEvents.push({ event: e.event, date: e.date || selectedOrder.updatedAt, color });
-                                });
-                              }
-
-                              if (selectedOrder.returnRequest && !hasEvent("return request")) {
-                                allEvents.push({ event: "Return Requested", date: selectedOrder.returnRequest.createdAt, color: "#f59e0b" });
-                                if (selectedOrder.returnRequest.status !== "Pending") {
-                                   allEvents.push({ event: `Return ${selectedOrder.returnRequest.status}`, date: selectedOrder.returnRequest.updatedAt, color: selectedOrder.returnRequest.status === "Approved" ? "#10b981" : "#ef4444" });
-                                }
-                              }
-                              
-                              if (selectedOrder.refundStatus === "Refunded" && !hasEvent("refund")) {
-                                allEvents.push({ event: "Refund Processed", date: selectedOrder.updatedAt, color: "#10b981" });
-                              } else if (selectedOrder.refundStatus === "Pending" && !hasEvent("refund")) {
-                                 allEvents.push({ event: "Refund Pending", date: selectedOrder.updatedAt, color: "#f59e0b" });
-                              }
-
-                              allEvents.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
-
-                              return allEvents.map((event, idx) => (
-                                <div key={idx} style={{ display: "flex", gap: "12px", position: "relative", zIndex: 1 }}>
-                                  <div style={{ width: "10px", height: "10px", borderRadius: "50%", backgroundColor: event.color, marginTop: "4px", flexShrink: 0, boxShadow: `0 0 0 3px #fff, 0 0 0 4px ${event.color}` }}></div>
-                                  <div>
-                                    <p style={{ margin: 0, fontSize: "0.85rem", fontWeight: 400, color: "#111827" }}>{event.event}</p>
-                                    <p style={{ margin: "2px 0 0 0", fontSize: "0.75rem", color: "#6b7280" }}>
-                                      {new Date(event.date).toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" })}
-                                    </p>
-                                  </div>
-                                </div>
-                              ));
-                            })()}
-                          </div>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-
                 </div>
+
               </div>
+            </div>
           </div>
         </div>
       )}
@@ -2513,7 +2512,7 @@ export default function AdminModals(props: any) {
               </svg>
               <h3>Edit Category</h3>
             </div>
-            
+
             <div style={{ flex: 1, overflowY: "auto", padding: "0 5px", marginTop: "15px", display: "flex", flexDirection: "column", gap: "20px" }}>
               <div>
                 <label style={{ display: "block", fontSize: "0.85rem", fontWeight: 400, marginBottom: "8px", color: "#374151" }}>Category Name</label>
@@ -2779,12 +2778,12 @@ export default function AdminModals(props: any) {
 
             <div style={{ padding: "24px", display: "flex", flexDirection: "column", gap: "16px" }}>
               <p style={{ margin: 0, fontSize: "0.9rem", color: "#64748b" }}>
-                {returnStatusAction.newStatus === "Approved" 
+                {returnStatusAction.newStatus === "Approved"
                   ? "You are approving this return request. Optionally, provide a note to the customer with instructions on what to do next (e.g. tracking info, timeline)."
                   : "You are rejecting this return request. Please provide a reason to the customer explaining why the claim was denied."
                 }
               </p>
-              
+
               <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
                 <label style={{ fontSize: "0.82rem", fontWeight: 400, color: "#475569" }}>
                   {returnStatusAction.newStatus === "Approved" ? "Note to Customer (Optional)" : "Reason for Rejection (Required)"}
