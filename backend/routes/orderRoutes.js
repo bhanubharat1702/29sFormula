@@ -11,6 +11,7 @@ import { invalidateProductsCache } from "../utils/cache.js";
 import { sendEmail } from "../utils/emailService.js";
 import { getBrandInfo } from "../utils/brandHelper.js";
 import Razorpay from "razorpay";
+import { getNextOrderId } from "../models/Counter.js";
 
 const router = express.Router();
 
@@ -408,16 +409,7 @@ router.post("/api/orders", async (req, res) => {
       }
     }
 
-    let orderIdNum = 1001;
-    const lastOrder = await Order.findOne({ orderId: /^ORD-\d+$/ }).sort({ _id: -1 });
-    if (lastOrder && lastOrder.orderId) {
-      const parts = lastOrder.orderId.split("-");
-      const lastNum = parseInt(parts[1], 10);
-      if (!isNaN(lastNum)) {
-        orderIdNum = lastNum + 1;
-      }
-    }
-    const orderId = `ORD-${orderIdNum}`;
+    const orderId = await getNextOrderId();
 
     const newOrder = new Order({
       orderId,
@@ -1012,16 +1004,7 @@ router.post("/api/orders/razorpay-verify", async (req, res) => {
       }
     }
 
-    let orderIdNum = 1001;
-    const lastOrder = await Order.findOne({ orderId: /^ORD-\d+$/ }).sort({ _id: -1 });
-    if (lastOrder && lastOrder.orderId) {
-      const parts = lastOrder.orderId.split("-");
-      const lastNum = parseInt(parts[1], 10);
-      if (!isNaN(lastNum)) {
-        orderIdNum = lastNum + 1;
-      }
-    }
-    const orderId = `ORD-${orderIdNum}`;
+    const orderId = await getNextOrderId();
 
     const resolvedCartItems = [];
     if (orderPayload.cartItems && Array.isArray(orderPayload.cartItems)) {

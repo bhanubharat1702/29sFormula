@@ -181,23 +181,17 @@ const seedSettings = async () => {
 };
 
 export const connectDB = async () => {
-if (!mongoURL) {
-  console.warn("Warning: mongoURL is not defined in the .env file.");
-} else {
-  mongoose
-    .connect(mongoURL)
-    .then(() => {
+  if (!mongoURL) {
+    console.warn("Warning: mongoURL is not defined in the .env file.");
+  } else {
+    try {
+      await mongoose.connect(mongoURL);
       console.log("Connected to MongoDB successfully!");
-      // Seeding calls disabled to keep database clean as requested:
-      // seedDefaultProducts();
-      // seedSettings();
-      // seedCustomers();
-    })
-    .catch((err) => {
+    } catch (err) {
       console.error("Failed to connect to MongoDB:", err.message);
       if (mongoURL.includes("<") && mongoURL.includes(">")) {
         console.warn("Tip: It looks like your mongoURL contains '<' and '>' brackets around the password. Make sure to remove them in the .env file (e.g., replace <1234567890bhanu> with 1234567890bhanu).");
       }
-    });
-}
+    }
+  }
 };
