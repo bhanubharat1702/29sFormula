@@ -101,6 +101,31 @@ router.post("/api/settings", async (req, res) => {
     if (req.body.heroManifestoFontSize !== undefined) settings.heroManifestoFontSize = req.body.heroManifestoFontSize;
     if (req.body.heroManifestoFontAlignment !== undefined) settings.heroManifestoFontAlignment = req.body.heroManifestoFontAlignment;
     if (req.body.heroManifestoFontWeight !== undefined) settings.heroManifestoFontWeight = req.body.heroManifestoFontWeight;
+
+    // Mobile Hero Layout Fields
+    if (req.body.mobileHeroTemplate !== undefined) settings.mobileHeroTemplate = req.body.mobileHeroTemplate;
+    if (req.body.mobileHeroTitle !== undefined) settings.mobileHeroTitle = req.body.mobileHeroTitle;
+    if (req.body.mobileHeroTitleFontType !== undefined) settings.mobileHeroTitleFontType = req.body.mobileHeroTitleFontType;
+    if (req.body.mobileHeroTitleFontColor !== undefined) settings.mobileHeroTitleFontColor = req.body.mobileHeroTitleFontColor;
+    if (req.body.mobileHeroTitleFontSize !== undefined) settings.mobileHeroTitleFontSize = req.body.mobileHeroTitleFontSize;
+    if (req.body.mobileHeroTitleFontAlignment !== undefined) settings.mobileHeroTitleFontAlignment = req.body.mobileHeroTitleFontAlignment;
+    if (req.body.mobileHeroTitleFontWeight !== undefined) settings.mobileHeroTitleFontWeight = req.body.mobileHeroTitleFontWeight;
+    if (req.body.showMobileHeroTitle !== undefined) settings.showMobileHeroTitle = req.body.showMobileHeroTitle;
+
+    if (req.body.mobileHeroManifesto !== undefined) settings.mobileHeroManifesto = req.body.mobileHeroManifesto;
+    if (req.body.mobileHeroManifestoFontType !== undefined) settings.mobileHeroManifestoFontType = req.body.mobileHeroManifestoFontType;
+    if (req.body.mobileHeroManifestoFontColor !== undefined) settings.mobileHeroManifestoFontColor = req.body.mobileHeroManifestoFontColor;
+    if (req.body.mobileHeroManifestoFontSize !== undefined) settings.mobileHeroManifestoFontSize = req.body.mobileHeroManifestoFontSize;
+    if (req.body.mobileHeroManifestoFontAlignment !== undefined) settings.mobileHeroManifestoFontAlignment = req.body.mobileHeroManifestoFontAlignment;
+    if (req.body.mobileHeroManifestoFontWeight !== undefined) settings.mobileHeroManifestoFontWeight = req.body.mobileHeroManifestoFontWeight;
+    if (req.body.showMobileHeroManifesto !== undefined) settings.showMobileHeroManifesto = req.body.showMobileHeroManifesto;
+
+    if (req.body.mobileHeroButtonText !== undefined) settings.mobileHeroButtonText = req.body.mobileHeroButtonText;
+    if (req.body.mobileHeroButtonStyle !== undefined) settings.mobileHeroButtonStyle = req.body.mobileHeroButtonStyle;
+    if (req.body.mobileHeroButtonSize !== undefined) settings.mobileHeroButtonSize = req.body.mobileHeroButtonSize;
+    if (req.body.mobileHeroButtonColor !== undefined) settings.mobileHeroButtonColor = req.body.mobileHeroButtonColor;
+    if (req.body.mobileHeroButtonTextColor !== undefined) settings.mobileHeroButtonTextColor = req.body.mobileHeroButtonTextColor;
+    if (req.body.showMobileHeroButton !== undefined) settings.showMobileHeroButton = req.body.showMobileHeroButton;
                         
     // Product Preview Page settings
     if (req.body.showProductReviews !== undefined) settings.showProductReviews = req.body.showProductReviews;

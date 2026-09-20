@@ -76,4 +76,29 @@ export interface LayoutCustomizationConfig {
   bgColor?: string;
   bgImage?: string;
   bgVideo?: string;
+
+  // Mobile-specific Layout Properties (Unlinked)
+  mobileLayoutTemplate?: string;
+  mobileTitleText?: string;
+  mobileTitleFontType?: string;
+  mobileTitleFontColor?: string;
+  mobileTitleFontSize?: string;
+  mobileTitleFontAlignment?: string;
+  mobileTitleFontWeight?: string;
+  showMobileHeroTitle?: boolean;
+
+  mobileManifestoText?: string;
+  mobileManifestoFontType?: string;
+  mobileManifestoFontColor?: string;
+  mobileManifestoFontSize?: string;
+  mobileManifestoFontAlignment?: string;
+  mobileManifestoFontWeight?: string;
+  showMobileHeroManifesto?: boolean;
+
+  mobileButtonText?: string;
+  mobileButtonStyle?: string;
+  mobileButtonSize?: string;
+  mobileButtonColor?: string;
+  mobileButtonTextColor?: string;
+  showMobileHeroButton?: boolean;
 }

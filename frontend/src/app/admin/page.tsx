@@ -293,6 +293,31 @@ export default function AdminDashboard() {
   const [heroManifestoFontAlignment, setHeroManifestoFontAlignment] = useState<string>("left");
   const [heroManifestoFontWeight, setHeroManifestoFontWeight] = useState<string>("500");
 
+  // Mobile Hero Layout States (Completely Unlinked from Desktop)
+  const [mobileHeroTemplate, setMobileHeroTemplate] = useState<string>("center");
+  const [mobileHeroTitle, setMobileHeroTitle] = useState<string>("");
+  const [mobileHeroTitleFontType, setMobileHeroTitleFontType] = useState<string>("Outfit");
+  const [mobileHeroTitleFontColor, setMobileHeroTitleFontColor] = useState<string>("#111827");
+  const [mobileHeroTitleFontSize, setMobileHeroTitleFontSize] = useState<string>("2.5rem");
+  const [mobileHeroTitleFontAlignment, setMobileHeroTitleFontAlignment] = useState<string>("center");
+  const [mobileHeroTitleFontWeight, setMobileHeroTitleFontWeight] = useState<string>("700");
+  const [showMobileHeroTitle, setShowMobileHeroTitle] = useState<boolean>(true);
+
+  const [mobileHeroManifesto, setMobileHeroManifesto] = useState<string>("");
+  const [mobileHeroManifestoFontType, setMobileHeroManifestoFontType] = useState<string>("Outfit");
+  const [mobileHeroManifestoFontColor, setMobileHeroManifestoFontColor] = useState<string>("#ffffff");
+  const [mobileHeroManifestoFontSize, setMobileHeroManifestoFontSize] = useState<string>("0.85rem");
+  const [mobileHeroManifestoFontAlignment, setMobileHeroManifestoFontAlignment] = useState<string>("center");
+  const [mobileHeroManifestoFontWeight, setMobileHeroManifestoFontWeight] = useState<string>("500");
+  const [showMobileHeroManifesto, setShowMobileHeroManifesto] = useState<boolean>(true);
+
+  const [mobileHeroButtonText, setMobileHeroButtonText] = useState<string>("Shop Now");
+  const [mobileHeroButtonStyle, setMobileHeroButtonStyle] = useState<string>("solid");
+  const [mobileHeroButtonSize, setMobileHeroButtonSize] = useState<string>("sm");
+  const [mobileHeroButtonColor, setMobileHeroButtonColor] = useState<string>("");
+  const [mobileHeroButtonTextColor, setMobileHeroButtonTextColor] = useState<string>("#ffffff");
+  const [showMobileHeroButton, setShowMobileHeroButton] = useState<boolean>(true);
+
 
 
 
@@ -462,6 +487,29 @@ export default function AdminDashboard() {
       heroButtonSize: data.heroButtonSize || "md",
       heroButtonColor: data.heroButtonColor || "",
       heroButtonTextColor: data.heroButtonTextColor || "#ffffff",
+      mobileHeroTemplate: data.mobileHeroTemplate || data.heroTemplate || "center",
+      mobileHeroTitle: data.mobileHeroTitle !== undefined ? data.mobileHeroTitle : "",
+      mobileHeroTitleFontType: data.mobileHeroTitleFontType || data.heroTitleFontType || "Outfit",
+      mobileHeroTitleFontColor: data.mobileHeroTitleFontColor || data.heroTitleFontColor || "#111827",
+      mobileHeroTitleFontSize: data.mobileHeroTitleFontSize || "2.5rem",
+      mobileHeroTitleFontAlignment: data.mobileHeroTitleFontAlignment || data.heroTitleFontAlignment || "center",
+      mobileHeroTitleFontWeight: data.mobileHeroTitleFontWeight || data.heroTitleFontWeight || "700",
+      showMobileHeroTitle: data.showMobileHeroTitle !== undefined ? data.showMobileHeroTitle : true,
+
+      mobileHeroManifesto: data.mobileHeroManifesto !== undefined ? data.mobileHeroManifesto : "",
+      mobileHeroManifestoFontType: data.mobileHeroManifestoFontType || data.heroManifestoFontType || "Outfit",
+      mobileHeroManifestoFontColor: data.mobileHeroManifestoFontColor || data.heroManifestoFontColor || "#ffffff",
+      mobileHeroManifestoFontSize: data.mobileHeroManifestoFontSize || "0.85rem",
+      mobileHeroManifestoFontAlignment: data.mobileHeroManifestoFontAlignment || data.heroManifestoFontAlignment || "center",
+      mobileHeroManifestoFontWeight: data.mobileHeroManifestoFontWeight || data.heroManifestoFontWeight || "500",
+      showMobileHeroManifesto: data.showMobileHeroManifesto !== undefined ? data.showMobileHeroManifesto : true,
+
+      mobileHeroButtonText: data.mobileHeroButtonText || data.heroButtonText || "Shop Now",
+      mobileHeroButtonStyle: data.mobileHeroButtonStyle || data.heroButtonStyle || "solid",
+      mobileHeroButtonSize: data.mobileHeroButtonSize || "sm",
+      mobileHeroButtonColor: data.mobileHeroButtonColor !== undefined ? data.mobileHeroButtonColor : "",
+      mobileHeroButtonTextColor: data.mobileHeroButtonTextColor || data.heroButtonTextColor || "#ffffff",
+      showMobileHeroButton: data.showMobileHeroButton !== undefined ? data.showMobileHeroButton : true,
       videoTitle: data.videoTitle || "",
       videoSubtitle: data.videoSubtitle || "",
       videoUrl: data.videoUrl || "",
@@ -584,6 +632,29 @@ export default function AdminDashboard() {
     heroButtonSize !== originalSettings.heroButtonSize ||
     heroButtonColor !== originalSettings.heroButtonColor ||
     heroButtonTextColor !== originalSettings.heroButtonTextColor ||
+    mobileHeroTemplate !== originalSettings.mobileHeroTemplate ||
+    mobileHeroTitle !== originalSettings.mobileHeroTitle ||
+    mobileHeroTitleFontType !== originalSettings.mobileHeroTitleFontType ||
+    mobileHeroTitleFontColor !== originalSettings.mobileHeroTitleFontColor ||
+    mobileHeroTitleFontSize !== originalSettings.mobileHeroTitleFontSize ||
+    mobileHeroTitleFontAlignment !== originalSettings.mobileHeroTitleFontAlignment ||
+    mobileHeroTitleFontWeight !== originalSettings.mobileHeroTitleFontWeight ||
+    showMobileHeroTitle !== originalSettings.showMobileHeroTitle ||
+
+    mobileHeroManifesto !== originalSettings.mobileHeroManifesto ||
+    mobileHeroManifestoFontType !== originalSettings.mobileHeroManifestoFontType ||
+    mobileHeroManifestoFontColor !== originalSettings.mobileHeroManifestoFontColor ||
+    mobileHeroManifestoFontSize !== originalSettings.mobileHeroManifestoFontSize ||
+    mobileHeroManifestoFontAlignment !== originalSettings.mobileHeroManifestoFontAlignment ||
+    mobileHeroManifestoFontWeight !== originalSettings.mobileHeroManifestoFontWeight ||
+    showMobileHeroManifesto !== originalSettings.showMobileHeroManifesto ||
+
+    mobileHeroButtonText !== originalSettings.mobileHeroButtonText ||
+    mobileHeroButtonStyle !== originalSettings.mobileHeroButtonStyle ||
+    mobileHeroButtonSize !== originalSettings.mobileHeroButtonSize ||
+    mobileHeroButtonColor !== originalSettings.mobileHeroButtonColor ||
+    mobileHeroButtonTextColor !== originalSettings.mobileHeroButtonTextColor ||
+    showMobileHeroButton !== originalSettings.showMobileHeroButton ||
     videoTitle !== originalSettings.videoTitle ||
     videoSubtitle !== originalSettings.videoSubtitle ||
     videoUrl !== originalSettings.videoUrl ||
@@ -809,6 +880,31 @@ export default function AdminDashboard() {
         setHeroButtonSize(data.heroButtonSize || "md");
         setHeroButtonColor(data.heroButtonColor || "");
         setHeroButtonTextColor(data.heroButtonTextColor || "#ffffff");
+
+        // Mobile hero layout setters (unlinked)
+        setMobileHeroTemplate(data.mobileHeroTemplate || data.heroTemplate || "center");
+        setMobileHeroTitle(data.mobileHeroTitle !== undefined ? data.mobileHeroTitle : "");
+        setMobileHeroTitleFontType(data.mobileHeroTitleFontType || data.heroTitleFontType || "Outfit");
+        setMobileHeroTitleFontColor(data.mobileHeroTitleFontColor || data.heroTitleFontColor || "#111827");
+        setMobileHeroTitleFontSize(data.mobileHeroTitleFontSize || "2.5rem");
+        setMobileHeroTitleFontAlignment(data.mobileHeroTitleFontAlignment || data.heroTitleFontAlignment || "center");
+        setMobileHeroTitleFontWeight(data.mobileHeroTitleFontWeight || data.heroTitleFontWeight || "700");
+        setShowMobileHeroTitle(data.showMobileHeroTitle !== undefined ? data.showMobileHeroTitle : true);
+
+        setMobileHeroManifesto(data.mobileHeroManifesto !== undefined ? data.mobileHeroManifesto : "");
+        setMobileHeroManifestoFontType(data.mobileHeroManifestoFontType || data.heroManifestoFontType || "Outfit");
+        setMobileHeroManifestoFontColor(data.mobileHeroManifestoFontColor || data.heroManifestoFontColor || "#ffffff");
+        setMobileHeroManifestoFontSize(data.mobileHeroManifestoFontSize || "0.85rem");
+        setMobileHeroManifestoFontAlignment(data.mobileHeroManifestoFontAlignment || data.heroManifestoFontAlignment || "center");
+        setMobileHeroManifestoFontWeight(data.mobileHeroManifestoFontWeight || data.heroManifestoFontWeight || "500");
+        setShowMobileHeroManifesto(data.showMobileHeroManifesto !== undefined ? data.showMobileHeroManifesto : true);
+
+        setMobileHeroButtonText(data.mobileHeroButtonText || data.heroButtonText || "Shop Now");
+        setMobileHeroButtonStyle(data.mobileHeroButtonStyle || data.heroButtonStyle || "solid");
+        setMobileHeroButtonSize(data.mobileHeroButtonSize || "sm");
+        setMobileHeroButtonColor(data.mobileHeroButtonColor !== undefined ? data.mobileHeroButtonColor : "");
+        setMobileHeroButtonTextColor(data.mobileHeroButtonTextColor || data.heroButtonTextColor || "#ffffff");
+        setShowMobileHeroButton(data.showMobileHeroButton !== undefined ? data.showMobileHeroButton : true);
         setVideoTitle(data.videoTitle || "");
         setVideoSubtitle(data.videoSubtitle || "");
         setVideoUrl(data.videoUrl || "");
@@ -1123,6 +1219,31 @@ export default function AdminDashboard() {
         heroButtonSize,
         heroButtonColor,
         heroButtonTextColor,
+
+        // Mobile Hero Layout Payload
+        mobileHeroTemplate,
+        mobileHeroTitle,
+        mobileHeroTitleFontType,
+        mobileHeroTitleFontColor,
+        mobileHeroTitleFontSize,
+        mobileHeroTitleFontAlignment,
+        mobileHeroTitleFontWeight,
+        showMobileHeroTitle,
+
+        mobileHeroManifesto,
+        mobileHeroManifestoFontType,
+        mobileHeroManifestoFontColor,
+        mobileHeroManifestoFontSize,
+        mobileHeroManifestoFontAlignment,
+        mobileHeroManifestoFontWeight,
+        showMobileHeroManifesto,
+
+        mobileHeroButtonText,
+        mobileHeroButtonStyle,
+        mobileHeroButtonSize,
+        mobileHeroButtonColor,
+        mobileHeroButtonTextColor,
+        showMobileHeroButton,
         videoTitle,
         videoSubtitle,
         videoUrl,
@@ -1220,6 +1341,30 @@ export default function AdminDashboard() {
       setHeroButtonSize(originalSettings.heroButtonSize || "md");
       setHeroButtonColor(originalSettings.heroButtonColor || "");
       setHeroButtonTextColor(originalSettings.heroButtonTextColor || "#ffffff");
+
+      setMobileHeroTemplate(originalSettings.mobileHeroTemplate || originalSettings.heroTemplate || "center");
+      setMobileHeroTitle(originalSettings.mobileHeroTitle !== undefined ? originalSettings.mobileHeroTitle : "");
+      setMobileHeroTitleFontType(originalSettings.mobileHeroTitleFontType || originalSettings.heroTitleFontType || "Outfit");
+      setMobileHeroTitleFontColor(originalSettings.mobileHeroTitleFontColor || originalSettings.heroTitleFontColor || "#111827");
+      setMobileHeroTitleFontSize(originalSettings.mobileHeroTitleFontSize || "2.5rem");
+      setMobileHeroTitleFontAlignment(originalSettings.mobileHeroTitleFontAlignment || originalSettings.heroTitleFontAlignment || "center");
+      setMobileHeroTitleFontWeight(originalSettings.mobileHeroTitleFontWeight || originalSettings.heroTitleFontWeight || "700");
+      setShowMobileHeroTitle(originalSettings.showMobileHeroTitle !== undefined ? originalSettings.showMobileHeroTitle : true);
+
+      setMobileHeroManifesto(originalSettings.mobileHeroManifesto !== undefined ? originalSettings.mobileHeroManifesto : "");
+      setMobileHeroManifestoFontType(originalSettings.mobileHeroManifestoFontType || originalSettings.heroManifestoFontType || "Outfit");
+      setMobileHeroManifestoFontColor(originalSettings.mobileHeroManifestoFontColor || originalSettings.heroManifestoFontColor || "#ffffff");
+      setMobileHeroManifestoFontSize(originalSettings.mobileHeroManifestoFontSize || "0.85rem");
+      setMobileHeroManifestoFontAlignment(originalSettings.mobileHeroManifestoFontAlignment || originalSettings.heroManifestoFontAlignment || "center");
+      setMobileHeroManifestoFontWeight(originalSettings.mobileHeroManifestoFontWeight || originalSettings.heroManifestoFontWeight || "500");
+      setShowMobileHeroManifesto(originalSettings.showMobileHeroManifesto !== undefined ? originalSettings.showMobileHeroManifesto : true);
+
+      setMobileHeroButtonText(originalSettings.mobileHeroButtonText || originalSettings.heroButtonText || "Shop Now");
+      setMobileHeroButtonStyle(originalSettings.mobileHeroButtonStyle || originalSettings.heroButtonStyle || "solid");
+      setMobileHeroButtonSize(originalSettings.mobileHeroButtonSize || "sm");
+      setMobileHeroButtonColor(originalSettings.mobileHeroButtonColor !== undefined ? originalSettings.mobileHeroButtonColor : "");
+      setMobileHeroButtonTextColor(originalSettings.mobileHeroButtonTextColor || originalSettings.heroButtonTextColor || "#ffffff");
+      setShowMobileHeroButton(originalSettings.showMobileHeroButton !== undefined ? originalSettings.showMobileHeroButton : true);
       setVideoTitle(originalSettings.videoTitle || "");
       setVideoSubtitle(originalSettings.videoSubtitle || "");
       setVideoUrl(originalSettings.videoUrl || "");
@@ -1332,6 +1477,29 @@ export default function AdminDashboard() {
           heroButtonSize,
           heroButtonColor,
           heroButtonTextColor,
+          mobileHeroTemplate,
+          mobileHeroTitle,
+          mobileHeroTitleFontType,
+          mobileHeroTitleFontColor,
+          mobileHeroTitleFontSize,
+          mobileHeroTitleFontAlignment,
+          mobileHeroTitleFontWeight,
+          showMobileHeroTitle,
+
+          mobileHeroManifesto,
+          mobileHeroManifestoFontType,
+          mobileHeroManifestoFontColor,
+          mobileHeroManifestoFontSize,
+          mobileHeroManifestoFontAlignment,
+          mobileHeroManifestoFontWeight,
+          showMobileHeroManifesto,
+
+          mobileHeroButtonText,
+          mobileHeroButtonStyle,
+          mobileHeroButtonSize,
+          mobileHeroButtonColor,
+          mobileHeroButtonTextColor,
+          showMobileHeroButton,
           videoTitle,
           videoSubtitle,
           videoUrl,
@@ -3333,6 +3501,30 @@ export default function AdminDashboard() {
             bgColor: heroBgColor,
             bgImage: heroBgImage,
             bgVideo: heroBgVideo,
+
+            mobileLayoutTemplate: mobileHeroTemplate,
+            mobileTitleText: mobileHeroTitle,
+            mobileTitleFontType: mobileHeroTitleFontType,
+            mobileTitleFontColor: mobileHeroTitleFontColor,
+            mobileTitleFontSize: mobileHeroTitleFontSize,
+            mobileTitleFontAlignment: mobileHeroTitleFontAlignment,
+            mobileTitleFontWeight: mobileHeroTitleFontWeight,
+            showMobileHeroTitle: showMobileHeroTitle,
+
+            mobileManifestoText: mobileHeroManifesto,
+            mobileManifestoFontType: mobileHeroManifestoFontType,
+            mobileManifestoFontColor: mobileHeroManifestoFontColor,
+            mobileManifestoFontSize: mobileHeroManifestoFontSize,
+            mobileManifestoFontAlignment: mobileHeroManifestoFontAlignment,
+            mobileManifestoFontWeight: mobileHeroManifestoFontWeight,
+            showMobileHeroManifesto: showMobileHeroManifesto,
+
+            mobileButtonText: mobileHeroButtonText,
+            mobileButtonStyle: mobileHeroButtonStyle,
+            mobileButtonSize: mobileHeroButtonSize,
+            mobileButtonColor: mobileHeroButtonColor,
+            mobileButtonTextColor: mobileHeroButtonTextColor,
+            showMobileHeroButton: showMobileHeroButton,
           }}
           onApply={(config) => {
             setHeroTitle(config.titleText);
@@ -3363,6 +3555,30 @@ export default function AdminDashboard() {
             if (config.bgColor) setHeroBgColor(config.bgColor);
             if (config.bgImage !== undefined) setHeroBgImage(config.bgImage);
             if (config.bgVideo !== undefined) setHeroBgVideo(config.bgVideo);
+
+            if (config.mobileLayoutTemplate) setMobileHeroTemplate(config.mobileLayoutTemplate);
+            if (config.mobileTitleText !== undefined) setMobileHeroTitle(config.mobileTitleText);
+            if (config.mobileTitleFontType) setMobileHeroTitleFontType(config.mobileTitleFontType);
+            if (config.mobileTitleFontColor) setMobileHeroTitleFontColor(config.mobileTitleFontColor);
+            if (config.mobileTitleFontSize) setMobileHeroTitleFontSize(config.mobileTitleFontSize);
+            if (config.mobileTitleFontAlignment) setMobileHeroTitleFontAlignment(config.mobileTitleFontAlignment);
+            if (config.mobileTitleFontWeight) setMobileHeroTitleFontWeight(config.mobileTitleFontWeight);
+            if (config.showMobileHeroTitle !== undefined) setShowMobileHeroTitle(config.showMobileHeroTitle);
+
+            if (config.mobileManifestoText !== undefined) setMobileHeroManifesto(config.mobileManifestoText);
+            if (config.mobileManifestoFontType) setMobileHeroManifestoFontType(config.mobileManifestoFontType);
+            if (config.mobileManifestoFontColor) setMobileHeroManifestoFontColor(config.mobileManifestoFontColor);
+            if (config.mobileManifestoFontSize) setMobileHeroManifestoFontSize(config.mobileManifestoFontSize);
+            if (config.mobileManifestoFontAlignment) setMobileHeroManifestoFontAlignment(config.mobileManifestoFontAlignment);
+            if (config.mobileManifestoFontWeight) setMobileHeroManifestoFontWeight(config.mobileManifestoFontWeight);
+            if (config.showMobileHeroManifesto !== undefined) setShowMobileHeroManifesto(config.showMobileHeroManifesto);
+
+            if (config.mobileButtonText !== undefined) setMobileHeroButtonText(config.mobileButtonText);
+            if (config.mobileButtonStyle) setMobileHeroButtonStyle(config.mobileButtonStyle);
+            if (config.mobileButtonSize) setMobileHeroButtonSize(config.mobileButtonSize);
+            if (config.mobileButtonColor !== undefined) setMobileHeroButtonColor(config.mobileButtonColor);
+            if (config.mobileButtonTextColor) setMobileHeroButtonTextColor(config.mobileButtonTextColor);
+            if (config.showMobileHeroButton !== undefined) setShowMobileHeroButton(config.showMobileHeroButton);
 
             setIsHeroCustomizerModalOpen(false);
           }}

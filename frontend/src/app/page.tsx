@@ -125,6 +125,31 @@ export default function Home() {
   const [heroManifestoFontAlignment, setHeroManifestoFontAlignment] = useState<string>("left");
   const [heroManifestoFontWeight, setHeroManifestoFontWeight] = useState<string>("500");
 
+  // Mobile Hero Layout States (Completely Unlinked from Desktop)
+  const [mobileHeroTemplate, setMobileHeroTemplate] = useState<string>("center");
+  const [mobileHeroTitle, setMobileHeroTitle] = useState<string>("");
+  const [mobileHeroTitleFontType, setMobileHeroTitleFontType] = useState<string>("Outfit");
+  const [mobileHeroTitleFontColor, setMobileHeroTitleFontColor] = useState<string>("#111827");
+  const [mobileHeroTitleFontSize, setMobileHeroTitleFontSize] = useState<string>("2.5rem");
+  const [mobileHeroTitleFontAlignment, setMobileHeroTitleFontAlignment] = useState<string>("center");
+  const [mobileHeroTitleFontWeight, setMobileHeroTitleFontWeight] = useState<string>("700");
+  const [showMobileHeroTitle, setShowMobileHeroTitle] = useState<boolean>(true);
+
+  const [mobileHeroManifesto, setMobileHeroManifesto] = useState<string>("");
+  const [mobileHeroManifestoFontType, setMobileHeroManifestoFontType] = useState<string>("Outfit");
+  const [mobileHeroManifestoFontColor, setMobileHeroManifestoFontColor] = useState<string>("#ffffff");
+  const [mobileHeroManifestoFontSize, setMobileHeroManifestoFontSize] = useState<string>("0.85rem");
+  const [mobileHeroManifestoFontAlignment, setMobileHeroManifestoFontAlignment] = useState<string>("center");
+  const [mobileHeroManifestoFontWeight, setMobileHeroManifestoFontWeight] = useState<string>("500");
+  const [showMobileHeroManifesto, setShowMobileHeroManifesto] = useState<boolean>(true);
+
+  const [mobileHeroButtonText, setMobileHeroButtonText] = useState<string>("Shop Now");
+  const [mobileHeroButtonStyle, setMobileHeroButtonStyle] = useState<string>("solid");
+  const [mobileHeroButtonSize, setMobileHeroButtonSize] = useState<string>("sm");
+  const [mobileHeroButtonColor, setMobileHeroButtonColor] = useState<string>("");
+  const [mobileHeroButtonTextColor, setMobileHeroButtonTextColor] = useState<string>("#ffffff");
+  const [showMobileHeroButton, setShowMobileHeroButton] = useState<boolean>(true);
+
 
   const [videoTitle, setVideoTitle] = useState<string>("NEW ARRIVALS");
   const [videoSubtitle, setVideoSubtitle] = useState<string>("Drop's live. Smells divine. Feels better.");
@@ -255,7 +280,7 @@ export default function Home() {
     window.addEventListener("cartUpdated", handleStorageChange);
     
     const checkMobile = () => {
-      setIsMobile(window.innerWidth <= 600); // 600px is the breakpoint for mobile grid
+      setIsMobile(window.innerWidth <= 768);
     };
     checkMobile();
     window.addEventListener("resize", checkMobile);
@@ -465,6 +490,31 @@ export default function Home() {
               setHeroTemplate(data.heroTemplate);
               localStorage.setItem("settings_heroTemplate", data.heroTemplate);
             }
+
+            // Mobile Hero Layout Loading (unlinked)
+            if (data.mobileHeroTemplate !== undefined) setMobileHeroTemplate(data.mobileHeroTemplate);
+            if (data.mobileHeroTitle !== undefined) setMobileHeroTitle(data.mobileHeroTitle);
+            if (data.mobileHeroTitleFontType !== undefined) setMobileHeroTitleFontType(data.mobileHeroTitleFontType);
+            if (data.mobileHeroTitleFontColor !== undefined) setMobileHeroTitleFontColor(data.mobileHeroTitleFontColor);
+            if (data.mobileHeroTitleFontSize !== undefined) setMobileHeroTitleFontSize(data.mobileHeroTitleFontSize);
+            if (data.mobileHeroTitleFontAlignment !== undefined) setMobileHeroTitleFontAlignment(data.mobileHeroTitleFontAlignment);
+            if (data.mobileHeroTitleFontWeight !== undefined) setMobileHeroTitleFontWeight(data.mobileHeroTitleFontWeight);
+            if (data.showMobileHeroTitle !== undefined) setShowMobileHeroTitle(data.showMobileHeroTitle);
+
+            if (data.mobileHeroManifesto !== undefined) setMobileHeroManifesto(data.mobileHeroManifesto);
+            if (data.mobileHeroManifestoFontType !== undefined) setMobileHeroManifestoFontType(data.mobileHeroManifestoFontType);
+            if (data.mobileHeroManifestoFontColor !== undefined) setMobileHeroManifestoFontColor(data.mobileHeroManifestoFontColor);
+            if (data.mobileHeroManifestoFontSize !== undefined) setMobileHeroManifestoFontSize(data.mobileHeroManifestoFontSize);
+            if (data.mobileHeroManifestoFontAlignment !== undefined) setMobileHeroManifestoFontAlignment(data.mobileHeroManifestoFontAlignment);
+            if (data.mobileHeroManifestoFontWeight !== undefined) setMobileHeroManifestoFontWeight(data.mobileHeroManifestoFontWeight);
+            if (data.showMobileHeroManifesto !== undefined) setShowMobileHeroManifesto(data.showMobileHeroManifesto);
+
+            if (data.mobileHeroButtonText !== undefined) setMobileHeroButtonText(data.mobileHeroButtonText);
+            if (data.mobileHeroButtonStyle !== undefined) setMobileHeroButtonStyle(data.mobileHeroButtonStyle);
+            if (data.mobileHeroButtonSize !== undefined) setMobileHeroButtonSize(data.mobileHeroButtonSize);
+            if (data.mobileHeroButtonColor !== undefined) setMobileHeroButtonColor(data.mobileHeroButtonColor);
+            if (data.mobileHeroButtonTextColor !== undefined) setMobileHeroButtonTextColor(data.mobileHeroButtonTextColor);
+            if (data.showMobileHeroButton !== undefined) setShowMobileHeroButton(data.showMobileHeroButton);
             if (data.showHeroTitle !== undefined) {
               setShowHeroTitle(data.showHeroTitle);
               localStorage.setItem("settings_showHeroTitle", String(data.showHeroTitle));
@@ -692,99 +742,134 @@ export default function Home() {
 
       
       {/* 4. Hero Section */}
-      <section 
-        className={styles.hero}
-        style={{
-          backgroundColor: heroBgType === "color" ? (heroBgColor || "var(--primary-brand-color, #57bc74)") : "#121212",
-          backgroundImage: heroBgType === "image" && heroBgImage ? `url("${heroBgImage}")` : "none",
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-          position: "relative",
-          overflow: "hidden",
-          display: "flex",
-          flexDirection: "column",
-          justifyContent: 
-            heroTemplate === "top-left" || heroTemplate === "right-top" || heroTemplate === "top-center" ? "flex-start" : 
-            heroTemplate === "bottom-left" || heroTemplate === "right-bottom" || heroTemplate === "bottom-center" ? "flex-end" : "center",
-          alignItems: 
-            heroTemplate === "center" || heroTemplate.endsWith("center") ? "center" : 
-            heroTemplate.startsWith("right") ? "flex-end" : "flex-start",
-          padding: 
-            heroTemplate === "bottom-left" || heroTemplate === "right-bottom" || heroTemplate === "bottom-center" ? "100px 5vw" : 
-            heroTemplate === "top-left" || heroTemplate === "right-top" || heroTemplate === "top-center" ? "100px 5vw" : "0 5vw",
-          textAlign: 
-            heroTemplate === "center" || heroTemplate.endsWith("center") ? "center" : 
-            heroTemplate.startsWith("right") ? "right" : "left",
-          minHeight: "80vh"
-        }}
-      >
-        {heroBgType === "video" && heroBgVideo && (
-          <video src={heroBgVideo} autoPlay muted loop playsInline style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", zIndex: 1 }} />
-        )}
-        {heroBgType !== "color" && <div style={{ position: "absolute", inset: 0, backgroundColor: "rgba(0, 0, 0, 0.45)", zIndex: 1 }} />}
+      {(() => {
+        const activeHeroTemplate = isMobile ? (mobileHeroTemplate || heroTemplate || "center") : heroTemplate;
 
-        <div style={{ position: "relative", zIndex: 2, display: "flex", flexDirection: "column", gap: "20px", maxWidth: "800px", width: "100%" }}>
-          {showHeroTitle && (
-            <h1 style={{
-              fontFamily: heroTitleFontType ? `"${heroTitleFontType}", sans-serif` : "inherit",
-              color: heroTitleFontColor,
-              fontSize: heroTitleFontSize,
-              fontWeight: Number(heroTitleFontWeight),
-              margin: 0,
-              lineHeight: "1.1"
-            }}>
-              {heroTitle || ""}
-            </h1>
-          )}
-          {showHeroManifesto && (
-            <p style={{
-              fontFamily: heroManifestoFontType ? `"${heroManifestoFontType}", sans-serif` : "inherit",
-              color: heroManifestoFontColor,
-              fontSize: heroManifestoFontSize,
-              fontWeight: Number(heroManifestoFontWeight),
-              margin: 0,
-              lineHeight: "1.6",
-              textTransform: "uppercase",
-              letterSpacing: "0.03em"
-            }}>
-              {heroManifesto || ""}
-            </p>
-          )}
-          {showHeroButton && (() => {
-            const btnColor = heroButtonColor ? heroButtonColor : (primaryColor || "#000");
-            const isSolid = heroButtonStyle === "solid";
-            const isOutline = heroButtonStyle === "outline";
-            
-            const paddings: Record<string, string> = { sm: "10px 24px", md: "14px 36px", lg: "18px 48px" };
-            const fontSizes: Record<string, string> = { sm: "0.75rem", md: "0.85rem", lg: "0.95rem" };
-            
-            return (
-              <div style={{ 
-                marginTop: "10px", 
-                alignSelf: 
-                  heroTemplate === "center" || heroTemplate.endsWith("center") ? "center" : 
-                  heroTemplate.startsWith("right") ? "flex-end" : "flex-start" 
-              }}>
-                <Link href="/shop" style={{
-                  display: "inline-block",
-                  padding: paddings[heroButtonSize] || paddings.md,
-                  fontSize: fontSizes[heroButtonSize] || fontSizes.md,
-                  backgroundColor: isSolid ? btnColor : "transparent",
-                  color: isSolid ? (heroButtonTextColor || "#ffffff") : (heroButtonTextColor || btnColor),
-                  border: isSolid || isOutline ? `2px solid ${btnColor}` : "none",
-                  textDecoration: heroButtonStyle === "minimal" ? "underline" : "none",
-                  fontWeight: 700,
-                  textTransform: "uppercase",
-                  letterSpacing: "0.1em",
-                  transition: "background 0.3s, transform 0.2s"
+        const activeHeroTitle = isMobile ? (mobileHeroTitle !== "" && mobileHeroTitle !== undefined ? mobileHeroTitle : heroTitle) : heroTitle;
+        const activeHeroTitleFontType = isMobile ? (mobileHeroTitleFontType || heroTitleFontType) : heroTitleFontType;
+        const activeHeroTitleFontColor = isMobile ? (mobileHeroTitleFontColor || heroTitleFontColor) : heroTitleFontColor;
+        const activeHeroTitleFontSize = isMobile ? (mobileHeroTitleFontSize || "2.5rem") : heroTitleFontSize;
+        const activeHeroTitleFontAlignment = isMobile ? (mobileHeroTitleFontAlignment || heroTitleFontAlignment || "center") : heroTitleFontAlignment;
+        const activeHeroTitleFontWeight = isMobile ? (mobileHeroTitleFontWeight || heroTitleFontWeight) : heroTitleFontWeight;
+        const activeShowHeroTitle = isMobile ? (showMobileHeroTitle !== undefined ? showMobileHeroTitle : showHeroTitle) : showHeroTitle;
+
+        const activeHeroManifesto = isMobile ? (mobileHeroManifesto !== "" && mobileHeroManifesto !== undefined ? mobileHeroManifesto : heroManifesto) : heroManifesto;
+        const activeHeroManifestoFontType = isMobile ? (mobileHeroManifestoFontType || heroManifestoFontType) : heroManifestoFontType;
+        const activeHeroManifestoFontColor = isMobile ? (mobileHeroManifestoFontColor || heroManifestoFontColor) : heroManifestoFontColor;
+        const activeHeroManifestoFontSize = isMobile ? (mobileHeroManifestoFontSize || "0.85rem") : heroManifestoFontSize;
+        const activeHeroManifestoFontAlignment = isMobile ? (mobileHeroManifestoFontAlignment || heroManifestoFontAlignment || "center") : heroManifestoFontAlignment;
+        const activeHeroManifestoFontWeight = isMobile ? (mobileHeroManifestoFontWeight || heroManifestoFontWeight) : heroManifestoFontWeight;
+        const activeShowHeroManifesto = isMobile ? (showMobileHeroManifesto !== undefined ? showMobileHeroManifesto : showHeroManifesto) : showHeroManifesto;
+
+        const activeHeroButtonText = isMobile ? (mobileHeroButtonText || heroButtonText) : heroButtonText;
+        const activeHeroButtonStyle = isMobile ? (mobileHeroButtonStyle || heroButtonStyle) : heroButtonStyle;
+        const activeHeroButtonSize = isMobile ? (mobileHeroButtonSize || "sm") : heroButtonSize;
+        const activeHeroButtonColor = isMobile ? (mobileHeroButtonColor !== "" && mobileHeroButtonColor !== undefined ? mobileHeroButtonColor : heroButtonColor) : heroButtonColor;
+        const activeHeroButtonTextColor = isMobile ? (mobileHeroButtonTextColor || heroButtonTextColor) : heroButtonTextColor;
+        const activeShowHeroButton = isMobile ? (showMobileHeroButton !== undefined ? showMobileHeroButton : showHeroButton) : showHeroButton;
+
+        return (
+          <section 
+            className={styles.hero}
+            style={{
+              backgroundColor: heroBgType === "color" ? (heroBgColor || "var(--primary-brand-color, #57bc74)") : "#121212",
+              backgroundImage: heroBgType === "image" && heroBgImage ? `url("${heroBgImage}")` : "none",
+              backgroundSize: "cover",
+              backgroundPosition: "center",
+              position: "relative",
+              overflow: "hidden",
+              display: "flex",
+              flexDirection: "column",
+              justifyContent: 
+                activeHeroTemplate === "top-left" || activeHeroTemplate === "right-top" || activeHeroTemplate === "top-center" ? "flex-start" : 
+                activeHeroTemplate === "bottom-left" || activeHeroTemplate === "right-bottom" || activeHeroTemplate === "bottom-center" ? "flex-end" : "center",
+              alignItems: 
+                activeHeroTemplate === "center" || activeHeroTemplate.endsWith("center") ? "center" : 
+                activeHeroTemplate.startsWith("right") ? "flex-end" : "flex-start",
+              padding: 
+                activeHeroTemplate === "bottom-left" || activeHeroTemplate === "right-bottom" || activeHeroTemplate === "bottom-center" ? "100px 5vw" : 
+                activeHeroTemplate === "top-left" || activeHeroTemplate === "right-top" || activeHeroTemplate === "top-center" ? "100px 5vw" : "0 5vw",
+              textAlign: 
+                activeHeroTemplate === "center" || activeHeroTemplate.endsWith("center") ? "center" : 
+                activeHeroTemplate.startsWith("right") ? "right" : "left",
+              minHeight: "80vh"
+            }}
+          >
+            {heroBgType === "video" && heroBgVideo && (
+              <video src={heroBgVideo} autoPlay muted loop playsInline style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", zIndex: 1 }} />
+            )}
+            {heroBgType !== "color" && <div style={{ position: "absolute", inset: 0, backgroundColor: "rgba(0, 0, 0, 0.45)", zIndex: 1 }} />}
+
+            <div style={{ position: "relative", zIndex: 2, display: "flex", flexDirection: "column", gap: "20px", maxWidth: "800px", width: "100%" }}>
+              {activeShowHeroTitle && (
+                <h1 style={{
+                  fontFamily: activeHeroTitleFontType ? `"${activeHeroTitleFontType}", sans-serif` : "inherit",
+                  color: activeHeroTitleFontColor,
+                  fontSize: activeHeroTitleFontSize,
+                  fontWeight: Number(activeHeroTitleFontWeight),
+                  textAlign: activeHeroTitleFontAlignment as any || "inherit",
+                  margin: 0,
+                  lineHeight: "1.1",
+                  wordBreak: "break-word",
+                  overflowWrap: "break-word"
                 }}>
-                  {heroButtonText || ""}
-                </Link>
-              </div>
-            );
-          })()}
-        </div>
-      </section>
+                  {activeHeroTitle || ""}
+                </h1>
+              )}
+              {activeShowHeroManifesto && (
+                <p style={{
+                  fontFamily: activeHeroManifestoFontType ? `"${activeHeroManifestoFontType}", sans-serif` : "inherit",
+                  color: activeHeroManifestoFontColor,
+                  fontSize: activeHeroManifestoFontSize,
+                  fontWeight: Number(activeHeroManifestoFontWeight),
+                  textAlign: activeHeroManifestoFontAlignment as any || "inherit",
+                  margin: 0,
+                  lineHeight: "1.6",
+                  textTransform: "uppercase",
+                  letterSpacing: "0.03em",
+                  wordBreak: "break-word",
+                  overflowWrap: "break-word"
+                }}>
+                  {activeHeroManifesto || ""}
+                </p>
+              )}
+              {activeShowHeroButton && (() => {
+                const btnColor = activeHeroButtonColor ? activeHeroButtonColor : (primaryColor || "#000");
+                const isSolid = activeHeroButtonStyle === "solid";
+                const isOutline = activeHeroButtonStyle === "outline";
+                
+                const paddings: Record<string, string> = { sm: "10px 24px", md: "14px 36px", lg: "18px 48px" };
+                const fontSizes: Record<string, string> = { sm: "0.75rem", md: "0.85rem", lg: "0.95rem" };
+                
+                return (
+                  <div style={{ 
+                    marginTop: "10px", 
+                    alignSelf: 
+                      activeHeroTemplate === "center" || activeHeroTemplate.endsWith("center") ? "center" : 
+                      activeHeroTemplate.startsWith("right") ? "flex-end" : "flex-start" 
+                  }}>
+                    <Link href="/shop" style={{
+                      display: "inline-block",
+                      padding: paddings[activeHeroButtonSize] || paddings.md,
+                      fontSize: fontSizes[activeHeroButtonSize] || fontSizes.md,
+                      backgroundColor: isSolid ? btnColor : "transparent",
+                      color: isSolid ? (activeHeroButtonTextColor || "#ffffff") : (activeHeroButtonTextColor || btnColor),
+                      border: isSolid || isOutline ? `2px solid ${btnColor}` : "none",
+                      textDecoration: activeHeroButtonStyle === "minimal" ? "underline" : "none",
+                      fontWeight: 700,
+                      textTransform: "uppercase",
+                      letterSpacing: "0.1em",
+                      textAlign: "center"
+                    }}>
+                      {activeHeroButtonText || "Shop Now"}
+                    </Link>
+                  </div>
+                );
+              })()}
+            </div>
+          </section>
+        );
+      })()}
 
       {/* 5. New Arrivals Video Section */}
       {showVideo && (
