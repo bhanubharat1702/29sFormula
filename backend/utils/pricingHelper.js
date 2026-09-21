@@ -15,11 +15,41 @@ export async function calculateOrderPricing(cartItems, discountCode = "") {
   let subtotal = 0;
   const resolvedCartItems = [];
 
+  // Extract all unique valid Product ObjectIds from cart items and gift set details
+  const productIds = new Set();
+  for (const item of cartItems) {
+    if (item.productId && mongoose.Types.ObjectId.isValid(item.productId)) {
+      productIds.add(item.productId.toString());
+    }
+    if (item.giftSetDetails && Array.isArray(item.giftSetDetails)) {
+      for (const detail of item.giftSetDetails) {
+        if (detail._id && mongoose.Types.ObjectId.isValid(detail._id)) {
+          productIds.add(detail._id.toString());
+        }
+      }
+    }
+  }
+
+  const productIdArray = Array.from(productIds);
+
+  // Batch query all products and product variants in single database calls
+  const [products, variants] = await Promise.all([
+    productIdArray.length > 0 ? Product.find({ _id: { $in: productIdArray } }).lean() : [],
+    productIdArray.length > 0 ? ProductVariant.find({ productId: { $in: productIdArray } }).lean() : []
+  ]);
+
+  // Store in Maps for O(1) instant memory access
+  const productMap = new Map();
+  products.forEach(p => productMap.set(p._id.toString(), p));
+
+  const variantMap = new Map();
+  variants.forEach(v => variantMap.set(`${v.productId.toString()}_${v.size}`, v));
+
   for (const item of cartItems) {
     const qty = Math.max(1, Number(item.quantity) || 1);
 
     if (item.productId && mongoose.Types.ObjectId.isValid(item.productId)) {
-      const product = await Product.findById(item.productId);
+      const product = productMap.get(item.productId.toString());
       if (!product) {
         throw new Error(`Product not found for ID: ${item.productId}`);
       }
@@ -28,8 +58,8 @@ export async function calculateOrderPricing(cartItems, discountCode = "") {
       let actualMakingPrice = product.makingPrice || 0;
       let availableStock = product.quantity || 0;
 
-      // Check product variant
-      const variant = await ProductVariant.findOne({ productId: item.productId, size: item.size });
+      // Check product variant from Map
+      const variant = variantMap.get(`${item.productId.toString()}_${item.size}`);
       if (variant && variant.price !== undefined && variant.price !== null) {
         actualPrice = variant.price;
         actualMakingPrice = variant.makingPrice || 0;
@@ -68,9 +98,9 @@ export async function calculateOrderPricing(cartItems, discountCode = "") {
       if (item.giftSetDetails && Array.isArray(item.giftSetDetails) && item.giftSetDetails.length > 0) {
         for (const detail of item.giftSetDetails) {
           if (detail._id && mongoose.Types.ObjectId.isValid(detail._id)) {
-            const subProduct = await Product.findById(detail._id);
+            const subProduct = productMap.get(detail._id.toString());
             if (subProduct) {
-              const subVariant = await ProductVariant.findOne({ productId: detail._id, size: item.size });
+              const subVariant = variantMap.get(`${detail._id.toString()}_${item.size}`);
               const subPrice = subVariant?.price ?? subProduct.options?.find(o => o.size === item.size)?.price ?? subProduct.price ?? detail.price ?? 0;
               giftSetPrice += subPrice;
             } else {
