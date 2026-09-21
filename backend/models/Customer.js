@@ -11,6 +11,19 @@ const customerSchema = new mongoose.Schema({
   totalSpend: { type: Number, default: 0 }
 }, { timestamps: true });
 
+// ─── Indexes ────────────────────────────────────────────────────────────────
+// NOTE: { email: 1 } unique index is auto-created from schema unique: true above
+
+// Admin customer listing: new signups sorted by date
+customerSchema.index({ createdAt: -1 });
+
+// CRM top-customers view sorted by highest spend first
+customerSchema.index({ totalSpend: -1 });
+
+// COD verification / SMS lookup by phone (sparse: not all customers provide phone)
+customerSchema.index({ phone: 1 }, { sparse: true });
+// ────────────────────────────────────────────────────────────────────────────
+
 const Customer = mongoose.models.Customer || mongoose.model("Customer", customerSchema);
 
 export default Customer;

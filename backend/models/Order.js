@@ -46,6 +46,27 @@ const orderSchema = new mongoose.Schema({
   ]
 }, { timestamps: true });
 
+// ─── Indexes ────────────────────────────────────────────────────────────────
+// "My Orders" page + order tracking by email (ESR: equality → sort)
+orderSchema.index({ customerEmail: 1, createdAt: -1 });
+
+// Admin order list: filter by status + soft-delete flag + date sort
+// Serves: Order.find({ status, deletedByAdmin }).sort({ createdAt: -1 })
+orderSchema.index({ status: 1, deletedByAdmin: 1, createdAt: -1 });
+
+// Admin dashboard: all orders sorted by newest (no filter, only sort)
+orderSchema.index({ createdAt: -1 });
+
+// Refund management queue: find all orders with a pending refund
+orderSchema.index({ refundStatus: 1 });
+
+// AWB/courier tracking lookup (sparse: many orders have no AWB yet)
+orderSchema.index({ awbNumber: 1 }, { sparse: true });
+
+// Customer order history by ObjectId (used when customer._id is known)
+orderSchema.index({ customerId: 1, createdAt: -1 });
+// ────────────────────────────────────────────────────────────────────────────
+
 const Order = mongoose.models.Order || mongoose.model("Order", orderSchema);
 
 export default Order;

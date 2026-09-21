@@ -20,6 +20,20 @@ const productSchema = new mongoose.Schema({
   sizes: { type: [String], default: [] }
 }, { timestamps: true });
 
+// ─── Indexes ────────────────────────────────────────────────────────────────
+// Storefront: filter by category, show newest first (ESR: equality → sort)
+productSchema.index({ category: 1, createdAt: -1 });
+
+// Admin all-products listing sorted by newest
+productSchema.index({ createdAt: -1 });
+
+// Low-stock alert dashboard (quantity ascending — find items near 0 first)
+productSchema.index({ quantity: 1 });
+
+// Name search (supports basic text queries via $regex or $text)
+productSchema.index({ name: "text" });
+// ────────────────────────────────────────────────────────────────────────────
+
 const Product = mongoose.models.Product || mongoose.model("Product", productSchema);
 
 const productVariantSchema = new mongoose.Schema({

@@ -11,4 +11,13 @@ const returnRequestSchema = new mongoose.Schema({
 }, { timestamps: true });
 
 const ReturnRequest = mongoose.models.ReturnRequest || mongoose.model("ReturnRequest", returnRequestSchema);
+
+// ─── Indexes ────────────────────────────────────────────────────────────────
+// Return lookup by order ObjectId — used in every findOne and $in batch query
+returnRequestSchema.index({ orderObjectId: 1 });
+
+// Admin return queue filtered by status (Pending / Approved / Rejected)
+returnRequestSchema.index({ status: 1, createdAt: -1 });
+// ────────────────────────────────────────────────────────────────────────────
+
 export default ReturnRequest;
