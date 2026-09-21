@@ -439,7 +439,7 @@ export default function CheckoutDrawer({ isOpen, onClose, cartItems, primaryColo
         const initRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:5001'}/api/orders/razorpay-init`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ totalAmount, cartItems: orderPayload.cartItems })
+          body: JSON.stringify({ cartItems: orderPayload.cartItems, discountCode: appliedCouponCode || "" })
         });
 
         if (!initRes.ok) {

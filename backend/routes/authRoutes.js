@@ -6,6 +6,7 @@ import Customer from "../models/Customer.js";
 import Order from "../models/Order.js";
 import { sendEmail } from "../utils/emailService.js";
 import { getBrandInfo } from "../utils/brandHelper.js";
+import { loginLimiter, otpLimiter } from "../middleware/rateLimiter.js";
 
 const router = express.Router();
 
@@ -61,7 +62,7 @@ const sendWelcomeEmail = async (userEmail, userName) => {
 };
 
 
-router.post("/api/auth/register", async (req, res) => {
+router.post("/api/auth/register", loginLimiter, async (req, res) => {
   try {
     const { name, email, password } = req.body;
     if (!name || !email || !password) {
@@ -104,7 +105,7 @@ router.post("/api/auth/register", async (req, res) => {
   }
 });
 
-router.post("/api/auth/login", async (req, res) => {
+router.post("/api/auth/login", loginLimiter, async (req, res) => {
   try {
     const { email, password } = req.body;
     if (!email || !password) {
@@ -264,7 +265,7 @@ router.post("/api/auth/google", async (req, res) => {
 });
 
 // Request Password Reset OTP
-router.post("/api/auth/request-reset-otp", async (req, res) => {
+router.post("/api/auth/request-reset-otp", otpLimiter, async (req, res) => {
   try {
     const { email } = req.body;
     if (!email) {
@@ -322,7 +323,7 @@ router.post("/api/auth/request-reset-otp", async (req, res) => {
 });
 
 // Reset Password with OTP
-router.post("/api/auth/reset-password", async (req, res) => {
+router.post("/api/auth/reset-password", otpLimiter, async (req, res) => {
   try {
     const { email, otp, newPassword } = req.body;
     if (!email || !otp || !newPassword) {

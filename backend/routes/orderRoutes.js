@@ -15,6 +15,7 @@ import { getNextOrderId } from "../models/Counter.js";
 import { deductStockAtomically } from "../utils/stockHelper.js";
 import { verifyOrderOwnership } from "../utils/authHelper.js";
 import { syncCustomerStats } from "../utils/customerHelper.js";
+import { calculateOrderPricing } from "../utils/pricingHelper.js";
 import { verifyToken, isAdmin } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
@@ -381,89 +382,33 @@ router.post("/api/orders", async (req, res) => {
       customerPhone,
       shippingAddress,
       cartItems,
-      totalAmount,
       paymentMethod,
-      subtotal: reqSubtotal,
-      discountCode,
-      discountAmount: reqDiscountAmount,
-      shippingCharge: reqShippingCharge,
-      taxAmount: reqTaxAmount
+      discountCode
     } = req.body;
 
     if (!customerName || !customerEmail || !customerPhone || !shippingAddress || !cartItems || !Array.isArray(cartItems) || cartItems.length === 0) {
       return res.status(400).json({ error: "Missing required order details" });
     }
 
-    const email = customerEmail.toLowerCase().trim();
-
-    let calculatedTotal = 0;
-    const resolvedCartItems = [];
-    for (const item of cartItems) {
-      if (!item.productId || !mongoose.Types.ObjectId.isValid(item.productId)) {
-        // Custom items like Gift Sets use string IDs (e.g. gift-set-...)
-        const giftSetPrice = item.price || 0;
-        resolvedCartItems.push({
-          productId: item.productId,
-          variantId: null,
-          name: item.name || "Custom Gift Set",
-          price: giftSetPrice,
-          makingPrice: 0,
-          size: item.size || "20ml x 3",
-          quantity: item.quantity || 1,
-          image: item.image || "",
-          isGiftSet: !!item.isGiftSet,
-          giftSetDetails: item.giftSetDetails || item.giftSetItems || []
-        });
-        calculatedTotal += giftSetPrice * (item.quantity || 1);
-        continue;
-      }
-      const product = await Product.findById(item.productId);
-      if (!product) continue;
-
-      let actualPrice = product.price || 0;
-      let actualMakingPrice = product.makingPrice || 0;
-      const variant = await ProductVariant.findOne({ productId: item.productId, size: item.size });
-      let availableStock = product.quantity || 0;
-      if (variant && variant.price) {
-        actualPrice = variant.price;
-        actualMakingPrice = variant.makingPrice || 0;
-        availableStock = variant.quantity || 0;
-      } else {
-
-        // Fallback to embedded options if variants aren't extracted
-        const embeddedOpt = product.options?.find(o => o.size === item.size);
-        if (embeddedOpt && embeddedOpt.price) {
-          actualPrice = embeddedOpt.price;
-          actualMakingPrice = embeddedOpt.makingPrice || 0;
-        }
-      }
-
-      if (item.quantity > availableStock) {
-        return res.status(400).json({ error: `Not enough stock for ${product.name} (${item.size}). Only ${availableStock} available.` });
-      }
-      resolvedCartItems.push({
-        productId: item.productId,
-        variantId: variant ? variant._id : null,
-        name: product.name || item.name,
-        price: actualPrice,
-        makingPrice: actualMakingPrice,
-        size: item.size,
-        quantity: item.quantity,
-        image: product.imageFront || item.image,
-        isGiftSet: false
-      });
-      calculatedTotal += actualPrice * item.quantity;
+    // Secure server-side pricing calculation (ignores client's totalAmount, subtotal, discountAmount)
+    let pricing;
+    try {
+      pricing = await calculateOrderPricing(cartItems, discountCode);
+    } catch (pricingError) {
+      return res.status(400).json({ error: pricingError.message });
     }
 
-    // Financial audit calculations
-    const subtotal = reqSubtotal !== undefined ? Number(reqSubtotal) || 0 : calculatedTotal;
-    const discountCodeVal = (discountCode || "").toString().trim();
-    const discountAmount = Math.max(0, Number(reqDiscountAmount) || 0);
-    const shippingCharge = Math.max(0, Number(reqShippingCharge) || 0);
-    const taxAmount = Math.max(0, Number(reqTaxAmount) || 0);
-    const secureTotalAmount = totalAmount !== undefined
-      ? Number(totalAmount)
-      : Math.max(0, subtotal - discountAmount + shippingCharge + taxAmount);
+    const {
+      subtotal,
+      discountCode: verifiedDiscountCode,
+      discountAmount,
+      shippingCharge,
+      taxAmount,
+      totalAmount: secureTotalAmount,
+      resolvedCartItems
+    } = pricing;
+
+    const email = customerEmail.toLowerCase().trim();
 
     // Perform atomic stock deduction (prevents race condition & negative stock)
     const stockDeduction = await deductStockAtomically(resolvedCartItems);
@@ -509,7 +454,7 @@ router.post("/api/orders", async (req, res) => {
       shippingAddress,
       cartItems: resolvedCartItems,
       subtotal,
-      discountCode: discountCodeVal,
+      discountCode: verifiedDiscountCode,
       discountAmount,
       shippingCharge,
       taxAmount,
@@ -1098,31 +1043,22 @@ router.put("/api/orders/:id/return-status", verifyToken, isAdmin, async (req, re
 
 router.post("/api/orders/razorpay-init", async (req, res) => {
   try {
-    const { totalAmount, cartItems } = req.body;
+    const { cartItems, discountCode } = req.body;
 
-    // Validate inventory before creating payment session
-    for (const item of cartItems) {
-      if (!item.productId || !mongoose.Types.ObjectId.isValid(item.productId)) {
-        // Custom items like Gift Sets use string IDs (e.g. gift-set-...) and are not standalone MongoDB Product documents
-        continue;
-      }
-      const product = await Product.findById(item.productId);
-      if (!product) continue;
-
-      let availableStock = product.quantity || 0;
-      const variant = await ProductVariant.findOne({ productId: item.productId, size: item.size });
-      if (variant) {
-        availableStock = variant.quantity || 0;
-      }
-
-      if (item.quantity > availableStock) {
-        return res.status(400).json({ error: `Not enough stock for ${product.name} (${item.size}). Only ${availableStock} available.` });
-      }
+    if (!cartItems || !Array.isArray(cartItems) || cartItems.length === 0) {
+      return res.status(400).json({ error: "Cart items are required to initialize payment" });
     }
-
 
     if (!process.env.RAZORPAY_KEY_ID || !process.env.RAZORPAY_KEY_SECRET) {
       return res.status(500).json({ error: "Razorpay credentials not configured" });
+    }
+
+    // Calculate total amount strictly on the server side to prevent price tampering
+    let pricing;
+    try {
+      pricing = await calculateOrderPricing(cartItems, discountCode);
+    } catch (pricingError) {
+      return res.status(400).json({ error: pricingError.message });
     }
 
     const razorpay = new Razorpay({
@@ -1130,13 +1066,8 @@ router.post("/api/orders/razorpay-init", async (req, res) => {
       key_secret: process.env.RAZORPAY_KEY_SECRET,
     });
 
-    // In a real app, calculate total amount on server side to prevent tampering
-    let serverTotalAmount = 0;
-    // (Skipping for brevity, trusting totalAmount from client for this implementation as it matches the existing COD flow)
-    serverTotalAmount = totalAmount;
-
     const options = {
-      amount: Math.round(serverTotalAmount * 100), // Amount in paise
+      amount: Math.round(pricing.totalAmount * 100), // Amount in paise strictly calculated by server
       currency: "INR",
       receipt: `receipt_order_${Date.now()}`,
     };
@@ -1149,6 +1080,7 @@ router.post("/api/orders/razorpay-init", async (req, res) => {
       order_id: order.id,
       amount: order.amount,
       currency: order.currency,
+      serverCalculatedTotal: pricing.totalAmount
     });
   } catch (error) {
     console.error("Razorpay init failed:", error);
@@ -1177,7 +1109,32 @@ router.post("/api/orders/razorpay-verify", async (req, res) => {
       return res.status(400).json({ error: "Invalid payment signature" });
     }
 
-    // Payment is verified. Now create the order in the database.
+    if (!orderPayload || !orderPayload.cartItems || !Array.isArray(orderPayload.cartItems)) {
+      return res.status(400).json({ error: "Invalid order payload" });
+    }
+
+    // Strictly re-calculate pricing from database to ensure no tampering during payment verification
+    let pricing;
+    try {
+      pricing = await calculateOrderPricing(orderPayload.cartItems, orderPayload.discountCode);
+    } catch (pricingError) {
+      return res.status(400).json({ error: pricingError.message });
+    }
+
+    const {
+      subtotal,
+      discountCode: verifiedDiscountCode,
+      discountAmount,
+      shippingCharge,
+      taxAmount,
+      totalAmount: secureTotalAmount,
+      resolvedCartItems
+    } = pricing;
+
+    // Perform atomic stock deduction
+    const stockDeduction = await deductStockAtomically(resolvedCartItems);
+
+    // Payment is verified. Now create/update customer in the database.
     const cleanEmail = (orderPayload.customerEmail || "").toLowerCase().trim();
     let customer = await Customer.findOne({ email: new RegExp(`^${cleanEmail}$`, 'i') });
     if (!customer) {
@@ -1187,12 +1144,12 @@ router.post("/api/orders/razorpay-verify", async (req, res) => {
         phone: orderPayload.customerPhone,
         address: orderPayload.shippingAddress,
         totalOrders: 1,
-        totalSpend: orderPayload.totalAmount,
+        totalSpend: secureTotalAmount,
       });
       await customer.save();
     } else {
       customer.totalOrders += 1;
-      customer.totalSpend += orderPayload.totalAmount;
+      customer.totalSpend += secureTotalAmount;
       if (orderPayload.customerName) customer.name = orderPayload.customerName;
       if (orderPayload.customerPhone) customer.phone = orderPayload.customerPhone;
       if (orderPayload.shippingAddress) customer.address = orderPayload.shippingAddress;
@@ -1209,50 +1166,17 @@ router.post("/api/orders/razorpay-verify", async (req, res) => {
 
     const orderId = await getNextOrderId();
 
-    const resolvedCartItems = [];
-    if (orderPayload.cartItems && Array.isArray(orderPayload.cartItems)) {
-      for (const item of orderPayload.cartItems) {
-        resolvedCartItems.push({
-          productId: item.productId,
-          variantId: item.variantId || null,
-          name: item.name,
-          price: item.price,
-          makingPrice: item.makingPrice || 0,
-          size: item.size,
-          quantity: item.quantity,
-          image: item.image,
-          isGiftSet: !!item.isGiftSet || item.name?.toLowerCase().includes('gift set'),
-          giftSetDetails: item.giftSetDetails || item.giftSetItems || []
-        });
-      }
-    }
-
-    const itemsToDeduct = resolvedCartItems.length > 0 ? resolvedCartItems : orderPayload.cartItems;
-    // Perform atomic stock deduction
-    const stockDeduction = await deductStockAtomically(itemsToDeduct);
-
-    const subtotalVal = orderPayload.subtotal !== undefined
-      ? Number(orderPayload.subtotal) || 0
-      : (itemsToDeduct || []).reduce((acc, item) => acc + (item.price || 0) * (item.quantity || 1), 0);
-    const discountCodeVal = (orderPayload.discountCode || "").toString().trim();
-    const discountAmountVal = Math.max(0, Number(orderPayload.discountAmount) || 0);
-    const shippingChargeVal = Math.max(0, Number(orderPayload.shippingCharge) || 0);
-    const taxAmountVal = Math.max(0, Number(orderPayload.taxAmount) || 0);
-    const totalAmountVal = orderPayload.totalAmount !== undefined
-      ? Number(orderPayload.totalAmount)
-      : Math.max(0, subtotalVal - discountAmountVal + shippingChargeVal + taxAmountVal);
-
     const newOrder = new Order({
       ...orderPayload,
-      cartItems: itemsToDeduct,
+      cartItems: resolvedCartItems,
       orderId,
       customerId: customer._id,
-      subtotal: subtotalVal,
-      discountCode: discountCodeVal,
-      discountAmount: discountAmountVal,
-      shippingCharge: shippingChargeVal,
-      taxAmount: taxAmountVal,
-      totalAmount: totalAmountVal,
+      subtotal,
+      discountCode: verifiedDiscountCode,
+      discountAmount,
+      shippingCharge,
+      taxAmount,
+      totalAmount: secureTotalAmount,
       paymentMethod: "Razorpay",
       status: stockDeduction.success ? "Pending" : "Stock Pending",
       paymentDetails: {

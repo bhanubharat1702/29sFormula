@@ -7,6 +7,7 @@ import dotenv from "dotenv";
 import { sendEmail } from "../utils/emailService.js";
 import { getBrandInfo } from "../utils/brandHelper.js";
 import { verifyToken, isAdmin } from "../middleware/authMiddleware.js";
+import { otpLimiter } from "../middleware/rateLimiter.js";
 
 dotenv.config();
 
@@ -15,7 +16,7 @@ const router = express.Router();
 // Generate 6 digit OTP
 const generateOtp = () => Math.floor(100000 + Math.random() * 900000).toString();
 
-router.post("/api/customers/request-autofill-otp", async (req, res) => {
+router.post("/api/customers/request-autofill-otp", otpLimiter, async (req, res) => {
   try {
     const { email } = req.body;
     if (!email) {
@@ -63,7 +64,7 @@ router.post("/api/customers/request-autofill-otp", async (req, res) => {
   }
 });
 
-router.post("/api/customers/verify-autofill-otp", async (req, res) => {
+router.post("/api/customers/verify-autofill-otp", otpLimiter, async (req, res) => {
   try {
     const { email, otp } = req.body;
     if (!email || !otp) {

@@ -5,6 +5,8 @@ import express from "express";
 import cors from "cors";
 import { connectDB } from "./config/db.js";
 
+import { generalLimiter } from "./middleware/rateLimiter.js";
+
 // Import Routers
 import uploadRoutes from "./routes/uploadRoutes.js";
 import settingsRoutes from "./routes/settingsRoutes.js";
@@ -23,6 +25,9 @@ const PORT = process.env.PORT || 5000;
 app.use(cors());
 app.use(express.json({ limit: "100mb" }));
 app.use(express.urlencoded({ limit: "100mb", extended: true }));
+
+// Apply general API rate limiting (100 req/min per IP)
+app.use("/api", generalLimiter);
 
 // Connect to MongoDB
 connectDB();
