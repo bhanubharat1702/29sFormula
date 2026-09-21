@@ -14,7 +14,7 @@ import DiscountsTab from "./components/tabs/DiscountsTab";
 import { FaqItem, DashboardStats, Product } from "./types";
 import { fontCategories, getFontFamilyStack } from "./constants/fonts";
 import { useAdminAuth } from "./hooks/useAdminAuth";
-import { useDashboardData, getAuthHeaders } from "./hooks/useDashboardData";
+import { useDashboardData, getAuthHeaders, ensureAdminToken } from "./hooks/useDashboardData";
 import AdminModals from "./components/modals/AdminModals";
 import CustomizeLayoutModal from "./components/modals/CustomizeLayoutModal";
 
@@ -1981,40 +1981,50 @@ export default function AdminDashboard() {
     }
   };
 
-  const fetchOrders = () => {
-    fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:5001'}/api/orders`, {
-      cache: "no-store",
-      headers: {
-        ...getAuthHeaders()
-      }
-    })
-      .then(res => res.json())
-      .then(data => {
-        const list = Array.isArray(data) ? data : (data?.data || data?.orders || []);
-        setOrders(list);
-      })
-      .catch(err => console.error("Error fetching orders:", err));
+  const fetchOrders = async () => {
+    try {
+      const authHeaders = await ensureAdminToken();
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:5001'}/api/orders`, {
+        cache: "no-store",
+        headers: {
+          ...authHeaders
+        }
+      });
+      const data = await res.json();
+      const list = Array.isArray(data) ? data : (data?.data || data?.orders || []);
+      setOrders(list);
+    } catch (err) {
+      console.error("Error fetching orders:", err);
+    }
   };
 
-  const fetchCustomers = () => {
-    fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:5001'}/api/customers`, {
-      cache: "no-store",
-      headers: {
-        ...getAuthHeaders()
-      }
-    })
-      .then(res => res.json())
-      .then(data => {
-        const list = Array.isArray(data) ? data : (data?.data || data?.customers || []);
-        setCustomers(list);
-      })
-      .catch(err => console.error("Error fetching customers:", err));
+  const fetchCustomers = async () => {
+    try {
+      const authHeaders = await ensureAdminToken();
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:5001'}/api/customers`, {
+        cache: "no-store",
+        headers: {
+          ...authHeaders
+        }
+      });
+      const data = await res.json();
+      const list = Array.isArray(data) ? data : (data?.data || data?.customers || []);
+      setCustomers(list);
+    } catch (err) {
+      console.error("Error fetching customers:", err);
+    }
   };
 
   const handleDeleteCustomer = async (id: string) => {
     setIsDeletingCustomer(true);
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:5001'}/api/customers/${id}`, { method: "DELETE" });
+      const authHeaders = await ensureAdminToken();
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:5001'}/api/customers/${id}`, {
+        method: "DELETE",
+        headers: {
+          ...authHeaders
+        }
+      });
       const data = await res.json();
       if (data.success) {
         fetchCustomers();
@@ -2042,9 +2052,13 @@ export default function AdminDashboard() {
 
   const executeReturnStatusUpdate = async (orderId: string, newStatus: string, notes: string) => {
     try {
+      const authHeaders = await ensureAdminToken();
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:5001'}/api/orders/${orderId}/return-status`, {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          ...authHeaders
+        },
         body: JSON.stringify({ status: newStatus, adminNotes: notes })
       });
       if (!res.ok) throw new Error("Failed to update return status");
@@ -2073,7 +2087,7 @@ export default function AdminDashboard() {
     }
   };
 
-  const handleUpdateOrderStatus = (
+  const handleUpdateOrderStatus = async (
     orderId: string,
     status: string,
     rtoCharges?: number,
@@ -2081,53 +2095,57 @@ export default function AdminDashboard() {
     awbNumber?: string,
     trackingUrl?: string
   ) => {
-    return fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:5001'}/api/orders/${orderId}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ status, rtoCharges, courierPartner, awbNumber, trackingUrl })
-    })
-      .then(res => {
-        if (!res.ok) throw new Error("Failed to update status");
-        return res.json();
-      })
-      .then(updated => {
-        setOrders(prev => prev.map(o => o._id === updated._id ? { ...o, ...updated } : o));
-        if (selectedOrder && selectedOrder._id === updated._id) {
-          setSelectedOrder((prev: any) => prev ? { ...prev, ...updated } : null);
-        }
-        setSuccessMessage("Order status updated to " + status);
-        setTimeout(() => setSuccessMessage(null), 3000);
-        return updated;
-      })
-      .catch(err => {
-        alert("Error updating status: " + err.message);
-        throw err;
+    try {
+      const authHeaders = await ensureAdminToken();
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:5001'}/api/orders/${orderId}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          ...authHeaders
+        },
+        body: JSON.stringify({ status, rtoCharges, courierPartner, awbNumber, trackingUrl })
       });
+      if (!res.ok) throw new Error("Failed to update status");
+      const updated = await res.json();
+
+      setOrders(prev => prev.map(o => o._id === updated._id ? { ...o, ...updated } : o));
+      if (selectedOrder && selectedOrder._id === updated._id) {
+        setSelectedOrder((prev: any) => prev ? { ...prev, ...updated } : null);
+      }
+      setSuccessMessage("Order status updated to " + status);
+      setTimeout(() => setSuccessMessage(null), 3000);
+      return updated;
+    } catch (err: any) {
+      alert("Error updating status: " + err.message);
+      throw err;
+    }
   };
 
-  const handleSaveTrackingInfo = (orderId: string, courierPartner: string, awbNumber: string, trackingUrl?: string) => {
-    return fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:5001'}/api/orders/${orderId}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ courierPartner, awbNumber, trackingUrl })
-    })
-      .then(res => {
-        if (!res.ok) throw new Error("Failed to update tracking info");
-        return res.json();
-      })
-      .then(updated => {
-        setOrders(prev => prev.map(o => o._id === updated._id ? { ...o, ...updated } : o));
-        if (selectedOrder && selectedOrder._id === updated._id) {
-          setSelectedOrder((prev: any) => prev ? { ...prev, ...updated } : null);
-        }
-        setSuccessMessage("Tracking info updated successfully!");
-        setTimeout(() => setSuccessMessage(null), 3000);
-        return updated;
-      })
-      .catch(err => {
-        alert("Error updating tracking info: " + err.message);
-        throw err;
+  const handleSaveTrackingInfo = async (orderId: string, courierPartner: string, awbNumber: string, trackingUrl?: string) => {
+    try {
+      const authHeaders = await ensureAdminToken();
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:5001'}/api/orders/${orderId}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          ...authHeaders
+        },
+        body: JSON.stringify({ courierPartner, awbNumber, trackingUrl })
       });
+      if (!res.ok) throw new Error("Failed to update tracking info");
+      const updated = await res.json();
+
+      setOrders(prev => prev.map(o => o._id === updated._id ? { ...o, ...updated } : o));
+      if (selectedOrder && selectedOrder._id === updated._id) {
+        setSelectedOrder((prev: any) => prev ? { ...prev, ...updated } : null);
+      }
+      setSuccessMessage("Tracking info updated successfully!");
+      setTimeout(() => setSuccessMessage(null), 3000);
+      return updated;
+    } catch (err: any) {
+      alert("Error updating tracking info: " + err.message);
+      throw err;
+    }
   };
 
   const handleDeleteOrder = (orderId: string) => {
@@ -2137,9 +2155,13 @@ export default function AdminDashboard() {
   const executeDeleteOrder = async (orderId: string) => {
     setIsDeletingOrder(true);
     try {
+      const authHeaders = await ensureAdminToken();
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:5001'}/api/orders/${orderId}`, {
         method: "DELETE",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          ...authHeaders
+        },
         body: JSON.stringify({ cancellationReason: cancelReasonInput.trim() })
       });
       if (res.ok) {
@@ -2159,25 +2181,29 @@ export default function AdminDashboard() {
     }
   };
 
-  const handleUpdateRefundStatus = (orderId: string, refundStatus: string) => {
-    fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:5001'}/api/orders/${orderId}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ refundStatus })
-    })
-      .then(res => {
-        if (!res.ok) throw new Error("Failed to update refund status");
-        return res.json();
-      })
-      .then(updated => {
-        setOrders(prev => prev.map(o => o._id === updated._id ? { ...o, refundStatus: updated.refundStatus } : o));
-        if (selectedOrder && selectedOrder._id === updated._id) {
-          setSelectedOrder({ ...selectedOrder, refundStatus: updated.refundStatus });
-        }
-        setSuccessMessage("Refund status updated to: " + refundStatus);
-        setTimeout(() => setSuccessMessage(null), 3000);
-      })
-      .catch(err => alert("Error updating refund status: " + err.message));
+  const handleUpdateRefundStatus = async (orderId: string, refundStatus: string) => {
+    try {
+      const authHeaders = await ensureAdminToken();
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:5001'}/api/orders/${orderId}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          ...authHeaders
+        },
+        body: JSON.stringify({ refundStatus })
+      });
+      if (!res.ok) throw new Error("Failed to update refund status");
+      const updated = await res.json();
+
+      setOrders(prev => prev.map(o => o._id === updated._id ? { ...o, refundStatus: updated.refundStatus } : o));
+      if (selectedOrder && selectedOrder._id === updated._id) {
+        setSelectedOrder({ ...selectedOrder, refundStatus: updated.refundStatus });
+      }
+      setSuccessMessage("Refund status updated to: " + refundStatus);
+      setTimeout(() => setSuccessMessage(null), 3000);
+    } catch (err: any) {
+      alert("Error updating refund status: " + err.message);
+    }
   };
 
   const handleMultipleFilesUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {

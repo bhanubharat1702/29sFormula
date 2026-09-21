@@ -11,6 +11,7 @@ import CheckoutDrawer from "@/components/CheckoutDrawer";
 import OrderSuccessModal from "@/components/OrderSuccessModal";
 import CustomCheckbox from "@/components/CustomCheckbox/CustomCheckbox";
 import NewtonsCradleLoader from "@/components/NewtonsCradleLoader";
+import { StorefrontGridSkeleton } from "@/components/Skeletons/Skeletons";
 import { saveCart, clearCart, fetchAndSyncUserCart } from "@/utils/cartSync";
 
 interface Variant {
@@ -393,9 +394,7 @@ export default function Shop() {
     return 0; // featured
   });
 
-  if (loading) {
-    return <NewtonsCradleLoader fullScreen={true} />;
-  }
+
 
   return (
     <div suppressHydrationWarning className={styles.page}>
@@ -579,7 +578,9 @@ export default function Shop() {
         </div>
 
         {/* 3. Catalog Products Grid */}
-        {sortedProducts.length > 0 ? (
+        {loading ? (
+          <StorefrontGridSkeleton count={8} />
+        ) : sortedProducts.length > 0 ? (
           <div className={viewLayout === "grid" ? styles.productsGrid : styles.productsList}>
             {sortedProducts.map((product) => {
               const swatchesColors = getSwatchesForProduct(product.name);

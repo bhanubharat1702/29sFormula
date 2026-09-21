@@ -2362,7 +2362,7 @@ export default function AdminModals(props: any) {
                       <CustomStatusSelect
                         currentStatus={selectedOrder.status}
                         onSelect={(newStatus) => {
-                          if (newStatus === "Packed" || newStatus === "Shipped") {
+                          if (newStatus === "Packed") {
                             handleOpenMandatoryTrackingModal(selectedOrder, newStatus);
                           } else if (newStatus === "RTO Delivered") {
                             setRtoChargeTargetId(selectedOrder._id);
@@ -2723,7 +2723,7 @@ export default function AdminModals(props: any) {
                               <CustomStatusSelect
                                 currentStatus={selectedOrder.status}
                                 onSelect={(newStatus) => {
-                                  if (newStatus === "Packed" || newStatus === "Shipped") {
+                                  if (newStatus === "Packed") {
                                     handleOpenMandatoryTrackingModal(selectedOrder, newStatus);
                                   } else if (newStatus === "RTO Delivered") {
                                     setRtoChargeTargetId(selectedOrder._id);

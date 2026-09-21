@@ -72,8 +72,29 @@ input[type="number"]::-webkit-inner-spin-button {
   margin: 0;
 }
 
-input[type="number"] {
-  -moz-appearance: textfield;
-  appearance: textfield;
+
+/* Shimmer Skeleton Animation */
+@keyframes shimmerAnimation {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
 }
+
+.skeleton-shimmer {
+  background: linear-gradient(90deg, #e5e7eb 25%, #f3f4f6 37%, #e5e7eb 63%);
+  background-size: 200% 100%;
+  animation: shimmerAnimation 1.5s infinite ease-in-out;
+  border-radius: 6px;
+}
+
+.skeleton-shimmer-dark {
+  background: linear-gradient(90deg, #1f2937 25%, #374151 37%, #1f2937 63%);
+  background-size: 200% 100%;
+  animation: shimmerAnimation 1.5s infinite ease-in-out;
+  border-radius: 6px;
+}
+
 

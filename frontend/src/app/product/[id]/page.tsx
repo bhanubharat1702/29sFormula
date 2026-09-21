@@ -8,6 +8,7 @@ import styles from "./page.module.css";
 import homeStyles from "@/app/page.module.css";
 import Footer from "@/components/Footer";
 import NewtonsCradleLoader from "@/components/NewtonsCradleLoader";
+import { ProductDetailSkeleton } from "@/components/Skeletons/Skeletons";
 
 import CheckoutDrawer from "@/components/CheckoutDrawer";
 import CartDrawer from "@/components/CartDrawer";
@@ -738,7 +739,13 @@ export default function ProductDetailPage() {
   };
 
   if (loading) {
-    return <NewtonsCradleLoader fullScreen={true} />;
+    return (
+      <div suppressHydrationWarning className={styles.page}>
+        <Navbar onCartClick={() => setShowCartDrawer(true)} />
+        <ProductDetailSkeleton />
+        <Footer />
+      </div>
+    );
   }
 
   if (!product) {

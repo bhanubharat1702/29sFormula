@@ -1,5 +1,6 @@
 import React from 'react';
 import styles from '../../../page.module.css';
+import { TableRowSkeleton } from '@/components/Skeletons/Skeletons';
 
 interface ActiveOrdersSubTabProps {
     orders: any[];
@@ -299,6 +300,9 @@ export default function ActiveOrdersSubTab({
                               o.customerEmail.toLowerCase().includes(searchQuery.toLowerCase())
                             )
                             ;
+  if (!orders) {
+    return <TableRowSkeleton columns={10} rows={5} />;
+  }
   if (filteredOrders.length === 0) {
     return (
       <tr>

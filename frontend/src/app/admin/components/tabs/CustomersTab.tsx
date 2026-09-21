@@ -1,5 +1,6 @@
 import React from 'react';
 import styles from '../../page.module.css';
+import { TableRowSkeleton } from '@/components/Skeletons/Skeletons';
 
 interface CustomersTabProps {
   activeTab: any;
@@ -32,7 +33,25 @@ export default function CustomersTab({
             </div>
 
             <div className={styles.dashboardCard} style={{ marginTop: 0 }}>
-              {customers.length > 0 ? (
+              {!customers ? (
+                <div className={styles.hideOnMobile} style={{ overflowX: "auto" }}>
+                  <table style={{ width: "100%", borderCollapse: "collapse", textAlign: "left" }}>
+                    <thead>
+                      <tr style={{ borderBottom: "2px solid #e5e7eb", fontSize: "0.82rem", color: "#6b7280", textTransform: "uppercase" }}>
+                        <th style={{ padding: "12px 16px" }}>Customer Name</th>
+                        <th style={{ padding: "12px 16px" }}>Email Address</th>
+                        <th style={{ padding: "12px 16px" }}>Phone</th>
+                        <th style={{ padding: "12px 16px", textAlign: "center" }}>Total Orders</th>
+                        <th style={{ padding: "12px 16px", textAlign: "right" }}>Total Spend</th>
+                        <th style={{ padding: "12px 16px", textAlign: "center" }}>Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <TableRowSkeleton columns={6} rows={5} />
+                    </tbody>
+                  </table>
+                </div>
+              ) : customers.length > 0 ? (
                 <>
                   {/* Desktop View */}
                   <div className={styles.hideOnMobile} style={{ overflowX: "auto" }}>

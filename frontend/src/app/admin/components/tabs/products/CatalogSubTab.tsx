@@ -1,6 +1,7 @@
 import React from 'react';
 import styles from '../../../page.module.css';
 import { Product } from '../../../types';
+import { TableRowSkeleton, ProductCardSkeleton } from '@/components/Skeletons/Skeletons';
 
 interface CatalogSubTabProps {
   activeTab: any;
@@ -121,7 +122,16 @@ export default function CatalogSubTab({
                           </tr>
                         </thead>
                         <tbody>
-                          {filteredProducts.map((product: any) => {
+                          {loading || !products ? (
+                            <TableRowSkeleton columns={7} rows={5} />
+                          ) : filteredProducts.length === 0 ? (
+                            <tr>
+                              <td colSpan={7} style={{ padding: '40px 0', textAlign: 'center', color: '#6b7280' }}>
+                                No products found.
+                              </td>
+                            </tr>
+                          ) : (
+                            filteredProducts.map((product: any) => {
                             const hasVariants = (product.options && product.options.length > 0) || (product.variants && product.variants.length > 0);
                             const variantsList = product.options && product.options.length > 0 ? product.options : (product.variants || []);
                             const isExpanded = expandedProducts.has(product._id!);
@@ -321,7 +331,8 @@ export default function CatalogSubTab({
                                 ))}
                               </React.Fragment>
                             );
-                          })}
+                          })
+                        )}
                         </tbody>
                       </table>
                     </div>

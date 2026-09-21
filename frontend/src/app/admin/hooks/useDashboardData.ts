@@ -17,7 +17,7 @@ export const getAuthHeaders = (): Record<string, string> => {
   return {};
 };
 
-const ensureAdminToken = async (): Promise<Record<string, string>> => {
+export const ensureAdminToken = async (): Promise<Record<string, string>> => {
   let headers = getAuthHeaders();
   if (headers.Authorization) return headers;
 
