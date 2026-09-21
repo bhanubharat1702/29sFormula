@@ -15,6 +15,7 @@ import { getNextOrderId } from "../models/Counter.js";
 import { deductStockAtomically } from "../utils/stockHelper.js";
 import { verifyOrderOwnership } from "../utils/authHelper.js";
 import { syncCustomerStats } from "../utils/customerHelper.js";
+import { verifyToken, isAdmin } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
@@ -551,7 +552,7 @@ router.post("/api/orders", async (req, res) => {
   }
 });
 
-router.get("/api/orders", async (req, res) => {
+router.get("/api/orders", verifyToken, isAdmin, async (req, res) => {
   try {
     const orders = await Order.find({}).populate("customerId").sort({ createdAt: -1 }).lean();
 
@@ -580,7 +581,7 @@ router.get("/api/orders", async (req, res) => {
   }
 });
 
-router.put("/api/orders/:id", async (req, res) => {
+router.put("/api/orders/:id", verifyToken, isAdmin, async (req, res) => {
   try {
     const { status, refundStatus, rtoCharges, courierPartner, awbNumber, trackingUrl } = req.body;
     const existingOrder = await Order.findById(req.params.id);
@@ -699,7 +700,7 @@ router.put("/api/orders/:id", async (req, res) => {
   }
 });
 
-router.delete("/api/orders/:id", async (req, res) => {
+router.delete("/api/orders/:id", verifyToken, isAdmin, async (req, res) => {
   try {
     const { cancellationReason } = req.body;
     if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
@@ -1035,7 +1036,7 @@ router.post("/api/orders/:id/return", async (req, res) => {
 });
 
 // 5. Add PUT /api/orders/:id/return-status for admin status updates
-router.put("/api/orders/:id/return-status", async (req, res) => {
+router.put("/api/orders/:id/return-status", verifyToken, isAdmin, async (req, res) => {
   try {
     const { status, adminNotes } = req.body;
     if (!status) {

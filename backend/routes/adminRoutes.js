@@ -4,8 +4,12 @@ import Order from "../models/Order.js";
 import { Product, ProductVariant } from "../models/Product.js";
 import Customer from "../models/Customer.js";
 import Review from "../models/Review.js";
+import { verifyToken, isAdmin } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
+
+// Apply auth & admin checks to all admin routes
+router.use(verifyToken, isAdmin);
 
 router.get("/api/admin/dashboard-stats", async (req, res) => {
   try {

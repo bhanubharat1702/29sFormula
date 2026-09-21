@@ -6,6 +6,7 @@ import Otp from "../models/Otp.js";
 import dotenv from "dotenv";
 import { sendEmail } from "../utils/emailService.js";
 import { getBrandInfo } from "../utils/brandHelper.js";
+import { verifyToken, isAdmin } from "../middleware/authMiddleware.js";
 
 dotenv.config();
 
@@ -90,7 +91,7 @@ router.post("/api/customers/verify-autofill-otp", async (req, res) => {
   }
 });
 
-router.get("/api/customers/search", async (req, res) => {
+router.get("/api/customers/search", verifyToken, isAdmin, async (req, res) => {
   try {
     const { query } = req.query;
     if (!query) {
@@ -146,7 +147,7 @@ router.get("/api/customers/search", async (req, res) => {
   }
 });
 
-router.get("/api/customers", async (req, res) => {
+router.get("/api/customers", verifyToken, isAdmin, async (req, res) => {
   try {
     const customers = await Customer.find({}).sort({ totalSpend: -1 });
     res.json(customers);

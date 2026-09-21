@@ -1,4 +1,6 @@
 import express from "express";
+import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
 import User from "../models/User.js";
 import Customer from "../models/Customer.js";
 import Order from "../models/Order.js";
@@ -6,6 +8,24 @@ import { sendEmail } from "../utils/emailService.js";
 import { getBrandInfo } from "../utils/brandHelper.js";
 
 const router = express.Router();
+
+const generateToken = (user) => {
+  const isAdminUser = Boolean(
+    user.isAdmin || 
+    user.role === "admin" || 
+    (process.env.ADMIN_EMAIL && user.email?.toLowerCase() === process.env.ADMIN_EMAIL.toLowerCase())
+  );
+  return jwt.sign(
+    {
+      id: user._id,
+      email: user.email,
+      role: isAdminUser ? "admin" : "user",
+      isAdmin: isAdminUser
+    },
+    process.env.JWT_SECRET || "29sformula_secret_jwt_key_2026",
+    { expiresIn: "7d" }
+  );
+};
 
 const sendWelcomeEmail = async (userEmail, userName) => {
   try {
@@ -54,10 +74,11 @@ router.post("/api/auth/register", async (req, res) => {
       return res.status(400).json({ error: "An account with this email already exists." });
     }
 
+    const hashedPassword = await bcrypt.hash(password, 12);
     const newUser = new User({
       name: name.trim(),
       email: trimmedEmail,
-      password: password,
+      password: hashedPassword,
       isGoogleUser: false
     });
 
@@ -66,10 +87,15 @@ router.post("/api/auth/register", async (req, res) => {
     // Send welcome email asynchronously
     sendWelcomeEmail(trimmedEmail, newUser.name);
     
+    const token = generateToken(newUser);
+
     res.status(201).json({
+      token,
       _id: newUser._id,
       name: newUser.name,
       email: newUser.email,
+      role: newUser.role || "user",
+      isAdmin: newUser.isAdmin || false,
       isGoogleUser: false
     });
   } catch (error) {
@@ -95,7 +121,15 @@ router.post("/api/auth/login", async (req, res) => {
       return res.status(400).json({ error: "This email is registered using Google Sign-In. Please sign in with Google." });
     }
 
-    if (user.password !== password) {
+    let isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch && user.password === password) {
+      // Legacy plain-text password fallback & auto-migration
+      isMatch = true;
+      user.password = await bcrypt.hash(password, 12);
+      await user.save();
+    }
+
+    if (!isMatch) {
       return res.status(400).json({ error: "Invalid email or password." });
     }
 
@@ -105,12 +139,17 @@ router.post("/api/auth/login", async (req, res) => {
     const validName = (n) => (n && n !== "Google User" && !n.toLowerCase().includes("google")) ? n.trim() : "";
     const resolvedName = validName(user.name) || validName(existingCustomer?.name) || validName(lastOrder?.customerName) || user.name;
 
+    const token = generateToken(user);
+
     res.json({
+      token,
       _id: user._id,
       name: resolvedName,
       email: user.email,
       phone: user.phone || existingCustomer?.phone || lastOrder?.customerPhone || "",
       address: existingCustomer?.address || lastOrder?.shippingAddress || "",
+      role: user.role || (user.email?.toLowerCase() === process.env.ADMIN_EMAIL?.toLowerCase() ? "admin" : "user"),
+      isAdmin: user.isAdmin || (user.email?.toLowerCase() === process.env.ADMIN_EMAIL?.toLowerCase()),
       isGoogleUser: false
     });
   } catch (error) {
@@ -204,12 +243,17 @@ router.post("/api/auth/google", async (req, res) => {
       ? user.name
       : (existingCustomer?.name && existingCustomer.name !== "Google User" ? existingCustomer.name : (lastOrder?.customerName || computedName));
 
+    const token = generateToken(user);
+
     res.json({
+      token,
       _id: user._id,
       name: finalName,
       email: user.email,
       phone: user.phone || existingCustomer?.phone || lastOrder?.customerPhone || "",
       address: existingCustomer?.address || lastOrder?.shippingAddress || "",
+      role: user.role || (user.email?.toLowerCase() === process.env.ADMIN_EMAIL?.toLowerCase() ? "admin" : "user"),
+      isAdmin: user.isAdmin || (user.email?.toLowerCase() === process.env.ADMIN_EMAIL?.toLowerCase()),
       isGoogleUser: true,
       profilePicture: user.profilePicture
     });
@@ -302,7 +346,7 @@ router.post("/api/auth/reset-password", async (req, res) => {
       return res.status(404).json({ error: "Account not found." });
     }
 
-    user.password = newPassword;
+    user.password = await bcrypt.hash(newPassword, 12);
     await user.save();
 
     // Delete used OTP
