@@ -40,7 +40,12 @@ router.get("/api/products", async (req, res) => {
       filter.category = req.query.category;
     }
     if (req.query.search) {
-      filter.name = { $regex: String(req.query.search).trim(), $options: "i" };
+      const searchRegex = { $regex: String(req.query.search).trim(), $options: "i" };
+      filter.$or = [
+        { name: searchRegex },
+        { category: searchRegex },
+        { description: searchRegex }
+      ];
     }
     if (cursor) {
       filter._id = { $lt: cursor };

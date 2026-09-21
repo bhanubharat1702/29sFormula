@@ -266,7 +266,7 @@ export default function Shop() {
   }, []);
 
   useEffect(() => {
-    // Check search query parameters for category pre-filtering
+    // Check search query parameters for category pre-filtering or text search
     if (typeof window !== "undefined") {
       const params = new URLSearchParams(window.location.search);
       const cat = params.get("category");
@@ -274,6 +274,10 @@ export default function Shop() {
         setCategoryFilter("Best Seller");
       } else if (cat === "arrivals") {
         setCategoryFilter("Latest Arrivals");
+      }
+      const searchParam = params.get("search");
+      if (searchParam) {
+        setSearchQuery(searchParam);
       }
     }
 

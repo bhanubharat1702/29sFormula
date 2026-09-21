@@ -198,3 +198,34 @@ export const StorefrontGridSkeleton: React.FC<{ count?: number }> = ({ count = 8
     </div>
   );
 };
+
+// 7. Search Results List Skeleton
+export const SearchListSkeleton: React.FC<{ count?: number }> = ({ count = 4 }) => {
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', padding: '4px 0' }}>
+      {Array.from({ length: count }).map((_, idx) => (
+        <div
+          key={idx}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            padding: '10px 12px',
+            borderRadius: '8px',
+            backgroundColor: '#f9fafb'
+          }}
+        >
+          <div
+            className="skeleton-shimmer"
+            style={{ width: '44px', height: '44px', borderRadius: '8px', marginRight: '12px', flexShrink: 0 }}
+          />
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', flex: 1 }}>
+            <div className="skeleton-shimmer" style={{ width: `${45 + ((idx * 20) % 35)}%`, height: '14px', borderRadius: '4px' }} />
+            <div className="skeleton-shimmer" style={{ width: '25%', height: '10px', borderRadius: '4px' }} />
+          </div>
+          <div className="skeleton-shimmer" style={{ width: '45px', height: '14px', borderRadius: '4px', marginLeft: '12px', flexShrink: 0 }} />
+        </div>
+      ))}
+    </div>
+  );
+};
+
