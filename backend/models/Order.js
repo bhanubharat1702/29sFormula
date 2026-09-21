@@ -35,6 +35,9 @@ const orderSchema = new mongoose.Schema({
   cancellationReason: { type: String },
   refundStatus: { type: String, default: "Not Refunded" },
   rtoCharges: { type: Number, default: 0 },
+  courierPartner: { type: String, default: "" },
+  awbNumber: { type: String, default: "" },
+  trackingUrl: { type: String, default: "" },
   timeline: [
     {
       event: { type: String, required: true },

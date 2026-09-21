@@ -2059,11 +2059,18 @@ export default function AdminDashboard() {
     }
   };
 
-  const handleUpdateOrderStatus = (orderId: string, status: string, rtoCharges?: number) => {
-    fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:5001'}/api/orders/${orderId}`, {
+  const handleUpdateOrderStatus = (
+    orderId: string,
+    status: string,
+    rtoCharges?: number,
+    courierPartner?: string,
+    awbNumber?: string,
+    trackingUrl?: string
+  ) => {
+    return fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:5001'}/api/orders/${orderId}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ status, rtoCharges })
+      body: JSON.stringify({ status, rtoCharges, courierPartner, awbNumber, trackingUrl })
     })
       .then(res => {
         if (!res.ok) throw new Error("Failed to update status");
@@ -2076,8 +2083,37 @@ export default function AdminDashboard() {
         }
         setSuccessMessage("Order status updated to " + status);
         setTimeout(() => setSuccessMessage(null), 3000);
+        return updated;
       })
-      .catch(err => alert("Error updating status: " + err.message));
+      .catch(err => {
+        alert("Error updating status: " + err.message);
+        throw err;
+      });
+  };
+
+  const handleSaveTrackingInfo = (orderId: string, courierPartner: string, awbNumber: string, trackingUrl?: string) => {
+    return fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:5001'}/api/orders/${orderId}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ courierPartner, awbNumber, trackingUrl })
+    })
+      .then(res => {
+        if (!res.ok) throw new Error("Failed to update tracking info");
+        return res.json();
+      })
+      .then(updated => {
+        setOrders(prev => prev.map(o => o._id === updated._id ? { ...o, ...updated } : o));
+        if (selectedOrder && selectedOrder._id === updated._id) {
+          setSelectedOrder((prev: any) => prev ? { ...prev, ...updated } : null);
+        }
+        setSuccessMessage("Tracking info updated successfully!");
+        setTimeout(() => setSuccessMessage(null), 3000);
+        return updated;
+      })
+      .catch(err => {
+        alert("Error updating tracking info: " + err.message);
+        throw err;
+      });
   };
 
   const handleDeleteOrder = (orderId: string) => {
@@ -3709,6 +3745,7 @@ export default function AdminDashboard() {
         handleResetToDefaults={handleResetToDefaults}
         handleSubmit={handleSubmit}
         handleUpdateOrderStatus={handleUpdateOrderStatus}
+        handleSaveTrackingInfo={handleSaveTrackingInfo}
         handleUpdateRefundStatus={handleUpdateRefundStatus}
         heroBgColor={heroBgColor}
         heroBgImage={heroBgImage}

@@ -337,6 +337,191 @@ const CustomRefundSelect = ({
   );
 };
 
+const computeTrackingUrl = (courierPartner: string, awbNumber: string, customUrl?: string) => {
+  if (customUrl && customUrl.trim()) return customUrl.trim();
+  if (!awbNumber || !awbNumber.trim()) return "";
+
+  const courier = (courierPartner || "").trim().toLowerCase();
+  const awb = awbNumber.trim();
+
+  if (courier.includes("delhivery")) {
+    return `https://www.delhivery.com/track/package/${awb}`;
+  }
+  if (courier.includes("bluedart") || courier.includes("blue dart")) {
+    return `https://www.bluedart.com/tracking?trackNumber=${awb}`;
+  }
+  if (courier.includes("dtdc")) {
+    return `https://www.dtdc.in/tracking.asp?strTxtTrackNo=${awb}`;
+  }
+  if (courier.includes("xpressbees") || courier.includes("expressbees")) {
+    return `https://www.xpressbees.com/track?isAWB=true&trackVal=${awb}`;
+  }
+  if (courier.includes("shadowfax")) {
+    return `https://www.shadowfax.in/track?awb=${awb}`;
+  }
+  if (courier.includes("ecom")) {
+    return `https://ecomexpress.in/tracking/?awb=${awb}`;
+  }
+  if (courier.includes("india post") || courier.includes("indiapost")) {
+    return `https://www.indiapost.gov.in/VAS/Pages/trackconsignment.aspx`;
+  }
+
+  return `https://www.google.com/search?q=${encodeURIComponent((courierPartner || "courier") + " tracking " + awb)}`;
+};
+
+const TrackingControlCard = ({
+  order
+}: {
+  order: any;
+}) => {
+  const courier = order?.courierPartner;
+  const awb = order?.awbNumber;
+  const trackingUrl = order?.trackingUrl;
+
+  return (
+    <div style={{ marginTop: "8px" }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px" }}>
+        <h3 style={{ fontSize: "0.8rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", margin: 0, color: "#888" }}>
+          Courier & AWB Tracking
+        </h3>
+        {awb && (
+          <span style={{ fontSize: "0.7rem", fontWeight: 700, color: "#059669", backgroundColor: "#ecfdf5", padding: "2px 8px", borderRadius: "4px", border: "1px solid #a7f3d0" }}>
+            ASSIGNED
+          </span>
+        )}
+      </div>
+
+      {awb ? (
+        <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <span style={{ fontSize: "0.85rem", color: "#6b7280" }}>Courier Partner:</span>
+            <span style={{ fontSize: "0.88rem", fontWeight: 600, color: "#111827" }}>{courier || "N/A"}</span>
+          </div>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <span style={{ fontSize: "0.85rem", color: "#6b7280" }}>AWB Tracking No:</span>
+            <span style={{ fontSize: "0.88rem", fontWeight: 600, color: "#111827", fontFamily: "monospace" }}>{awb}</span>
+          </div>
+          {trackingUrl && (
+            <div style={{ marginTop: "4px" }}>
+              <a
+                href={trackingUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{ fontSize: "0.82rem", color: "#2563eb", textDecoration: "underline", fontWeight: 600 }}
+              >
+                Track Package Online ↗
+              </a>
+            </div>
+          )}
+        </div>
+      ) : (
+        <p style={{ margin: 0, fontSize: "0.85rem", color: "#6b7280", fontStyle: "italic" }}>
+          Tracking information will be entered when status is updated to Packed.
+        </p>
+      )}
+    </div>
+  );
+};
+const OrderTimelineContainer = ({
+  children,
+  title = "Order Timeline",
+  maxHeight = "100%"
+}: {
+  children: React.ReactNode;
+  title?: string;
+  maxHeight?: string;
+}) => {
+  const scrollRef = React.useRef<HTMLDivElement>(null);
+  const [hasMoreBelow, setHasMoreBelow] = useState(false);
+
+  const checkScroll = React.useCallback(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const remaining = el.scrollHeight - el.scrollTop - el.clientHeight;
+    setHasMoreBelow(remaining > 15);
+  }, []);
+
+  useEffect(() => {
+    checkScroll();
+    const el = scrollRef.current;
+    if (el) {
+      el.addEventListener("scroll", checkScroll);
+      window.addEventListener("resize", checkScroll);
+    }
+    const timer = setTimeout(checkScroll, 300);
+    return () => {
+      if (el) el.removeEventListener("scroll", checkScroll);
+      window.removeEventListener("resize", checkScroll);
+      clearTimeout(timer);
+    };
+  }, [children, checkScroll]);
+
+  const handleScrollDown = () => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollBy({ top: 120, behavior: "smooth" });
+    }
+  };
+
+  return (
+    <div style={{ flex: 1, display: "flex", flexDirection: "column", minHeight: 0, maxHeight, position: "relative" }}>
+      {title && (
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "12px", flexShrink: 0 }}>
+          <h3 style={{ fontSize: "0.85rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", margin: 0, color: "#6b7280" }}>
+            {title}
+          </h3>
+
+        </div>
+      )}
+
+      <div
+        ref={scrollRef}
+        style={{
+          flex: 1,
+          overflowY: "auto",
+          paddingRight: "5px",
+          minHeight: 0
+        }}
+      >
+        {children}
+      </div>
+
+      {hasMoreBelow && (
+        <button
+          type="button"
+          onClick={handleScrollDown}
+          title="Scroll down to view remaining timeline events"
+          style={{
+            position: "absolute",
+            bottom: "8px",
+            right: "12px",
+            backgroundColor: "#111827",
+            color: "#ffffff",
+            border: "none",
+            borderRadius: "20px",
+            padding: "4px 10px",
+            display: "flex",
+            alignItems: "center",
+            gap: "5px",
+            fontSize: "0.72rem",
+            fontWeight: 600,
+            boxShadow: "0 4px 12px rgba(0, 0, 0, 0.25)",
+            cursor: "pointer",
+            zIndex: 10,
+            transition: "transform 0.15s ease"
+          }}
+          onMouseEnter={(e) => (e.currentTarget.style.transform = "scale(1.05)")}
+          onMouseLeave={(e) => (e.currentTarget.style.transform = "scale(1)")}
+        >
+
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M12 5v14M19 12l-7 7-7-7" />
+          </svg>
+        </button>
+      )}
+    </div>
+  );
+};
+
 export default function AdminModals(props: any) {
   const {
     allCategories,
@@ -376,6 +561,7 @@ export default function AdminModals(props: any) {
     handleResetToDefaults,
     handleSubmit,
     handleUpdateOrderStatus,
+    handleSaveTrackingInfo,
     handleUpdateRefundStatus,
     heroBackup,
     heroBgColor,
@@ -510,6 +696,76 @@ export default function AdminModals(props: any) {
   const [showRtoChargeModal, setShowRtoChargeModal] = useState(false);
   const [rtoChargeTargetId, setRtoChargeTargetId] = useState<string | null>(null);
   const [rtoChargeAmount, setRtoChargeAmount] = useState<string>("");
+
+  const [mandatoryTrackingModalOrder, setMandatoryTrackingModalOrder] = useState<any | null>(null);
+  const [mandatoryTargetStatus, setMandatoryTargetStatus] = useState<string>("Packed");
+  const [mandatoryCourier, setMandatoryCourier] = useState<string>("Delhivery");
+  const [mandatoryCustomCourier, setMandatoryCustomCourier] = useState<string>("");
+  const [mandatoryAwb, setMandatoryAwb] = useState<string>("");
+  const [mandatoryTrackingUrl, setMandatoryTrackingUrl] = useState<string>("");
+  const [mandatoryError, setMandatoryError] = useState<string | null>(null);
+  const [isSubmittingMandatoryTracking, setIsSubmittingMandatoryTracking] = useState<boolean>(false);
+
+  const handleMandatoryTrackingCourierChange = (val: string) => {
+    setMandatoryCourier(val);
+    const activeCourier = val === "Other" ? (mandatoryCustomCourier || "Other") : val;
+    const autoUrl = computeTrackingUrl(activeCourier, mandatoryAwb, "");
+    setMandatoryTrackingUrl(autoUrl);
+  };
+
+  const handleMandatoryTrackingAwbChange = (val: string) => {
+    setMandatoryAwb(val);
+    const activeCourier = mandatoryCourier === "Other" ? (mandatoryCustomCourier || "Other") : mandatoryCourier;
+    const autoUrl = computeTrackingUrl(activeCourier, val, "");
+    setMandatoryTrackingUrl(autoUrl);
+  };
+
+  const handleMandatoryTrackingCustomCourierChange = (val: string) => {
+    setMandatoryCustomCourier(val);
+    const autoUrl = computeTrackingUrl(val || "Other", mandatoryAwb, "");
+    setMandatoryTrackingUrl(autoUrl);
+  };
+
+  const handleOpenMandatoryTrackingModal = (order: any, targetStatus: string) => {
+    setMandatoryTrackingModalOrder(order);
+    setMandatoryTargetStatus(targetStatus);
+    setMandatoryCourier(order.courierPartner || "Delhivery");
+    setMandatoryCustomCourier("");
+    setMandatoryAwb(order.awbNumber || "");
+    setMandatoryTrackingUrl(order.trackingUrl || "");
+    setMandatoryError(null);
+  };
+
+  const handleSubmitMandatoryTracking = async () => {
+    const activeCourier = mandatoryCourier === "Other" ? mandatoryCustomCourier.trim() : mandatoryCourier.trim();
+    if (!activeCourier) {
+      setMandatoryError("Please select or enter a Courier Partner.");
+      return;
+    }
+    if (!mandatoryAwb || !mandatoryAwb.trim()) {
+      setMandatoryError("Courier AWB / Tracking Number is required to pack/ship this order.");
+      return;
+    }
+
+    setMandatoryError(null);
+    setIsSubmittingMandatoryTracking(true);
+    try {
+      const finalUrl = computeTrackingUrl(activeCourier, mandatoryAwb, mandatoryTrackingUrl);
+      await handleUpdateOrderStatus(
+        mandatoryTrackingModalOrder._id,
+        mandatoryTargetStatus,
+        undefined,
+        activeCourier,
+        mandatoryAwb.trim(),
+        finalUrl
+      );
+      setMandatoryTrackingModalOrder(null);
+    } catch (err: any) {
+      setMandatoryError(err?.message || "Failed to update tracking info & status.");
+    } finally {
+      setIsSubmittingMandatoryTracking(false);
+    }
+  };
 
   useEffect(() => {
     if (error && showCrudModal && window.innerWidth <= 768) {
@@ -2106,7 +2362,9 @@ export default function AdminModals(props: any) {
                       <CustomStatusSelect
                         currentStatus={selectedOrder.status}
                         onSelect={(newStatus) => {
-                          if (newStatus === "RTO Delivered") {
+                          if (newStatus === "Packed" || newStatus === "Shipped") {
+                            handleOpenMandatoryTrackingModal(selectedOrder, newStatus);
+                          } else if (newStatus === "RTO Delivered") {
                             setRtoChargeTargetId(selectedOrder._id);
                             setRtoChargeAmount("");
                             setShowRtoChargeModal(true);
@@ -2143,11 +2401,12 @@ export default function AdminModals(props: any) {
                   </div>
                 )}
 
+                {/* COURIER & AWB TRACKING DISPLAY */}
+                <TrackingControlCard order={selectedOrder} />
+
                 {/* ORDER TIMELINE */}
                 <div style={{ marginTop: "10px", paddingTop: "20px", borderTop: "1px dashed #e5e7eb", flex: 1, display: "flex", flexDirection: "column", minHeight: 0 }}>
-                  <h3 style={{ fontSize: "0.85rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", margin: "0 0 16px 0", color: "#6b7280", flexShrink: 0 }}>Order Timeline</h3>
-
-                  <div style={{ flex: 1, overflowY: "auto", paddingRight: "5px", minHeight: 0 }}>
+                  <OrderTimelineContainer title="Order Timeline">
                     <div style={{ display: "flex", flexDirection: "column", gap: "16px", position: "relative", paddingLeft: "10px" }}>
                       <div style={{ position: "absolute", left: "14px", top: "4px", bottom: "4px", width: "2px", backgroundColor: "#e5e7eb", zIndex: 0 }}></div>
                       {(() => {
@@ -2276,7 +2535,7 @@ export default function AdminModals(props: any) {
                         ));
                       })()}
                     </div>
-                  </div>
+                  </OrderTimelineContainer>
                 </div>
 
               </div>
@@ -2464,7 +2723,9 @@ export default function AdminModals(props: any) {
                               <CustomStatusSelect
                                 currentStatus={selectedOrder.status}
                                 onSelect={(newStatus) => {
-                                  if (newStatus === "RTO Delivered") {
+                                  if (newStatus === "Packed" || newStatus === "Shipped") {
+                                    handleOpenMandatoryTrackingModal(selectedOrder, newStatus);
+                                  } else if (newStatus === "RTO Delivered") {
                                     setRtoChargeTargetId(selectedOrder._id);
                                     setRtoChargeAmount("");
                                     setShowRtoChargeModal(true);
@@ -2504,8 +2765,8 @@ export default function AdminModals(props: any) {
                   </div>
                   {openMobileAccordion === "timeline" && (
                     <div className={styles.mobileAccordionContent}>
-                      <div style={{ maxHeight: "40vh", overflowY: "auto", paddingRight: "5px", paddingLeft: "10px" }}>
-                        <div style={{ display: "flex", flexDirection: "column", gap: "16px", position: "relative" }}>
+                      <OrderTimelineContainer title="" maxHeight="40vh">
+                        <div style={{ display: "flex", flexDirection: "column", gap: "16px", position: "relative", paddingLeft: "10px" }}>
                           <div style={{ position: "absolute", left: "4px", top: "4px", bottom: "4px", width: "2px", backgroundColor: "#e5e7eb", zIndex: 0 }}></div>
                           {(() => {
                             const allEvents: any[] = [];
@@ -2571,7 +2832,7 @@ export default function AdminModals(props: any) {
                             ));
                           })()}
                         </div>
-                      </div>
+                      </OrderTimelineContainer>
                     </div>
                   )}
                 </div>
@@ -3020,6 +3281,154 @@ export default function AdminModals(props: any) {
                 }}
               >
                 Confirm RTO Delivery
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Mandatory Tracking Modal for Packed / Shipped */}
+      {mandatoryTrackingModalOrder && (
+        <div
+          style={{
+            position: "fixed",
+            inset: 0,
+            backgroundColor: "rgba(0, 0, 0, 0.65)",
+            backdropFilter: "blur(4px)",
+            zIndex: 20000,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: "20px"
+          }}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              backgroundColor: "#ffffff",
+              borderRadius: "12px",
+              width: "100%",
+              maxWidth: "520px",
+              padding: "28px",
+              boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25)",
+              display: "flex",
+              flexDirection: "column",
+              gap: "18px"
+            }}
+          >
+            <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+              <div style={{ width: "42px", height: "42px", borderRadius: "50%", backgroundColor: "#eff6ff", color: "#2563eb", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                  <rect x="1" y="3" width="15" height="13"></rect>
+                  <polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon>
+                  <circle cx="5.5" cy="18.5" r="2.5"></circle>
+                  <circle cx="18.5" cy="18.5" r="2.5"></circle>
+                </svg>
+              </div>
+              <div>
+                <h3 style={{ margin: 0, fontSize: "1.15rem", fontWeight: 700, color: "#111827" }}>
+                  Courier & AWB Tracking Required
+                </h3>
+                <span style={{ fontSize: "0.8rem", color: "#6b7280" }}>
+                  Order {mandatoryTrackingModalOrder.orderId} · Mark as <strong style={{ color: "#0369a1" }}>{mandatoryTargetStatus}</strong>
+                </span>
+              </div>
+            </div>
+
+            <p style={{ margin: 0, fontSize: "0.85rem", color: "#4b5563", lineHeight: 1.5 }}>
+              To change order status to <strong>{mandatoryTargetStatus}</strong>, you must enter courier partner details and tracking number. Customers rely on this tracking information on their tracking page.
+            </p>
+
+            {mandatoryError && (
+              <div style={{ padding: "10px 14px", backgroundColor: "#fef2f2", border: "1px solid #fecaca", borderRadius: "8px", color: "#991b1b", fontSize: "0.83rem", fontWeight: 500, display: "flex", alignItems: "center", gap: "8px" }}>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+                <span>{mandatoryError}</span>
+              </div>
+            )}
+
+            <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
+              <div>
+                <label style={{ display: "block", fontSize: "0.8rem", fontWeight: 600, color: "#374151", marginBottom: "6px" }}>
+                  Courier Partner <span style={{ color: "#ef4444" }}>*</span>
+                </label>
+                <select
+                  value={mandatoryCourier}
+                  onChange={(e) => handleMandatoryTrackingCourierChange(e.target.value)}
+                  style={{ width: "100%", padding: "10px 12px", fontSize: "0.88rem", border: "1px solid #d1d5db", borderRadius: "8px", backgroundColor: "#fff", color: "#111827", outline: "none" }}
+                >
+                  <option value="Delhivery">Delhivery</option>
+                  <option value="BlueDart">BlueDart</option>
+                  <option value="DTDC">DTDC</option>
+                  <option value="Xpressbees">Xpressbees</option>
+                  <option value="Shadowfax">Shadowfax</option>
+                  <option value="Ecom Express">Ecom Express</option>
+                  <option value="India Post">India Post</option>
+                  <option value="Other">Other Courier</option>
+                </select>
+              </div>
+
+              {mandatoryCourier === "Other" && (
+                <div>
+                  <label style={{ display: "block", fontSize: "0.8rem", fontWeight: 600, color: "#374151", marginBottom: "6px" }}>
+                    Custom Courier Name <span style={{ color: "#ef4444" }}>*</span>
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="e.g. Fedex, Porter"
+                    value={mandatoryCustomCourier}
+                    onChange={(e) => handleMandatoryTrackingCustomCourierChange(e.target.value)}
+                    style={{ width: "100%", padding: "10px 12px", fontSize: "0.88rem", border: "1px solid #d1d5db", borderRadius: "8px", backgroundColor: "#fff", color: "#111827" }}
+                  />
+                </div>
+              )}
+
+              <div>
+                <label style={{ display: "block", fontSize: "0.8rem", fontWeight: 600, color: "#374151", marginBottom: "6px" }}>
+                  AWB / Tracking Number <span style={{ color: "#ef4444" }}>*</span>
+                </label>
+                <input
+                  type="text"
+                  placeholder="e.g. DEL123456789"
+                  value={mandatoryAwb}
+                  onChange={(e) => handleMandatoryTrackingAwbChange(e.target.value)}
+                  style={{ width: "100%", padding: "10px 12px", fontSize: "0.88rem", border: "1px solid #d1d5db", borderRadius: "8px", backgroundColor: "#fff", color: "#111827" }}
+                />
+              </div>
+
+              <div>
+                <label style={{ display: "block", fontSize: "0.8rem", fontWeight: 600, color: "#374151", marginBottom: "6px" }}>
+                  Tracking URL (Optional - Auto-generated if left blank)
+                </label>
+                <input
+                  type="url"
+                  placeholder="https://track.courier.com/12345"
+                  value={mandatoryTrackingUrl}
+                  onChange={(e) => setMandatoryTrackingUrl(e.target.value)}
+                  style={{ width: "100%", padding: "10px 12px", fontSize: "0.88rem", border: "1px solid #d1d5db", borderRadius: "8px", backgroundColor: "#fff", color: "#111827" }}
+                />
+              </div>
+            </div>
+
+            <div style={{ display: "flex", justifyContent: "flex-end", alignItems: "center", gap: "12px", marginTop: "10px" }}>
+              <button
+                type="button"
+                disabled={isSubmittingMandatoryTracking}
+                onClick={handleSubmitMandatoryTracking}
+                style={{
+                  width: "100%",
+                  padding: "12px 20px",
+                  backgroundColor: "#111827",
+                  color: "#ffffff",
+                  border: "none",
+                  borderRadius: "8px",
+                  fontSize: "0.9rem",
+                  fontWeight: 600,
+                  cursor: isSubmittingMandatoryTracking ? "not-allowed" : "pointer",
+                  opacity: isSubmittingMandatoryTracking ? 0.7 : 1,
+                  transition: "all 0.15s ease"
+                }}
+              >
+                {isSubmittingMandatoryTracking ? "Saving & Packing Order..." : `Save Tracking & Mark as ${mandatoryTargetStatus}`}
               </button>
             </div>
           </div>

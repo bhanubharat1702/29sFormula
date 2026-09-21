@@ -33,6 +33,9 @@ interface Order {
   deletedByAdmin?: boolean;
   cancellationReason?: string;
   refundStatus?: string;
+  courierPartner?: string;
+  awbNumber?: string;
+  trackingUrl?: string;
   createdAt: string;
   returnRequest?: {
     status: string;
@@ -358,27 +361,40 @@ export default function TrackOrderPage() {
     }
   };
 
-  const isReturnEligible = (order: any) => {
-    if (!order) return false;
-    // If a request is already submitted, they are no longer eligible to create another one
-    if (order.returnRequest || order.status === "Return Requested" || order.status === "Return Approved" || order.status === "Return Rejected") return false;
-    if (order.status !== "Delivered") return false;
+  const getReturnPolicyInfo = (order: any) => {
+    if (!order) return { isEligible: false, isExpired: false, deadlineFormatted: "", daysRemaining: 0, hasReturnSubmitted: false, isDelivered: false };
 
-    let deliveryDate = order.deliveredAt;
-    if (!deliveryDate && order.timeline && Array.isArray(order.timeline)) {
-      const deliveredEvent = order.timeline.find((t: any) => t.event && t.event.toLowerCase().includes("delivered"));
-      if (deliveredEvent && deliveredEvent.date) {
-        deliveryDate = deliveredEvent.date;
-      }
-    }
-    if (!deliveryDate) {
-      deliveryDate = order.updatedAt || order.createdAt;
-    }
-
+    const orderDate = order.createdAt ? new Date(order.createdAt) : new Date();
+    const deadline = new Date(orderDate.getTime() + 7 * 24 * 60 * 60 * 1000);
     const now = new Date();
-    const diffTime = Math.abs(now.getTime() - new Date(deliveryDate).getTime());
-    const diffDays = diffTime / (1000 * 60 * 60 * 24);
-    return diffDays <= 7;
+
+    const isExpired = now > deadline;
+    const deadlineFormatted = deadline.toLocaleDateString("en-IN", {
+      day: "numeric",
+      month: "short",
+      year: "numeric"
+    });
+
+    const diffMs = deadline.getTime() - now.getTime();
+    const daysRemaining = Math.max(0, Math.ceil(diffMs / (1000 * 60 * 60 * 24)));
+
+    const hasReturnSubmitted = !!(order.returnRequest || ["Return Requested", "Return Approved", "Return Rejected"].includes(order.status));
+    const isDelivered = order.status === "Delivered";
+
+    const isEligible = isDelivered && !hasReturnSubmitted && !isExpired;
+
+    return {
+      isEligible,
+      isExpired,
+      deadlineFormatted,
+      daysRemaining,
+      hasReturnSubmitted,
+      isDelivered
+    };
+  };
+
+  const isReturnEligible = (order: any) => {
+    return getReturnPolicyInfo(order).isEligible;
   };
 
   return (
@@ -677,24 +693,112 @@ export default function TrackOrderPage() {
                   </div>
                 )}
 
-                {/* Return Request Option */}
-                {isReturnEligible(order) && (
-                  <div className={styles.cancellationBlock} style={{ borderLeftColor: "#f59e0b", backgroundColor: "#fffbeb" }}>
-                    <p className={styles.cancellationWarning} style={{ color: "#92400e" }}>
-                      Not satisfied? You can request a return for this delivered order.
-                    </p>
-                    <button 
-                      onClick={() => {
-                        setModalOrderId(order._id);
-                        setShowReturnModal(true);
-                      }} 
-                      className={styles.cancelBtn}
-                      style={{ backgroundColor: "#f59e0b", borderColor: "#f59e0b", color: "#fff" }}
-                    >
-                      Request Return (Damaged Product)
-                    </button>
-                  </div>
-                )}
+                {/* Return Request Option & Prominent Return Policy Display */}
+                {(() => {
+                  const policyInfo = getReturnPolicyInfo(order);
+                  return (
+                    <>
+                      {policyInfo.isEligible && (
+                        <div className={styles.cancellationBlock} style={{ borderLeftColor: "#10b981", backgroundColor: "#ecfdf5", padding: "16px", borderRadius: "8px", marginTop: "16px" }}>
+                          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "12px", flexWrap: "wrap" }}>
+                            <div>
+                              <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                                <span style={{ fontSize: "0.85rem", fontWeight: 700, color: "#065f46" }}>
+                                  Return eligible until {policyInfo.deadlineFormatted}
+                                </span>
+                                <span style={{ padding: "2px 6px", backgroundColor: "#d1fae5", color: "#047857", borderRadius: "4px", fontSize: "0.7rem", fontWeight: 700 }}>
+                                  7-DAY RETURN POLICY
+                                </span>
+                              </div>
+                              <p style={{ margin: "4px 0 0 0", fontSize: "0.8rem", color: "#047857" }}>
+                                If you received a damaged or incorrect product, you can file a return request within {policyInfo.daysRemaining} {policyInfo.daysRemaining === 1 ? 'day' : 'days'}.
+                              </p>
+                            </div>
+                            <button 
+                              onClick={() => {
+                                setModalOrderId(order._id);
+                                setShowReturnModal(true);
+                              }} 
+                              className={styles.cancelBtn}
+                              style={{ backgroundColor: "#10b981", borderColor: "#10b981", color: "#fff", marginTop: 0 }}
+                            >
+                              Request Return
+                            </button>
+                          </div>
+                        </div>
+                      )}
+
+                      {policyInfo.isDelivered && policyInfo.isExpired && !policyInfo.hasReturnSubmitted && (
+                        <div className={styles.cancellationBlock} style={{ borderLeftColor: "#ef4444", backgroundColor: "#fef2f2", padding: "16px", borderRadius: "8px", marginTop: "16px" }}>
+                          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                            <span style={{ fontSize: "0.85rem", fontWeight: 700, color: "#991b1b" }}>
+                              Return window expired on {policyInfo.deadlineFormatted}
+                            </span>
+                            <span style={{ padding: "2px 6px", backgroundColor: "#fee2e2", color: "#991b1b", borderRadius: "4px", fontSize: "0.7rem", fontWeight: 700 }}>
+                              POLICY EXPIRED
+                            </span>
+                          </div>
+                          <p style={{ margin: "4px 0 0 0", fontSize: "0.8rem", color: "#b91c1c" }}>
+                            The 7-day return policy window from the order date has passed. Returns are no longer accepted for this order.
+                          </p>
+                        </div>
+                      )}
+                      {/* SHIPMENT COURIER TRACKING CARD */}
+                      {(order.awbNumber || order.trackingUrl) && (
+                        <div style={{
+                          marginTop: "20px",
+                          padding: "20px",
+                          borderRadius: "12px",
+                          backgroundColor: "#f0fdf4",
+                          border: "1px solid #bbf7d0",
+                          boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.03)"
+                        }}>
+                          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "12px", flexWrap: "wrap" }}>
+                            <div>
+                              <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                                <span style={{ fontSize: "1.2rem" }}>🚚</span>
+                                <span style={{ fontSize: "0.95rem", fontWeight: 800, color: "#166534", textTransform: "uppercase", letterSpacing: "0.05em" }}>
+                                  {order.courierPartner || "Courier Partner"} Shipment
+                                </span>
+                                <span style={{ padding: "2px 8px", backgroundColor: "#dcfce7", color: "#15803d", borderRadius: "12px", fontSize: "0.72rem", fontWeight: 700 }}>
+                                  LIVE TRACKING
+                                </span>
+                              </div>
+                              {order.awbNumber && (
+                                <p style={{ margin: "8px 0 0 0", fontSize: "0.88rem", color: "#166534" }}>
+                                  <strong>AWB Tracking Number:</strong> <code style={{ backgroundColor: "#dcfce7", padding: "2px 6px", borderRadius: "4px", fontSize: "0.9rem", color: "#14532d", fontWeight: 700 }}>{order.awbNumber}</code>
+                                </p>
+                              )}
+                            </div>
+
+                            {order.trackingUrl && (
+                              <a
+                                href={order.trackingUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                style={{
+                                  display: "inline-flex",
+                                  alignItems: "center",
+                                  gap: "6px",
+                                  padding: "10px 20px",
+                                  backgroundColor: "#16a34a",
+                                  color: "#ffffff",
+                                  borderRadius: "8px",
+                                  fontSize: "0.85rem",
+                                  fontWeight: 700,
+                                  textDecoration: "none",
+                                  boxShadow: "0 2px 4px rgba(22, 163, 74, 0.2)"
+                                }}
+                              >
+                                Track Package on {order.courierPartner || "Courier"} ↗
+                              </a>
+                            )}
+                          </div>
+                        </div>
+                      )}
+                    </>
+                  );
+                })()}
               </div>
 
               {/* Order Invoice Details summary */}
@@ -704,6 +808,24 @@ export default function TrackOrderPage() {
                   <div className={styles.detailRow}>
                     <span className={styles.detailLabel}>Order ID:</span>
                     <span className={styles.orderIdVal} style={{ color: '#000000' }}>{order.orderId}</span>
+                  </div>
+                  {order.courierPartner && (
+                    <div className={styles.detailRow}>
+                      <span className={styles.detailLabel}>Courier Partner:</span>
+                      <span style={{ fontWeight: 600 }}>{order.courierPartner}</span>
+                    </div>
+                  )}
+                  {order.awbNumber && (
+                    <div className={styles.detailRow}>
+                      <span className={styles.detailLabel}>AWB Number:</span>
+                      <span style={{ fontWeight: 700, fontFamily: "monospace" }}>{order.awbNumber}</span>
+                    </div>
+                  )}
+                  <div className={styles.detailRow}>
+                    <span className={styles.detailLabel}>Return Window:</span>
+                    <span style={{ fontSize: "0.85rem", fontWeight: 600, color: getReturnPolicyInfo(order).isExpired ? "#991b1b" : "#065f46" }}>
+                      Return eligible until {getReturnPolicyInfo(order).deadlineFormatted} (7-Day Policy)
+                    </span>
                   </div>
                   <div className={styles.detailRow}>
                     <span className={styles.detailLabel}>Recipient:</span>
@@ -847,9 +969,20 @@ export default function TrackOrderPage() {
               padding: "20px 24px",
               borderBottom: "1px solid #f1f5f9"
             }}>
-              <h3 style={{ margin: 0, fontSize: "1.1rem", fontWeight: 800, color: "#1e293b" }}>
-                REQUEST RETURN FOR DAMAGE
-              </h3>
+              <div>
+                <h3 style={{ margin: 0, fontSize: "1.1rem", fontWeight: 800, color: "#1e293b" }}>
+                  REQUEST RETURN FOR DAMAGE
+                </h3>
+                {modalOrderId && (() => {
+                  const targetOrd = (currentOrder && currentOrder._id === modalOrderId) ? currentOrder : history.find(o => o._id === modalOrderId);
+                  const pInfo = getReturnPolicyInfo(targetOrd);
+                  return (
+                    <p style={{ margin: "4px 0 0 0", fontSize: "0.75rem", color: "#065f46", fontWeight: 600 }}>
+                      7-Day Return Policy • Eligible until {pInfo.deadlineFormatted}
+                    </p>
+                  );
+                })()}
+              </div>
               <button
                 type="button"
                 onClick={() => {

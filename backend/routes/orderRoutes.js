@@ -18,6 +18,38 @@ import { syncCustomerStats } from "../utils/customerHelper.js";
 
 const router = express.Router();
 
+export const generateTrackingUrl = (courierPartner, awbNumber, customUrl) => {
+  if (customUrl && customUrl.trim()) return customUrl.trim();
+  if (!awbNumber || !awbNumber.toString().trim()) return "";
+
+  const courier = (courierPartner || "").toString().trim().toLowerCase();
+  const awb = awbNumber.toString().trim();
+
+  if (courier.includes("delhivery")) {
+    return `https://www.delhivery.com/track/package/${awb}`;
+  }
+  if (courier.includes("bluedart") || courier.includes("blue dart")) {
+    return `https://www.bluedart.com/tracking?trackNumber=${awb}`;
+  }
+  if (courier.includes("dtdc")) {
+    return `https://www.dtdc.in/tracking.asp?strTxtTrackNo=${awb}`;
+  }
+  if (courier.includes("xpressbees") || courier.includes("expressbees")) {
+    return `https://www.xpressbees.com/track?isAWB=true&trackVal=${awb}`;
+  }
+  if (courier.includes("shadowfax")) {
+    return `https://www.shadowfax.in/track?awb=${awb}`;
+  }
+  if (courier.includes("ecom")) {
+    return `https://ecomexpress.in/tracking/?awb=${awb}`;
+  }
+  if (courier.includes("india post") || courier.includes("indiapost")) {
+    return `https://www.indiapost.gov.in/VAS/Pages/trackconsignment.aspx`;
+  }
+
+  return `https://www.google.com/search?q=${encodeURIComponent((courierPartner || "courier") + " tracking " + awb)}`;
+};
+
 const sendReturnUpdateEmail = async (order, customerEmail, customerName, returnStatus, adminNotes) => {
   try {
     const { brandName, brandLogoUrl, headerHtml, brandTagline, primaryColor, frontendUrl } = await getBrandInfo();
@@ -134,6 +166,13 @@ const sendOrderUpdateEmail = async (order, customerEmail, customerName) => {
           <div style="margin-top: 30px; border: 1px solid #eee; border-radius: 4px; background-color: #fff; padding: 20px;">
             <h3 style="margin-top: 0; color: #333; font-weight: 500; font-size: 16px; border-bottom: 1px solid #eee; padding-bottom: 10px;">Order Details</h3>
             <p style="font-size: 14px; margin-bottom: 5px;"><strong>Order ID:</strong> ${order.orderId}</p>
+            ${order.awbNumber ? `
+              <div style="margin-top: 15px; padding: 12px; background-color: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 4px;">
+                <p style="margin: 0; font-size: 14px; color: #166534;"><strong>Courier Partner:</strong> ${order.courierPartner || 'Courier Service'}</p>
+                <p style="margin: 4px 0 0 0; font-size: 14px; color: #166534;"><strong>AWB Tracking No:</strong> ${order.awbNumber}</p>
+                ${order.trackingUrl ? `<p style="margin: 8px 0 0 0;"><a href="${order.trackingUrl}" target="_blank" style="color: #15803d; font-weight: 700; text-decoration: underline;">Click Here to Track Shipment ↗</a></p>` : ''}
+              </div>
+            ` : ''}
             <div style="margin-top: 15px; text-align: right; font-size: 16px;">
               <strong>Total Paid: ₹${order.totalAmount}</strong>
             </div>
@@ -543,7 +582,7 @@ router.get("/api/orders", async (req, res) => {
 
 router.put("/api/orders/:id", async (req, res) => {
   try {
-    const { status, refundStatus, rtoCharges } = req.body;
+    const { status, refundStatus, rtoCharges, courierPartner, awbNumber, trackingUrl } = req.body;
     const existingOrder = await Order.findById(req.params.id);
     if (!existingOrder) {
       return res.status(404).json({ error: "Order not found" });
@@ -551,6 +590,24 @@ router.put("/api/orders/:id", async (req, res) => {
 
     const $set = {};
     const $push = { timeline: { $each: [] } };
+
+    if (courierPartner !== undefined || awbNumber !== undefined || trackingUrl !== undefined) {
+      const newCourier = courierPartner !== undefined ? (courierPartner || "").toString().trim() : (existingOrder.courierPartner || "");
+      const newAwb = awbNumber !== undefined ? (awbNumber || "").toString().trim() : (existingOrder.awbNumber || "");
+      const customUrl = trackingUrl !== undefined ? (trackingUrl || "").toString().trim() : (existingOrder.trackingUrl || "");
+
+      const finalTrackingUrl = generateTrackingUrl(newCourier, newAwb, customUrl);
+
+      $set.courierPartner = newCourier;
+      $set.awbNumber = newAwb;
+      $set.trackingUrl = finalTrackingUrl;
+
+      if (newAwb && newAwb !== existingOrder.awbNumber) {
+        $push.timeline.$each.push({
+          event: `Shipment Tracking updated: ${newCourier || 'Courier'} (AWB: ${newAwb})`
+        });
+      }
+    }
 
     if (rtoCharges !== undefined) {
       const chargeVal = Math.max(0, Number(rtoCharges) || 0);
@@ -915,35 +972,20 @@ router.post("/api/orders/:id/return", async (req, res) => {
       return res.status(400).json({ error: `Cannot request return. Status is currently '${order.status}' (must be Delivered)` });
     }
 
-    // Enforce 7-day return window limit
+    // Enforce 7-day return window limit (from order creation date)
     const RETURN_WINDOW_DAYS = 7;
-    let deliveryDate = order.deliveredAt;
-
-    if (!deliveryDate && order.timeline && Array.isArray(order.timeline)) {
-      const deliveredEvent = order.timeline.find(t => 
-        t.event && t.event.toLowerCase().includes("delivered")
-      );
-      if (deliveredEvent && deliveredEvent.date) {
-        deliveryDate = new Date(deliveredEvent.date);
-      }
-    }
-
-    if (!deliveryDate) {
-      deliveryDate = order.updatedAt || order.createdAt;
-    }
-
+    const orderDate = order.createdAt ? new Date(order.createdAt) : new Date();
+    const returnDeadline = new Date(orderDate.getTime() + RETURN_WINDOW_DAYS * 24 * 60 * 60 * 1000);
     const now = new Date();
-    const timeDiffMs = now.getTime() - new Date(deliveryDate).getTime();
-    const daysSinceDelivery = timeDiffMs / (1000 * 60 * 60 * 24);
 
-    if (daysSinceDelivery > RETURN_WINDOW_DAYS) {
-      const formattedDeliveryDate = new Date(deliveryDate).toLocaleDateString("en-IN", {
+    if (now > returnDeadline) {
+      const formattedDeadline = returnDeadline.toLocaleDateString("en-IN", {
         day: "numeric",
         month: "short",
         year: "numeric"
       });
       return res.status(400).json({
-        error: `Return window expired. Returns can only be filed within ${RETURN_WINDOW_DAYS} days of delivery. (Order was delivered on ${formattedDeliveryDate})`
+        error: `Return window expired. Returns can only be filed within ${RETURN_WINDOW_DAYS} days of order date (Return eligible until ${formattedDeadline}).`
       });
     }
 
