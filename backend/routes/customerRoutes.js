@@ -8,6 +8,7 @@ import { sendEmail } from "../utils/emailService.js";
 import { getBrandInfo } from "../utils/brandHelper.js";
 import { verifyToken, isAdmin } from "../middleware/authMiddleware.js";
 import { otpLimiter } from "../middleware/rateLimiter.js";
+import { getPaginationParams, buildPaginatedResponse, setPaginationHeaders } from "../utils/paginationHelper.js";
 
 dotenv.config();
 
@@ -150,7 +151,35 @@ router.get("/api/customers/search", verifyToken, isAdmin, async (req, res) => {
 
 router.get("/api/customers", verifyToken, isAdmin, async (req, res) => {
   try {
-    const customers = await Customer.find({}).sort({ totalSpend: -1 });
+    const { page, limit, skip, cursor, isExplicitPagination } = getPaginationParams(req, 20, 100);
+
+    const filter = {};
+    if (req.query.search) {
+      const searchRegex = new RegExp(String(req.query.search).trim(), "i");
+      filter.$or = [
+        { name: searchRegex },
+        { email: searchRegex },
+        { phone: searchRegex }
+      ];
+    }
+    if (cursor) {
+      filter._id = { $lt: cursor };
+    }
+
+    const total = await Customer.countDocuments(filter);
+    const customers = await Customer.find(filter)
+      .sort({ totalSpend: -1, _id: -1 })
+      .skip(cursor ? 0 : skip)
+      .limit(limit)
+      .lean();
+
+    setPaginationHeaders(res, total, page, limit);
+    const nextCursor = customers.length > 0 ? String(customers[customers.length - 1]._id) : null;
+
+    if (isExplicitPagination) {
+      return res.json(buildPaginatedResponse(customers, total, page, limit, nextCursor));
+    }
+
     res.json(customers);
   } catch (error) {
     console.error("Failed to retrieve customers:", error);

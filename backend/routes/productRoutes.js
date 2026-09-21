@@ -4,6 +4,7 @@ import Order from "../models/Order.js";
 import Review from "../models/Review.js";
 import { cachedProducts, setCachedProducts, cachedProductDetails, invalidateProductsCache } from "../utils/cache.js";
 import { deleteFromCloudinary } from "../utils/cloudinary.js";
+import { getPaginationParams, buildPaginatedResponse, setPaginationHeaders } from "../utils/paginationHelper.js";
 
 const router = express.Router();
 
@@ -32,10 +33,26 @@ const enforceLatestArrivalsLimit = async () => {
 
 router.get("/api/products", async (req, res) => {
   try {
-    if (cachedProducts) {
-      return res.json(cachedProducts);
+    const { page, limit, skip, cursor, isExplicitPagination } = getPaginationParams(req, 20, 100);
+
+    const filter = {};
+    if (req.query.category) {
+      filter.category = req.query.category;
     }
-    const products = await Product.find({}).sort({ createdAt: -1 }).lean();
+    if (req.query.search) {
+      filter.name = { $regex: String(req.query.search).trim(), $options: "i" };
+    }
+    if (cursor) {
+      filter._id = { $lt: cursor };
+    }
+
+    const total = await Product.countDocuments(filter);
+    const products = await Product.find(filter)
+      .sort({ _id: -1 })
+      .skip(cursor ? 0 : skip)
+      .limit(limit)
+      .lean();
+
     const productIds = products.map(p => p._id);
     const variants = await ProductVariant.find({ productId: { $in: productIds } }).lean();
     
@@ -59,9 +76,16 @@ router.get("/api/products", async (req, res) => {
       }
     });
 
-    setCachedProducts(products);
+    setPaginationHeaders(res, total, page, limit);
+    const nextCursor = products.length > 0 ? String(products[products.length - 1]._id) : null;
+
+    if (isExplicitPagination) {
+      return res.json(buildPaginatedResponse(products, total, page, limit, nextCursor));
+    }
+
     res.json(products);
   } catch (error) {
+    console.error("Failed to fetch products:", error);
     res.status(500).json({ error: "Failed to fetch products" });
   }
 });

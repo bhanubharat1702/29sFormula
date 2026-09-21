@@ -150,18 +150,6 @@ export default function LoginPageClient({ initialColor }: { initialColor: string
     const isSystemAdmin = email.toLowerCase().trim() === "admin" && password === "admin";
     setIsAdmin(isSystemAdmin);
 
-    if (isSystemAdmin) {
-      // Admin dashboard login flow shortcut
-      setIsLoading(false);
-      setSuccess(true);
-      localStorage.setItem("adminSession", "true");
-      localStorage.setItem("lastActivityTime", Date.now().toString());
-      setTimeout(() => {
-        window.location.href = "/admin";
-      }, 1500);
-      return;
-    }
-
     try {
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:5001'}/api/auth/login`, {
         method: "POST",
@@ -176,7 +164,21 @@ export default function LoginPageClient({ initialColor }: { initialColor: string
 
       setSuccess(true);
       localStorage.setItem("userSession", JSON.stringify(data));
+      if (data.token) {
+        localStorage.setItem("adminToken", data.token);
+      }
+      if (isSystemAdmin || data.isAdmin || data.role === "admin") {
+        localStorage.setItem("adminSession", "true");
+      }
       localStorage.setItem("lastActivityTime", Date.now().toString());
+
+      if (isSystemAdmin || data.isAdmin || data.role === "admin") {
+        setTimeout(() => {
+          window.location.href = "/admin";
+        }, 1500);
+        return;
+      }
+
       await fetchAndSyncUserCart();
 
       setTimeout(() => {

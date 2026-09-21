@@ -14,7 +14,7 @@ import DiscountsTab from "./components/tabs/DiscountsTab";
 import { FaqItem, DashboardStats, Product } from "./types";
 import { fontCategories, getFontFamilyStack } from "./constants/fonts";
 import { useAdminAuth } from "./hooks/useAdminAuth";
-import { useDashboardData } from "./hooks/useDashboardData";
+import { useDashboardData, getAuthHeaders } from "./hooks/useDashboardData";
 import AdminModals from "./components/modals/AdminModals";
 import CustomizeLayoutModal from "./components/modals/CustomizeLayoutModal";
 
@@ -1963,10 +1963,16 @@ export default function AdminDashboard() {
   const fetchProducts = async () => {
     try {
       setLoading(true);
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:5001'}/api/products`, { cache: "no-store" });
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:5001'}/api/products`, {
+        cache: "no-store",
+        headers: {
+          ...getAuthHeaders()
+        }
+      });
       if (!res.ok) throw new Error("Failed to fetch products");
       const data = await res.json();
-      setProducts(data);
+      const productList = Array.isArray(data) ? data : (data?.data || data?.products || []);
+      setProducts(productList);
       setError(null);
     } catch (err: any) {
       setError(err.message || "Failed to query store database.");
@@ -1976,23 +1982,31 @@ export default function AdminDashboard() {
   };
 
   const fetchOrders = () => {
-    fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:5001'}/api/orders`, { cache: "no-store" })
+    fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:5001'}/api/orders`, {
+      cache: "no-store",
+      headers: {
+        ...getAuthHeaders()
+      }
+    })
       .then(res => res.json())
       .then(data => {
-        if (Array.isArray(data)) {
-          setOrders(data);
-        }
+        const list = Array.isArray(data) ? data : (data?.data || data?.orders || []);
+        setOrders(list);
       })
       .catch(err => console.error("Error fetching orders:", err));
   };
 
   const fetchCustomers = () => {
-    fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:5001'}/api/customers`, { cache: "no-store" })
+    fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:5001'}/api/customers`, {
+      cache: "no-store",
+      headers: {
+        ...getAuthHeaders()
+      }
+    })
       .then(res => res.json())
       .then(data => {
-        if (Array.isArray(data)) {
-          setCustomers(data);
-        }
+        const list = Array.isArray(data) ? data : (data?.data || data?.customers || []);
+        setCustomers(list);
       })
       .catch(err => console.error("Error fetching customers:", err));
   };

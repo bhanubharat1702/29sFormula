@@ -1,11 +1,32 @@
 import express from "express";
 import Discount from "../models/Discount.js";
+import { getPaginationParams, buildPaginatedResponse, setPaginationHeaders } from "../utils/paginationHelper.js";
 
 const router = express.Router();
 
 router.get("/api/discounts", async (req, res) => {
   try {
-    const discounts = await Discount.find({}).sort({ createdAt: -1 });
+    const { page, limit, skip, cursor, isExplicitPagination } = getPaginationParams(req, 20, 100);
+
+    const filter = {};
+    if (cursor) {
+      filter._id = { $lt: cursor };
+    }
+
+    const total = await Discount.countDocuments(filter);
+    const discounts = await Discount.find(filter)
+      .sort({ createdAt: -1, _id: -1 })
+      .skip(cursor ? 0 : skip)
+      .limit(limit)
+      .lean();
+
+    setPaginationHeaders(res, total, page, limit);
+    const nextCursor = discounts.length > 0 ? String(discounts[discounts.length - 1]._id) : null;
+
+    if (isExplicitPagination) {
+      return res.json(buildPaginatedResponse(discounts, total, page, limit, nextCursor));
+    }
+
     res.json(discounts);
   } catch (error) {
     res.status(500).json({ error: "Failed to fetch discounts" });

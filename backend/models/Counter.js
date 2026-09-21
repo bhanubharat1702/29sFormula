@@ -15,15 +15,16 @@ export default Counter;
  * Uses MongoDB findOneAndUpdate with $inc to guarantee atomic increments
  * even during high concurrency / identical millisecond requests.
  */
-export const getNextOrderId = async () => {
+export const getNextOrderId = async (session = null) => {
+  const opts = session ? { session } : {};
   // Check if counter exists
-  let counter = await Counter.findOne({ _id: "orderId" });
+  let counter = await Counter.findOne({ _id: "orderId" }, null, opts);
 
   // If counter does not exist yet (first run), auto-seed from highest existing orderId
   if (!counter) {
     let maxNum = 1000;
     try {
-      const lastOrder = await Order.findOne({ orderId: /^ORD-\d+$/ }).sort({ _id: -1 });
+      const lastOrder = await Order.findOne({ orderId: /^ORD-\d+$/ }, null, opts).sort({ _id: -1 });
       if (lastOrder && lastOrder.orderId) {
         const parts = lastOrder.orderId.split("-");
         const lastNum = parseInt(parts[1], 10);
@@ -39,7 +40,7 @@ export const getNextOrderId = async () => {
       await Counter.updateOne(
         { _id: "orderId" },
         { $setOnInsert: { seq: maxNum } },
-        { upsert: true }
+        { upsert: true, ...opts }
       );
     } catch (err) {
       // Ignore duplicate key error if another concurrent request created it first
@@ -50,7 +51,7 @@ export const getNextOrderId = async () => {
   const updatedCounter = await Counter.findOneAndUpdate(
     { _id: "orderId" },
     { $inc: { seq: 1 } },
-    { returnDocument: 'after', upsert: true }
+    { returnDocument: 'after', upsert: true, ...opts }
   );
 
   return `ORD-${updatedCounter.seq}`;

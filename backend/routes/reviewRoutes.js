@@ -3,6 +3,7 @@ import mongoose from "mongoose";
 import Review from "../models/Review.js";
 import Order from "../models/Order.js";
 import { Product } from "../models/Product.js";
+import { getPaginationParams, buildPaginatedResponse, setPaginationHeaders } from "../utils/paginationHelper.js";
 
 const router = express.Router();
 
@@ -16,11 +17,19 @@ router.get("/api/reviews/:productId", async (req, res) => {
       return res.status(400).json({ error: "Invalid product ID format." });
     }
 
-    const reviews = await Review.find({ productId: objId }).sort({ createdAt: -1 });
+    const { page, limit, skip, cursor, isExplicitPagination } = getPaginationParams(req, 10, 50);
 
-    const total = reviews.length;
+    const filter = { productId: objId };
+    if (cursor) {
+      filter._id = { $lt: cursor };
+    }
+
+    // Get total review count and rating aggregation
+    const total = await Review.countDocuments({ productId: objId });
+    
     if (total === 0) {
-      return res.json({
+      setPaginationHeaders(res, 0, page, limit);
+      const emptyRes = {
         reviews: [],
         average: 0,
         total: 0,
@@ -31,30 +40,59 @@ router.get("/api/reviews/:productId", async (req, res) => {
           { stars: 2, percentage: 0, count: 0 },
           { stars: 1, percentage: 0, count: 0 },
         ]
-      });
+      };
+      if (isExplicitPagination) {
+        return res.json({ ...emptyRes, ...buildPaginatedResponse([], 0, page, limit) });
+      }
+      return res.json(emptyRes);
     }
+
+    // Compute rating breakdown efficiently without loading all text reviews
+    const stats = await Review.aggregate([
+      { $match: { productId: objId } },
+      {
+        $group: {
+          _id: "$rating",
+          count: { $sum: 1 },
+          sumRating: { $sum: "$rating" }
+        }
+      }
+    ]);
 
     const counts = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
     let sum = 0;
-    reviews.forEach(r => {
-      const star = Math.min(5, Math.max(1, Math.round(r.rating)));
-      counts[star] = (counts[star] || 0) + 1;
-      sum += r.rating;
+    stats.forEach(s => {
+      const star = Math.min(5, Math.max(1, Math.round(s._id)));
+      counts[star] = (counts[star] || 0) + s.count;
+      sum += s.sumRating;
     });
 
     const average = parseFloat((sum / total).toFixed(1));
     const breakdown = [5, 4, 3, 2, 1].map(stars => ({
       stars,
-      count: counts[stars],
-      percentage: Math.round((counts[stars] / total) * 100)
+      count: counts[stars] || 0,
+      percentage: Math.round(((counts[stars] || 0) / total) * 100)
     }));
 
-    res.json({
+    // Fetch paginated reviews for this page
+    const reviews = await Review.find(filter)
+      .sort({ createdAt: -1, _id: -1 })
+      .skip(cursor ? 0 : skip)
+      .limit(limit)
+      .lean();
+
+    setPaginationHeaders(res, total, page, limit);
+    const nextCursor = reviews.length > 0 ? String(reviews[reviews.length - 1]._id) : null;
+
+    const responsePayload = {
       reviews,
       average,
       total,
-      breakdown
-    });
+      breakdown,
+      ...(isExplicitPagination ? buildPaginatedResponse(reviews, total, page, limit, nextCursor).pagination : {})
+    };
+
+    res.json(responsePayload);
   } catch (error) {
     console.error("Error fetching reviews:", error);
     res.status(500).json({ error: "Failed to fetch reviews" });

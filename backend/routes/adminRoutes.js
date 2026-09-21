@@ -9,7 +9,7 @@ import { verifyToken, isAdmin } from "../middleware/authMiddleware.js";
 const router = express.Router();
 
 // Apply auth & admin checks to all admin routes
-router.use(verifyToken, isAdmin);
+router.use("/api/admin", verifyToken, isAdmin);
 
 router.get("/api/admin/dashboard-stats", async (req, res) => {
   try {

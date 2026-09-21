@@ -12,11 +12,12 @@ import { sendEmail } from "../utils/emailService.js";
 import { getBrandInfo } from "../utils/brandHelper.js";
 import Razorpay from "razorpay";
 import { getNextOrderId } from "../models/Counter.js";
-import { deductStockAtomically } from "../utils/stockHelper.js";
+import { deductStockAtomically, rollbackStock } from "../utils/stockHelper.js";
 import { verifyOrderOwnership } from "../utils/authHelper.js";
 import { syncCustomerStats } from "../utils/customerHelper.js";
 import { calculateOrderPricing } from "../utils/pricingHelper.js";
 import { verifyToken, isAdmin } from "../middleware/authMiddleware.js";
+import { getPaginationParams, buildPaginatedResponse, setPaginationHeaders } from "../utils/paginationHelper.js";
 
 const router = express.Router();
 
@@ -410,61 +411,101 @@ router.post("/api/orders", async (req, res) => {
 
     const email = customerEmail.toLowerCase().trim();
 
-    // Perform atomic stock deduction (prevents race condition & negative stock)
-    const stockDeduction = await deductStockAtomically(resolvedCartItems);
-    if (!stockDeduction.success) {
-      return res.status(400).json({ error: stockDeduction.error });
+    // Start MongoDB ACID Transaction (with graceful fallback if standalone DB without replica set)
+    const session = await mongoose.startSession();
+    let transactionStarted = false;
+    try {
+      session.startTransaction();
+      transactionStarted = true;
+    } catch (txnError) {
+      transactionStarted = false;
     }
 
-    let customer = await Customer.findOne({ email });
-    if (customer) {
-      customer.totalOrders += 1;
-      customer.totalSpend += secureTotalAmount;
-      if (customerName) customer.name = customerName;
-      if (customerPhone) customer.phone = customerPhone;
-      if (shippingAddress) customer.address = shippingAddress;
-      await customer.save();
-    } else {
-      customer = await Customer.create({
-        name: customerName,
-        email,
-        phone: customerPhone,
-        address: shippingAddress,
-        totalOrders: 1,
-        totalSpend: secureTotalAmount
-      });
-    }
+    let newOrder;
+    let stockDeduction;
 
-    if (email) {
-      const userAcc = await User.findOne({ email: new RegExp(`^${email}$`, 'i') });
-      if (userAcc) {
-        if (customerPhone) userAcc.phone = customerPhone;
-        await userAcc.save();
+    try {
+      const activeSession = transactionStarted ? session : null;
+      const opts = activeSession ? { session: activeSession } : {};
+
+      // Perform atomic stock deduction within transaction
+      stockDeduction = await deductStockAtomically(resolvedCartItems, activeSession);
+      if (!stockDeduction.success) {
+        if (transactionStarted) {
+          await session.abortTransaction();
+          session.endSession();
+        }
+        return res.status(400).json({ error: stockDeduction.error });
       }
+
+      let customer = await Customer.findOne({ email }, null, opts);
+      if (customer) {
+        customer.totalOrders += 1;
+        customer.totalSpend += secureTotalAmount;
+        if (customerName) customer.name = customerName;
+        if (customerPhone) customer.phone = customerPhone;
+        if (shippingAddress) customer.address = shippingAddress;
+        await customer.save(opts);
+      } else {
+        const createdCustomers = await Customer.create(
+          [{
+            name: customerName,
+            email,
+            phone: customerPhone,
+            address: shippingAddress,
+            totalOrders: 1,
+            totalSpend: secureTotalAmount
+          }],
+          opts
+        );
+        customer = createdCustomers[0];
+      }
+
+      if (email) {
+        const userAcc = await User.findOne({ email: new RegExp(`^${email}$`, 'i') }, null, opts);
+        if (userAcc) {
+          if (customerPhone) userAcc.phone = customerPhone;
+          await userAcc.save(opts);
+        }
+      }
+
+      const orderId = await getNextOrderId(activeSession);
+
+      newOrder = new Order({
+        orderId,
+        customerId: customer._id,
+        customerName,
+        customerEmail,
+        customerPhone,
+        shippingAddress,
+        cartItems: resolvedCartItems,
+        subtotal,
+        discountCode: verifiedDiscountCode,
+        discountAmount,
+        shippingCharge,
+        taxAmount,
+        totalAmount: secureTotalAmount,
+        paymentMethod: paymentMethod || "Razorpay",
+        status: "Pending",
+        timeline: [{ event: "Order Placed (Pending Review)" }]
+      });
+
+      await newOrder.save(opts);
+
+      if (transactionStarted) {
+        await session.commitTransaction();
+        session.endSession();
+      }
+    } catch (orderError) {
+      if (transactionStarted) {
+        await session.abortTransaction();
+        session.endSession();
+      } else if (stockDeduction && stockDeduction.deducted) {
+        await rollbackStock(stockDeduction.deducted);
+      }
+      console.error("Order Creation Error:", orderError);
+      return res.status(500).json({ error: "Failed to create order: " + orderError.message });
     }
-
-    const orderId = await getNextOrderId();
-
-    const newOrder = new Order({
-      orderId,
-      customerId: customer._id,
-      customerName,
-      customerEmail,
-      customerPhone,
-      shippingAddress,
-      cartItems: resolvedCartItems,
-      subtotal,
-      discountCode: verifiedDiscountCode,
-      discountAmount,
-      shippingCharge,
-      taxAmount,
-      totalAmount: secureTotalAmount,
-      paymentMethod: paymentMethod || "Razorpay",
-      status: "Pending",
-      timeline: [{ event: "Order Placed (Pending Review)" }]
-    });
-
-    await newOrder.save();
 
     // Sync Customer analytics (totalOrders & totalSpend based on active non-cancelled orders)
     await syncCustomerStats(email);
@@ -499,7 +540,32 @@ router.post("/api/orders", async (req, res) => {
 
 router.get("/api/orders", verifyToken, isAdmin, async (req, res) => {
   try {
-    const orders = await Order.find({}).populate("customerId").sort({ createdAt: -1 }).lean();
+    const { page, limit, skip, cursor, isExplicitPagination } = getPaginationParams(req, 20, 100);
+
+    const filter = {};
+    if (req.query.status) {
+      filter.status = req.query.status;
+    }
+    if (req.query.search) {
+      const searchRegex = new RegExp(String(req.query.search).trim(), "i");
+      filter.$or = [
+        { orderId: searchRegex },
+        { customerEmail: searchRegex },
+        { customerName: searchRegex },
+        { customerPhone: searchRegex }
+      ];
+    }
+    if (cursor) {
+      filter._id = { $lt: cursor };
+    }
+
+    const total = await Order.countDocuments(filter);
+    const orders = await Order.find(filter)
+      .populate("customerId")
+      .sort({ _id: -1 })
+      .skip(cursor ? 0 : skip)
+      .limit(limit)
+      .lean();
 
     const orderIds = orders.map(o => o._id);
     const returnRequests = await ReturnRequest.find({ orderObjectId: { $in: orderIds } }).lean();
@@ -519,6 +585,14 @@ router.get("/api/orders", verifyToken, isAdmin, async (req, res) => {
         returnRequest: returnRequestsMap[order._id.toString()] || null
       };
     });
+
+    setPaginationHeaders(res, total, page, limit);
+    const nextCursor = orders.length > 0 ? String(orders[orders.length - 1]._id) : null;
+
+    if (isExplicitPagination) {
+      return res.json(buildPaginatedResponse(mappedOrders, total, page, limit, nextCursor));
+    }
+
     res.json(mappedOrders);
   } catch (error) {
     console.error("Failed to retrieve orders:", error);
@@ -1131,62 +1205,98 @@ router.post("/api/orders/razorpay-verify", async (req, res) => {
       resolvedCartItems
     } = pricing;
 
-    // Perform atomic stock deduction
-    const stockDeduction = await deductStockAtomically(resolvedCartItems);
+    // Start MongoDB ACID Transaction (with graceful fallback if standalone DB without replica set)
+    const session = await mongoose.startSession();
+    let transactionStarted = false;
+    try {
+      session.startTransaction();
+      transactionStarted = true;
+    } catch (txnError) {
+      transactionStarted = false;
+    }
 
-    // Payment is verified. Now create/update customer in the database.
-    const cleanEmail = (orderPayload.customerEmail || "").toLowerCase().trim();
-    let customer = await Customer.findOne({ email: new RegExp(`^${cleanEmail}$`, 'i') });
-    if (!customer) {
-      customer = new Customer({
-        name: orderPayload.customerName,
-        email: cleanEmail,
-        phone: orderPayload.customerPhone,
-        address: orderPayload.shippingAddress,
-        totalOrders: 1,
-        totalSpend: secureTotalAmount,
+    let newOrder;
+    let stockDeduction;
+
+    try {
+      const activeSession = transactionStarted ? session : null;
+      const opts = activeSession ? { session: activeSession } : {};
+
+      // Perform atomic stock deduction
+      stockDeduction = await deductStockAtomically(resolvedCartItems, activeSession);
+
+      // Payment is verified. Now create/update customer in the database.
+      const cleanEmail = (orderPayload.customerEmail || "").toLowerCase().trim();
+      let customer = await Customer.findOne({ email: new RegExp(`^${cleanEmail}$`, 'i') }, null, opts);
+      if (!customer) {
+        const createdCustomers = await Customer.create(
+          [{
+            name: orderPayload.customerName,
+            email: cleanEmail,
+            phone: orderPayload.customerPhone,
+            address: orderPayload.shippingAddress,
+            totalOrders: 1,
+            totalSpend: secureTotalAmount,
+          }],
+          opts
+        );
+        customer = createdCustomers[0];
+      } else {
+        customer.totalOrders += 1;
+        customer.totalSpend += secureTotalAmount;
+        if (orderPayload.customerName) customer.name = orderPayload.customerName;
+        if (orderPayload.customerPhone) customer.phone = orderPayload.customerPhone;
+        if (orderPayload.shippingAddress) customer.address = orderPayload.shippingAddress;
+        await customer.save(opts);
+      }
+
+      if (cleanEmail) {
+        const userAcc = await User.findOne({ email: new RegExp(`^${cleanEmail}$`, 'i') }, null, opts);
+        if (userAcc) {
+          if (orderPayload.customerPhone) userAcc.phone = orderPayload.customerPhone;
+          await userAcc.save(opts);
+        }
+      }
+
+      const orderId = await getNextOrderId(activeSession);
+
+      newOrder = new Order({
+        ...orderPayload,
+        cartItems: resolvedCartItems,
+        orderId,
+        customerId: customer._id,
+        subtotal,
+        discountCode: verifiedDiscountCode,
+        discountAmount,
+        shippingCharge,
+        taxAmount,
+        totalAmount: secureTotalAmount,
+        paymentMethod: "Razorpay",
+        status: stockDeduction.success ? "Pending" : "Stock Pending",
+        paymentDetails: {
+          razorpay_payment_id,
+          razorpay_order_id,
+          razorpay_signature
+        }
       });
-      await customer.save();
-    } else {
-      customer.totalOrders += 1;
-      customer.totalSpend += secureTotalAmount;
-      if (orderPayload.customerName) customer.name = orderPayload.customerName;
-      if (orderPayload.customerPhone) customer.phone = orderPayload.customerPhone;
-      if (orderPayload.shippingAddress) customer.address = orderPayload.shippingAddress;
-      await customer.save();
+
+      await newOrder.save(opts);
+
+      if (transactionStarted) {
+        await session.commitTransaction();
+        session.endSession();
+      }
+    } catch (orderError) {
+      if (transactionStarted) {
+        await session.abortTransaction();
+        session.endSession();
+      } else if (stockDeduction && stockDeduction.deducted) {
+        await rollbackStock(stockDeduction.deducted);
+      }
+      console.error("Razorpay Verify Order Error:", orderError);
+      return res.status(500).json({ error: "Failed to process verified order: " + orderError.message });
     }
 
-    if (cleanEmail) {
-      const userAcc = await User.findOne({ email: new RegExp(`^${cleanEmail}$`, 'i') });
-      if (userAcc) {
-        if (orderPayload.customerPhone) userAcc.phone = orderPayload.customerPhone;
-        await userAcc.save();
-      }
-    }
-
-    const orderId = await getNextOrderId();
-
-    const newOrder = new Order({
-      ...orderPayload,
-      cartItems: resolvedCartItems,
-      orderId,
-      customerId: customer._id,
-      subtotal,
-      discountCode: verifiedDiscountCode,
-      discountAmount,
-      shippingCharge,
-      taxAmount,
-      totalAmount: secureTotalAmount,
-      paymentMethod: "Razorpay",
-      status: stockDeduction.success ? "Pending" : "Stock Pending",
-      paymentDetails: {
-        razorpay_payment_id,
-        razorpay_order_id,
-        razorpay_signature
-      }
-    });
-
-    await newOrder.save();
     invalidateProductsCache();
 
     // Sync Customer analytics
