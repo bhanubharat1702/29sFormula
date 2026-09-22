@@ -257,6 +257,8 @@
   padding-bottom: 120%; /* Rectangular shape matching mockup sandal cards */
   overflow: hidden;
   background-color: #f3f3f3;
+  border: none;
+  box-shadow: none;
 }
 
 .productImage {

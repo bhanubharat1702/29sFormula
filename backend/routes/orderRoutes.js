@@ -8,7 +8,7 @@ import Customer from "../models/Customer.js";
 import User from "../models/User.js";
 import { Product, ProductVariant } from "../models/Product.js";
 import { invalidateProductsCache } from "../utils/cache.js";
-import { sendEmail } from "../utils/emailService.js";
+import { queueEmail } from "../utils/emailQueue.js";
 import { getBrandInfo } from "../utils/brandHelper.js";
 import Razorpay from "razorpay";
 import { getNextOrderId } from "../models/Counter.js";
@@ -84,7 +84,7 @@ const sendReturnUpdateEmail = async (order, customerEmail, customerName, returnS
       }
     }
 
-    await sendEmail({
+    await queueEmail({
       to: customerEmail,
       subject: subject,
       html: `
@@ -151,7 +151,7 @@ const sendOrderUpdateEmail = async (order, customerEmail, customerName) => {
       message = "Your recent order has been cancelled. If this was a mistake or you require assistance, our support team is here to help.";
     }
 
-    await sendEmail({
+    await queueEmail({
       to: customerEmail,
       subject: subject,
       html: `
@@ -228,7 +228,7 @@ const sendAdminNewOrderEmail = async (order) => {
       hour: '2-digit', minute: '2-digit', hour12: true
     });
 
-    await sendEmail({
+    await queueEmail({
       to: adminEmail,
       subject: `🛒 New Order Received — ${order.orderId} (₹${(order.totalAmount || 0).toLocaleString('en-IN')})`,
       html: `
@@ -329,7 +329,7 @@ const sendOrderConfirmationEmail = async (order, customerEmail, customerName) =>
       </tr>
     `).join("");
 
-    await sendEmail({
+    await queueEmail({
       to: customerEmail,
       subject: `Order Confirmation - ${order.orderId}`,
       html: `

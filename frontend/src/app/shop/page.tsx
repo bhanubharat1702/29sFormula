@@ -610,6 +610,38 @@ export default function Shop() {
                   }}
                 >
                   <div className={styles.productImageContainer} style={getProductStock(product) === 0 ? { pointerEvents: "none", filter: "grayscale(1)", opacity: 0.7 } : {}}>
+                    {(() => {
+                      const cats = Array.isArray(product.category)
+                        ? product.category.map(c => String(c).toLowerCase().trim())
+                        : [String(product.category || '').toLowerCase().trim()];
+                      const isBestSeller = cats.some(c => c.includes("best seller") || c.includes("bestseller"));
+                      const isLatest = !isBestSeller && cats.some(c => c.includes("latest") || c.includes("new arrival"));
+                      if (isBestSeller || isLatest) {
+                        return (
+                          <span 
+                            style={{
+                              position: "absolute",
+                              top: "10px",
+                              right: "10px",
+                              backgroundColor: isBestSeller ? "#000000" : "#111827",
+                              color: "#ffffff",
+                              fontSize: "0.62rem",
+                              fontWeight: 700,
+                              letterSpacing: "0.08em",
+                              padding: "4px 8px",
+                              borderRadius: "2px",
+                              zIndex: 8,
+                              boxShadow: "0 2px 4px rgba(0,0,0,0.15)",
+                              pointerEvents: "none",
+                              textTransform: "uppercase"
+                            }}
+                          >
+                            {isBestSeller ? "BEST SELLER" : "LATEST ARRIVAL"}
+                          </span>
+                        );
+                      }
+                      return null;
+                    })()}
                     <Link 
                       href={`/product/${product._id}`} 
                       style={{ textDecoration: "none", color: "inherit", display: "block", pointerEvents: getProductStock(product) === 0 ? "none" : "auto" }}
@@ -683,9 +715,10 @@ export default function Shop() {
                     <Link href={`/product/${product._id}`} style={{ textDecoration: "none", color: "inherit", pointerEvents: getProductStock(product) === 0 ? "none" : "auto", display: "flex", flexDirection: "column", alignItems: "center" }}>
                       <h3 className={styles.productTitle}>{product.name.toUpperCase()}</h3>
                       {(() => {
-                        const cheapestVariant = product.variants && product.variants.length > 0
-                          ? [...product.variants].sort((a, b) => a.price - b.price)[0]
-                          : null;
+                        const inStockVariants = product.variants ? product.variants.filter(v => (Number(v.quantity) || 0) > 0) : [];
+                        const cheapestVariant = inStockVariants.length > 0
+                          ? [...inStockVariants].sort((a, b) => a.price - b.price)[0]
+                          : (product.variants && product.variants.length > 0 ? [...product.variants].sort((a, b) => a.price - b.price)[0] : null);
 
                         const displayPrice = cheapestVariant ? cheapestVariant.price : product.price;
                         const displayStrikePrice = cheapestVariant ? cheapestVariant.strikePrice : (product as any).strikePrice;
@@ -695,8 +728,8 @@ export default function Shop() {
                           : (product.quantity || 0);
 
                         const availableSizes = product.variants && product.variants.length > 0
-                          ? product.variants.map(v => v.size)
-                          : (product.sizes || []);
+                          ? product.variants.filter(v => (Number(v.quantity) || 0) > 0).map(v => v.size)
+                          : (Number(product.quantity || 0) > 0 ? (product.sizes || []) : []);
 
                         return (
                           <>

@@ -18,7 +18,9 @@ export const registerSchema = z.object({
 export const loginSchema = z.object({
   email: z.string({ message: "Email and password are required" })
     .trim()
-    .email("Please enter a valid email address"),
+    .refine((val) => val.toLowerCase() === "admin" || z.string().email().safeParse(val).success, {
+      message: "Please enter a valid email address"
+    }),
   password: requiredString("Email and password are required")
 });
 

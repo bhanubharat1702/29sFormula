@@ -361,7 +361,8 @@
   aspect-ratio: 1 / 1;
   overflow: hidden;
   background-color: #f7f7f7;
-  border: 1px solid #f0f0f0;
+  border: none;
+  box-shadow: none;
 }
 
 .productImage {

@@ -4,7 +4,7 @@ import jwt from "jsonwebtoken";
 import User from "../models/User.js";
 import Customer from "../models/Customer.js";
 import Order from "../models/Order.js";
-import { sendEmail } from "../utils/emailService.js";
+import { queueEmail } from "../utils/emailQueue.js";
 import { getBrandInfo } from "../utils/brandHelper.js";
 import { loginLimiter, otpLimiter } from "../middleware/rateLimiter.js";
 import { validate } from "../middleware/validate.js";
@@ -34,7 +34,7 @@ const sendWelcomeEmail = async (userEmail, userName) => {
   try {
     const { brandName, brandTagline, primaryColor, contactText, frontendUrl } = await getBrandInfo();
 
-    await sendEmail({
+    await queueEmail({
       to: userEmail,
       subject: `Welcome to ${brandName}! 🎉`,
       html: `
@@ -306,10 +306,9 @@ router.post("/api/auth/request-reset-otp", otpLimiter, validate(sendOtpSchema), 
       { upsert: true, returnDocument: 'after' }
     );
 
-    // Send email via Brevo
-    const { sendEmail } = await import("../utils/emailService.js");
+    // Send email via BullMQ queue
     const { brandName } = await getBrandInfo();
-    await sendEmail({
+    await queueEmail({
       to: trimmedEmail,
       subject: `Password Reset Code - ${brandName}`,
       text: `Hello ${user.name || 'User'},\n\nYour 6-digit password reset verification code for ${brandName} is: ${otpCode}\nThis code will expire in 5 minutes.\n\nIf you did not request a password reset, please ignore this email.`,

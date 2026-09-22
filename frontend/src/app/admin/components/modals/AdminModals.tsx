@@ -948,7 +948,7 @@ export default function AdminModals(props: any) {
                             <th style={{ padding: "8px 6px", fontSize: "0.8rem", fontWeight: 600, color: "#4b5563" }}>Price*</th>
                             <th style={{ padding: "8px 6px", fontSize: "0.8rem", fontWeight: 600, color: "#4b5563" }}>Strike Price</th>
                             <th style={{ padding: "8px 6px", fontSize: "0.8rem", fontWeight: 600, color: "#4b5563" }}>Making Price*</th>
-                            <th style={{ padding: "8px 6px", fontSize: "0.8rem", fontWeight: 600, color: "#4b5563", minWidth: "180px" }}>Category*</th>
+                            <th style={{ padding: "8px 6px", fontSize: "0.8rem", fontWeight: 600, color: "#4b5563", minWidth: "180px" }}>Category</th>
                             <th style={{ padding: "8px 6px", width: "40px" }}></th>
                           </tr>
                         </thead>
@@ -1364,7 +1364,7 @@ export default function AdminModals(props: any) {
                                 <input type="number" value={opt.makingPrice} min="0" placeholder="Making Price" onChange={(e) => { const updated = [...options]; updated[index].makingPrice = e.target.value === "" ? "" : (parseInt(e.target.value) || 0); setOptions(updated); }} required={mobileCrudStep === 2} className={styles.textInput} style={{ padding: "8px", fontSize: "0.85rem", width: "100%", boxSizing: "border-box" }} />
                               </div>
                               <div style={{ position: 'relative', zIndex: openCategoryIndex === index ? 99999 : 1 }}>
-                                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: '#4b5563', marginBottom: '4px' }}>Category *</label>
+                                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: '#4b5563', marginBottom: '4px' }}>Category (Optional)</label>
                                 <div className={styles.selectInput} style={{ padding: "8px", fontSize: "0.85rem", width: "100%", height: "35px", boxSizing: "border-box", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "space-between", backgroundColor: '#fff' }} onClick={() => setOpenCategoryIndex(openCategoryIndex === index ? null : index)}>
                                   <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{opt.category && opt.category.length > 0 ? opt.category.join(", ") : "Select..."}</span>
                                   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" style={{ width: "12px", height: "12px", flexShrink: 0 }}><path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" /></svg>

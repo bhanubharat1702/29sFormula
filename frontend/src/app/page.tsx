@@ -1129,6 +1129,38 @@ export default function Home() {
               >
                 <div className={styles.productCard} style={product.quantity === 0 ? { pointerEvents: "none" } : {}}>
                   <div className={styles.productImageContainer} style={product.quantity === 0 ? { filter: "grayscale(1)", opacity: 0.7 } : {}}>
+                    {(() => {
+                      const cats = Array.isArray(product.category)
+                        ? product.category.map(c => String(c).toLowerCase().trim())
+                        : [String(product.category || '').toLowerCase().trim()];
+                      const isBestSeller = cats.some(c => c.includes("best seller") || c.includes("bestseller"));
+                      const isLatest = !isBestSeller && cats.some(c => c.includes("latest") || c.includes("new arrival"));
+                      if (isBestSeller || isLatest) {
+                        return (
+                          <span 
+                            style={{
+                              position: "absolute",
+                              top: "10px",
+                              right: "10px",
+                              backgroundColor: isBestSeller ? "#000000" : "#111827",
+                              color: "#ffffff",
+                              fontSize: "0.62rem",
+                              fontWeight: 700,
+                              letterSpacing: "0.08em",
+                              padding: "4px 8px",
+                              borderRadius: "2px",
+                              zIndex: 8,
+                              boxShadow: "0 2px 4px rgba(0,0,0,0.15)",
+                              pointerEvents: "none",
+                              textTransform: "uppercase"
+                            }}
+                          >
+                            {isBestSeller ? "BEST SELLER" : "LATEST ARRIVAL"}
+                          </span>
+                        );
+                      }
+                      return null;
+                    })()}
                     <img
                       className={`${styles.productImage} ${styles.productImageFront}`}
                       src={product.imageFront}
@@ -1177,9 +1209,10 @@ export default function Home() {
                   <div className={styles.productInfo}>
                     <h3 className={styles.productTitle}>{product.name}</h3>
                     {(() => {
-                      const cheapestVariant = product.variants && product.variants.length > 0
-                        ? [...product.variants].sort((a, b) => a.price - b.price)[0]
-                        : null;
+                      const inStockVariants = product.variants ? product.variants.filter(v => (Number(v.quantity) || 0) > 0) : [];
+                      const cheapestVariant = inStockVariants.length > 0
+                        ? [...inStockVariants].sort((a, b) => a.price - b.price)[0]
+                        : (product.variants && product.variants.length > 0 ? [...product.variants].sort((a, b) => a.price - b.price)[0] : null);
 
                       const displayPrice = cheapestVariant ? cheapestVariant.price : product.price;
                       const displayStrikePrice = cheapestVariant ? cheapestVariant.strikePrice : product.strikePrice;
@@ -1382,6 +1415,38 @@ export default function Home() {
               >
                 <div className={styles.productCard} style={product.quantity === 0 ? { pointerEvents: "none" } : {}}>
                   <div className={styles.productImageContainer} style={product.quantity === 0 ? { filter: "grayscale(1)", opacity: 0.7 } : {}}>
+                    {(() => {
+                      const cats = Array.isArray(product.category)
+                        ? product.category.map(c => String(c).toLowerCase().trim())
+                        : [String(product.category || '').toLowerCase().trim()];
+                      const isBestSeller = cats.some(c => c.includes("best seller") || c.includes("bestseller"));
+                      const isLatest = !isBestSeller && cats.some(c => c.includes("latest") || c.includes("new arrival"));
+                      if (isBestSeller || isLatest) {
+                        return (
+                          <span 
+                            style={{
+                              position: "absolute",
+                              top: "10px",
+                              right: "10px",
+                              backgroundColor: isBestSeller ? "#000000" : "#111827",
+                              color: "#ffffff",
+                              fontSize: "0.62rem",
+                              fontWeight: 700,
+                              letterSpacing: "0.08em",
+                              padding: "4px 8px",
+                              borderRadius: "2px",
+                              zIndex: 8,
+                              boxShadow: "0 2px 4px rgba(0,0,0,0.15)",
+                              pointerEvents: "none",
+                              textTransform: "uppercase"
+                            }}
+                          >
+                            {isBestSeller ? "BEST SELLER" : "LATEST ARRIVAL"}
+                          </span>
+                        );
+                      }
+                      return null;
+                    })()}
                     <img
                       className={`${styles.productImage} ${styles.productImageFront}`}
                       src={product.imageFront}
@@ -1430,9 +1495,10 @@ export default function Home() {
                   <div className={styles.productInfo}>
                     <h3 className={styles.productTitle}>{product.name}</h3>
                     {(() => {
-                      const cheapestVariant = product.variants && product.variants.length > 0
-                        ? [...product.variants].sort((a, b) => a.price - b.price)[0]
-                        : null;
+                      const inStockVariants = product.variants ? product.variants.filter(v => (Number(v.quantity) || 0) > 0) : [];
+                      const cheapestVariant = inStockVariants.length > 0
+                        ? [...inStockVariants].sort((a, b) => a.price - b.price)[0]
+                        : (product.variants && product.variants.length > 0 ? [...product.variants].sort((a, b) => a.price - b.price)[0] : null);
 
                       const displayPrice = cheapestVariant ? cheapestVariant.price : product.price;
                       const displayStrikePrice = cheapestVariant ? cheapestVariant.strikePrice : product.strikePrice;

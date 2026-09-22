@@ -651,8 +651,13 @@ export default function ProductDetailPage() {
         if (data) {
           setProduct(data);
           initializeMedia(data);
-          const productSizes = data.sizes && data.sizes.length > 0 ? data.sizes : ["50ml", "100ml", "150ml"];
-          setSelectedVolume(productSizes[0]);
+          const inStockVar = (data as any).variants?.find((v: any) => (Number(v.quantity) || 0) > 0);
+          if (inStockVar) {
+            setSelectedVolume(inStockVar.size);
+          } else {
+            const productSizes = data.sizes && data.sizes.length > 0 ? data.sizes : ["50ml", "100ml", "150ml"];
+            setSelectedVolume(productSizes[0]);
+          }
         }
         setLoading(false);
       })
@@ -886,9 +891,17 @@ export default function ProductDetailPage() {
                   </div>
 
                   <div className={styles.sizeSectionChanel}>
-                    <p className={styles.sizeHeaderChanel}>
-                      {product.sizes?.length || 3} SIZES AVAILABLE
-                    </p>
+                    {(() => {
+                      const inStockVariants = (product as any).variants ? (product as any).variants.filter((v: any) => (Number(v.quantity) || 0) > 0) : [];
+                      const displaySizeCount = (product as any).variants && (product as any).variants.length > 0
+                        ? inStockVariants.length
+                        : (product.sizes?.length || 3);
+                      return (
+                        <p className={styles.sizeHeaderChanel}>
+                          {displaySizeCount} {displaySizeCount === 1 ? "SIZE" : "SIZES"} AVAILABLE
+                        </p>
+                      );
+                    })()}
                     
                     <div className={styles.sizeDropdownWrapper}>
                       <div className={styles.sizeSelectDisplay} onClick={() => setIsSizeDropdownOpen(!isSizeDropdownOpen)}>
@@ -905,19 +918,27 @@ export default function ProductDetailPage() {
                           <div className={styles.dropdownBackdrop} onClick={() => setIsSizeDropdownOpen(false)} />
                           <div className={styles.sizeDropdownMenu}>
                             {(product.sizes && product.sizes.length > 0 ? product.sizes : ["50ml", "100ml", "150ml"]).map(size => {
-                              const variantPrice = (product as any).variants?.find((v: any) => v.size === size)?.price || (product as any).options?.find((v: any) => v.size === size)?.price || product.price;
+                              const variantObj = (product as any).variants?.find((v: any) => v.size === size);
+                              const isOutOfStock = variantObj ? (Number(variantObj.quantity) || 0) <= 0 : false;
+                              const variantPrice = variantObj?.price || (product as any).options?.find((o: any) => o.size === size)?.price || product.price;
                               const isSelected = selectedVolume === size;
                               return (
                                 <div 
                                   key={size} 
                                   className={styles.sizeDropdownItem}
-                                  onClick={() => { setSelectedVolume(size); setIsSizeDropdownOpen(false); }}
+                                  style={isOutOfStock ? { opacity: 0.5, backgroundColor: "#f9fafb" } : {}}
+                                  onClick={() => {
+                                    if (!isOutOfStock) {
+                                      setSelectedVolume(size);
+                                      setIsSizeDropdownOpen(false);
+                                    }
+                                  }}
                                 >
                                   <span style={{ fontWeight: isSelected ? 700 : 400, color: isSelected ? '#111827' : '#4b5563' }}>
                                     {size.toLowerCase().endsWith("ml") ? size : `${size}ml`}
                                   </span>
-                                  <span style={{ fontWeight: isSelected ? 700 : 400, color: isSelected ? '#111827' : '#4b5563' }}>
-                                    ₹ {variantPrice.toLocaleString("en-IN")}
+                                  <span style={{ fontWeight: isSelected ? 700 : 400, color: isOutOfStock ? '#dc2626' : (isSelected ? '#111827' : '#4b5563'), fontSize: isOutOfStock ? '0.8rem' : 'inherit' }}>
+                                    {isOutOfStock ? "Out of Stock" : `₹ ${variantPrice.toLocaleString("en-IN")}`}
                                   </span>
                                 </div>
                               );
@@ -1208,9 +1229,10 @@ export default function ProductDetailPage() {
               } : undefined}
             >
               {displayedExplore.map((item) => {
-                const cheapestVariant = item.variants && item.variants.length > 0
-                  ? [...item.variants].sort((a, b) => a.price - b.price)[0]
-                  : null;
+                const inStockVariants = item.variants ? item.variants.filter(v => (Number(v.quantity) || 0) > 0) : [];
+                const cheapestVariant = inStockVariants.length > 0
+                  ? [...inStockVariants].sort((a, b) => a.price - b.price)[0]
+                  : (item.variants && item.variants.length > 0 ? [...item.variants].sort((a, b) => a.price - b.price)[0] : null);
                 const displayPrice = cheapestVariant ? cheapestVariant.price : item.price;
                 const displayStrikePrice = cheapestVariant ? cheapestVariant.strikePrice : item.strikePrice;
                 
@@ -1233,6 +1255,38 @@ export default function ProductDetailPage() {
                   >
                     <div className={homeStyles.productCard} style={item.quantity === 0 ? { pointerEvents: "none" } : {}}>
                       <div className={homeStyles.productImageContainer} style={item.quantity === 0 ? { filter: "grayscale(1)", opacity: 0.7 } : {}}>
+                        {(() => {
+                          const cats = Array.isArray(item.category)
+                            ? item.category.map(c => String(c).toLowerCase().trim())
+                            : [String(item.category || '').toLowerCase().trim()];
+                          const isBestSeller = cats.some(c => c.includes("best seller") || c.includes("bestseller"));
+                          const isLatest = !isBestSeller && cats.some(c => c.includes("latest") || c.includes("new arrival"));
+                          if (isBestSeller || isLatest) {
+                            return (
+                              <span 
+                                style={{
+                                  position: "absolute",
+                                  top: "10px",
+                                  right: "10px",
+                                  backgroundColor: isBestSeller ? "#000000" : "#111827",
+                                  color: "#ffffff",
+                                  fontSize: "0.62rem",
+                                  fontWeight: 700,
+                                  letterSpacing: "0.08em",
+                                  padding: "4px 8px",
+                                  borderRadius: "2px",
+                                  zIndex: 8,
+                                  boxShadow: "0 2px 4px rgba(0,0,0,0.15)",
+                                  pointerEvents: "none",
+                                  textTransform: "uppercase"
+                                }}
+                              >
+                                {isBestSeller ? "BEST SELLER" : "LATEST ARRIVAL"}
+                              </span>
+                            );
+                          }
+                          return null;
+                        })()}
                         <img 
                           className={`${homeStyles.productImage} ${homeStyles.productImageFront}`} 
                           src={item.imageFront} 
@@ -1382,9 +1436,10 @@ export default function ProductDetailPage() {
               } : undefined}
             >
               {displayedRecent.map((item) => {
-                const cheapestVariant = item.variants && item.variants.length > 0
-                  ? [...item.variants].sort((a, b) => a.price - b.price)[0]
-                  : null;
+                const inStockVariants = item.variants ? item.variants.filter(v => (Number(v.quantity) || 0) > 0) : [];
+                const cheapestVariant = inStockVariants.length > 0
+                  ? [...inStockVariants].sort((a, b) => a.price - b.price)[0]
+                  : (item.variants && item.variants.length > 0 ? [...item.variants].sort((a, b) => a.price - b.price)[0] : null);
                 const displayPrice = cheapestVariant ? cheapestVariant.price : item.price;
                 const displayStrikePrice = cheapestVariant ? cheapestVariant.strikePrice : item.strikePrice;
                 
@@ -1407,6 +1462,38 @@ export default function ProductDetailPage() {
                   >
                     <div className={homeStyles.productCard} style={item.quantity === 0 ? { pointerEvents: "none" } : {}}>
                       <div className={homeStyles.productImageContainer} style={item.quantity === 0 ? { filter: "grayscale(1)", opacity: 0.7 } : {}}>
+                        {(() => {
+                          const cats = Array.isArray(item.category)
+                            ? item.category.map(c => String(c).toLowerCase().trim())
+                            : [String(item.category || '').toLowerCase().trim()];
+                          const isBestSeller = cats.some(c => c.includes("best seller") || c.includes("bestseller"));
+                          const isLatest = !isBestSeller && cats.some(c => c.includes("latest") || c.includes("new arrival"));
+                          if (isBestSeller || isLatest) {
+                            return (
+                              <span 
+                                style={{
+                                  position: "absolute",
+                                  top: "10px",
+                                  right: "10px",
+                                  backgroundColor: isBestSeller ? "#000000" : "#111827",
+                                  color: "#ffffff",
+                                  fontSize: "0.62rem",
+                                  fontWeight: 700,
+                                  letterSpacing: "0.08em",
+                                  padding: "4px 8px",
+                                  borderRadius: "2px",
+                                  zIndex: 8,
+                                  boxShadow: "0 2px 4px rgba(0,0,0,0.15)",
+                                  pointerEvents: "none",
+                                  textTransform: "uppercase"
+                                }}
+                              >
+                                {isBestSeller ? "BEST SELLER" : "LATEST ARRIVAL"}
+                              </span>
+                            );
+                          }
+                          return null;
+                        })()}
                         <img 
                           className={`${homeStyles.productImage} ${homeStyles.productImageFront}`} 
                           src={item.imageFront} 

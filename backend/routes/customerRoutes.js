@@ -4,7 +4,7 @@ import User from "../models/User.js";
 import Order from "../models/Order.js";
 import Otp from "../models/Otp.js";
 import dotenv from "dotenv";
-import { sendEmail } from "../utils/emailService.js";
+import { queueEmail } from "../utils/emailQueue.js";
 import { getBrandInfo } from "../utils/brandHelper.js";
 import { verifyToken, isAdmin } from "../middleware/authMiddleware.js";
 import { otpLimiter } from "../middleware/rateLimiter.js";
@@ -39,7 +39,7 @@ router.post("/api/customers/request-autofill-otp", otpLimiter, async (req, res) 
     );
 
     const { brandName } = await getBrandInfo();
-    await sendEmail({
+    await queueEmail({
       to: customer.email,
       subject: `Your ${brandName} Verification Code`,
       text: `Hello ${customer.name || 'Customer'},\n\nPlease use the verification code below to autofill your checkout details for ${brandName}. This code will expire in 5 minutes.\n\nCode: ${otpCode}\n\nIf you didn't request this code, you can safely ignore this email.`,

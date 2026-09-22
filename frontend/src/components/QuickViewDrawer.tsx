@@ -152,7 +152,12 @@ export default function QuickViewDrawer({
               <div className={styles.pricingSection}>
                 {hasVariants && (
                   <div className={styles.sizesSection}>
-                    <p className={styles.sizesLabel}>{fullProductData.variants.length} SIZES AVAILABLE</p>
+                    {(() => {
+                      const inStockCount = fullProductData.variants.filter((v: any) => (Number(v.quantity) || 0) > 0).length;
+                      return (
+                        <p className={styles.sizesLabel}>{inStockCount} {inStockCount === 1 ? "SIZE" : "SIZES"} AVAILABLE</p>
+                      );
+                    })()}
                     <div className={styles.dropdownContainer}>
                       <button 
                         className={styles.dropdownToggle}
@@ -169,19 +174,27 @@ export default function QuickViewDrawer({
                       
                       {isDropdownOpen && (
                         <div className={styles.dropdownMenu}>
-                          {fullProductData.variants.map((v: any) => (
-                            <div 
-                              key={v.size} 
-                              className={`${styles.dropdownOption} ${selectedSize === v.size ? styles.dropdownOptionActive : ""}`}
-                              onClick={() => {
-                                setSelectedSize(v.size);
-                                setIsDropdownOpen(false);
-                              }}
-                            >
-                              <span className={styles.dropdownLeft}>{v.size}</span>
-                              <span className={styles.dropdownRight}>₹ {v.price.toLocaleString("en-IN")}</span>
-                            </div>
-                          ))}
+                          {fullProductData.variants.map((v: any) => {
+                            const isOutOfStock = (Number(v.quantity) || 0) <= 0;
+                            return (
+                              <div 
+                                key={v.size} 
+                                className={`${styles.dropdownOption} ${selectedSize === v.size ? styles.dropdownOptionActive : ""}`}
+                                style={isOutOfStock ? { opacity: 0.5, backgroundColor: "#f9fafb" } : {}}
+                                onClick={() => {
+                                  if (!isOutOfStock) {
+                                    setSelectedSize(v.size);
+                                    setIsDropdownOpen(false);
+                                  }
+                                }}
+                              >
+                                <span className={styles.dropdownLeft}>{v.size}</span>
+                                <span className={styles.dropdownRight} style={isOutOfStock ? { color: "#dc2626", fontSize: "0.8rem" } : {}}>
+                                  {isOutOfStock ? "Out of Stock" : `₹ ${v.price.toLocaleString("en-IN")}`}
+                                </span>
+                              </div>
+                            );
+                          })}
                         </div>
                       )}
                     </div>
