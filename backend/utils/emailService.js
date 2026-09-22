@@ -16,6 +16,10 @@ dotenv.config();
  * @returns {Promise<Object>}
  */
 export const sendEmail = async ({ to, subject, html, text }) => {
+  if (process.env.NODE_ENV === "test") {
+    return { messageId: "test-mock-id" };
+  }
+
   const apiKey = process.env.BREVO_API_KEY;
   if (!apiKey) {
     console.error("BREVO_API_KEY is not set in environment variables.");

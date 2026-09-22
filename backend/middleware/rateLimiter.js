@@ -6,6 +6,7 @@ export const generalLimiter = rateLimit({
   max: 100,
   standardHeaders: true, // Return rate limit info in `RateLimit-*` headers
   legacyHeaders: false, // Disable `X-RateLimit-*` headers
+  skip: () => process.env.NODE_ENV === "test",
   message: {
     error: "Too many requests, please try again after a minute."
   },
@@ -18,6 +19,7 @@ export const loginLimiter = rateLimit({
   max: 5,
   standardHeaders: true,
   legacyHeaders: false,
+  skip: () => process.env.NODE_ENV === "test",
   message: {
     error: "Too many login attempts, please try again after a minute."
   },
@@ -30,6 +32,8 @@ export const otpLimiter = rateLimit({
   max: 5,
   standardHeaders: true,
   legacyHeaders: false,
+  validate: { ip: false },
+  skip: () => process.env.NODE_ENV === "test",
   keyGenerator: (req) => {
     const identifier = req.body?.email || req.body?.phone || req.query?.email || "";
     return identifier ? `${req.ip}_${identifier.toLowerCase().trim()}` : req.ip;
@@ -39,3 +43,4 @@ export const otpLimiter = rateLimit({
   },
   statusCode: 429
 });
+
