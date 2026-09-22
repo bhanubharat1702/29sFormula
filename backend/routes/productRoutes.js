@@ -5,6 +5,7 @@ import Review from "../models/Review.js";
 import { cachedProducts, setCachedProducts, cachedProductDetails, invalidateProductsCache } from "../utils/cache.js";
 import { deleteFromCloudinary } from "../utils/cloudinary.js";
 import { getPaginationParams, buildPaginatedResponse, setPaginationHeaders } from "../utils/paginationHelper.js";
+import { redisCache } from "../middleware/cacheMiddleware.js";
 
 const router = express.Router();
 
@@ -31,7 +32,7 @@ const enforceLatestArrivalsLimit = async () => {
   }
 };
 
-router.get("/api/products", async (req, res) => {
+router.get("/api/products", redisCache("products", 300), async (req, res) => {
   try {
     const { page, limit, skip, cursor, isExplicitPagination } = getPaginationParams(req, 20, 100);
 

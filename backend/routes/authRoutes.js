@@ -7,6 +7,8 @@ import Order from "../models/Order.js";
 import { sendEmail } from "../utils/emailService.js";
 import { getBrandInfo } from "../utils/brandHelper.js";
 import { loginLimiter, otpLimiter } from "../middleware/rateLimiter.js";
+import { validate } from "../middleware/validate.js";
+import { registerSchema, loginSchema, sendOtpSchema, resetPasswordSchema } from "../utils/schemas.js";
 
 const router = express.Router();
 
@@ -62,12 +64,9 @@ const sendWelcomeEmail = async (userEmail, userName) => {
 };
 
 
-router.post("/api/auth/register", loginLimiter, async (req, res) => {
+router.post("/api/auth/register", loginLimiter, validate(registerSchema), async (req, res) => {
   try {
     const { name, email, password } = req.body;
-    if (!name || !email || !password) {
-      return res.status(400).json({ error: "Name, email, and password are required" });
-    }
 
     const trimmedEmail = email.trim().toLowerCase();
     const existingUser = await User.findOne({ email: trimmedEmail });
@@ -105,12 +104,9 @@ router.post("/api/auth/register", loginLimiter, async (req, res) => {
   }
 });
 
-router.post("/api/auth/login", loginLimiter, async (req, res) => {
+router.post("/api/auth/login", loginLimiter, validate(loginSchema), async (req, res) => {
   try {
     const { email, password } = req.body;
-    if (!email || !password) {
-      return res.status(400).json({ error: "Email and password are required" });
-    }
 
     const trimmedEmail = email.trim().toLowerCase();
 
@@ -285,12 +281,9 @@ router.post("/api/auth/google", async (req, res) => {
 });
 
 // Request Password Reset OTP
-router.post("/api/auth/request-reset-otp", otpLimiter, async (req, res) => {
+router.post("/api/auth/request-reset-otp", otpLimiter, validate(sendOtpSchema), async (req, res) => {
   try {
     const { email } = req.body;
-    if (!email) {
-      return res.status(400).json({ error: "Email is required." });
-    }
 
     const trimmedEmail = email.trim().toLowerCase();
     const user = await User.findOne({ email: trimmedEmail });
@@ -343,16 +336,9 @@ router.post("/api/auth/request-reset-otp", otpLimiter, async (req, res) => {
 });
 
 // Reset Password with OTP
-router.post("/api/auth/reset-password", otpLimiter, async (req, res) => {
+router.post("/api/auth/reset-password", otpLimiter, validate(resetPasswordSchema), async (req, res) => {
   try {
     const { email, otp, newPassword } = req.body;
-    if (!email || !otp || !newPassword) {
-      return res.status(400).json({ error: "Email, OTP, and new password are required." });
-    }
-
-    if (newPassword.length < 6) {
-      return res.status(400).json({ error: "Password must be at least 6 characters long." });
-    }
 
     const trimmedEmail = email.trim().toLowerCase();
     const Otp = (await import("../models/Otp.js")).default;

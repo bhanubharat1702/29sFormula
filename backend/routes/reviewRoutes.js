@@ -4,6 +4,8 @@ import Review from "../models/Review.js";
 import Order from "../models/Order.js";
 import { Product } from "../models/Product.js";
 import { getPaginationParams, buildPaginatedResponse, setPaginationHeaders } from "../utils/paginationHelper.js";
+import { validate } from "../middleware/validate.js";
+import { createReviewSchema } from "../utils/schemas.js";
 
 const router = express.Router();
 
@@ -99,12 +101,9 @@ router.get("/api/reviews/:productId", async (req, res) => {
   }
 });
 
-router.post("/api/reviews", async (req, res) => {
+router.post("/api/reviews", validate(createReviewSchema), async (req, res) => {
   try {
     const { productId, author, rating, comment, title, location, images } = req.body;
-    if (!productId || !author || !rating || !comment) {
-      return res.status(400).json({ error: "productId, author, rating, and comment are required." });
-    }
 
     let objId;
     try {

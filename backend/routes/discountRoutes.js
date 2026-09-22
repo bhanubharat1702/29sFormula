@@ -1,6 +1,8 @@
 import express from "express";
 import Discount from "../models/Discount.js";
 import { getPaginationParams, buildPaginatedResponse, setPaginationHeaders } from "../utils/paginationHelper.js";
+import { validate } from "../middleware/validate.js";
+import { createDiscountSchema, validateDiscountQuerySchema } from "../utils/schemas.js";
 
 const router = express.Router();
 
@@ -33,12 +35,9 @@ router.get("/api/discounts", async (req, res) => {
   }
 });
 
-router.post("/api/discounts", async (req, res) => {
+router.post("/api/discounts", validate(createDiscountSchema), async (req, res) => {
   try {
     const { code, type, value, minOrderAmount } = req.body;
-    if (!code || !value) {
-      return res.status(400).json({ error: "Code and value are required." });
-    }
     const newDiscount = new Discount({
       code: String(code).toUpperCase().trim(),
       type: type || "percentage",
@@ -62,10 +61,9 @@ router.delete("/api/discounts/:id", async (req, res) => {
   }
 });
 
-router.get("/api/discounts/validate", async (req, res) => {
+router.get("/api/discounts/validate", validate(validateDiscountQuerySchema, "query"), async (req, res) => {
   try {
     const { code, subtotal } = req.query;
-    if (!code) return res.status(400).json({ error: "Discount code is required" });
     const discount = await Discount.findOne({ code: String(code).toUpperCase().trim(), active: true });
     if (!discount) return res.status(404).json({ error: "Invalid discount code" });
     

@@ -1,6 +1,7 @@
 import express from "express";
 import Settings from "../models/Settings.js";
 import { cachedSettings, setCachedSettings, invalidateSettingsCache } from "../utils/cache.js";
+import { redisCache } from "../middleware/cacheMiddleware.js";
 
 const router = express.Router();
 
@@ -12,7 +13,7 @@ router.get("/api", (req, res) => {
   });
 });
 
-router.get("/api/settings", async (req, res) => {
+router.get("/api/settings", redisCache("settings", 300), async (req, res) => {
   try {
     if (cachedSettings) {
       return res.json(cachedSettings);

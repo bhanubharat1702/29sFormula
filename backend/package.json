@@ -21,11 +21,13 @@
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
     "express-rate-limit": "^8.7.0",
+    "ioredis": "^6.0.0",
     "jsonwebtoken": "^9.0.3",
     "mongoose": "^9.7.4",
     "multer": "^2.2.0",
     "nodemailer": "^9.0.5",
-    "razorpay": "^2.9.8"
+    "razorpay": "^2.9.8",
+    "zod": "^4.6.5"
   },
   "devDependencies": {
     "jest": "^30.5.2",
