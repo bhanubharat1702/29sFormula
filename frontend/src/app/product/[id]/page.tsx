@@ -55,7 +55,7 @@ export default function ProductDetailPage() {
   const [touchEnd, setTouchEnd] = useState<number | null>(null);
   
   // Customizer option choices
-  const [selectedVolume, setSelectedVolume] = useState<string>("100ml");
+  const [selectedVolume, setSelectedVolume] = useState<string>("");
   const [quantity, setQuantity] = useState<number>(1);
   
 
@@ -526,7 +526,11 @@ export default function ProductDetailPage() {
     };
   }, []);
 
-  const addToCart = (product: any, size: string = "50ml", qtyToAdd: number = 1) => {
+  const addToCart = (product: any, size?: string, qtyToAdd: number = 1) => {
+    const defaultSize = (product?.variants && product.variants.length > 0)
+      ? (product.variants.find((v: any) => (Number(v.quantity) || 0) > 0)?.size || product.variants[0].size)
+      : (product?.sizes?.[0] || "");
+    const targetSize = size || defaultSize;
     if (typeof window !== "undefined") {
       const current = localStorage.getItem("cart");
       let itemsList = [];
@@ -536,23 +540,23 @@ export default function ProductDetailPage() {
         } catch (e) {}
       }
       
-      const existingIdx = itemsList.findIndex((item: any) => item._id === product._id && item.size === size);
+      const existingIdx = itemsList.findIndex((item: any) => item._id === product._id && item.size === targetSize);
       if (existingIdx > -1) {
-        const maxS = itemsList[existingIdx].maxStock ?? ((product.variants && product.variants.find((v: any) => v.size === size)?.quantity) ?? product.quantity);
+        const maxS = itemsList[existingIdx].maxStock ?? ((product.variants && product.variants.find((v: any) => v.size === targetSize)?.quantity) ?? product.quantity);
         if (itemsList[existingIdx].quantity + qtyToAdd > maxS) {
-          showCartError(`Only ${maxS} units of ${product.name} (${size}) are available in stock.`);
+          showCartError(`Only ${maxS} units of ${product.name} (${targetSize}) are available in stock.`);
           itemsList[existingIdx].quantity = maxS;
           setShowCartDrawer(true);
         } else {
           itemsList[existingIdx].quantity += qtyToAdd;
         }
       } else {
-        const variantPrice = (product.options && product.options.find((o: any) => o.size === size)?.price) 
-                          || (product.variants && product.variants.find((v: any) => v.size === size)?.price)
+        const variantPrice = (product.options && product.options.find((o: any) => o.size === targetSize)?.price) 
+                          || (product.variants && product.variants.find((v: any) => v.size === targetSize)?.price)
                           || product.price;
 
-        const variantStrikePrice = ((product as any).options && (product as any).options.find((o: any) => o.size === size)?.strikePrice) || ((product as any).variants && (product as any).variants.find((v: any) => v.size === size)?.strikePrice) || (product as any).strikePrice;
-        const maxS = (product.variants && product.variants.find((v: any) => v.size === size)?.quantity) ?? product.quantity;
+        const variantStrikePrice = ((product as any).options && (product as any).options.find((o: any) => o.size === targetSize)?.strikePrice) || ((product as any).variants && (product as any).variants.find((v: any) => v.size === targetSize)?.strikePrice) || (product as any).strikePrice;
+        const maxS = (product.variants && product.variants.find((v: any) => v.size === targetSize)?.quantity) ?? product.quantity;
         let qtyToPush = qtyToAdd;
         if (qtyToAdd > maxS) {
           showCartError(`Only ${maxS} units of ${product.name} (${size}) are available in stock.`);
@@ -566,7 +570,7 @@ export default function ProductDetailPage() {
           price: variantPrice,
           strikePrice: variantStrikePrice,
           imageFront: product.imageFront,
-          size: size,
+          size: targetSize,
           quantity: qtyToPush,
           maxStock: maxS
         });
@@ -655,8 +659,15 @@ export default function ProductDetailPage() {
           if (inStockVar) {
             setSelectedVolume(inStockVar.size);
           } else {
-            const productSizes = data.sizes && data.sizes.length > 0 ? data.sizes : ["50ml", "100ml", "150ml"];
-            setSelectedVolume(productSizes[0]);
+            const availVars = (data as any).variants && (data as any).variants.length > 0 ? (data as any).variants : [];
+            const productSizes = availVars.length > 0
+              ? availVars.map((v: any) => v.size)
+              : (data.sizes && data.sizes.length > 0 ? data.sizes : []);
+            if (productSizes.length > 0) {
+              setSelectedVolume(productSizes[0]);
+            } else {
+              setSelectedVolume("");
+            }
           }
         }
         setLoading(false);
@@ -668,8 +679,12 @@ export default function ProductDetailPage() {
         if (found) {
           setProduct(found);
           initializeMedia(found);
-          const fallbackSizes = found.sizes && found.sizes.length > 0 ? found.sizes : ["50ml", "100ml", "150ml"];
-          setSelectedVolume(fallbackSizes[0]);
+          const fallbackSizes = (found as any).variants && (found as any).variants.length > 0
+            ? (found as any).variants.map((v: any) => v.size)
+            : (found.sizes || []);
+          if (fallbackSizes.length > 0) {
+            setSelectedVolume(fallbackSizes[0]);
+          }
         }
         setLoading(false);
       });
@@ -905,7 +920,7 @@ export default function ProductDetailPage() {
                     
                     <div className={styles.sizeDropdownWrapper}>
                       <div className={styles.sizeSelectDisplay} onClick={() => setIsSizeDropdownOpen(!isSizeDropdownOpen)}>
-                        <span>{selectedVolume.toLowerCase().endsWith("ml") ? selectedVolume : `${selectedVolume}ml`}</span>
+                        <span>{selectedVolume}</span>
                         <div className={styles.selectChevron}>
                           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" style={{ width: "16px", height: "16px", transform: isSizeDropdownOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }}>
                             <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
@@ -917,32 +932,39 @@ export default function ProductDetailPage() {
                         <>
                           <div className={styles.dropdownBackdrop} onClick={() => setIsSizeDropdownOpen(false)} />
                           <div className={styles.sizeDropdownMenu}>
-                            {(product.sizes && product.sizes.length > 0 ? product.sizes : ["50ml", "100ml", "150ml"]).map(size => {
-                              const variantObj = (product as any).variants?.find((v: any) => v.size === size);
-                              const isOutOfStock = variantObj ? (Number(variantObj.quantity) || 0) <= 0 : false;
-                              const variantPrice = variantObj?.price || (product as any).options?.find((o: any) => o.size === size)?.price || product.price;
-                              const isSelected = selectedVolume === size;
-                              return (
-                                <div 
-                                  key={size} 
-                                  className={styles.sizeDropdownItem}
-                                  style={isOutOfStock ? { opacity: 0.5, backgroundColor: "#f9fafb" } : {}}
-                                  onClick={() => {
-                                    if (!isOutOfStock) {
-                                      setSelectedVolume(size);
-                                      setIsSizeDropdownOpen(false);
-                                    }
-                                  }}
-                                >
-                                  <span style={{ fontWeight: isSelected ? 700 : 400, color: isSelected ? '#111827' : '#4b5563' }}>
-                                    {size.toLowerCase().endsWith("ml") ? size : `${size}ml`}
-                                  </span>
-                                  <span style={{ fontWeight: isSelected ? 700 : 400, color: isOutOfStock ? '#dc2626' : (isSelected ? '#111827' : '#4b5563'), fontSize: isOutOfStock ? '0.8rem' : 'inherit' }}>
-                                    {isOutOfStock ? "Out of Stock" : `₹ ${variantPrice.toLocaleString("en-IN")}`}
-                                  </span>
-                                </div>
-                              );
-                            })}
+                            {(() => {
+                              const availVars = (product as any).variants && (product as any).variants.length > 0 ? (product as any).variants : [];
+                              const sizeList: string[] = availVars.length > 0
+                                ? availVars.map((v: any) => v.size)
+                                : (product.sizes || []);
+                              
+                              return sizeList.map((size: string) => {
+                                const variantObj = (product as any).variants?.find((v: any) => v.size === size);
+                                const isOutOfStock = variantObj ? (Number(variantObj.quantity) || 0) <= 0 : false;
+                                const variantPrice = variantObj?.price || (product as any).options?.find((o: any) => o.size === size)?.price || product.price;
+                                const isSelected = selectedVolume === size;
+                                return (
+                                  <div 
+                                    key={size} 
+                                    className={styles.sizeDropdownItem}
+                                    style={isOutOfStock ? { opacity: 0.5, backgroundColor: "#f9fafb" } : {}}
+                                    onClick={() => {
+                                      if (!isOutOfStock) {
+                                        setSelectedVolume(size);
+                                        setIsSizeDropdownOpen(false);
+                                      }
+                                    }}
+                                  >
+                                    <span style={{ fontWeight: isSelected ? 700 : 400, color: isSelected ? '#111827' : '#4b5563' }}>
+                                      {size}
+                                    </span>
+                                    <span style={{ fontWeight: isSelected ? 700 : 400, color: isOutOfStock ? '#dc2626' : (isSelected ? '#111827' : '#4b5563'), fontSize: isOutOfStock ? '0.8rem' : 'inherit' }}>
+                                      {isOutOfStock ? "Out of Stock" : `₹ ${variantPrice.toLocaleString("en-IN")}`}
+                                    </span>
+                                  </div>
+                                );
+                              });
+                            })()}
                           </div>
                         </>
                       )}
@@ -1305,7 +1327,7 @@ export default function ProductDetailPage() {
                         <button 
                           aria-label="Add to cart" 
                           className={homeStyles.addToCartCircle}
-                          onClick={(e) => { e.preventDefault(); e.stopPropagation(); addToCart(item, item.sizes?.[0] || "50ml", 1); }}
+                          onClick={(e) => { e.preventDefault(); e.stopPropagation(); addToCart(item, item.variants?.[0]?.size || item.sizes?.[0] || "", 1); }}
                         >
                           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" className={homeStyles.cartIcon} style={{ width: "20px", height: "20px" }}>
                             <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 10.5V6a3.75 3.75 0 1 0-7.5 0v4.5m11.356-1.993 1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 0 1-1.12-1.243l1.264-12A1.125 1.125 0 0 1 5.513 7.5h12.974c.576 0 1.059.435 1.119 1.007ZM8.625 10.5a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm7.5 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" />
@@ -1512,7 +1534,7 @@ export default function ProductDetailPage() {
                         <button 
                           aria-label="Add to cart" 
                           className={homeStyles.addToCartCircle}
-                          onClick={(e) => { e.preventDefault(); e.stopPropagation(); addToCart(item, item.sizes?.[0] || "50ml", 1); }}
+                          onClick={(e) => { e.preventDefault(); e.stopPropagation(); addToCart(item, item.variants?.[0]?.size || item.sizes?.[0] || "", 1); }}
                         >
                           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" className={homeStyles.cartIcon} style={{ width: "20px", height: "20px" }}>
                             <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 10.5V6a3.75 3.75 0 1 0-7.5 0v4.5m11.356-1.993 1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 0 1-1.12-1.243l1.264-12A1.125 1.125 0 0 1 5.513 7.5h12.974c.576 0 1.059.435 1.119 1.007ZM8.625 10.5a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm7.5 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" />

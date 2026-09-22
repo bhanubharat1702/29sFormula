@@ -943,7 +943,7 @@ export default function AdminModals(props: any) {
                       <table style={{ width: "100%", borderCollapse: "collapse", minWidth: "500px" }}>
                         <thead>
                           <tr style={{ borderBottom: "2px solid #e5e7eb", textAlign: "left" }}>
-                            <th style={{ padding: "8px 6px", fontSize: "0.8rem", fontWeight: 600, color: "#4b5563" }}>Size*</th>
+                            <th style={{ padding: "8px 6px", fontSize: "0.8rem", fontWeight: 600, color: "#4b5563" }}>Size / Unit*</th>
                             <th style={{ padding: "8px 6px", fontSize: "0.8rem", fontWeight: 600, color: "#4b5563" }}>Quantity*</th>
                             <th style={{ padding: "8px 6px", fontSize: "0.8rem", fontWeight: 600, color: "#4b5563" }}>Price*</th>
                             <th style={{ padding: "8px 6px", fontSize: "0.8rem", fontWeight: 600, color: "#4b5563" }}>Strike Price</th>
@@ -955,11 +955,11 @@ export default function AdminModals(props: any) {
                         <tbody>
                           {options.map((opt: any, index: number) => (
                             <tr key={index} style={{ borderBottom: "1px solid #f3f4f6" }}>
-                              <td style={{ padding: "8px 4px" }}>
+                              <td style={{ padding: "8px 4px", minWidth: "150px" }}>
                                 <input
                                   type="text"
                                   value={opt.size}
-                                  placeholder="e.g. 50ml"
+                                  placeholder="e.g. 2 Kgs, 1 Litre, 500g, 50ml"
                                   onChange={(e) => {
                                     const updated = [...options];
                                     updated[index].size = e.target.value;
@@ -1338,8 +1338,16 @@ export default function AdminModals(props: any) {
                           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
                               <div>
-                                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: '#4b5563', marginBottom: '4px' }}>Size *</label>
-                                <input type="text" value={opt.size} placeholder="e.g. 50ml" onChange={(e) => { const updated = [...options]; updated[index].size = e.target.value; setOptions(updated); }} required={mobileCrudStep === 2} className={styles.textInput} style={{ padding: "8px", fontSize: "0.85rem", width: "100%", boxSizing: "border-box" }} />
+                                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: '#4b5563', marginBottom: '4px' }}>Size / Unit *</label>
+                                <input
+                                  type="text"
+                                  value={opt.size}
+                                  placeholder="e.g. 2 Kgs, 1 Litre, 500g, 50ml"
+                                  onChange={(e) => { const updated = [...options]; updated[index].size = e.target.value; setOptions(updated); }}
+                                  required={mobileCrudStep === 2}
+                                  className={styles.textInput}
+                                  style={{ padding: "8px", fontSize: "0.85rem", width: "100%", boxSizing: "border-box" }}
+                                />
                               </div>
                               <div>
                                 <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: '#4b5563', marginBottom: '4px' }}>Quantity *</label>

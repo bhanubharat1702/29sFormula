@@ -344,7 +344,8 @@ export default function Home() {
     };
   }, []);
 
-  const addToCart = (product: any, size: string = "50ml", qty: number = 1) => {
+  const addToCart = (product: any, size?: string, qty: number = 1) => {
+    const selectedSize = size || product?.variants?.[0]?.size || product?.sizes?.[0] || product?.availableSizes?.[0] || "Standard";
     if (typeof window !== "undefined") {
       const current = localStorage.getItem("cart");
       let itemsList = [];
@@ -354,28 +355,28 @@ export default function Home() {
         } catch (e) { }
       }
 
-      const maxStock = ((product as any).variants && (product as any).variants.find((v: any) => v.size === size)?.quantity) ?? product.quantity;
+      const maxStock = ((product as any).variants && (product as any).variants.find((v: any) => v.size === selectedSize)?.quantity) ?? product.quantity;
 
-      const existingIdx = itemsList.findIndex((item: any) => item._id === product._id && item.size === size);
+      const existingIdx = itemsList.findIndex((item: any) => item._id === product._id && item.size === selectedSize);
       if (existingIdx > -1) {
         if (itemsList[existingIdx].quantity + qty > maxStock) {
-          showCartError(`Only ${maxStock} units of ${product.name} (${size}) are available in stock.`);
+          showCartError(`Only ${maxStock} units of ${product.name} (${selectedSize}) are available in stock.`);
           itemsList[existingIdx].quantity = maxStock;
           setShowCartDrawer(true);
         } else {
           itemsList[existingIdx].quantity += qty;
         }
       } else {
-        const variantPrice = (product.options && product.options.find((o: any) => o.size === size)?.price)
-          || (product.variants && product.variants.find((v: any) => v.size === size)?.price)
+        const variantPrice = (product.options && product.options.find((o: any) => o.size === selectedSize)?.price)
+          || (product.variants && product.variants.find((v: any) => v.size === selectedSize)?.price)
           || product.price;
-        const variantStrikePrice = ((product as any).options && (product as any).options.find((o: any) => o.size === size)?.strikePrice)
-          || ((product as any).variants && (product as any).variants.find((v: any) => v.size === size)?.strikePrice)
+        const variantStrikePrice = ((product as any).options && (product as any).options.find((o: any) => o.size === selectedSize)?.strikePrice)
+          || ((product as any).variants && (product as any).variants.find((v: any) => v.size === selectedSize)?.strikePrice)
           || product.strikePrice;
 
         let qtyToPush = qty;
         if (qty > maxStock) {
-          showCartError(`Only ${maxStock} units of ${product.name} (${size}) are available in stock.`);
+          showCartError(`Only ${maxStock} units of ${product.name} (${selectedSize}) are available in stock.`);
           qtyToPush = maxStock;
           setShowCartDrawer(true);
         }
@@ -387,7 +388,7 @@ export default function Home() {
             price: variantPrice,
             strikePrice: variantStrikePrice,
             imageFront: product.imageFront,
-            size: size,
+            size: selectedSize,
             quantity: qtyToPush,
             maxStock: maxStock
           });
@@ -1100,7 +1101,7 @@ export default function Home() {
       <section className={styles.arrivalsSection}>
         <div className={styles.arrivalsHeader}>
           <h2 className={styles.arrivalsTitle}>LATEST ARRIVALS</h2>
-          <Link href="/shop?category=arrivals" className={styles.viewAllLink}>VIEW ALL</Link>
+          <Link href="/collections?category=arrivals" className={styles.viewAllLink}>VIEW ALL</Link>
         </div>
         <div
           key={`arrivals-${arrivalsPage}`}
@@ -1386,7 +1387,7 @@ export default function Home() {
       <section className={styles.arrivalsSection}>
         <div className={styles.arrivalsHeader}>
           <h2 className={styles.arrivalsTitle}>BEST SELLERS</h2>
-          <Link href="/shop?category=bestsellers" className={styles.viewAllLink}>SHOP ALL</Link>
+          <Link href="/collections?category=bestsellers" className={styles.viewAllLink}>VIEW ALL</Link>
         </div>
         <div
           key={`bestsellers-${bestSellersPage}`}

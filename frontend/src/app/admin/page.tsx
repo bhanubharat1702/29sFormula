@@ -254,7 +254,7 @@ export default function AdminDashboard() {
   const [imageFront, setImageFront] = useState<string>("");
   const [imageBack, setImageBack] = useState<string>("");
   const [images, setImages] = useState<string[]>([]);
-  const [sizes, setSizes] = useState<string[]>(["50ml", "100ml", "150ml"]);
+  const [sizes, setSizes] = useState<string[]>([]);
   const [sizeQuantities, setSizeQuantities] = useState<Record<string, number>>({});
   const [options, setOptions] = useState<{ size: string; quantity: number | ""; price: number | ""; strikePrice: number | ""; makingPrice: number | ""; category: string[] }[]>([{ size: "", quantity: "", price: "", strikePrice: "", makingPrice: "", category: [] }]);
   const [openCategoryIndex, setOpenCategoryIndex] = useState<number | null>(null);
@@ -2556,7 +2556,7 @@ export default function AdminDashboard() {
     setImageFront("");
     setImageBack("");
     setImages([]);
-    setSizes(["50ml", "100ml", "150ml"]);
+    setSizes([]);
     setSizeQuantities({});
     setOptions([{ size: "", quantity: "", price: "", strikePrice: "", makingPrice: "", category: [] }]);
     setIsEditing(false);

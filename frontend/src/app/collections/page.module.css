@@ -200,6 +200,80 @@
   color: #1a1a1a;
 }
 
+.activeSortOption {
+  font-weight: 700 !important;
+  color: #111827 !important;
+  background-color: #f1f5f9;
+}
+
+/* Active Filter Badges Bar */
+.activeFiltersBar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 25px;
+  padding: 10px 16px;
+  background-color: #f8fafc;
+  border-radius: 6px;
+  border: 1px solid #e2e8f0;
+}
+
+.activeFiltersLabel {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #64748b;
+  margin-right: 4px;
+}
+
+.activeFilterBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background-color: #111827;
+  color: #ffffff;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 6px 14px;
+  border-radius: 20px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.activeFilterBadge:hover {
+  background-color: #374151;
+  transform: translateY(-1px);
+}
+
+.removeBadgeIcon {
+  font-size: 0.7rem;
+  margin-left: 2px;
+  opacity: 0.8;
+}
+
+.clearAllBtn {
+  background: none;
+  border: none;
+  color: #ef4444;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  padding: 4px 8px;
+  margin-left: auto;
+  text-decoration: underline;
+  transition: opacity 0.2s ease;
+}
+
+.clearAllBtn:hover {
+  opacity: 0.8;
+}
+
 .itemCount {
   font-size: 0.75rem;
   color: #718096;

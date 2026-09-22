@@ -55,7 +55,7 @@ export default function Shop() {
   const [viewLayout, setViewLayout] = useState<"grid" | "list">("grid");
 
   // Dropdown visibility state
-  const [activeDropdown, setActiveDropdown] = useState<"availability" | "price" | "sort" | null>(null);
+  const [activeDropdown, setActiveDropdown] = useState<"category" | "availability" | "price" | "sort" | null>(null);
 
   const [showCheckoutDrawer, setShowCheckoutDrawer] = useState<boolean>(false);
   const [showSuccessModal, setShowSuccessModal] = useState<boolean>(false);
@@ -143,7 +143,8 @@ export default function Shop() {
     };
   }, []);
 
-  const addToCart = (product: Product, size: string = "50ml") => {
+  const addToCart = (product: Product, size?: string) => {
+    const selectedSize = size || (product as any)?.variants?.[0]?.size || (product as any)?.sizes?.[0] || (product as any)?.availableSizes?.[0] || "Standard";
     if (typeof window !== "undefined") {
       const current = localStorage.getItem("cart");
       let itemsList = [];
@@ -153,28 +154,28 @@ export default function Shop() {
         } catch (e) {}
       }
       
-      const maxStock = ((product as any).variants && (product as any).variants.find((v: any) => v.size === size)?.quantity) ?? product.quantity;
+      const maxStock = ((product as any).variants && (product as any).variants.find((v: any) => v.size === selectedSize)?.quantity) ?? product.quantity;
 
-      const existingIdx = itemsList.findIndex((item: any) => item._id === product._id && item.size === size);
+      const existingIdx = itemsList.findIndex((item: any) => item._id === product._id && item.size === selectedSize);
       if (existingIdx > -1) {
         if (itemsList[existingIdx].quantity + 1 > maxStock) {
-          showCartError(`Only ${maxStock} units of ${product.name} (${size}) are available in stock.`);
+          showCartError(`Only ${maxStock} units of ${product.name} (${selectedSize}) are available in stock.`);
           itemsList[existingIdx].quantity = maxStock;
           setShowCartDrawer(true);
         } else {
           itemsList[existingIdx].quantity += 1;
         }
       } else {
-        const variantPrice = ((product as any).options && (product as any).options.find((o: any) => o.size === size)?.price) 
-                          || ((product as any).variants && (product as any).variants.find((v: any) => v.size === size)?.price)
+        const variantPrice = ((product as any).options && (product as any).options.find((o: any) => o.size === selectedSize)?.price) 
+                          || ((product as any).variants && (product as any).variants.find((v: any) => v.size === selectedSize)?.price)
                           || product.price;
-        const variantStrikePrice = ((product as any).options && (product as any).options.find((o: any) => o.size === size)?.strikePrice) 
-                          || ((product as any).variants && (product as any).variants.find((v: any) => v.size === size)?.strikePrice)
+        const variantStrikePrice = ((product as any).options && (product as any).options.find((o: any) => o.size === selectedSize)?.strikePrice) 
+                          || ((product as any).variants && (product as any).variants.find((v: any) => v.size === selectedSize)?.strikePrice)
                           || (product as any).strikePrice;
 
         let qtyToPush = 1;
         if (1 > maxStock) {
-          showCartError(`Only ${maxStock} units of ${product.name} (${size}) are available in stock.`);
+          showCartError(`Only ${maxStock} units of ${product.name} (${selectedSize}) are available in stock.`);
           qtyToPush = maxStock;
           setShowCartDrawer(true);
         }
@@ -185,7 +186,7 @@ export default function Shop() {
           price: variantPrice,
           strikePrice: variantStrikePrice,
           imageFront: product.imageFront,
-          size: size,
+          size: selectedSize,
           quantity: qtyToPush,
           maxStock: maxStock
         });
@@ -270,10 +271,15 @@ export default function Shop() {
     if (typeof window !== "undefined") {
       const params = new URLSearchParams(window.location.search);
       const cat = params.get("category");
-      if (cat === "bestsellers") {
-        setCategoryFilter("Best Seller");
-      } else if (cat === "arrivals") {
-        setCategoryFilter("Latest Arrivals");
+      if (cat) {
+        const catLower = cat.toLowerCase().trim();
+        if (catLower === "bestsellers" || catLower === "best seller" || catLower === "best sellers" || catLower === "bestseller") {
+          setCategoryFilter("Best Seller");
+        } else if (catLower === "arrivals" || catLower === "latest arrivals" || catLower === "latest arrival" || catLower === "new arrivals") {
+          setCategoryFilter("Latest Arrivals");
+        } else {
+          setCategoryFilter(cat);
+        }
       }
       const searchParam = params.get("search");
       if (searchParam) {
@@ -319,7 +325,7 @@ export default function Shop() {
     // Session is now handled by Navbar
   }, []);
 
-  const toggleDropdown = (dropdown: "availability" | "price" | "sort") => {
+  const toggleDropdown = (dropdown: "category" | "availability" | "price" | "sort") => {
     setActiveDropdown(prev => (prev === dropdown ? null : dropdown));
   };
 
@@ -359,11 +365,22 @@ export default function Shop() {
   // Filter logic
   const filteredProducts = products.filter(product => {
     // Category match
-    const matchesCategory =
-      categoryFilter === "All" ||
-      (Array.isArray(product.category)
-        ? product.category.includes(categoryFilter)
-        : product.category === categoryFilter);
+    let matchesCategory = categoryFilter === "All";
+    if (!matchesCategory) {
+      const prodCats = Array.isArray(product.category)
+        ? product.category.map(c => String(c).toLowerCase().trim())
+        : [String(product.category || '').toLowerCase().trim()];
+      
+      const filterLower = categoryFilter.toLowerCase().trim();
+
+      if (filterLower === "latest arrivals" || filterLower === "arrivals" || filterLower === "latest arrival") {
+        matchesCategory = prodCats.some(c => c.includes("latest") || c.includes("arrival") || c === "arrivals");
+      } else if (filterLower === "best seller" || filterLower === "bestsellers" || filterLower === "best sellers") {
+        matchesCategory = prodCats.some(c => c.includes("best") || c.includes("seller") || c === "bestsellers");
+      } else {
+        matchesCategory = prodCats.some(c => c === filterLower || c.includes(filterLower));
+      }
+    }
 
     // Text search match
     const categoryString = Array.isArray(product.category) ? product.category.join(", ") : (product.category || "");
@@ -413,6 +430,8 @@ export default function Shop() {
         {/* 2. Advanced Filters and Sort Bar */}
         <div className={styles.filtersBar} ref={dropdownRef}>
           <div className={styles.filtersLeft}>
+
+
             {/* Availability Dropdown */}
             <div className={styles.dropdownWrapper}>
               <button 
@@ -536,8 +555,6 @@ export default function Shop() {
               )}
             </div>
 
-            {/* Layout Toggles */}
-            
             {/* Mobile Filter Trigger */}
             <button 
               className={styles.mobileFilterBtn}
@@ -580,6 +597,68 @@ export default function Shop() {
             </div>
           </div>
         </div>
+
+        {/* Active Filter Badges Bar */}
+        {(availabilityFilter !== "all" || priceRange !== "all" || searchQuery) && (
+          <div className={styles.activeFiltersBar}>
+            <span className={styles.activeFiltersLabel}>Active Filters:</span>
+            {availabilityFilter !== "all" && (
+              <button 
+                className={styles.activeFilterBadge}
+                onClick={() => {
+                  setAvailabilityFilter("all");
+                  setInStockOnly(false);
+                }}
+              >
+                Availability: {availabilityFilter === "in-stock" ? "In Stock" : "Out of Stock"}
+                <span className={styles.removeBadgeIcon}>✕</span>
+              </button>
+            )}
+            {priceRange !== "all" && (
+              <button 
+                className={styles.activeFilterBadge}
+                onClick={() => setPriceRange("all")}
+              >
+                Price: {priceRange === "under-1500" ? "Under ₹1,500" : priceRange === "1500-2000" ? "₹1,500 - ₹2,000" : "Over ₹2,000"}
+                <span className={styles.removeBadgeIcon}>✕</span>
+              </button>
+            )}
+            {searchQuery && (
+              <button 
+                className={styles.activeFilterBadge}
+                onClick={() => {
+                  setSearchQuery("");
+                  if (typeof window !== "undefined") {
+                    const url = new URL(window.location.href);
+                    url.searchParams.delete("search");
+                    window.history.replaceState({}, "", url.toString());
+                  }
+                }}
+              >
+                Search: "{searchQuery}"
+                <span className={styles.removeBadgeIcon}>✕</span>
+              </button>
+            )}
+            <button 
+              className={styles.clearAllBtn}
+              onClick={() => {
+                setCategoryFilter("All");
+                setAvailabilityFilter("all");
+                setInStockOnly(false);
+                setPriceRange("all");
+                setSearchQuery("");
+                if (typeof window !== "undefined") {
+                  const url = new URL(window.location.href);
+                  url.searchParams.delete("category");
+                  url.searchParams.delete("search");
+                  window.history.replaceState({}, "", url.toString());
+                }
+              }}
+            >
+              Clear All
+            </button>
+          </div>
+        )}
 
         {/* 3. Catalog Products Grid */}
         {loading ? (
@@ -810,6 +889,8 @@ export default function Shop() {
             </div>
             <div className={styles.mobileFilterBody}>
               
+
+
               <div className={styles.mobileFilterGroup}>
                 <h3 className={styles.mobileFilterGroupTitle}>SORT BY</h3>
                 <div className={styles.mobileFilterOptions}>
