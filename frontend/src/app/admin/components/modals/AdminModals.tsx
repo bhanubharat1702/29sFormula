@@ -3,6 +3,7 @@ import styles from "../../page.module.css";
 import CustomCheckbox from "@/components/CustomCheckbox/CustomCheckbox";
 import dynamic from 'next/dynamic';
 import 'react-quill-new/dist/quill.snow.css';
+import { getStatusBadgeStyle } from "../../utils/statusUtils";
 
 const ReactQuill = dynamic(() => import('react-quill-new'), { ssr: false });
 const getValidNextStatuses = (currentStatus: string): string[] => {
@@ -28,36 +29,7 @@ const getValidNextStatuses = (currentStatus: string): string[] => {
   }
 };
 
-const getStatusBadgeStyle = (status: string) => {
-  switch (status) {
-    case "Pending":
-      return { bg: "#fef3c7", color: "#b45309", dot: "#f59e0b" };
-    case "Confirmed":
-      return { bg: "#f3e8ff", color: "#6b21a8", dot: "#9333ea" };
-    case "Packed":
-      return { bg: "#e0f2fe", color: "#0369a1", dot: "#0284c7" };
-    case "Shipped":
-      return { bg: "#eff6ff", color: "#1d4ed8", dot: "#2563eb" };
-    case "Out for Delivery":
-      return { bg: "#ccfbf1", color: "#0f766e", dot: "#0d9488" };
-    case "Delivery Attempted":
-      return { bg: "#ffedd5", color: "#c2410c", dot: "#ea580c" };
-    case "RTO Initiated":
-      return { bg: "#fff7ed", color: "#c2410c", dot: "#ea580c" };
-    case "RTO Delivered":
-      return { bg: "#fef2f2", color: "#991b1b", dot: "#dc2626" };
-    case "Delivered":
-      return { bg: "#eaf7ee", color: "#15803d", dot: "#16a34a" };
-    case "Returned":
-      return { bg: "#ffedd5", color: "#c2410c", dot: "#ea580c" };
-    case "Cancelled":
-      return { bg: "#fee2e2", color: "#991b1b", dot: "#dc2626" };
-    case "Return Requested":
-      return { bg: "#fef3c7", color: "#b45309", dot: "#d97706" };
-    default:
-      return { bg: "#f3f4f6", color: "#4b5563", dot: "#6b7280" };
-  }
-};
+
 
 const CustomStatusSelect = ({
   currentStatus,

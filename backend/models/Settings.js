@@ -204,46 +204,6 @@ const settingsSchema = new mongoose.Schema({
     type: String,
     default: "We offer free shipping across India. Orders are typically processed within 1-2 business days and delivered within 4-7 business days."
   },
-
-  // Gift Set Page Settings
-  showGiftSetPage: { type: Boolean, default: true },
-  giftSetHeaderBadge: { type: String, default: "CURATE · GIFT · DELIGHT" },
-  giftSetHeaderTitle: { type: String, default: "Build Your Gift Set" },
-  giftSetHeaderSubtitle: { type: String, default: "Pick any 3 fragrances in the same size" },
-  giftSetHeaderTitleFontType: { type: String, default: "Outfit" },
-  giftSetHeaderTitleFontSize: { type: String, default: "3.5rem" },
-  giftSetHeaderTitleFontColor: { type: String, default: "#111827" },
-  giftSetHeaderTitleFontWeight: { type: String, default: "800" },
-  giftSetHeaderTitleFontAlignment: { type: String, default: "center" },
-  giftSetHeaderSubtitleFontType: { type: String, default: "Outfit" },
-  giftSetHeaderSubtitleFontSize: { type: String, default: "1.1rem" },
-  giftSetHeaderSubtitleFontColor: { type: String, default: "#6b7280" },
-  giftSetHeaderSubtitleFontWeight: { type: String, default: "500" },
-  giftSetHeaderBgType: { type: String, default: "color" },
-  giftSetHeaderBgColor: { type: String, default: "#ffffff" },
-  giftSetHeaderBgImage: { type: String, default: "" },
-  giftSetHeaderBgVideo: { type: String, default: "" },
-  giftSetBgType: { type: String, default: "color" },
-  giftSetBgColor: { type: String, default: "#faf5ff" },
-  giftSetBgImage: { type: String, default: "" },
-  giftSetBgGradient: { type: String, default: "linear-gradient(135deg, #faf5ff 0%, #f0e7ff 100%)" },
-  giftSetSizes: {
-    type: [{ size: String, label: String, description: String }],
-    default: [
-      { size: "20 ml", label: "Discovery Set", description: "Pocket perfection for travel" },
-      { size: "50 ml", label: "Classic Trio", description: "The most popular signature box" },
-      { size: "100 ml", label: "Grand Vault", description: "Ultimate statement fragrance collection" }
-    ]
-  },
-  giftSetDefaultSize: { type: String, default: "50 ml" },
-  giftSetMaxFragrances: { type: Number, default: 3 },
-  giftSetButtonText: { type: String, default: "Add Gift Box to Cart" },
-  giftSetButtonColor: { type: String, default: "#111827" },
-  giftSetButtonTextColor: { type: String, default: "#ffffff" },
-  giftSetButtonStyle: { type: String, default: "solid" },
-  giftSetCardBorderColor: { type: String, default: "#e2e8f0" },
-  giftSetCardSelectedColor: { type: String, default: "#111827" },
-  giftSetAccentColor: { type: String, default: "#111827" }
 }, { timestamps: true });
 
 const Settings = mongoose.models.Settings || mongoose.model("Settings", settingsSchema);

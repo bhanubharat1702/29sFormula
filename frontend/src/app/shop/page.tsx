@@ -12,6 +12,7 @@ import OrderSuccessModal from "@/components/OrderSuccessModal";
 import CustomCheckbox from "@/components/CustomCheckbox/CustomCheckbox";
 import NewtonsCradleLoader from "@/components/NewtonsCradleLoader";
 import { StorefrontGridSkeleton } from "@/components/Skeletons/Skeletons";
+import QuickViewDrawer from "@/components/QuickViewDrawer";
 import { saveCart, clearCart, fetchAndSyncUserCart } from "@/utils/cartSync";
 
 interface Variant {
@@ -56,6 +57,8 @@ export default function Shop() {
 
   // Dropdown visibility state
   const [activeDropdown, setActiveDropdown] = useState<"category" | "availability" | "price" | "sort" | null>(null);
+
+  const [quickViewProduct, setQuickViewProduct] = useState<any | null>(null);
 
   const [showCheckoutDrawer, setShowCheckoutDrawer] = useState<boolean>(false);
   const [showSuccessModal, setShowSuccessModal] = useState<boolean>(false);
@@ -144,7 +147,7 @@ export default function Shop() {
     };
   }, []);
 
-  const addToCart = (product: Product, size?: string) => {
+  const addToCart = (product: Product, size?: string, qty: number = 1) => {
     const selectedSize = size || (product as any)?.variants?.find((v: any) => (Number(v.quantity) || 0) > 0)?.size || (product as any)?.variants?.[0]?.size || (product as any)?.sizes?.[0] || (product as any)?.availableSizes?.[0] || "Standard";
     if (typeof window !== "undefined") {
       const current = localStorage.getItem("cart");
@@ -159,12 +162,12 @@ export default function Shop() {
 
       const existingIdx = itemsList.findIndex((item: any) => item._id === product._id && item.size === selectedSize);
       if (existingIdx > -1) {
-        if (itemsList[existingIdx].quantity + 1 > maxStock) {
+        if (itemsList[existingIdx].quantity + qty > maxStock) {
           showCartError(`Only ${maxStock} units of ${product.name} (${selectedSize}) are available in stock.`);
           itemsList[existingIdx].quantity = maxStock;
           setShowCartDrawer(true);
         } else {
-          itemsList[existingIdx].quantity += 1;
+          itemsList[existingIdx].quantity += qty;
         }
       } else {
         const variantPrice = ((product as any).options && (product as any).options.find((o: any) => o.size === selectedSize)?.price) 
@@ -174,8 +177,8 @@ export default function Shop() {
                           || ((product as any).variants && (product as any).variants.find((v: any) => v.size === selectedSize)?.strikePrice)
                           || (product as any).strikePrice;
 
-        let qtyToPush = 1;
-        if (1 > maxStock) {
+        let qtyToPush = qty;
+        if (qty > maxStock) {
           showCartError(`Only ${maxStock} units of ${product.name} (${selectedSize}) are available in stock.`);
           qtyToPush = maxStock;
           setShowCartDrawer(true);
@@ -800,7 +803,7 @@ export default function Shop() {
                     <button 
                       aria-label="Add to cart" 
                       className={styles.addToCartCircle}
-                      onClick={(e) => { e.preventDefault(); e.stopPropagation(); addToCart(product); }}
+                      onClick={(e) => { e.preventDefault(); e.stopPropagation(); setQuickViewProduct(product); }}
                     >
                       <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" className={styles.cartIcon}>
                         <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 10.5V6a3.75 3.75 0 1 0-7.5 0v4.5m11.356-1.993 1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 0 1-1.12-1.243l1.264-12A1.125 1.125 0 0 1 5.513 7.5h12.974c.576 0 1.059.435 1.119 1.007ZM8.625 10.5a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm7.5 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" />
@@ -1018,6 +1021,12 @@ export default function Shop() {
         orderDetails={completedOrderDetails}
         onClose={() => setShowSuccessModal(false)}
         primaryColor="#d0d0d0"
+      />
+      <QuickViewDrawer
+        product={quickViewProduct}
+        isOpen={!!quickViewProduct}
+        onClose={() => setQuickViewProduct(null)}
+        onAddToCart={(prod, size, qty) => addToCart(prod, size, qty)}
       />
     </div>
   );

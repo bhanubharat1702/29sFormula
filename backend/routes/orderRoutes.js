@@ -208,7 +208,7 @@ const sendAdminNewOrderEmail = async (order) => {
       <tr>
         <td style="padding: 12px 10px; border-bottom: 1px solid #eee; font-size: 14px; color: #333;">
           <strong>${item.name}</strong>
-          <span style="display:block; font-size:12px; color:#888; margin-top:3px;">${item.size}${item.isGiftSet ? ' &bull; Custom Box' : ''}</span>
+          <span style="display:block; font-size:12px; color:#888; margin-top:3px;">${item.size}</span>
         </td>
         <td style="padding: 12px 10px; border-bottom: 1px solid #eee; font-size: 14px; color: #333; text-align: center;">${item.quantity}</td>
         <td style="padding: 12px 10px; border-bottom: 1px solid #eee; font-size: 14px; color: #333; text-align: right;">&#8377;${(item.price * item.quantity).toLocaleString('en-IN')}</td>

@@ -1,7 +1,6 @@
 import React from 'react';
 import LandingPageSubTab from './onlinestore/LandingPageSubTab';
 import ProductPageSubTab from './onlinestore/ProductPageSubTab';
-import GiftSetPageSubTab from './onlinestore/GiftSetPageSubTab';
 import ReviewsSubTab from './onlinestore/ReviewsSubTab';
 
 export default function OnlineStoreTab(props: any) {
@@ -11,7 +10,6 @@ export default function OnlineStoreTab(props: any) {
     <>
       {activeTab === "online-store" && customizeSubTab === "landing" && <LandingPageSubTab {...props} />}
       {activeTab === "online-store" && customizeSubTab === "product" && <ProductPageSubTab {...props} />}
-      {activeTab === "online-store" && customizeSubTab === "giftset" && <GiftSetPageSubTab {...props} />}
       {activeTab === "online-store" && customizeSubTab === "reviews" && <ReviewsSubTab {...props} />}
     </>
   );

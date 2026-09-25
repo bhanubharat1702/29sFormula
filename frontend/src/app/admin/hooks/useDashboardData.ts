@@ -3,25 +3,34 @@ import { DashboardStats } from '../types';
 
 export const getAuthHeaders = (): Record<string, string> => {
   if (typeof window === "undefined") return {};
+  
+  // 1. Explicit admin token
+  const adminToken = localStorage.getItem("adminToken");
+  if (adminToken) {
+    return { Authorization: `Bearer ${adminToken}` };
+  }
+
+  // 2. User session if user is admin
   const sessionStr = localStorage.getItem("userSession");
   if (sessionStr) {
     try {
       const session = JSON.parse(sessionStr);
-      if (session?.token) {
+      if (session?.token && (session.isAdmin || session.role === "admin")) {
         return { Authorization: `Bearer ${session.token}` };
       }
     } catch (e) {}
   }
-  const token = localStorage.getItem("adminToken") || localStorage.getItem("token");
-  if (token) return { Authorization: `Bearer ${token}` };
+
   return {};
 };
 
-export const ensureAdminToken = async (): Promise<Record<string, string>> => {
-  let headers = getAuthHeaders();
-  if (headers.Authorization) return headers;
+export const ensureAdminToken = async (forceRefresh = false): Promise<Record<string, string>> => {
+  if (!forceRefresh) {
+    const headers = getAuthHeaders();
+    if (headers.Authorization) return headers;
+  }
 
-  if (typeof window !== "undefined" && localStorage.getItem("adminSession") === "true") {
+  if (typeof window !== "undefined") {
     try {
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:5001'}/api/auth/login`, {
         method: "POST",
@@ -32,12 +41,11 @@ export const ensureAdminToken = async (): Promise<Record<string, string>> => {
         const data = await res.json();
         if (data.token) {
           localStorage.setItem("adminToken", data.token);
-          localStorage.setItem("userSession", JSON.stringify(data));
           return { Authorization: `Bearer ${data.token}` };
         }
       }
     } catch (e) {
-      console.error("Auto token issue failed:", e);
+      console.error("Auto admin token issue failed:", e);
     }
   }
   return {};
@@ -48,20 +56,31 @@ export function useDashboardData() {
 
   const fetchDashboardStats = async (timeline: string = "all", retries = 3) => {
     try {
-      const headers = await ensureAdminToken();
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:5001'}/api/admin/dashboard-stats?timeline=${timeline}&t=${Date.now()}`, {
+      let headers = await ensureAdminToken();
+      let res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:5001'}/api/admin/dashboard-stats?timeline=${timeline}&t=${Date.now()}`, {
         cache: "no-store",
         headers
       });
-      if (!res.ok) throw new Error("Failed to fetch dashboard stats");
+
+      // If token expired or unauthorized, force token refresh & retry once
+      if ((res.status === 401 || res.status === 403) && typeof window !== "undefined") {
+        localStorage.removeItem("adminToken");
+        headers = await ensureAdminToken(true);
+        res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:5001'}/api/admin/dashboard-stats?timeline=${timeline}&t=${Date.now()}`, {
+          cache: "no-store",
+          headers
+        });
+      }
+
+      if (!res.ok) throw new Error(`Failed to fetch dashboard stats (HTTP ${res.status})`);
       const data = await res.json();
       setDashboardStats(data);
     } catch (err: any) {
       if (retries > 0) {
-        console.warn(`Dashboard fetch failed, retrying... (${retries} retries left)`);
+        console.warn(`Dashboard fetch failed (${err.message}), retrying... (${retries} retries left)`);
         setTimeout(() => fetchDashboardStats(timeline, retries - 1), 1500);
       } else {
-        console.error(err);
+        console.error("Dashboard stats error:", err);
       }
     }
   };

@@ -1,5 +1,6 @@
 import React from 'react';
 import styles from '../../../page.module.css';
+import { getStatusBadgeStyle } from '../../../utils/statusUtils';
 
 interface ReturnsSubTabProps {
     orders: any[];
@@ -336,8 +337,8 @@ export default function ReturnsSubTab({
                                           fontSize: "0.75rem",
                                           fontWeight: 700,
                                           textTransform: "uppercase",
-                                          backgroundColor: isRejected ? "#fef2f2" : "#fef3c7",
-                                          color: isRejected ? "#b91c1c" : "#b45309",
+                                          backgroundColor: getStatusBadgeStyle(isRejected ? "Rejected" : (order.returnRequest?.status || "Return Requested")).bg,
+                                          color: getStatusBadgeStyle(isRejected ? "Rejected" : (order.returnRequest?.status || "Return Requested")).color,
                                           width: "fit-content"
                                         }}>
                                           {isRejected ? "REJECTED" : (order.returnRequest?.status || "Return Requested")}
@@ -455,11 +456,11 @@ export default function ReturnsSubTab({
                                           <div style={{ textAlign: 'right' }}>
                                             <div className={styles.mobileOrderAmount}>₹{(order.totalAmount || 0).toLocaleString('en-IN')}</div>
                                             <div className={styles.mobileStatusBadge} style={{
-                                              backgroundColor: order.status === 'Processing' ? '#fef3c7' : order.status === 'Dispatched' ? '#e0e7ff' : order.status === 'Delivered' ? '#f0fdf4' : order.status === 'Cancelled' ? '#f3f4f6' : '#fee2e2',
-                                              color: order.status === 'Processing' ? '#b45309' : order.status === 'Dispatched' ? '#4338ca' : order.status === 'Delivered' ? '#166534' : order.status === 'Cancelled' ? '#4b5563' : '#b91c1c'
+                                              backgroundColor: getStatusBadgeStyle(order.status).bg,
+                                              color: getStatusBadgeStyle(order.status).color
                                             }}>
                                               <div className={styles.mobileStatusDot} style={{
-                                                backgroundColor: order.status === 'Processing' ? '#b45309' : order.status === 'Dispatched' ? '#4338ca' : order.status === 'Delivered' ? '#166534' : order.status === 'Cancelled' ? '#4b5563' : '#b91c1c'
+                                                backgroundColor: getStatusBadgeStyle(order.status).dot
                                               }}></div>
                                               {order.status}
                                             </div>

@@ -1,5 +1,6 @@
 import React from 'react';
 import styles from '../../../page.module.css';
+import { getStatusBadgeStyle } from '../../../utils/statusUtils';
 
 interface CancelledSubTabProps {
     orders: any[];
@@ -513,18 +514,24 @@ export default function CancelledSubTab({
                                     ₹{(order.totalAmount || 0).toLocaleString("en-IN")}
                                   </td>
                                   <td>
-                                    <span style={{
-                                      display: "inline-block",
-                                      padding: "4px 8px",
-                                      borderRadius: "12px",
-                                      fontSize: "0.75rem",
-                                      fontWeight: 700,
-                                      textTransform: "uppercase",
-                                      backgroundColor: order.status === "Delivered" || (order.status === "Return Approved" && !(order.returnRequest?.returnType === "Refund" && order.refundStatus !== "Refunded")) ? "#eaf7ee" : order.status === "Return Rejected" ? "#fef2f2" : order.status === "Shipped" ? "#eff6ff" : order.status === "Return Approved" ? "#fef3c7" : "#fef3c7",
-                                      color: order.status === "Delivered" || (order.status === "Return Approved" && !(order.returnRequest?.returnType === "Refund" && order.refundStatus !== "Refunded")) ? "#15803d" : order.status === "Return Rejected" ? "#991b1b" : order.status === "Shipped" ? "#1d4ed8" : order.status === "Return Approved" ? "#b45309" : "#b45309"
-                                    }}>
-                                      {order.status === "Return Approved" ? (order.returnRequest?.returnType === "Refund" && order.refundStatus !== "Refunded" ? "Payment Pending" : "Approved") : order.status === "Return Rejected" ? "Rejected" : order.status}
-                                    </span>
+                                    {(() => {
+                                      const displayStatus = order.status === "Return Approved" ? (order.returnRequest?.returnType === "Refund" && order.refundStatus !== "Refunded" ? "Payment Pending" : "Approved") : order.status === "Return Rejected" ? "Rejected" : order.status;
+                                      const stStyle = getStatusBadgeStyle(displayStatus);
+                                      return (
+                                        <span style={{
+                                          display: "inline-block",
+                                          padding: "4px 8px",
+                                          borderRadius: "12px",
+                                          fontSize: "0.75rem",
+                                          fontWeight: 700,
+                                          textTransform: "uppercase",
+                                          backgroundColor: stStyle.bg,
+                                          color: stStyle.color
+                                        }}>
+                                          {displayStatus}
+                                        </span>
+                                      );
+                                    })()}
                                   </td>
                                   <td>
                                     <span className={styles.tableDesc} style={{ whiteSpace: "normal" }}>
@@ -599,11 +606,11 @@ export default function CancelledSubTab({
                                           <div style={{ textAlign: 'right' }}>
                                             <div className={styles.mobileOrderAmount}>₹{(order.totalAmount || 0).toLocaleString('en-IN')}</div>
                                             <div className={styles.mobileStatusBadge} style={{
-                                              backgroundColor: order.status === 'Processing' ? '#fef3c7' : order.status === 'Dispatched' ? '#e0e7ff' : order.status === 'Delivered' ? '#f0fdf4' : order.status === 'Cancelled' ? '#f3f4f6' : '#fee2e2',
-                                              color: order.status === 'Processing' ? '#b45309' : order.status === 'Dispatched' ? '#4338ca' : order.status === 'Delivered' ? '#166534' : order.status === 'Cancelled' ? '#4b5563' : '#b91c1c'
+                                              backgroundColor: getStatusBadgeStyle(order.status).bg,
+                                              color: getStatusBadgeStyle(order.status).color
                                             }}>
                                               <div className={styles.mobileStatusDot} style={{
-                                                backgroundColor: order.status === 'Processing' ? '#b45309' : order.status === 'Dispatched' ? '#4338ca' : order.status === 'Delivered' ? '#166534' : order.status === 'Cancelled' ? '#4b5563' : '#b91c1c'
+                                                backgroundColor: getStatusBadgeStyle(order.status).dot
                                               }}></div>
                                               {order.status}
                                             </div>

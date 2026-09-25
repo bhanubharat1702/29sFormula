@@ -1,5 +1,6 @@
 import React from 'react';
 import styles from '../../../page.module.css';
+import { getStatusBadgeStyle } from '../../../utils/statusUtils';
 
 interface CompletedSubTabProps {
     orders: any[];
@@ -120,7 +121,12 @@ export default function CompletedSubTab({
                         className={styles.selectInput}
                         style={{ padding: "6px 12px", minHeight: "36px", fontSize: "0.85rem", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "space-between", minWidth: "140px" }}
                       >
-                        {orderStatusFilter === "All" ? "All Statuses" : orderStatusFilter}
+                        <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                          {orderStatusFilter !== "All" && (
+                            <span style={{ width: "8px", height: "8px", borderRadius: "50%", backgroundColor: getStatusBadgeStyle(orderStatusFilter).dot, display: "inline-block" }} />
+                          )}
+                          <span>{orderStatusFilter === "All" ? "All Statuses" : orderStatusFilter}</span>
+                        </div>
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="#6b7280" style={{ width: "14px", height: "14px", transform: isStatusFilterOpen ? "rotate(180deg)" : "none", transition: "transform 0.2s" }}>
                           <path strokeLinecap="round" strokeLinejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
                         </svg>
@@ -129,7 +135,7 @@ export default function CompletedSubTab({
                         <>
                           <div style={{ position: "fixed", inset: 0, zIndex: 100 }} onClick={() => setIsStatusFilterOpen(false)} />
                           <div style={{ position: "absolute", top: "42px", left: 0, width: "100%", background: "#fff", border: "1px solid #e5e7eb", borderRadius: "8px", boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.1)", zIndex: 110, overflow: "hidden" }}>
-                            {["All", "Processing", "Shipped"].map((opt) => (
+                            {["All", "Delivered", "Returned", "Return Approved", "Return Rejected"].map((opt) => (
                               <div
                                 key={opt}
                                 onClick={() => { setOrderStatusFilter(opt); setIsStatusFilterOpen(false); }}
@@ -137,6 +143,9 @@ export default function CompletedSubTab({
                                   padding: "8px 12px",
                                   fontSize: "0.85rem",
                                   cursor: "pointer",
+                                  display: "flex",
+                                  alignItems: "center",
+                                  gap: "8px",
                                   backgroundColor: orderStatusFilter === opt ? "#eff6ff" : "transparent",
                                   color: orderStatusFilter === opt ? "#2563eb" : "#374151",
                                   fontWeight: orderStatusFilter === opt ? 600 : 400
@@ -144,6 +153,9 @@ export default function CompletedSubTab({
                                 onMouseEnter={(e) => { if (orderStatusFilter !== opt) e.currentTarget.style.backgroundColor = "#f3f4f6"; }}
                                 onMouseLeave={(e) => { if (orderStatusFilter !== opt) e.currentTarget.style.backgroundColor = "transparent"; }}
                               >
+                                {opt !== "All" && (
+                                  <span style={{ width: "8px", height: "8px", borderRadius: "50%", backgroundColor: getStatusBadgeStyle(opt).dot, display: "inline-block" }} />
+                                )}
                                 {opt === "All" ? "All Statuses" : opt}
                               </div>
                             ))}
@@ -511,18 +523,24 @@ export default function CompletedSubTab({
                                     ₹{(order.totalAmount || 0).toLocaleString("en-IN")}
                                   </td>
                                   <td>
-                                    <span style={{
-                                      display: "inline-block",
-                                      padding: "4px 8px",
-                                      borderRadius: "12px",
-                                      fontSize: "0.75rem",
-                                      fontWeight: 700,
-                                      textTransform: "uppercase",
-                                      backgroundColor: order.status === "Delivered" || (order.status === "Return Approved" && !(order.returnRequest?.returnType === "Refund" && order.refundStatus !== "Refunded")) ? "#eaf7ee" : order.status === "Return Rejected" ? "#fef2f2" : order.status === "Shipped" ? "#eff6ff" : order.status === "Return Approved" ? "#fef3c7" : "#fef3c7",
-                                      color: order.status === "Delivered" || (order.status === "Return Approved" && !(order.returnRequest?.returnType === "Refund" && order.refundStatus !== "Refunded")) ? "#15803d" : order.status === "Return Rejected" ? "#991b1b" : order.status === "Shipped" ? "#1d4ed8" : order.status === "Return Approved" ? "#b45309" : "#b45309"
-                                    }}>
-                                      {order.status === "Return Approved" ? (order.returnRequest?.returnType === "Refund" && order.refundStatus !== "Refunded" ? "Payment Pending" : "Approved") : order.status === "Return Rejected" ? "Rejected" : order.status}
-                                    </span>
+                                    {(() => {
+                                      const displayStatus = order.status === "Return Approved" ? (order.returnRequest?.returnType === "Refund" && order.refundStatus !== "Refunded" ? "Payment Pending" : "Approved") : order.status === "Return Rejected" ? "Rejected" : order.status;
+                                      const stStyle = getStatusBadgeStyle(displayStatus);
+                                      return (
+                                        <span style={{
+                                          display: "inline-block",
+                                          padding: "4px 8px",
+                                          borderRadius: "12px",
+                                          fontSize: "0.75rem",
+                                          fontWeight: 700,
+                                          textTransform: "uppercase",
+                                          backgroundColor: stStyle.bg,
+                                          color: stStyle.color
+                                        }}>
+                                          {displayStatus}
+                                        </span>
+                                      );
+                                    })()}
                                   </td>
                                   <td>
                                     <span className={styles.tableDesc} style={{ whiteSpace: "normal" }}>
@@ -595,11 +613,11 @@ export default function CompletedSubTab({
                                           <div style={{ textAlign: 'right' }}>
                                             <div className={styles.mobileOrderAmount}>₹{(order.totalAmount || 0).toLocaleString('en-IN')}</div>
                                             <div className={styles.mobileStatusBadge} style={{
-                                              backgroundColor: order.status === 'Processing' ? '#fef3c7' : order.status === 'Dispatched' ? '#e0e7ff' : order.status === 'Delivered' ? '#f0fdf4' : order.status === 'Cancelled' ? '#f3f4f6' : '#fee2e2',
-                                              color: order.status === 'Processing' ? '#b45309' : order.status === 'Dispatched' ? '#4338ca' : order.status === 'Delivered' ? '#166534' : order.status === 'Cancelled' ? '#4b5563' : '#b91c1c'
+                                              backgroundColor: getStatusBadgeStyle(order.status).bg,
+                                              color: getStatusBadgeStyle(order.status).color
                                             }}>
                                               <div className={styles.mobileStatusDot} style={{
-                                                backgroundColor: order.status === 'Processing' ? '#b45309' : order.status === 'Dispatched' ? '#4338ca' : order.status === 'Delivered' ? '#166534' : order.status === 'Cancelled' ? '#4b5563' : '#b91c1c'
+                                                backgroundColor: getStatusBadgeStyle(order.status).dot
                                               }}></div>
                                               {order.status}
                                             </div>

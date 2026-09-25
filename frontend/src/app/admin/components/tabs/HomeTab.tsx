@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import styles from '../../page.module.css';
 import { DashboardStats } from '../../types';
 import { StatCardSkeleton, ChartSkeleton } from '@/components/Skeletons/Skeletons';
+import { getStatusBadgeStyle } from '../../utils/statusUtils';
 
 const generateChartPath = (
   data: { date: string; sales: number; orders: number; profit?: number }[],
@@ -721,9 +722,9 @@ export default function HomeTab({
                         <td style={{ padding: '12px 16px', verticalAlign: 'top' }}>
                           <span style={{
                             display: 'inline-block',
-                            padding: '2px 6px', borderRadius: '12px', fontSize: '11px', fontWeight: 700, textTransform: 'uppercase',
-                            backgroundColor: order.status === 'Processing' ? '#fef3c7' : order.status === 'Dispatched' ? '#e0e7ff' : order.status === 'Delivered' ? '#dcfce7' : order.status === 'Cancelled' ? '#f3f4f6' : '#fee2e2',
-                            color: order.status === 'Processing' ? '#b45309' : order.status === 'Dispatched' ? '#4338ca' : order.status === 'Delivered' ? '#15803d' : order.status === 'Cancelled' ? '#4b5563' : '#b91c1c'
+                            padding: '2px 8px', borderRadius: '12px', fontSize: '11px', fontWeight: 700, textTransform: 'uppercase',
+                            backgroundColor: getStatusBadgeStyle(order.status).bg,
+                            color: getStatusBadgeStyle(order.status).color
                           }}>
                             {order.status}
                           </span>
@@ -745,11 +746,11 @@ export default function HomeTab({
                               <div style={{ textAlign: 'right' }}>
                                 <div className={styles.mobileOrderAmount}>₹{(order.totalAmount || 0).toLocaleString('en-IN')}</div>
                                 <div className={styles.mobileStatusBadge} style={{
-                                  backgroundColor: order.status === 'Processing' ? '#fef3c7' : order.status === 'Dispatched' ? '#e0e7ff' : order.status === 'Delivered' ? '#f0fdf4' : order.status === 'Cancelled' ? '#f3f4f6' : '#fee2e2',
-                                  color: order.status === 'Processing' ? '#b45309' : order.status === 'Dispatched' ? '#4338ca' : order.status === 'Delivered' ? '#166534' : order.status === 'Cancelled' ? '#4b5563' : '#b91c1c'
+                                  backgroundColor: getStatusBadgeStyle(order.status).bg,
+                                  color: getStatusBadgeStyle(order.status).color
                                 }}>
                                   <div className={styles.mobileStatusDot} style={{
-                                    backgroundColor: order.status === 'Processing' ? '#b45309' : order.status === 'Dispatched' ? '#4338ca' : order.status === 'Delivered' ? '#166534' : order.status === 'Cancelled' ? '#4b5563' : '#b91c1c'
+                                    backgroundColor: getStatusBadgeStyle(order.status).dot
                                   }}></div>
                                   {order.status}
                                 </div>

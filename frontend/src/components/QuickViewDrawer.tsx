@@ -76,13 +76,29 @@ export default function QuickViewDrawer({
 
   useEffect(() => {
     if (isOpen) {
+      if (typeof window !== 'undefined' && (window as any).lenis) {
+        (window as any).lenis.stop();
+      }
+
       setIsRendered(true);
       document.body.style.overflow = "hidden";
       document.documentElement.style.overflow = "hidden";
+
       // To ensure the animation triggers after render, we use a tiny timeout
       setTimeout(() => setIsAnimating(true), 10);
+
+      return () => {
+        if (typeof window !== 'undefined' && (window as any).lenis) {
+          (window as any).lenis.start();
+        }
+        document.body.style.overflow = "";
+        document.documentElement.style.overflow = "";
+      };
     } else if (isRendered) {
       setIsAnimating(false);
+      if (typeof window !== 'undefined' && (window as any).lenis) {
+        (window as any).lenis.start();
+      }
       document.body.style.overflow = "";
       document.documentElement.style.overflow = "";
       // Wait for animation to finish before removing from DOM
@@ -94,6 +110,9 @@ export default function QuickViewDrawer({
   // Clean up overflow on unmount just in case
   useEffect(() => {
     return () => {
+      if (typeof window !== 'undefined' && (window as any).lenis) {
+        (window as any).lenis.start();
+      }
       document.body.style.overflow = "";
       document.documentElement.style.overflow = "";
     };
@@ -129,9 +148,13 @@ export default function QuickViewDrawer({
       <div 
         className={`${styles.overlay} ${isAnimating ? styles.open : ""}`} 
         onClick={onClose}
+        data-lenis-prevent="true"
       />
       
-      <div className={`${styles.drawer} ${isAnimating ? styles.open : ""}`}>
+      <div 
+        className={`${styles.drawer} ${isAnimating ? styles.open : ""}`}
+        data-lenis-prevent="true"
+      >
         <div className={styles.header}>
           <button onClick={onClose} className={styles.closeBtn}>
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" width="24" height="24">
@@ -140,7 +163,7 @@ export default function QuickViewDrawer({
           </button>
         </div>
 
-        <div className={styles.content}>
+        <div className={styles.content} data-lenis-prevent="true">
           <div className={styles.titleContainer}>
             <h2 className={styles.title}>{cachedProduct.name}</h2>
           </div>

@@ -291,14 +291,12 @@ export default function Home() {
   );
   const [showVideo, setShowVideo] = useState<boolean>(true);
   const [showLifestyle, setShowLifestyle] = useState<boolean>(true);
-  const [showGiftSetPage, setShowGiftSetPage] = useState<boolean>(true);
 
   const videoRef = useRef<HTMLVideoElement>(null);
 
   // Cart Drawer State
   const [showCartDrawer, setShowCartDrawer] = useState<boolean>(false);
   const [cartItems, setCartItems] = useState<any[]>([]);
-  const [expandedGiftSets, setExpandedGiftSets] = useState<{ [key: string]: boolean }>({});
   const [cartError, setCartError] = useState<string | null>(null);
 
   const showCartError = (msg: string) => {
@@ -514,8 +512,6 @@ export default function Home() {
       if (cachedShowVideo) setShowVideo(cachedShowVideo === "true");
       const cachedShowLifestyle = localStorage.getItem("settings_showLifestyle");
       if (cachedShowLifestyle) setShowLifestyle(cachedShowLifestyle === "true");
-      const cachedShowGiftSetPage = localStorage.getItem("settings_showGiftSetPage");
-      if (cachedShowGiftSetPage !== null) setShowGiftSetPage(cachedShowGiftSetPage === "true");
 
       // Load cached arrays list to avoid slow loading layout shifts
       const cachedArrivals = localStorage.getItem("storefront_arrivals");
@@ -774,10 +770,6 @@ export default function Home() {
             if (data.showLifestyle !== undefined) {
               setShowLifestyle(data.showLifestyle);
               localStorage.setItem("settings_showLifestyle", String(data.showLifestyle));
-            }
-            if (data.showGiftSetPage !== undefined) {
-              setShowGiftSetPage(data.showGiftSetPage);
-              localStorage.setItem("settings_showGiftSetPage", String(data.showGiftSetPage));
             }
             if (data.faqs !== undefined && Array.isArray(data.faqs)) setFaqs(data.faqs);
           }
@@ -1289,7 +1281,7 @@ export default function Home() {
                     <button
                       aria-label="Add to cart"
                       className={styles.addToCartCircle}
-                      onClick={(e) => { e.preventDefault(); e.stopPropagation(); addToCart(product); }}
+                      onClick={(e) => { e.preventDefault(); e.stopPropagation(); setQuickViewProduct(product); }}
                     >
                       <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" className={styles.cartIcon}>
                         <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 10.5V6a3.75 3.75 0 1 0-7.5 0v4.5m11.356-1.993 1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 0 1-1.12-1.243l1.264-12A1.125 1.125 0 0 1 5.513 7.5h12.974c.576 0 1.059.435 1.119 1.007ZM8.625 10.5a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm7.5 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" />
@@ -1624,7 +1616,7 @@ export default function Home() {
                     <button
                       aria-label="Add to cart"
                       className={styles.addToCartCircle}
-                      onClick={(e) => { e.preventDefault(); e.stopPropagation(); addToCart(product); }}
+                      onClick={(e) => { e.preventDefault(); e.stopPropagation(); setQuickViewProduct(product); }}
                     >
                       <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" className={styles.cartIcon}>
                         <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 10.5V6a3.75 3.75 0 1 0-7.5 0v4.5m11.356-1.993 1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 0 1-1.12-1.243l1.264-12A1.125 1.125 0 0 1 5.513 7.5h12.974c.576 0 1.059.435 1.119 1.007ZM8.625 10.5a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm7.5 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" />
@@ -1949,35 +1941,7 @@ export default function Home() {
         </section>
       )}
 
-      {/* 11. Gift Set Builder Banner Section */}
-      {showGiftSetPage && (
-        <section className={styles.giftSetBannerSection}>
-          <div className={styles.giftSetBannerCard}>
-            <div className={styles.giftSetContentLeft}>
-              <div className={styles.giftSetBadge}>
-                LIMITED COLLECTION
-              </div>
-              <h2 className={styles.giftSetTitle}>Gift Set Builder</h2>
-              <p className={styles.giftSetSubtitle}>
-                Curate any 3 fragrances in 20 ml, 50 ml, or 100 ml — beautifully packed in a signature gift box.
-              </p>
-              <div className={styles.giftSetPills}>
-                <span className={styles.giftSetPill}>20 ml × 3</span>
-                <span className={styles.giftSetPill}>50 ml × 3</span>
-                <span className={styles.giftSetPill}>100 ml × 3</span>
-              </div>
-            </div>
-            <div className={styles.giftSetActionRight}>
-              <Link href="/gift-set" className={styles.buildSetBtn}>
-                Build a Set
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" style={{ width: '16px', height: '16px' }}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
-                </svg>
-              </Link>
-            </div>
-          </div>
-        </section>
-      )}
+
 
       {/* Footer Section */}
       <Footer />

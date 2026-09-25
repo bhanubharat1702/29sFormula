@@ -30,7 +30,6 @@ export default function Navbar({ onCartClick }: NavbarProps) {
   const searchInputRef = React.useRef<HTMLInputElement>(null);
   const router = useRouter();
 
-  const [showGiftSetPage, setShowGiftSetPage] = useState<boolean>(true);
 
   useEffect(() => {
     const loadCartCount = () => {
@@ -67,10 +66,8 @@ export default function Navbar({ onCartClick }: NavbarProps) {
     // Load cached logo & settings for instant render
     const cachedLogoType = localStorage.getItem("settings_brandLogoType");
     const cachedLogoValue = localStorage.getItem("settings_brandLogoValue");
-    const cachedShowGiftSet = localStorage.getItem("settings_showGiftSetPage");
     if (cachedLogoType) setBrandLogoType(cachedLogoType);
     if (cachedLogoValue) setBrandLogoValue(cachedLogoValue);
-    if (cachedShowGiftSet !== null) setShowGiftSetPage(cachedShowGiftSet === "true");
 
     // Fetch latest settings in background
     fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:5001'}/api/settings`)
@@ -85,10 +82,7 @@ export default function Navbar({ onCartClick }: NavbarProps) {
             setBrandLogoValue(data.brandLogoValue);
             localStorage.setItem("settings_brandLogoValue", data.brandLogoValue);
           }
-          if (data.showGiftSetPage !== undefined) {
-            setShowGiftSetPage(data.showGiftSetPage);
-            localStorage.setItem("settings_showGiftSetPage", String(data.showGiftSetPage));
-          }
+
         }
       })
       .catch(err => console.warn("Error fetching logo settings:", err));
@@ -218,9 +212,7 @@ export default function Navbar({ onCartClick }: NavbarProps) {
           <Link href="/" className={`${styles.navLink} ${pathname === "/" ? styles.activeLink : ""}`}>HOME</Link>
           <Link href="/shop" className={`${styles.navLink} ${pathname === "/shop" ? styles.activeLink : ""}`}>SHOP ALL</Link>
           <Link href="/collections" className={`${styles.navLink} ${pathname === "/collections" ? styles.activeLink : ""}`}>COLLECTIONS</Link>
-          {showGiftSetPage && (
-            <Link href="/gift-set" className={`${styles.navLink} ${pathname === "/gift-set" ? styles.activeLink : ""}`}>GIFT SET</Link>
-          )}
+
           <Link href="/track" className={`${styles.navLink} ${pathname === "/track" ? styles.activeLink : ""}`}>TRACK ORDER</Link>
         </nav>
         {/* Mobile Navigation Drawer Overlay */}
@@ -229,9 +221,7 @@ export default function Navbar({ onCartClick }: NavbarProps) {
             <Link href="/" onClick={() => setIsMobileMenuOpen(false)} className={`${styles.mobileMenuItem} ${styles.mobileNavLink} ${pathname === "/" ? styles.mobileNavLinkActive : ""}`}>HOME</Link>
             <Link href="/shop" onClick={() => setIsMobileMenuOpen(false)} className={`${styles.mobileMenuItem} ${styles.mobileNavLink} ${pathname === "/shop" ? styles.mobileNavLinkActive : ""}`}>SHOP ALL</Link>
             <Link href="/collections" onClick={() => setIsMobileMenuOpen(false)} className={`${styles.mobileMenuItem} ${styles.mobileNavLink} ${pathname === "/collections" ? styles.mobileNavLinkActive : ""}`}>COLLECTIONS</Link>
-            {showGiftSetPage && (
-              <Link href="/gift-set" onClick={() => setIsMobileMenuOpen(false)} className={`${styles.mobileMenuItem} ${styles.mobileNavLink} ${pathname === "/gift-set" ? styles.mobileNavLinkActive : ""}`}>GIFT SET</Link>
-            )}
+
             <Link href="/track" onClick={() => setIsMobileMenuOpen(false)} className={`${styles.mobileMenuItem} ${styles.mobileNavLink} ${pathname === "/track" ? styles.mobileNavLinkActive : ""}`}>TRACK ORDER</Link>
           </div>
         </div>

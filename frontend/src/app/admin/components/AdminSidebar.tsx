@@ -371,7 +371,7 @@ export default function AdminSidebar({
                     <path d="M 12 0 L 12 14 A 4 4 0 0 0 16 18 L 24 18" strokeLinecap="round" strokeLinejoin="round" />
                     <path d="M 20 14 L 24 18 L 20 22" strokeLinecap="round" strokeLinejoin="round" />
                   </svg>
-                ) : (activeTab === "online-store" && (customizeSubTab === "product" || customizeSubTab === "giftset" || customizeSubTab === "reviews" || customizeSubTab === "marketing")) ? (
+                ) : (activeTab === "online-store" && (customizeSubTab === "product" || customizeSubTab === "reviews" || customizeSubTab === "marketing")) ? (
                   <svg style={{ display: "block", minWidth: "28px", width: "28px", height: "36px", marginRight: "8px", color: "#d1d5db" }} viewBox="0 0 28 36" fill="none" stroke="currentColor" strokeWidth="2">
                     <path d="M 12 0 L 12 36" strokeLinecap="round" strokeLinejoin="round" />
                   </svg>
@@ -402,7 +402,7 @@ export default function AdminSidebar({
                     <path d="M 12 0 L 12 14 A 4 4 0 0 0 16 18 L 24 18" strokeLinecap="round" strokeLinejoin="round" />
                     <path d="M 20 14 L 24 18 L 20 22" strokeLinecap="round" strokeLinejoin="round" />
                   </svg>
-                ) : (activeTab === "online-store" && (customizeSubTab === "giftset" || customizeSubTab === "reviews" || customizeSubTab === "marketing")) ? (
+                ) : (activeTab === "online-store" && (customizeSubTab === "reviews" || customizeSubTab === "marketing")) ? (
                   <svg style={{ display: "block", minWidth: "28px", width: "28px", height: "36px", marginRight: "8px", color: "#d1d5db" }} viewBox="0 0 28 36" fill="none" stroke="currentColor" strokeWidth="2">
                     <path d="M 12 0 L 12 36" strokeLinecap="round" strokeLinejoin="round" />
                   </svg>
@@ -419,36 +419,7 @@ export default function AdminSidebar({
                 </div>
               </div>
 
-              {/* Item 3: Gift Set Page */}
-              <div
-                onClick={() => {
-                  setActiveTab("online-store");
-                  setCustomizeSubTab("giftset");
-                  if (isMobileMenuOpen && setIsMobileMenuOpen) setIsMobileMenuOpen(false);
-                }}
-                className={styles.subMenuItem}
-              >
-                {activeTab === "online-store" && customizeSubTab === "giftset" ? (
-                  <svg style={{ display: "block", minWidth: "28px", width: "28px", height: "36px", marginRight: "8px", color: "#d1d5db" }} viewBox="0 0 28 36" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="M 12 0 L 12 14 A 4 4 0 0 0 16 18 L 24 18" strokeLinecap="round" strokeLinejoin="round" />
-                    <path d="M 20 14 L 24 18 L 20 22" strokeLinecap="round" strokeLinejoin="round" />
-                  </svg>
-                ) : (activeTab === "online-store" && (customizeSubTab === "reviews" || customizeSubTab === "marketing")) ? (
-                  <svg style={{ display: "block", minWidth: "28px", width: "28px", height: "36px", marginRight: "8px", color: "#d1d5db" }} viewBox="0 0 28 36" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="M 12 0 L 12 36" strokeLinecap="round" strokeLinejoin="round" />
-                  </svg>
-                ) : (
-                  <div style={{ minWidth: "28px", width: "28px", height: "36px", marginRight: "8px" }} />
-                )}
-                <div className={`${styles.subMenuItemCapsule} ${activeTab === "online-store" && customizeSubTab === "giftset" ? styles.subMenuItemCapsuleActive : ""}`} style={{ display: "flex", alignItems: "center", width: "100%", justifyContent: "space-between" }}>
-                  <div style={{ display: "flex", alignItems: "center" }}>
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" style={{ width: "13px", height: "13px", marginRight: "6px" }}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M21 11.25v8.25a1.5 1.5 0 0 1-1.5 1.5H4.5a1.5 1.5 0 0 1-1.5-1.5v-8.25M12 4.875A2.625 2.625 0 1 0 9.375 7.5H12m0-2.625V7.5m0-2.625A2.625 2.625 0 1 1 14.625 7.5H12m0 0V21m-9.75-13.5h19.5" />
-                    </svg>
-                    Gift Set Page
-                  </div>
-                </div>
-              </div>
+
 
               {/* Item 4: Customer Reviews */}
               <div
