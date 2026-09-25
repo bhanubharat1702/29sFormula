@@ -1,11 +1,21 @@
 import mongoose from "mongoose";
 
+const addressItemSchema = new mongoose.Schema({
+  label: { type: String, default: "Home" },
+  address: { type: String, required: true },
+  city: { type: String, required: true },
+  stateVal: { type: String, required: true },
+  pinCode: { type: String, required: true },
+  isDefault: { type: Boolean, default: false }
+}, { _id: true, timestamps: true });
+
 // Define Customer Schema
 const customerSchema = new mongoose.Schema({
   name: { type: String, required: true },
   email: { type: String, required: true, unique: true },
   phone: { type: String },
   address: { type: String },
+  addresses: [addressItemSchema],
   cart: { type: Array, default: [] },
   totalOrders: { type: Number, default: 0 },
   totalSpend: { type: Number, default: 0 }

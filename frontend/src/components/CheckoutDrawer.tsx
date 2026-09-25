@@ -106,6 +106,25 @@ export default function CheckoutDrawer({ isOpen, onClose, cartItems, primaryColo
   const [isVerifyingOtp, setIsVerifyingOtp] = useState(false);
   const [isFetchingLocation, setIsFetchingLocation] = useState(false);
 
+  // Saved Address Book state
+  interface SavedAddressItem {
+    _id?: string;
+    label?: string;
+    address: string;
+    city: string;
+    stateVal: string;
+    pinCode: string;
+    isDefault?: boolean;
+  }
+
+  const [savedAddresses, setSavedAddresses] = useState<SavedAddressItem[]>([]);
+  const [activeAddress, setActiveAddress] = useState<SavedAddressItem | null>(null);
+  const [selectedAddressId, setSelectedAddressId] = useState<string>("new");
+  const [isAddressMode, setIsAddressMode] = useState<'summary' | 'list' | 'form'>('form');
+  const [editingAddressId, setEditingAddressId] = useState<string | null>(null);
+  const [saveAddressForFuture, setSaveAddressForFuture] = useState<boolean>(true);
+  const [newAddressLabel, setNewAddressLabel] = useState<string>("Home");
+
   const [discount, setDiscount] = useState(0);
   const [appliedCouponCode, setAppliedCouponCode] = useState<string | null>(null);
 
@@ -122,7 +141,6 @@ export default function CheckoutDrawer({ isOpen, onClose, cartItems, primaryColo
     let str = String(fullAddress).trim();
     if (!str) return { address: "", city: "", stateVal: "", pinCode: "" };
 
-    // Try parsing if it's a JSON string
     if (str.startsWith("{") && str.endsWith("}")) {
       try {
         const obj = JSON.parse(str);
@@ -137,7 +155,6 @@ export default function CheckoutDrawer({ isOpen, onClose, cartItems, primaryColo
       } catch (e) { }
     }
 
-    // Extract 6-digit Indian pincode from the end (e.g. "- 400706" or "400706")
     let pinCode = "";
     const pinMatch = str.match(/(?:-\s*|\s+)(\d{6})\s*$/);
     if (pinMatch) {
@@ -145,7 +162,6 @@ export default function CheckoutDrawer({ isOpen, onClose, cartItems, primaryColo
       str = str.replace(/(?:-\s*|\s+)\d{6}\s*$/, "").trim();
     }
 
-    // Split remaining string by comma
     const parts = str.split(',').map(p => p.trim()).filter(Boolean);
     if (parts.length >= 3) {
       const stateVal = parts.pop() || "";
@@ -163,12 +179,93 @@ export default function CheckoutDrawer({ isOpen, onClose, cartItems, primaryColo
     if (data.name) setName(data.name);
     if (data.email) setEmail(data.email);
     if (data.phone) setPhone(data.phone);
-    if (data.address) {
+
+    if (data.addresses && Array.isArray(data.addresses) && data.addresses.length > 0) {
+      setSavedAddresses(data.addresses);
+      const defaultAddr = data.addresses.find((a: any) => a.isDefault) || data.addresses[0];
+      if (defaultAddr) {
+        const idStr = String(defaultAddr._id || defaultAddr.label || "0");
+        setSelectedAddressId(idStr);
+        setActiveAddress(defaultAddr);
+        setAddress(defaultAddr.address || "");
+        setCity(defaultAddr.city || "");
+        setStateVal(defaultAddr.stateVal || "");
+        setPinCode(defaultAddr.pinCode || "");
+        setIsAddressMode('summary');
+      } else {
+        setIsAddressMode('form');
+      }
+    } else if (data.address) {
       const parsed = parseSavedAddress(data.address);
-      if (parsed.address) setAddress(parsed.address);
-      if (parsed.city) setCity(parsed.city);
-      if (parsed.stateVal) setStateVal(parsed.stateVal);
-      if (parsed.pinCode) setPinCode(parsed.pinCode);
+      if (parsed.address) {
+        const singleAddr: SavedAddressItem = {
+          _id: "default_1",
+          label: "Home",
+          address: parsed.address,
+          city: parsed.city || "",
+          stateVal: parsed.stateVal || "",
+          pinCode: parsed.pinCode || "",
+          isDefault: true
+        };
+        setSavedAddresses([singleAddr]);
+        setSelectedAddressId("default_1");
+        setActiveAddress(singleAddr);
+        setAddress(parsed.address);
+        if (parsed.city) setCity(parsed.city);
+        if (parsed.stateVal) setStateVal(parsed.stateVal);
+        if (parsed.pinCode) setPinCode(parsed.pinCode);
+        setIsAddressMode('summary');
+      } else {
+        setIsAddressMode('form');
+      }
+    } else {
+      setIsAddressMode('form');
+    }
+  };
+
+  const handleSelectSavedAddress = (addr: SavedAddressItem) => {
+    const idStr = String(addr._id || addr.label || "0");
+    setSelectedAddressId(idStr);
+    setActiveAddress(addr);
+    setAddress(addr.address || "");
+    setCity(addr.city || "");
+    setStateVal(addr.stateVal || "");
+    setPinCode(addr.pinCode || "");
+  };
+
+  const handleSelectNewAddress = () => {
+    setSelectedAddressId("new");
+    setActiveAddress(null);
+    setEditingAddressId(null);
+    setAddress("");
+    setCity("");
+    setStateVal("");
+    setPinCode("");
+  };
+
+  const handleDeleteSavedAddress = async (e: React.MouseEvent, addrId?: string) => {
+    e.stopPropagation();
+    if (!addrId || !email) return;
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:5001'}/api/customers/addresses/${addrId}?email=${encodeURIComponent(email)}`, {
+        method: "DELETE"
+      });
+      if (res.ok) {
+        const data = await res.json();
+        const updated = data.addresses || [];
+        setSavedAddresses(updated);
+        if (selectedAddressId === addrId) {
+          if (updated.length > 0) {
+            handleSelectSavedAddress(updated[0]);
+            setIsAddressMode('summary');
+          } else {
+            handleSelectNewAddress();
+            setIsAddressMode('form');
+          }
+        }
+      }
+    } catch (err) {
+      console.error("Failed to delete address:", err);
     }
   };
 
@@ -406,6 +503,35 @@ export default function CheckoutDrawer({ isOpen, onClose, cartItems, primaryColo
 
     setIsSubmitting(true);
     setError(null);
+
+    if (editingAddressId && email) {
+      fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:5001'}/api/customers/addresses/${editingAddressId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email,
+          label: newAddressLabel || "Home",
+          address,
+          city,
+          stateVal,
+          pinCode
+        })
+      }).catch(err => console.error("Error updating address:", err));
+    } else if (saveAddressForFuture && email && selectedAddressId === "new") {
+      fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:5001'}/api/customers/addresses`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email,
+          label: newAddressLabel || "Home",
+          address,
+          city,
+          stateVal,
+          pinCode,
+          isDefault: savedAddresses.length === 0
+        })
+      }).catch(err => console.error("Error saving address for future:", err));
+    }
 
     const orderPayload = {
       customerName: name,
@@ -752,48 +878,241 @@ export default function CheckoutDrawer({ isOpen, onClose, cartItems, primaryColo
                 </button>
               </div>
 
-              <div className={styles.inputGroup}>
-                <label className={styles.label}>Street Address</label>
-                <input
-                  type="text"
-                  required
-                  value={address}
-                  onChange={(e) => setAddress(e.target.value)}
-                  className={styles.input}
-                />
-              </div>
-              <div className={styles.inputRow}>
-                <div className={styles.inputGroup}>
-                  <label className={styles.label}>City</label>
-                  <input
-                    type="text"
-                    required
-                    value={city}
-                    onChange={(e) => setCity(e.target.value)}
-                    className={styles.input}
-                  />
+              {/* Amazon-style Address Modes: summary | list | form */}
+
+              {/* Mode A: Summary Card */}
+              {isAddressMode === 'summary' && (
+                <div className={styles.addressSummaryCard}>
+                  <div>
+                    <p style={{ fontWeight: 700, fontSize: "0.9rem", margin: "0 0 2px 0", color: "#111827" }}>
+                      Delivering to {name || 'Customer'}
+                    </p>
+                    <p style={{ fontWeight: 600, fontSize: "0.85rem", color: "#374151", margin: "0 0 4px 0" }}>
+                      {activeAddress?.city || city}
+                    </p>
+                    <p style={{ fontSize: "0.82rem", color: "#6b7280", margin: 0, lineHeight: 1.4 }}>
+                      {activeAddress ? `${activeAddress.address}, ${activeAddress.city}, ${activeAddress.stateVal} - ${activeAddress.pinCode}` : `${address}, ${city}, ${stateVal} - ${pinCode}`}
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setIsAddressMode('list')}
+                    className={styles.changeAddressLink}
+                  >
+                    Change
+                  </button>
                 </div>
-                <div className={styles.inputGroup}>
-                  <label className={styles.label}>State</label>
-                  <input
-                    type="text"
-                    required
-                    value={stateVal}
-                    onChange={(e) => setStateVal(e.target.value)}
-                    className={styles.input}
-                  />
+              )}
+
+              {/* Mode B: Saved Address List */}
+              {isAddressMode === 'list' && (
+                <div style={{ marginBottom: "20px" }}>
+                  <p style={{ fontSize: "0.75rem", fontWeight: 700, letterSpacing: "0.05em", color: "#6b7280", textTransform: "uppercase", marginBottom: "12px" }}>
+                    Your Saved Addresses
+                  </p>
+                  <div className={styles.addressCardsGrid}>
+                    {savedAddresses.map((addr) => {
+                      const addrId = String(addr._id || addr.label || "0");
+                      const isSelected = selectedAddressId === addrId;
+                      return (
+                        <div
+                          key={addrId}
+                          onClick={() => handleSelectSavedAddress(addr)}
+                          className={`${styles.addressCard} ${isSelected ? styles.selectedAddressCard : ''}`}
+                        >
+                          <input
+                            type="radio"
+                            name="selectedAddressList"
+                            checked={isSelected}
+                            onChange={() => handleSelectSavedAddress(addr)}
+                            style={{ accentColor: "#000", marginTop: "3px", cursor: "pointer" }}
+                          />
+                          <div style={{ flex: 1, minWidth: 0 }}>
+                            <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap", marginBottom: "4px" }}>
+                              <span className={styles.addressLabelBadge}>{addr.label || "Home"}</span>
+                              {addr.isDefault && (
+                                <span style={{ fontSize: "0.65rem", fontWeight: 600, color: "#10b981", backgroundColor: "#ecfdf5", padding: "1px 6px", borderRadius: "4px" }}>
+                                  Default
+                                </span>
+                              )}
+                            </div>
+                            <p className={styles.addressText}>
+                              {addr.address}{addr.city ? `, ${addr.city}` : ''}{addr.stateVal ? `, ${addr.stateVal}` : ''}{addr.pinCode ? ` - ${addr.pinCode}` : ''}
+                            </p>
+
+                            {/* Action Buttons on Selected Card */}
+                            {isSelected && (
+                              <div className={styles.addressActionButtons}>
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    handleSelectSavedAddress(addr);
+                                    setIsAddressMode('summary');
+                                  }}
+                                  className={styles.deliverHereBtn}
+                                >
+                                  Deliver to this address
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setEditingAddressId(String(addr._id || ""));
+                                    setSelectedAddressId(String(addr._id || ""));
+                                    setAddress(addr.address || "");
+                                    setCity(addr.city || "");
+                                    setStateVal(addr.stateVal || "");
+                                    setPinCode(addr.pinCode || "");
+                                    setNewAddressLabel(addr.label || "Home");
+                                    setIsAddressMode('form');
+                                  }}
+                                  className={styles.editAddrBtn}
+                                >
+                                  Edit address
+                                </button>
+                              </div>
+                            )}
+                          </div>
+
+                          {addr._id && String(addr._id) !== "default_1" && (
+                            <button
+                              type="button"
+                              onClick={(e) => handleDeleteSavedAddress(e, String(addr._id))}
+                              className={styles.deleteAddrBtn}
+                              title="Delete address"
+                            >
+                              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <polyline points="3 6 5 6 21 6"></polyline>
+                                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                              </svg>
+                            </button>
+                          )}
+                        </div>
+                      );
+                    })}
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        handleSelectNewAddress();
+                        setNewAddressLabel("Home");
+                        setIsAddressMode('form');
+                      }}
+                      className={styles.addNewAddressBtn}
+                    >
+                      + Add a new delivery address
+                    </button>
+                  </div>
                 </div>
-              </div>
-              <div className={styles.inputGroup}>
-                <label className={styles.label}>PIN Code</label>
-                <input
-                  type="text"
-                  required
-                  value={pinCode}
-                  onChange={(e) => setPinCode(e.target.value)}
-                  className={styles.input}
-                />
-              </div>
+              )}
+
+              {/* Mode C: Address Form (No saved addresses OR adding new OR editing) */}
+              {isAddressMode === 'form' && (
+                <div>
+                  <div className={styles.inputGroup}>
+                    <label className={styles.label}>Street Address</label>
+                    <input
+                      type="text"
+                      required
+                      value={address}
+                      onChange={(e) => setAddress(e.target.value)}
+                      className={styles.input}
+                    />
+                  </div>
+                  <div className={styles.inputRow}>
+                    <div className={styles.inputGroup}>
+                      <label className={styles.label}>City</label>
+                      <input
+                        type="text"
+                        required
+                        value={city}
+                        onChange={(e) => setCity(e.target.value)}
+                        className={styles.input}
+                      />
+                    </div>
+                    <div className={styles.inputGroup}>
+                      <label className={styles.label}>State</label>
+                      <input
+                        type="text"
+                        required
+                        value={stateVal}
+                        onChange={(e) => setStateVal(e.target.value)}
+                        className={styles.input}
+                      />
+                    </div>
+                  </div>
+                  <div className={styles.inputGroup}>
+                    <label className={styles.label}>PIN Code</label>
+                    <input
+                      type="text"
+                      required
+                      value={pinCode}
+                      onChange={(e) => setPinCode(e.target.value)}
+                      className={styles.input}
+                    />
+                  </div>
+
+                  {/* Auto-save & Label Options */}
+                  <div style={{ marginTop: "14px", display: "flex", flexDirection: "column", gap: "8px" }}>
+                    <CustomCheckbox
+                      id="saveAddressFuture"
+                      checked={saveAddressForFuture}
+                      onChange={(e) => setSaveAddressForFuture(e.target.checked)}
+                      label="Save address for future checkouts"
+                    />
+
+                    {saveAddressForFuture && (
+                      <div style={{ display: "flex", alignItems: "center", gap: "10px", marginTop: "4px" }}>
+                        <label style={{ fontSize: "0.75rem", fontWeight: 600, color: "#4b5563" }}>Address Label:</label>
+                        {["Home", "Work", "Other"].map((lbl) => (
+                          <button
+                            key={lbl}
+                            type="button"
+                            onClick={() => setNewAddressLabel(lbl)}
+                            style={{
+                              padding: "3px 10px",
+                              borderRadius: "12px",
+                              border: newAddressLabel === lbl ? "1.5px solid #000" : "1px solid #d1d5db",
+                              backgroundColor: newAddressLabel === lbl ? "#000" : "#fff",
+                              color: newAddressLabel === lbl ? "#fff" : "#374151",
+                              fontSize: "0.72rem",
+                              fontWeight: 600,
+                              cursor: "pointer"
+                            }}
+                          >
+                            {lbl}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+
+                    {savedAddresses.length > 0 && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (activeAddress) {
+                            setIsAddressMode('summary');
+                          } else {
+                            setIsAddressMode('list');
+                          }
+                        }}
+                        style={{
+                          alignSelf: "flex-start",
+                          background: "none",
+                          border: "none",
+                          color: "#6b7280",
+                          fontSize: "0.78rem",
+                          cursor: "pointer",
+                          textDecoration: "underline",
+                          marginTop: "8px",
+                          padding: 0
+                        }}
+                      >
+                        ← Cancel & Return to Saved Addresses
+                      </button>
+                    )}
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Payment Options */}

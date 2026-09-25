@@ -136,12 +136,47 @@ router.get("/api/customers/search", verifyToken, isAdmin, async (req, res) => {
     const mergedPhone = customer?.phone || userAcc?.phone || lastOrder?.customerPhone || "";
     const mergedAddress = customer?.address || lastOrder?.shippingAddress || "";
 
+    let addressesList = (customer?.addresses && customer.addresses.length > 0)
+      ? customer.addresses
+      : ((userAcc?.addresses && userAcc.addresses.length > 0) ? userAcc.addresses : []);
+
+    if (addressesList.length === 0 && mergedAddress) {
+      // Parse legacy single address string into structured item
+      let str = String(mergedAddress).trim();
+      let pinCode = "";
+      const pinMatch = str.match(/(?:-\s*|\s+)(\d{6})\s*$/);
+      if (pinMatch) {
+        pinCode = pinMatch[1];
+        str = str.replace(/(?:-\s*|\s+)\d{6}\s*$/, "").trim();
+      }
+      const parts = str.split(',').map(p => p.trim()).filter(Boolean);
+      let city = "", stateVal = "", addrLine = str;
+      if (parts.length >= 3) {
+        stateVal = parts.pop() || "";
+        city = parts.pop() || "";
+        addrLine = parts.join(", ");
+      } else if (parts.length === 2) {
+        city = parts[1];
+        addrLine = parts[0];
+      }
+      addressesList = [{
+        _id: "default_1",
+        label: "Home",
+        address: addrLine,
+        city,
+        stateVal,
+        pinCode,
+        isDefault: true
+      }];
+    }
+
     res.json({
       _id: customer?._id || userAcc?._id || lastOrder?._id,
       name: mergedName,
       email: mergedEmail,
       phone: mergedPhone,
-      address: mergedAddress
+      address: mergedAddress,
+      addresses: addressesList
     });
   } catch (error) {
     console.error("Failed to search customer:", error);
@@ -228,6 +263,161 @@ router.post("/api/cart", async (req, res) => {
   } catch (error) {
     console.error("Failed to save cart:", error);
     res.status(500).json({ error: "Failed to save cart" });
+  }
+});
+
+// ─── Saved Address Book Routes ──────────────────────────────────────────────
+
+// GET /api/customers/addresses?email=...
+router.get("/api/customers/addresses", async (req, res) => {
+  try {
+    const { email } = req.query;
+    if (!email) {
+      return res.status(400).json({ error: "Email parameter is required" });
+    }
+    const cleanEmail = email.trim().toLowerCase();
+    const customer = await Customer.findOne({ email: new RegExp(`^${cleanEmail}$`, 'i') }).lean();
+    const userAcc = await User.findOne({ email: new RegExp(`^${cleanEmail}$`, 'i') }).lean();
+
+    let addresses = (customer?.addresses && customer.addresses.length > 0)
+      ? customer.addresses
+      : (userAcc?.addresses || []);
+
+    res.json({ addresses });
+  } catch (error) {
+    console.error("Failed to fetch addresses:", error);
+    res.status(500).json({ error: "Failed to fetch addresses" });
+  }
+});
+
+// POST /api/customers/addresses
+router.post("/api/customers/addresses", async (req, res) => {
+  try {
+    const { email, label, address, city, stateVal, pinCode, isDefault } = req.body;
+    if (!email || !address || !city || !stateVal || !pinCode) {
+      return res.status(400).json({ error: "Missing required address fields" });
+    }
+
+    const cleanEmail = email.trim().toLowerCase();
+    let customer = await Customer.findOne({ email: new RegExp(`^${cleanEmail}$`, 'i') });
+    let userAcc = await User.findOne({ email: new RegExp(`^${cleanEmail}$`, 'i') });
+
+    if (!customer && !userAcc) {
+      customer = await Customer.create({
+        name: cleanEmail.split('@')[0],
+        email: cleanEmail,
+        addresses: []
+      });
+    }
+
+    const newAddr = {
+      label: label || "Home",
+      address,
+      city,
+      stateVal,
+      pinCode,
+      isDefault: Boolean(isDefault)
+    };
+
+    if (customer) {
+      if (!customer.addresses) customer.addresses = [];
+      if (newAddr.isDefault) {
+        customer.addresses.forEach(a => { a.isDefault = false; });
+      }
+      customer.addresses.push(newAddr);
+      customer.address = `${address}, ${city}, ${stateVal} - ${pinCode}`;
+      await customer.save();
+    }
+
+    if (userAcc) {
+      if (!userAcc.addresses) userAcc.addresses = [];
+      if (newAddr.isDefault) {
+        userAcc.addresses.forEach(a => { a.isDefault = false; });
+      }
+      userAcc.addresses.push(newAddr);
+      await userAcc.save();
+    }
+
+    const updatedAddresses = customer ? customer.addresses : userAcc.addresses;
+    res.json({ success: true, addresses: updatedAddresses });
+  } catch (error) {
+    console.error("Failed to save address:", error);
+    res.status(500).json({ error: "Failed to save address" });
+  }
+});
+
+// DELETE /api/customers/addresses/:addressId?email=...
+router.delete("/api/customers/addresses/:addressId", async (req, res) => {
+  try {
+    const { addressId } = req.params;
+    const { email } = req.query;
+    if (!email) {
+      return res.status(400).json({ error: "Email parameter is required" });
+    }
+
+    const cleanEmail = email.trim().toLowerCase();
+    const customer = await Customer.findOne({ email: new RegExp(`^${cleanEmail}$`, 'i') });
+    const userAcc = await User.findOne({ email: new RegExp(`^${cleanEmail}$`, 'i') });
+
+    if (customer && customer.addresses) {
+      customer.addresses = customer.addresses.filter(a => String(a._id) !== addressId);
+      await customer.save();
+    }
+
+    if (userAcc && userAcc.addresses) {
+      userAcc.addresses = userAcc.addresses.filter(a => String(a._id) !== addressId);
+      await userAcc.save();
+    }
+
+    const updatedAddresses = customer ? customer.addresses : (userAcc ? userAcc.addresses : []);
+    res.json({ success: true, addresses: updatedAddresses });
+  } catch (error) {
+    console.error("Failed to delete address:", error);
+    res.status(500).json({ error: "Failed to delete address" });
+  }
+});
+
+// PUT /api/customers/addresses/:addressId
+router.put("/api/customers/addresses/:addressId", async (req, res) => {
+  try {
+    const { addressId } = req.params;
+    const { email, label, address, city, stateVal, pinCode, isDefault } = req.body;
+    if (!email || !address || !city || !stateVal || !pinCode) {
+      return res.status(400).json({ error: "Missing required address fields" });
+    }
+
+    const cleanEmail = email.trim().toLowerCase();
+    const customer = await Customer.findOne({ email: new RegExp(`^${cleanEmail}$`, 'i') });
+    const userAcc = await User.findOne({ email: new RegExp(`^${cleanEmail}$`, 'i') });
+
+    const updateItem = (arr) => {
+      if (!arr) return;
+      const target = arr.find(a => String(a._id) === addressId);
+      if (target) {
+        if (label) target.label = label;
+        target.address = address;
+        target.city = city;
+        target.stateVal = stateVal;
+        target.pinCode = pinCode;
+        if (isDefault !== undefined) target.isDefault = Boolean(isDefault);
+      }
+    };
+
+    if (customer && customer.addresses) {
+      updateItem(customer.addresses);
+      await customer.save();
+    }
+
+    if (userAcc && userAcc.addresses) {
+      updateItem(userAcc.addresses);
+      await userAcc.save();
+    }
+
+    const updatedAddresses = customer ? customer.addresses : (userAcc ? userAcc.addresses : []);
+    res.json({ success: true, addresses: updatedAddresses });
+  } catch (error) {
+    console.error("Failed to update address:", error);
+    res.status(500).json({ error: "Failed to update address" });
   }
 });
 

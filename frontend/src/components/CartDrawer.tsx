@@ -64,10 +64,16 @@ export default function CartDrawer({
     }
   }, [couponSuccess]);
 
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
   useEffect(() => {
     if (isOpen) {
       const active = getAppliedCoupon();
       setAppliedCouponState(active);
+      if (typeof window !== 'undefined') {
+        const session = localStorage.getItem('userSession');
+        setIsLoggedIn(Boolean(session));
+      }
     }
   }, [isOpen]);
 
@@ -509,20 +515,27 @@ export default function CartDrawer({
           /* Empty State */
           <div className={styles.cartDrawerEmpty}>
             <h2 className={styles.cartEmptyHeading}>YOUR CART IS EMPTY</h2>
-            <p className={styles.cartEmptySubtext}>
-              Have an account?{' '}
-              <Link href="/login" className={styles.cartLoginLink} onClick={handleClose}>
-                Log in
-              </Link>{' '}
-              to check out faster.
-            </p>
-            <button
-              type="button"
+            {isLoggedIn ? (
+              <p className={styles.cartEmptySubtext}>
+                Your cart is currently empty. Explore our collection and add your favorite items to your cart!
+              </p>
+            ) : (
+              <p className={styles.cartEmptySubtext}>
+                Your cart is currently empty. Have an account?{' '}
+                <Link href="/login" className={styles.cartLoginLink} onClick={handleClose}>
+                  Log in
+                </Link>{' '}
+                to check out faster.
+              </p>
+            )}
+            <Link
+              href="/shop"
               className={styles.continueBtn}
               onClick={handleClose}
+              style={{ textDecoration: 'none', display: 'inline-block' }}
             >
               Continue shopping
-            </button>
+            </Link>
           </div>
         )}
       </div>

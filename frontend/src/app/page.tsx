@@ -1132,10 +1132,10 @@ export default function Home() {
                   <div className={styles.productImageContainer} style={product.quantity === 0 ? { filter: "grayscale(1)", opacity: 0.7 } : {}}>
                     {(() => {
                       const cats = Array.isArray(product.category)
-                        ? product.category.map(c => String(c).toLowerCase().trim())
+                        ? product.category.map((c: any) => String(c).toLowerCase().trim())
                         : [String(product.category || '').toLowerCase().trim()];
-                      const isBestSeller = cats.some(c => c.includes("best seller") || c.includes("bestseller"));
-                      const isLatest = !isBestSeller && cats.some(c => c.includes("latest") || c.includes("new arrival"));
+                      const isBestSeller = cats.some((c: string) => c.includes("best seller") || c.includes("bestseller"));
+                      const isLatest = !isBestSeller && cats.some((c: string) => c.includes("latest") || c.includes("new arrival"));
                       if (isBestSeller || isLatest) {
                         return (
                           <span 
@@ -1210,7 +1210,7 @@ export default function Home() {
                   <div className={styles.productInfo}>
                     <h3 className={styles.productTitle}>{product.name}</h3>
                     {(() => {
-                      const inStockVariants = product.variants ? product.variants.filter(v => (Number(v.quantity) || 0) > 0) : [];
+                      const inStockVariants = product.variants ? product.variants.filter((v: any) => (Number(v.quantity) || 0) > 0) : [];
                       const cheapestVariant = inStockVariants.length > 0
                         ? [...inStockVariants].sort((a, b) => a.price - b.price)[0]
                         : (product.variants && product.variants.length > 0 ? [...product.variants].sort((a, b) => a.price - b.price)[0] : null);
@@ -1418,10 +1418,10 @@ export default function Home() {
                   <div className={styles.productImageContainer} style={product.quantity === 0 ? { filter: "grayscale(1)", opacity: 0.7 } : {}}>
                     {(() => {
                       const cats = Array.isArray(product.category)
-                        ? product.category.map(c => String(c).toLowerCase().trim())
+                        ? product.category.map((c: any) => String(c).toLowerCase().trim())
                         : [String(product.category || '').toLowerCase().trim()];
-                      const isBestSeller = cats.some(c => c.includes("best seller") || c.includes("bestseller"));
-                      const isLatest = !isBestSeller && cats.some(c => c.includes("latest") || c.includes("new arrival"));
+                      const isBestSeller = cats.some((c: string) => c.includes("best seller") || c.includes("bestseller"));
+                      const isLatest = !isBestSeller && cats.some((c: string) => c.includes("latest") || c.includes("new arrival"));
                       if (isBestSeller || isLatest) {
                         return (
                           <span 
@@ -1496,7 +1496,7 @@ export default function Home() {
                   <div className={styles.productInfo}>
                     <h3 className={styles.productTitle}>{product.name}</h3>
                     {(() => {
-                      const inStockVariants = product.variants ? product.variants.filter(v => (Number(v.quantity) || 0) > 0) : [];
+                      const inStockVariants = product.variants ? product.variants.filter((v: any) => (Number(v.quantity) || 0) > 0) : [];
                       const cheapestVariant = inStockVariants.length > 0
                         ? [...inStockVariants].sort((a, b) => a.price - b.price)[0]
                         : (product.variants && product.variants.length > 0 ? [...product.variants].sort((a, b) => a.price - b.price)[0] : null);

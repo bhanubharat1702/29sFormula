@@ -477,7 +477,7 @@ export default function Navbar({ onCartClick }: NavbarProps) {
                       )}
                       <div style={{ display: 'flex', flexDirection: 'column', flex: 1, minWidth: 0 }}>
                         <span style={{ fontSize: '14px', fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.name}</span>
-                        {p.category && <span style={{ fontSize: '11px', color: '#9ca3af' }}>{p.category}</span>}
+                        {p.category && <span style={{ fontSize: '11px', color: '#9ca3af' }}>{Array.isArray(p.category) ? p.category.join(", ") : p.category}</span>}
                       </div>
                       <span style={{ fontSize: '13px', fontWeight: 600, color: '#111827', marginLeft: '12px' }}>₹{p.price}</span>
                     </button>

@@ -1,5 +1,14 @@
 import mongoose from "mongoose";
 
+const addressItemSchema = new mongoose.Schema({
+  label: { type: String, default: "Home" },
+  address: { type: String, required: true },
+  city: { type: String, required: true },
+  stateVal: { type: String, required: true },
+  pinCode: { type: String, required: true },
+  isDefault: { type: Boolean, default: false }
+}, { _id: true, timestamps: true });
+
 // Define User Schema
 const userSchema = new mongoose.Schema({
   name: { type: String, required: true },
@@ -10,7 +19,8 @@ const userSchema = new mongoose.Schema({
   profilePicture: { type: String },
   phone: { type: String },
   role: { type: String, enum: ["user", "admin"], default: "user" },
-  isAdmin: { type: Boolean, default: false }
+  isAdmin: { type: Boolean, default: false },
+  addresses: [addressItemSchema]
 }, { timestamps: true });
 
 const User = mongoose.models.User || mongoose.model("User", userSchema);

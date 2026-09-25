@@ -6,6 +6,7 @@ export const generalLimiter = rateLimit({
   max: 100,
   standardHeaders: true, // Return rate limit info in `RateLimit-*` headers
   legacyHeaders: false, // Disable `X-RateLimit-*` headers
+  validate: false,
   skip: () => process.env.NODE_ENV === "test",
   message: {
     error: "Too many requests, please try again after a minute."
@@ -19,6 +20,7 @@ export const loginLimiter = rateLimit({
   max: 5,
   standardHeaders: true,
   legacyHeaders: false,
+  validate: false,
   skip: () => process.env.NODE_ENV === "test",
   message: {
     error: "Too many login attempts, please try again after a minute."
@@ -32,11 +34,12 @@ export const otpLimiter = rateLimit({
   max: 5,
   standardHeaders: true,
   legacyHeaders: false,
-  validate: { ip: false },
+  validate: false,
   skip: () => process.env.NODE_ENV === "test",
   keyGenerator: (req) => {
     const identifier = req.body?.email || req.body?.phone || req.query?.email || "";
-    return identifier ? `${req.ip}_${identifier.toLowerCase().trim()}` : req.ip;
+    const ip = req.ip || req.headers['x-forwarded-for'] || "127.0.0.1";
+    return identifier ? `${ip}_${identifier.toLowerCase().trim()}` : ip;
   },
   message: {
     error: "Too many OTP requests. Maximum 5 requests allowed per 5 minutes. Please try again after 5 minutes."

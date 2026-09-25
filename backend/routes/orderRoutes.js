@@ -1314,7 +1314,7 @@ router.post("/api/orders/razorpay-verify", async (req, res) => {
       shippingAddress: orderPayload.shippingAddress
     });
 
-    res.json({ success: true, orderId });
+    res.json({ success: true, orderId: newOrder ? (newOrder.orderId || newOrder._id) : null });
   } catch (error) {
     console.error("Razorpay verification failed:", error);
     res.status(500).json({ error: "Failed to verify Razorpay payment" });
