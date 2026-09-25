@@ -67,6 +67,7 @@ export default function Shop() {
 
   // Image slider indexes per product
   const [activeImageIndexes, setActiveImageIndexes] = useState<{ [productId: string]: number }>({});
+  const [hoveredProductId, setHoveredProductId] = useState<string | null>(null);
 
   // Cart Drawer State
   const [showCartDrawer, setShowCartDrawer] = useState<boolean>(false);
@@ -144,7 +145,7 @@ export default function Shop() {
   }, []);
 
   const addToCart = (product: Product, size?: string) => {
-    const selectedSize = size || (product as any)?.variants?.[0]?.size || (product as any)?.sizes?.[0] || (product as any)?.availableSizes?.[0] || "Standard";
+    const selectedSize = size || (product as any)?.variants?.find((v: any) => (Number(v.quantity) || 0) > 0)?.size || (product as any)?.variants?.[0]?.size || (product as any)?.sizes?.[0] || (product as any)?.availableSizes?.[0] || "Standard";
     if (typeof window !== "undefined") {
       const current = localStorage.getItem("cart");
       let itemsList = [];
@@ -220,25 +221,28 @@ export default function Shop() {
   };
 
   const getProductImages = (product: Product) => {
-    const list = [product.imageFront];
-    if (product.images && product.images.length > 0) {
+    const list: string[] = [];
+    if (product.imageFront) list.push(product.imageFront);
+    if (product.images && Array.isArray(product.images)) {
       product.images.forEach(img => {
-        if (img && img !== product.imageFront) {
+        if (img && !list.includes(img)) {
           list.push(img);
         }
       });
-    } else if (product.imageBack && product.imageBack !== product.imageFront) {
+    }
+    if (product.imageBack && !list.includes(product.imageBack)) {
       list.push(product.imageBack);
     }
-    return list;
+    return list.length > 0 ? list : [product.imageFront || ''];
   };
 
   const handlePrevImage = (e: React.MouseEvent, product: Product) => {
     e.preventDefault();
     e.stopPropagation();
     const imagesList = getProductImages(product);
+    if (imagesList.length <= 1) return;
     
-    const currentIndex = activeImageIndexes[product._id] || 0;
+    const currentIndex = activeImageIndexes[product._id] ?? 0;
     const nextIndex = (currentIndex - 1 + imagesList.length) % imagesList.length;
     setActiveImageIndexes(prev => ({ ...prev, [product._id]: nextIndex }));
   };
@@ -247,8 +251,9 @@ export default function Shop() {
     e.preventDefault();
     e.stopPropagation();
     const imagesList = getProductImages(product);
+    if (imagesList.length <= 1) return;
     
-    const currentIndex = activeImageIndexes[product._id] || 0;
+    const currentIndex = activeImageIndexes[product._id] ?? 0;
     const nextIndex = (currentIndex + 1) % imagesList.length;
     setActiveImageIndexes(prev => ({ ...prev, [product._id]: nextIndex }));
   };
@@ -678,13 +683,15 @@ export default function Shop() {
                   }}
                   onMouseEnter={() => {
                     if (getProductStock(product) === 0) return;
+                    setHoveredProductId(product._id);
                     const imgs = getProductImages(product);
-                    if (imgs.length > 1) {
+                    if (imgs.length > 1 && (activeImageIndexes[product._id] === undefined || activeImageIndexes[product._id] === 0)) {
                       setActiveImageIndexes(prev => ({ ...prev, [product._id]: 1 }));
                     }
                   }}
                   onMouseLeave={() => {
                     if (getProductStock(product) === 0) return;
+                    setHoveredProductId(null);
                     setActiveImageIndexes(prev => ({ ...prev, [product._id]: 0 }));
                   }}
                 >
@@ -723,31 +730,42 @@ export default function Shop() {
                     })()}
                     <Link 
                       href={`/product/${product._id}`} 
-                      style={{ textDecoration: "none", color: "inherit", display: "block", pointerEvents: getProductStock(product) === 0 ? "none" : "auto" }}
+                      style={{ textDecoration: "none", color: "inherit", position: "absolute", top: 0, left: 0, right: 0, bottom: 0, pointerEvents: getProductStock(product) === 0 ? "none" : "auto" }}
                     >
                       {(() => {
                         const imagesList = getProductImages(product);
-                        const activeIdx = activeImageIndexes[product._id] || 0;
-                        const coverImage = imagesList[0];
-                        const hoverIdx = activeIdx === 0 && imagesList.length > 1 ? 1 : activeIdx;
-                        const hoverImage = imagesList[hoverIdx];
+                        const activeIdx = activeImageIndexes[product._id] ?? 0;
+                        const isHovered = hoveredProductId === product._id;
 
                         return (
                           <>
-                            <img 
-                              className={`${styles.productImage} ${styles.productImageFront}`} 
-                              src={coverImage} 
-                              alt={product.name}
-                              loading="lazy"
-                            />
-                            {imagesList.length > 1 && (
-                              <img 
-                                className={`${styles.productImage} ${styles.productImageBack}`} 
-                                src={hoverImage} 
-                                alt={`${product.name} Alternate`}
-                                loading="lazy"
-                              />
-                            )}
+                            {imagesList.map((imgUrl, idx) => {
+                              const isVisible = isHovered && imagesList.length > 1 
+                                ? idx === activeIdx 
+                                : idx === 0;
+
+                              return (
+                                <img 
+                                  key={`${product._id}_img_${idx}`}
+                                  className={styles.productImage} 
+                                  src={imgUrl} 
+                                  alt={product.name}
+                                  loading={idx === 0 ? "eager" : "lazy"}
+                                  style={{
+                                    position: "absolute",
+                                    top: 0,
+                                    left: 0,
+                                    width: "100%",
+                                    height: "100%",
+                                    objectFit: "cover",
+                                    opacity: isVisible ? 1 : 0,
+                                    transform: isHovered ? "scale(1.04)" : "scale(1.00)",
+                                    transition: "opacity 0.5s ease-in-out, transform 0.6s cubic-bezier(0.25, 1, 0.5, 1)",
+                                    pointerEvents: "none"
+                                  }}
+                                />
+                              );
+                            })}
                           </>
                         );
                       })()}

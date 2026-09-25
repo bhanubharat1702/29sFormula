@@ -77,6 +77,46 @@ export default function Home() {
   const [heroTitleFontType, setHeroTitleFontType] = useState<string>("Outfit");
 
   const [allReviews, setAllReviews] = useState<any[]>([]);
+  const [activeImageIndexes, setActiveImageIndexes] = useState<{ [productId: string]: number }>({});
+  const [hoveredProductId, setHoveredProductId] = useState<string | null>(null);
+
+  const getProductImages = (product: any) => {
+    const list: string[] = [];
+    if (product.imageFront) list.push(product.imageFront);
+    if (product.images && Array.isArray(product.images)) {
+      product.images.forEach((img: string) => {
+        if (img && !list.includes(img)) {
+          list.push(img);
+        }
+      });
+    }
+    if (product.imageBack && !list.includes(product.imageBack)) {
+      list.push(product.imageBack);
+    }
+    return list.length > 0 ? list : [product.imageFront || ''];
+  };
+
+  const handlePrevImage = (e: React.MouseEvent, product: any) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const imagesList = getProductImages(product);
+    if (imagesList.length <= 1) return;
+    
+    const currentIndex = activeImageIndexes[product._id] ?? 0;
+    const nextIndex = (currentIndex - 1 + imagesList.length) % imagesList.length;
+    setActiveImageIndexes(prev => ({ ...prev, [product._id]: nextIndex }));
+  };
+
+  const handleNextImage = (e: React.MouseEvent, product: any) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const imagesList = getProductImages(product);
+    if (imagesList.length <= 1) return;
+    
+    const currentIndex = activeImageIndexes[product._id] ?? 0;
+    const nextIndex = (currentIndex + 1) % imagesList.length;
+    setActiveImageIndexes(prev => ({ ...prev, [product._id]: nextIndex }));
+  };
 
   // Auto-slide reviews every 4 seconds
   useEffect(() => {
@@ -345,7 +385,7 @@ export default function Home() {
   }, []);
 
   const addToCart = (product: any, size?: string, qty: number = 1) => {
-    const selectedSize = size || product?.variants?.[0]?.size || product?.sizes?.[0] || product?.availableSizes?.[0] || "Standard";
+    const selectedSize = size || product?.variants?.find((v: any) => (Number(v.quantity) || 0) > 0)?.size || product?.variants?.[0]?.size || product?.sizes?.[0] || product?.availableSizes?.[0] || "Standard";
     if (typeof window !== "undefined") {
       const current = localStorage.getItem("cart");
       let itemsList = [];
@@ -1128,7 +1168,23 @@ export default function Home() {
                   cursor: product.quantity === 0 ? "not-allowed" : "pointer"
                 }}
               >
-                <div className={styles.productCard} style={product.quantity === 0 ? { pointerEvents: "none" } : {}}>
+                <div 
+                  className={styles.productCard} 
+                  style={product.quantity === 0 ? { pointerEvents: "none" } : {}}
+                  onMouseEnter={() => {
+                    if (product.quantity === 0) return;
+                    setHoveredProductId(product._id);
+                    const imgs = getProductImages(product);
+                    if (imgs.length > 1 && (activeImageIndexes[product._id] === undefined || activeImageIndexes[product._id] === 0)) {
+                      setActiveImageIndexes(prev => ({ ...prev, [product._id]: 1 }));
+                    }
+                  }}
+                  onMouseLeave={() => {
+                    if (product.quantity === 0) return;
+                    setHoveredProductId(null);
+                    setActiveImageIndexes(prev => ({ ...prev, [product._id]: 0 }));
+                  }}
+                >
                   <div className={styles.productImageContainer} style={product.quantity === 0 ? { filter: "grayscale(1)", opacity: 0.7 } : {}}>
                     {(() => {
                       const cats = Array.isArray(product.category)
@@ -1162,40 +1218,73 @@ export default function Home() {
                       }
                       return null;
                     })()}
-                    <img
-                      className={`${styles.productImage} ${styles.productImageFront}`}
-                      src={product.imageFront}
-                      alt={product.name}
-                      loading="lazy"
-                    />
-                    {product.imageBack && (
-                      <img
-                        className={`${styles.productImage} ${styles.productImageBack}`}
-                        src={product.imageBack}
-                        alt={`${product.name} Alternate`}
-                        loading="lazy"
-                      />
-                    )}
+                    {(() => {
+                      const imagesList = getProductImages(product);
+                      const activeIdx = activeImageIndexes[product._id] ?? 0;
+                      const isHovered = hoveredProductId === product._id;
+
+                      return (
+                        <>
+                          {imagesList.map((imgUrl: string, idx: number) => {
+                            const isVisible = isHovered && imagesList.length > 1 
+                              ? idx === activeIdx 
+                              : idx === 0;
+
+                            return (
+                              <img 
+                                key={`${product._id}_img_${idx}`}
+                                className={styles.productImage} 
+                                src={imgUrl} 
+                                alt={product.name}
+                                loading={idx === 0 ? "eager" : "lazy"}
+                                style={{
+                                  position: "absolute",
+                                  top: 0,
+                                  left: 0,
+                                  width: "100%",
+                                  height: "100%",
+                                  objectFit: "cover",
+                                  opacity: isVisible ? 1 : 0,
+                                  transform: isHovered ? "scale(1.04)" : "scale(1.00)",
+                                  transition: "opacity 0.5s ease-in-out, transform 0.6s cubic-bezier(0.25, 1, 0.5, 1)",
+                                  pointerEvents: "none"
+                                }}
+                              />
+                            );
+                          })}
+                        </>
+                      );
+                    })()}
 
                     {/* Arrow controls */}
-                    <button
-                      aria-label="Previous image"
-                      className={`${styles.sliderArrow} ${styles.sliderArrowLeft}`}
-                      onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}
-                    >
-                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className={styles.arrowIcon}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18" />
-                      </svg>
-                    </button>
-                    <button
-                      aria-label="Next image"
-                      className={`${styles.sliderArrow} ${styles.sliderArrowRight}`}
-                      onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}
-                    >
-                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className={styles.arrowIcon}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
-                      </svg>
-                    </button>
+                    {(() => {
+                      const imagesList = getProductImages(product);
+                      if (imagesList.length > 1) {
+                        return (
+                          <>
+                            <button
+                              aria-label="Previous image"
+                              className={`${styles.sliderArrow} ${styles.sliderArrowLeft}`}
+                              onClick={(e) => handlePrevImage(e, product)}
+                            >
+                              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className={styles.arrowIcon}>
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18" />
+                              </svg>
+                            </button>
+                            <button
+                              aria-label="Next image"
+                              className={`${styles.sliderArrow} ${styles.sliderArrowRight}`}
+                              onClick={(e) => handleNextImage(e, product)}
+                            >
+                              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className={styles.arrowIcon}>
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
+                              </svg>
+                            </button>
+                          </>
+                        );
+                      }
+                      return null;
+                    })()}
 
                     <button
                       aria-label="Add to cart"
@@ -1414,7 +1503,23 @@ export default function Home() {
                   cursor: product.quantity === 0 ? "not-allowed" : "pointer"
                 }}
               >
-                <div className={styles.productCard} style={product.quantity === 0 ? { pointerEvents: "none" } : {}}>
+                <div 
+                  className={styles.productCard} 
+                  style={product.quantity === 0 ? { pointerEvents: "none" } : {}}
+                  onMouseEnter={() => {
+                    if (product.quantity === 0) return;
+                    setHoveredProductId(product._id);
+                    const imgs = getProductImages(product);
+                    if (imgs.length > 1 && (activeImageIndexes[product._id] === undefined || activeImageIndexes[product._id] === 0)) {
+                      setActiveImageIndexes(prev => ({ ...prev, [product._id]: 1 }));
+                    }
+                  }}
+                  onMouseLeave={() => {
+                    if (product.quantity === 0) return;
+                    setHoveredProductId(null);
+                    setActiveImageIndexes(prev => ({ ...prev, [product._id]: 0 }));
+                  }}
+                >
                   <div className={styles.productImageContainer} style={product.quantity === 0 ? { filter: "grayscale(1)", opacity: 0.7 } : {}}>
                     {(() => {
                       const cats = Array.isArray(product.category)
@@ -1448,40 +1553,73 @@ export default function Home() {
                       }
                       return null;
                     })()}
-                    <img
-                      className={`${styles.productImage} ${styles.productImageFront}`}
-                      src={product.imageFront}
-                      alt={product.name}
-                      loading="lazy"
-                    />
-                    {product.imageBack && (
-                      <img
-                        className={`${styles.productImage} ${styles.productImageBack}`}
-                        src={product.imageBack}
-                        alt={`${product.name} Alternate`}
-                        loading="lazy"
-                      />
-                    )}
+                    {(() => {
+                      const imagesList = getProductImages(product);
+                      const activeIdx = activeImageIndexes[product._id] ?? 0;
+                      const isHovered = hoveredProductId === product._id;
+
+                      return (
+                        <>
+                          {imagesList.map((imgUrl: string, idx: number) => {
+                            const isVisible = isHovered && imagesList.length > 1 
+                              ? idx === activeIdx 
+                              : idx === 0;
+
+                            return (
+                              <img 
+                                key={`${product._id}_img_${idx}`}
+                                className={styles.productImage} 
+                                src={imgUrl} 
+                                alt={product.name}
+                                loading={idx === 0 ? "eager" : "lazy"}
+                                style={{
+                                  position: "absolute",
+                                  top: 0,
+                                  left: 0,
+                                  width: "100%",
+                                  height: "100%",
+                                  objectFit: "cover",
+                                  opacity: isVisible ? 1 : 0,
+                                  transform: isHovered ? "scale(1.04)" : "scale(1.00)",
+                                  transition: "opacity 0.5s ease-in-out, transform 0.6s cubic-bezier(0.25, 1, 0.5, 1)",
+                                  pointerEvents: "none"
+                                }}
+                              />
+                            );
+                          })}
+                        </>
+                      );
+                    })()}
 
                     {/* Arrow controls */}
-                    <button
-                      aria-label="Previous image"
-                      className={`${styles.sliderArrow} ${styles.sliderArrowLeft}`}
-                      onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}
-                    >
-                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className={styles.arrowIcon}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18" />
-                      </svg>
-                    </button>
-                    <button
-                      aria-label="Next image"
-                      className={`${styles.sliderArrow} ${styles.sliderArrowRight}`}
-                      onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}
-                    >
-                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className={styles.arrowIcon}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
-                      </svg>
-                    </button>
+                    {(() => {
+                      const imagesList = getProductImages(product);
+                      if (imagesList.length > 1) {
+                        return (
+                          <>
+                            <button
+                              aria-label="Previous image"
+                              className={`${styles.sliderArrow} ${styles.sliderArrowLeft}`}
+                              onClick={(e) => handlePrevImage(e, product)}
+                            >
+                              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className={styles.arrowIcon}>
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18" />
+                              </svg>
+                            </button>
+                            <button
+                              aria-label="Next image"
+                              className={`${styles.sliderArrow} ${styles.sliderArrowRight}`}
+                              onClick={(e) => handleNextImage(e, product)}
+                            >
+                              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className={styles.arrowIcon}>
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
+                              </svg>
+                            </button>
+                          </>
+                        );
+                      }
+                      return null;
+                    })()}
 
                     <button
                       aria-label="Add to cart"

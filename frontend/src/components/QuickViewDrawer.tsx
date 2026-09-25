@@ -32,6 +32,18 @@ export default function QuickViewDrawer({
     if (product) {
       setCachedProduct(product);
       setQuantity(1);
+      let defaultSize = "";
+      if (product.variants && product.variants.length > 0) {
+        const inStockVar = product.variants.find((v: any) => (Number(v.quantity) || 0) > 0);
+        if (inStockVar) {
+          defaultSize = inStockVar.size;
+        }
+      } else if (product.sizes && product.sizes.length > 0) {
+        if ((Number(product.quantity || 0) > 0)) {
+          defaultSize = product.sizes[0];
+        }
+      }
+      setSelectedSize(defaultSize);
     }
   }, [product]);
 
@@ -43,12 +55,17 @@ export default function QuickViewDrawer({
         .then(data => {
           setFullProductData(data);
           
-          // Select default size
+          // Select default size: ONLY select an IN-STOCK size
           let defaultSize = "";
           if (data.variants && data.variants.length > 0) {
-            defaultSize = data.variants[0].size;
+            const inStockVariant = data.variants.find((v: any) => (Number(v.quantity) || 0) > 0);
+            if (inStockVariant) {
+              defaultSize = inStockVariant.size;
+            }
           } else if (data.sizes && data.sizes.length > 0) {
-            defaultSize = data.sizes[0];
+            if ((Number(data.quantity || 0) > 0)) {
+              defaultSize = data.sizes[0];
+            }
           }
           setSelectedSize(defaultSize);
         })
@@ -140,8 +157,10 @@ export default function QuickViewDrawer({
             let activePrice = cachedProduct.price;
             let activeStrikePrice = cachedProduct.strikePrice;
             
-            if (hasVariants && selectedSize) {
-              const variant = fullProductData.variants.find((v: any) => v.size === selectedSize);
+            if (hasVariants) {
+              const variant = selectedSize
+                ? fullProductData.variants.find((v: any) => v.size === selectedSize)
+                : (fullProductData.variants.find((v: any) => (Number(v.quantity) || 0) > 0) || fullProductData.variants[0]);
               if (variant) {
                 activePrice = variant.price;
                 activeStrikePrice = variant.strikePrice;
@@ -163,7 +182,7 @@ export default function QuickViewDrawer({
                         className={styles.dropdownToggle}
                         onClick={() => setIsDropdownOpen(!isDropdownOpen)}
                       >
-                        <span className={styles.dropdownLeft}>{selectedSize}</span>
+                        <span className={styles.dropdownLeft}>{selectedSize || "Out of Stock"}</span>
                         <div className={styles.dropdownRight}>
                           <span>₹ {activePrice.toLocaleString("en-IN")}</span>
                           <svg className={`${styles.dropdownIcon} ${isDropdownOpen ? styles.dropdownIconOpen : ""}`} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
@@ -180,12 +199,15 @@ export default function QuickViewDrawer({
                               <div 
                                 key={v.size} 
                                 className={`${styles.dropdownOption} ${selectedSize === v.size ? styles.dropdownOptionActive : ""}`}
-                                style={isOutOfStock ? { opacity: 0.5, backgroundColor: "#f9fafb" } : {}}
-                                onClick={() => {
-                                  if (!isOutOfStock) {
-                                    setSelectedSize(v.size);
-                                    setIsDropdownOpen(false);
+                                style={isOutOfStock ? { opacity: 0.5, backgroundColor: "#f9fafb", cursor: "not-allowed", pointerEvents: "none" } : {}}
+                                onClick={(e) => {
+                                  if (isOutOfStock) {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    return;
                                   }
+                                  setSelectedSize(v.size);
+                                  setIsDropdownOpen(false);
                                 }}
                               >
                                 <span className={styles.dropdownLeft}>{v.size}</span>
@@ -263,21 +285,41 @@ export default function QuickViewDrawer({
             );
           })()}
 
-          <div className={styles.actionButtons}>
-            <button 
-              className={styles.addToBagBtn}
-              onClick={() => {
-                onAddToCart(cachedProduct, selectedSize || undefined, quantity);
-                onClose();
-              }}
-              disabled={isLoadingDetails}
-            >
-              {isLoadingDetails ? "LOADING..." : "ADD TO BAG"}
-            </button>
-            <Link href={`/product/${cachedProduct._id}`} className={styles.viewDetailsBtn}>
-              VIEW DETAILS
-            </Link>
-          </div>
+          {(() => {
+            const isSelectedSizeOutOfStock = (() => {
+              if (fullProductData?.variants && fullProductData.variants.length > 0) {
+                if (!selectedSize) return true;
+                const selectedVar = fullProductData.variants.find((v: any) => v.size === selectedSize);
+                return !selectedVar || (Number(selectedVar.quantity) || 0) <= 0;
+              }
+              if (cachedProduct?.variants && cachedProduct.variants.length > 0) {
+                if (!selectedSize) return true;
+                const selectedVar = cachedProduct.variants.find((v: any) => v.size === selectedSize);
+                return !selectedVar || (Number(selectedVar.quantity) || 0) <= 0;
+              }
+              return (Number(fullProductData?.quantity ?? cachedProduct?.quantity) || 0) <= 0;
+            })();
+
+            return (
+              <div className={styles.actionButtons}>
+                <button 
+                  className={styles.addToBagBtn}
+                  onClick={() => {
+                    if (isSelectedSizeOutOfStock) return;
+                    onAddToCart(cachedProduct, selectedSize || undefined, quantity);
+                    onClose();
+                  }}
+                  disabled={isLoadingDetails || isSelectedSizeOutOfStock}
+                  style={isSelectedSizeOutOfStock ? { opacity: 0.5, cursor: "not-allowed" } : {}}
+                >
+                  {isLoadingDetails ? "LOADING..." : (isSelectedSizeOutOfStock ? "OUT OF STOCK" : "ADD TO BAG")}
+                </button>
+                <Link href={`/product/${cachedProduct._id}`} className={styles.viewDetailsBtn}>
+                  VIEW DETAILS
+                </Link>
+              </div>
+            );
+          })()}
 
           <div className={styles.taxFooter}>
             *MRP (inclusive of all taxes). <a href="#">More information</a>
