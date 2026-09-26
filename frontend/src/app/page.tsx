@@ -1,7 +1,8 @@
 'use client';
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
 import styles from "./page.module.css";
 import Footer from "@/components/Footer";
@@ -51,6 +52,9 @@ export default function Home() {
   const [activeFaq, setActiveFaq] = useState<number | null>(null);
   const [arrivals, setArrivals] = useState<any[]>([]);
   const [bestSellers, setBestSellers] = useState<any[]>([]);
+  const [isStorefrontError, setIsStorefrontError] = useState<boolean>(false);
+  const [isStorefrontLoading, setIsStorefrontLoading] = useState<boolean>(false);
+  const [storefrontErrorMessage, setStorefrontErrorMessage] = useState<string>("");
   const [currentReviewIndex, setCurrentReviewIndex] = useState(0);
   const [reviewFade, setReviewFade] = useState(true);
   const [slideDirection, setSlideDirection] = useState<"forward" | "backward">("forward");
@@ -467,6 +471,272 @@ export default function Home() {
     }
   }, [videoUrl]);
 
+  const loadData = useCallback(() => {
+    setIsStorefrontLoading(true);
+    setIsStorefrontError(false);
+    setStorefrontErrorMessage("");
+
+    fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:5001'}/api/storefront/home`, { cache: "no-store" })
+      .then(res => {
+        if (!res.ok) throw new Error(`Server returned status ${res.status}`);
+        return res.json();
+      })
+      .then(payload => {
+        setIsStorefrontLoading(false);
+        setIsStorefrontError(false);
+        if (payload.arrivals && Array.isArray(payload.arrivals)) {
+          setArrivals(payload.arrivals);
+          localStorage.setItem("storefront_arrivals", JSON.stringify(payload.arrivals));
+        }
+        if (payload.bestSellers && Array.isArray(payload.bestSellers)) {
+          setBestSellers(payload.bestSellers);
+          localStorage.setItem("storefront_bestSellers", JSON.stringify(payload.bestSellers));
+        }
+
+        if (payload.reviews && Array.isArray(payload.reviews)) {
+          const formatted = payload.reviews.map((r: any) => ({
+            name: r.author || r.authorName || "Anonymous",
+            date: new Date(r.createdAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }),
+            rating: Number(r.rating) || 5,
+            text: r.comment || r.text || ""
+          }));
+          setAllReviews(formatted);
+        }
+
+        if (payload.settings) {
+          const data = payload.settings;
+          setGlobalSettings(data);
+          if (data.heroTitle !== undefined) {
+            setHeroTitle(data.heroTitle);
+            localStorage.setItem("settings_heroTitle", data.heroTitle);
+          }
+          if (data.heroTitleFontType !== undefined) {
+            setHeroTitleFontType(data.heroTitleFontType);
+            localStorage.setItem("settings_heroTitleFontType", data.heroTitleFontType);
+          }
+          if (data.heroTitleFontColor !== undefined) {
+            setHeroTitleFontColor(data.heroTitleFontColor);
+            localStorage.setItem("settings_heroTitleFontColor", data.heroTitleFontColor);
+          }
+          if (data.heroTitleFontSize !== undefined) {
+            setHeroTitleFontSize(data.heroTitleFontSize);
+            localStorage.setItem("settings_heroTitleFontSize", data.heroTitleFontSize);
+          }
+          if (data.heroTitleFontAlignment !== undefined) {
+            setHeroTitleFontAlignment(data.heroTitleFontAlignment);
+            localStorage.setItem("settings_heroTitleFontAlignment", data.heroTitleFontAlignment);
+          }
+          if (data.heroTitleFontWeight !== undefined) {
+            setHeroTitleFontWeight(data.heroTitleFontWeight);
+            localStorage.setItem("settings_heroTitleFontWeight", data.heroTitleFontWeight);
+          }
+          if (data.heroTemplate !== undefined) {
+            setHeroTemplate(data.heroTemplate);
+            localStorage.setItem("settings_heroTemplate", data.heroTemplate);
+          }
+
+          // Mobile Hero Layout Loading (unlinked)
+          if (data.mobileHeroTemplate !== undefined) setMobileHeroTemplate(data.mobileHeroTemplate);
+          if (data.mobileHeroTitle !== undefined) setMobileHeroTitle(data.mobileHeroTitle);
+          if (data.mobileHeroTitleFontType !== undefined) setMobileHeroTitleFontType(data.mobileHeroTitleFontType);
+          if (data.mobileHeroTitleFontColor !== undefined) setMobileHeroTitleFontColor(data.mobileHeroTitleFontColor);
+          if (data.mobileHeroTitleFontSize !== undefined) setMobileHeroTitleFontSize(data.mobileHeroTitleFontSize);
+          if (data.mobileHeroTitleFontAlignment !== undefined) setMobileHeroTitleFontAlignment(data.mobileHeroTitleFontAlignment);
+          if (data.mobileHeroTitleFontWeight !== undefined) setMobileHeroTitleFontWeight(data.mobileHeroTitleFontWeight);
+          if (data.showMobileHeroTitle !== undefined) setShowMobileHeroTitle(data.showMobileHeroTitle);
+
+          if (data.mobileHeroManifesto !== undefined) setMobileHeroManifesto(data.mobileHeroManifesto);
+          if (data.mobileHeroManifestoFontType !== undefined) setMobileHeroManifestoFontType(data.mobileHeroManifestoFontType);
+          if (data.mobileHeroManifestoFontColor !== undefined) setMobileHeroManifestoFontColor(data.mobileHeroManifestoFontColor);
+          if (data.mobileHeroManifestoFontSize !== undefined) setMobileHeroManifestoFontSize(data.mobileHeroManifestoFontSize);
+          if (data.mobileHeroManifestoFontAlignment !== undefined) setMobileHeroManifestoFontAlignment(data.mobileHeroManifestoFontAlignment);
+          if (data.mobileHeroManifestoFontWeight !== undefined) setMobileHeroManifestoFontWeight(data.mobileHeroManifestoFontWeight);
+          if (data.showMobileHeroManifesto !== undefined) setShowMobileHeroManifesto(data.showMobileHeroManifesto);
+
+          if (data.mobileHeroButtonText !== undefined) setMobileHeroButtonText(data.mobileHeroButtonText);
+          if (data.mobileHeroButtonStyle !== undefined) setMobileHeroButtonStyle(data.mobileHeroButtonStyle);
+          if (data.mobileHeroButtonSize !== undefined) setMobileHeroButtonSize(data.mobileHeroButtonSize);
+          if (data.mobileHeroButtonColor !== undefined) setMobileHeroButtonColor(data.mobileHeroButtonColor);
+          if (data.mobileHeroButtonTextColor !== undefined) setMobileHeroButtonTextColor(data.mobileHeroButtonTextColor);
+          if (data.showMobileHeroButton !== undefined) setShowMobileHeroButton(data.showMobileHeroButton);
+          if (data.showHeroTitle !== undefined) {
+            setShowHeroTitle(data.showHeroTitle);
+            localStorage.setItem("settings_showHeroTitle", String(data.showHeroTitle));
+          }
+          if (data.showHeroManifesto !== undefined) {
+            setShowHeroManifesto(data.showHeroManifesto);
+            localStorage.setItem("settings_showHeroManifesto", String(data.showHeroManifesto));
+          }
+          if (data.showHeroButton !== undefined) {
+            setShowHeroButton(data.showHeroButton);
+            localStorage.setItem("settings_showHeroButton", String(data.showHeroButton));
+          }
+          if (data.heroButtonStyle !== undefined) {
+            setHeroButtonStyle(data.heroButtonStyle);
+            localStorage.setItem("settings_heroButtonStyle", data.heroButtonStyle);
+          }
+          if (data.heroButtonSize !== undefined) {
+            setHeroButtonSize(data.heroButtonSize);
+            localStorage.setItem("settings_heroButtonSize", data.heroButtonSize);
+          }
+          if (data.heroButtonColor !== undefined) {
+            setHeroButtonColor(data.heroButtonColor);
+            localStorage.setItem("settings_heroButtonColor", data.heroButtonColor);
+          }
+          if (data.heroButtonTextColor !== undefined) {
+            setHeroButtonTextColor(data.heroButtonTextColor);
+            localStorage.setItem("settings_heroButtonTextColor", data.heroButtonTextColor);
+          }
+          if (data.heroButtonText !== undefined) {
+            setHeroButtonText(data.heroButtonText);
+            localStorage.setItem("settings_heroButtonText", data.heroButtonText);
+          }
+          if (data.heroManifesto !== undefined) {
+            setHeroManifesto(data.heroManifesto);
+            localStorage.setItem("settings_heroManifesto", data.heroManifesto);
+          }
+          if (data.heroManifestoFontType !== undefined) { setHeroManifestoFontType(data.heroManifestoFontType); localStorage.setItem("settings_heroManifestoFontType", data.heroManifestoFontType); }
+          if (data.heroManifestoFontColor !== undefined) { setHeroManifestoFontColor(data.heroManifestoFontColor); localStorage.setItem("settings_heroManifestoFontColor", data.heroManifestoFontColor); }
+          if (data.heroManifestoFontSize !== undefined) { setHeroManifestoFontSize(data.heroManifestoFontSize); localStorage.setItem("settings_heroManifestoFontSize", data.heroManifestoFontSize); }
+          if (data.heroManifestoFontAlignment !== undefined) { setHeroManifestoFontAlignment(data.heroManifestoFontAlignment); localStorage.setItem("settings_heroManifestoFontAlignment", data.heroManifestoFontAlignment); }
+          if (data.heroManifestoFontWeight !== undefined) { setHeroManifestoFontWeight(data.heroManifestoFontWeight); localStorage.setItem("settings_heroManifestoFontWeight", data.heroManifestoFontWeight); }
+          if (data.videoTitle !== undefined) {
+            setVideoTitle(data.videoTitle);
+            localStorage.setItem("settings_videoTitle", data.videoTitle);
+          }
+          if (data.videoSubtitle !== undefined) {
+            setVideoSubtitle(data.videoSubtitle);
+            localStorage.setItem("settings_videoSubtitle", data.videoSubtitle);
+          }
+          if (data.videoUrl !== undefined) {
+            setVideoUrl(data.videoUrl);
+            localStorage.setItem("settings_videoUrl", data.videoUrl);
+          }
+          if (data.videoFallbackColor !== undefined) {
+            setVideoFallbackColor(data.videoFallbackColor);
+            localStorage.setItem("settings_videoFallbackColor", data.videoFallbackColor);
+          }
+          if (data.videoTitleFontType !== undefined) { setVideoTitleFontType(data.videoTitleFontType); localStorage.setItem("settings_videoTitleFontType", data.videoTitleFontType); }
+          if (data.videoTitleFontColor !== undefined) { setVideoTitleFontColor(data.videoTitleFontColor); localStorage.setItem("settings_videoTitleFontColor", data.videoTitleFontColor); }
+          if (data.videoTitleFontSize !== undefined) { setVideoTitleFontSize(data.videoTitleFontSize); localStorage.setItem("settings_videoTitleFontSize", data.videoTitleFontSize); }
+          if (data.videoTitleFontAlignment !== undefined) { setVideoTitleFontAlignment(data.videoTitleFontAlignment); localStorage.setItem("settings_videoTitleFontAlignment", data.videoTitleFontAlignment); }
+          if (data.videoTitleFontWeight !== undefined) { setVideoTitleFontWeight(data.videoTitleFontWeight); localStorage.setItem("settings_videoTitleFontWeight", data.videoTitleFontWeight); }
+          if (data.videoSubtitleFontType !== undefined) { setVideoSubtitleFontType(data.videoSubtitleFontType); localStorage.setItem("settings_videoSubtitleFontType", data.videoSubtitleFontType); }
+          if (data.videoSubtitleFontColor !== undefined) { setVideoSubtitleFontColor(data.videoSubtitleFontColor); localStorage.setItem("settings_videoSubtitleFontColor", data.videoSubtitleFontColor); }
+          if (data.videoSubtitleFontSize !== undefined) { setVideoSubtitleFontSize(data.videoSubtitleFontSize); localStorage.setItem("settings_videoSubtitleFontSize", data.videoSubtitleFontSize); }
+          if (data.videoSubtitleFontAlignment !== undefined) { setVideoSubtitleFontAlignment(data.videoSubtitleFontAlignment); localStorage.setItem("settings_videoSubtitleFontAlignment", data.videoSubtitleFontAlignment); }
+          if (data.videoSubtitleFontWeight !== undefined) { setVideoSubtitleFontWeight(data.videoSubtitleFontWeight); localStorage.setItem("settings_videoSubtitleFontWeight", data.videoSubtitleFontWeight); }
+          if (data.videoTemplate !== undefined) { setVideoTemplate(data.videoTemplate); localStorage.setItem("settings_videoTemplate", data.videoTemplate); }
+          if (data.showVideoTitle !== undefined) { setShowVideoTitle(data.showVideoTitle); localStorage.setItem("settings_showVideoTitle", String(data.showVideoTitle)); }
+          if (data.showVideoSubtitle !== undefined) { setShowVideoSubtitle(data.showVideoSubtitle); localStorage.setItem("settings_showVideoSubtitle", String(data.showVideoSubtitle)); }
+          if (data.showVideoButton !== undefined) { setShowVideoButton(data.showVideoButton); localStorage.setItem("settings_showVideoButton", String(data.showVideoButton)); }
+          if (data.videoButtonText !== undefined) { setVideoButtonText(data.videoButtonText); localStorage.setItem("settings_videoButtonText", data.videoButtonText); }
+          if (data.videoButtonStyle !== undefined) { setVideoButtonStyle(data.videoButtonStyle); localStorage.setItem("settings_videoButtonStyle", data.videoButtonStyle); }
+          if (data.videoButtonSize !== undefined) { setVideoButtonSize(data.videoButtonSize); localStorage.setItem("settings_videoButtonSize", data.videoButtonSize); }
+          if (data.videoButtonColor !== undefined) { setVideoButtonColor(data.videoButtonColor); localStorage.setItem("settings_videoButtonColor", data.videoButtonColor); }
+          if (data.videoButtonTextColor !== undefined) { setVideoButtonTextColor(data.videoButtonTextColor); localStorage.setItem("settings_videoButtonTextColor", data.videoButtonTextColor); }
+          if (data.videoBgType !== undefined) { setVideoBgType(data.videoBgType); localStorage.setItem("settings_videoBgType", data.videoBgType); }
+          if (data.videoBgColor !== undefined) { setVideoBgColor(data.videoBgColor); localStorage.setItem("settings_videoBgColor", data.videoBgColor); }
+          if (data.videoBgImage !== undefined) { setVideoBgImage(data.videoBgImage); localStorage.setItem("settings_videoBgImage", data.videoBgImage); }
+
+          // Mobile Video Layout Loading (unlinked)
+          if (data.mobileVideoTemplate !== undefined) setMobileVideoTemplate(data.mobileVideoTemplate);
+          if (data.mobileVideoTitle !== undefined) setMobileVideoTitle(data.mobileVideoTitle);
+          if (data.mobileVideoTitleFontType !== undefined) setMobileVideoTitleFontType(data.mobileVideoTitleFontType);
+          if (data.mobileVideoTitleFontColor !== undefined) setMobileVideoTitleFontColor(data.mobileVideoTitleFontColor);
+          if (data.mobileVideoTitleFontSize !== undefined) setMobileVideoTitleFontSize(data.mobileVideoTitleFontSize);
+          if (data.mobileVideoTitleFontAlignment !== undefined) setMobileVideoTitleFontAlignment(data.mobileVideoTitleFontAlignment);
+          if (data.mobileVideoTitleFontWeight !== undefined) setMobileVideoTitleFontWeight(data.mobileVideoTitleFontWeight);
+          if (data.showMobileVideoTitle !== undefined) setShowMobileVideoTitle(data.showMobileVideoTitle);
+
+          if (data.mobileVideoSubtitle !== undefined) setMobileVideoSubtitle(data.mobileVideoSubtitle);
+          if (data.mobileVideoSubtitleFontType !== undefined) setMobileVideoSubtitleFontType(data.mobileVideoSubtitleFontType);
+          if (data.mobileVideoSubtitleFontColor !== undefined) setMobileVideoSubtitleFontColor(data.mobileVideoSubtitleFontColor);
+          if (data.mobileVideoSubtitleFontSize !== undefined) setMobileVideoSubtitleFontSize(data.mobileVideoSubtitleFontSize);
+          if (data.mobileVideoSubtitleFontAlignment !== undefined) setMobileVideoSubtitleFontAlignment(data.mobileVideoSubtitleFontAlignment);
+          if (data.mobileVideoSubtitleFontWeight !== undefined) setMobileVideoSubtitleFontWeight(data.mobileVideoSubtitleFontWeight);
+          if (data.showMobileVideoSubtitle !== undefined) setShowMobileVideoSubtitle(data.showMobileVideoSubtitle);
+
+          if (data.mobileVideoButtonText !== undefined) setMobileVideoButtonText(data.mobileVideoButtonText);
+          if (data.mobileVideoButtonStyle !== undefined) setMobileVideoButtonStyle(data.mobileVideoButtonStyle);
+          if (data.mobileVideoButtonSize !== undefined) setMobileVideoButtonSize(data.mobileVideoButtonSize);
+          if (data.mobileVideoButtonColor !== undefined) setMobileVideoButtonColor(data.mobileVideoButtonColor);
+          if (data.mobileVideoButtonTextColor !== undefined) setMobileVideoButtonTextColor(data.mobileVideoButtonTextColor);
+          if (data.showMobileVideoButton !== undefined) setShowMobileVideoButton(data.showMobileVideoButton);
+          if (data.lifestyleText !== undefined) {
+            setLifestyleText(data.lifestyleText);
+            localStorage.setItem("settings_lifestyleText", data.lifestyleText);
+          }
+          if (data.lifestyleImage !== undefined) {
+            setLifestyleImage(data.lifestyleImage);
+            localStorage.setItem("settings_lifestyleImage", data.lifestyleImage);
+          }
+          if (data.lifestyleTextFontType !== undefined) setLifestyleTextFontType(data.lifestyleTextFontType);
+          if (data.lifestyleTextFontColor !== undefined) setLifestyleTextFontColor(data.lifestyleTextFontColor);
+          if (data.lifestyleTextFontSize !== undefined) setLifestyleTextFontSize(data.lifestyleTextFontSize);
+          if (data.lifestyleTextFontAlignment !== undefined) setLifestyleTextFontAlignment(data.lifestyleTextFontAlignment);
+          if (data.lifestyleTextFontWeight !== undefined) setLifestyleTextFontWeight(data.lifestyleTextFontWeight);
+          if (data.showLifestyleText !== undefined) setShowLifestyleText(data.showLifestyleText);
+          if (data.showLifestyleButton !== undefined) setShowLifestyleButton(data.showLifestyleButton);
+          if (data.lifestyleButtonText !== undefined) setLifestyleButtonText(data.lifestyleButtonText);
+          if (data.lifestyleButtonStyle !== undefined) setLifestyleButtonStyle(data.lifestyleButtonStyle);
+          if (data.lifestyleButtonSize !== undefined) setLifestyleButtonSize(data.lifestyleButtonSize);
+          if (data.lifestyleButtonColor !== undefined) setLifestyleButtonColor(data.lifestyleButtonColor);
+          if (data.lifestyleButtonTextColor !== undefined) setLifestyleButtonTextColor(data.lifestyleButtonTextColor);
+
+          if (data.mobileLifestyleText !== undefined) setMobileLifestyleText(data.mobileLifestyleText);
+          if (data.mobileLifestyleTextFontType !== undefined) setMobileLifestyleTextFontType(data.mobileLifestyleTextFontType);
+          if (data.mobileLifestyleTextFontColor !== undefined) setMobileLifestyleTextFontColor(data.mobileLifestyleTextFontColor);
+          if (data.mobileLifestyleTextFontSize !== undefined) setMobileLifestyleTextFontSize(data.mobileLifestyleTextFontSize);
+          if (data.mobileLifestyleTextFontAlignment !== undefined) setMobileLifestyleTextFontAlignment(data.mobileLifestyleTextFontAlignment);
+          if (data.mobileLifestyleTextFontWeight !== undefined) setMobileLifestyleTextFontWeight(data.mobileLifestyleTextFontWeight);
+          if (data.showMobileLifestyleText !== undefined) setShowMobileLifestyleText(data.showMobileLifestyleText);
+          if (data.showMobileLifestyleButton !== undefined) setShowMobileLifestyleButton(data.showMobileLifestyleButton);
+          if (data.mobileLifestyleButtonText !== undefined) setMobileLifestyleButtonText(data.mobileLifestyleButtonText);
+          if (data.mobileLifestyleButtonStyle !== undefined) setMobileLifestyleButtonStyle(data.mobileLifestyleButtonStyle);
+          if (data.mobileLifestyleButtonSize !== undefined) setMobileLifestyleButtonSize(data.mobileLifestyleButtonSize);
+          if (data.mobileLifestyleButtonColor !== undefined) setMobileLifestyleButtonColor(data.mobileLifestyleButtonColor);
+          if (data.mobileLifestyleButtonTextColor !== undefined) setMobileLifestyleButtonTextColor(data.mobileLifestyleButtonTextColor);
+          if (data.primaryColor !== undefined) {
+            setPrimaryColor(data.primaryColor);
+            if (typeof document !== "undefined") document.documentElement.style.setProperty("--primary-brand-color", data.primaryColor);
+            localStorage.setItem("settings_primaryColor", data.primaryColor);
+          }
+          if (data.heroBgType !== undefined) {
+            setHeroBgType(data.heroBgType);
+            localStorage.setItem("settings_heroBgType", data.heroBgType);
+          }
+          if (data.heroBgColor !== undefined) {
+            setHeroBgColor(data.heroBgColor);
+            localStorage.setItem("settings_heroBgColor", data.heroBgColor);
+          }
+          if (data.heroBgImage !== undefined) {
+            setHeroBgImage(data.heroBgImage);
+            localStorage.setItem("settings_heroBgImage", data.heroBgImage);
+          }
+          if (data.heroBgVideo !== undefined) {
+            setHeroBgVideo(data.heroBgVideo);
+            localStorage.setItem("settings_heroBgVideo", data.heroBgVideo);
+          }
+          if (data.showVideo !== undefined) {
+            setShowVideo(data.showVideo);
+            localStorage.setItem("settings_showVideo", String(data.showVideo));
+          }
+          if (data.showLifestyle !== undefined) {
+            setShowLifestyle(data.showLifestyle);
+            localStorage.setItem("settings_showLifestyle", String(data.showLifestyle));
+          }
+          if (data.faqs !== undefined && Array.isArray(data.faqs)) setFaqs(data.faqs);
+        }
+      })
+      .catch(err => {
+        console.warn("Storefront fetch error:", err.message || err);
+        setIsStorefrontLoading(false);
+        setIsStorefrontError(true);
+        setStorefrontErrorMessage(err.message || "Failed to load live catalog");
+      });
+  }, []);
+
   useEffect(() => {
     // Load cached settings immediately to prevent visual jumps during load
     try {
@@ -522,263 +792,8 @@ export default function Home() {
       console.warn("Failed to load cached settings:", e);
     }
 
-    const loadData = () => {
-      fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:5001'}/api/storefront/home`, { cache: "no-store" })
-        .then(res => {
-          if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
-          return res.json();
-        })
-        .then(payload => {
-          if (payload.arrivals && Array.isArray(payload.arrivals)) {
-            setArrivals(payload.arrivals);
-            localStorage.setItem("storefront_arrivals", JSON.stringify(payload.arrivals));
-          }
-          if (payload.bestSellers && Array.isArray(payload.bestSellers)) {
-            setBestSellers(payload.bestSellers);
-            localStorage.setItem("storefront_bestSellers", JSON.stringify(payload.bestSellers));
-          }
-
-          if (payload.reviews && Array.isArray(payload.reviews)) {
-            const formatted = payload.reviews.map((r: any) => ({
-              name: r.author || r.authorName || "Anonymous",
-              date: new Date(r.createdAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }),
-              rating: Number(r.rating) || 5,
-              text: r.comment || r.text || ""
-            }));
-            setAllReviews(formatted);
-          }
-
-          if (payload.settings) {
-            const data = payload.settings;
-            setGlobalSettings(data);
-            if (data.heroTitle !== undefined) {
-              setHeroTitle(data.heroTitle);
-              localStorage.setItem("settings_heroTitle", data.heroTitle);
-            }
-            if (data.heroTitleFontType !== undefined) {
-              setHeroTitleFontType(data.heroTitleFontType);
-              localStorage.setItem("settings_heroTitleFontType", data.heroTitleFontType);
-            }
-            if (data.heroTitleFontColor !== undefined) {
-              setHeroTitleFontColor(data.heroTitleFontColor);
-              localStorage.setItem("settings_heroTitleFontColor", data.heroTitleFontColor);
-            }
-            if (data.heroTitleFontSize !== undefined) {
-              setHeroTitleFontSize(data.heroTitleFontSize);
-              localStorage.setItem("settings_heroTitleFontSize", data.heroTitleFontSize);
-            }
-            if (data.heroTitleFontAlignment !== undefined) {
-              setHeroTitleFontAlignment(data.heroTitleFontAlignment);
-              localStorage.setItem("settings_heroTitleFontAlignment", data.heroTitleFontAlignment);
-            }
-            if (data.heroTitleFontWeight !== undefined) {
-              setHeroTitleFontWeight(data.heroTitleFontWeight);
-              localStorage.setItem("settings_heroTitleFontWeight", data.heroTitleFontWeight);
-            }
-            if (data.heroTemplate !== undefined) {
-              setHeroTemplate(data.heroTemplate);
-              localStorage.setItem("settings_heroTemplate", data.heroTemplate);
-            }
-
-            // Mobile Hero Layout Loading (unlinked)
-            if (data.mobileHeroTemplate !== undefined) setMobileHeroTemplate(data.mobileHeroTemplate);
-            if (data.mobileHeroTitle !== undefined) setMobileHeroTitle(data.mobileHeroTitle);
-            if (data.mobileHeroTitleFontType !== undefined) setMobileHeroTitleFontType(data.mobileHeroTitleFontType);
-            if (data.mobileHeroTitleFontColor !== undefined) setMobileHeroTitleFontColor(data.mobileHeroTitleFontColor);
-            if (data.mobileHeroTitleFontSize !== undefined) setMobileHeroTitleFontSize(data.mobileHeroTitleFontSize);
-            if (data.mobileHeroTitleFontAlignment !== undefined) setMobileHeroTitleFontAlignment(data.mobileHeroTitleFontAlignment);
-            if (data.mobileHeroTitleFontWeight !== undefined) setMobileHeroTitleFontWeight(data.mobileHeroTitleFontWeight);
-            if (data.showMobileHeroTitle !== undefined) setShowMobileHeroTitle(data.showMobileHeroTitle);
-
-            if (data.mobileHeroManifesto !== undefined) setMobileHeroManifesto(data.mobileHeroManifesto);
-            if (data.mobileHeroManifestoFontType !== undefined) setMobileHeroManifestoFontType(data.mobileHeroManifestoFontType);
-            if (data.mobileHeroManifestoFontColor !== undefined) setMobileHeroManifestoFontColor(data.mobileHeroManifestoFontColor);
-            if (data.mobileHeroManifestoFontSize !== undefined) setMobileHeroManifestoFontSize(data.mobileHeroManifestoFontSize);
-            if (data.mobileHeroManifestoFontAlignment !== undefined) setMobileHeroManifestoFontAlignment(data.mobileHeroManifestoFontAlignment);
-            if (data.mobileHeroManifestoFontWeight !== undefined) setMobileHeroManifestoFontWeight(data.mobileHeroManifestoFontWeight);
-            if (data.showMobileHeroManifesto !== undefined) setShowMobileHeroManifesto(data.showMobileHeroManifesto);
-
-            if (data.mobileHeroButtonText !== undefined) setMobileHeroButtonText(data.mobileHeroButtonText);
-            if (data.mobileHeroButtonStyle !== undefined) setMobileHeroButtonStyle(data.mobileHeroButtonStyle);
-            if (data.mobileHeroButtonSize !== undefined) setMobileHeroButtonSize(data.mobileHeroButtonSize);
-            if (data.mobileHeroButtonColor !== undefined) setMobileHeroButtonColor(data.mobileHeroButtonColor);
-            if (data.mobileHeroButtonTextColor !== undefined) setMobileHeroButtonTextColor(data.mobileHeroButtonTextColor);
-            if (data.showMobileHeroButton !== undefined) setShowMobileHeroButton(data.showMobileHeroButton);
-            if (data.showHeroTitle !== undefined) {
-              setShowHeroTitle(data.showHeroTitle);
-              localStorage.setItem("settings_showHeroTitle", String(data.showHeroTitle));
-            }
-            if (data.showHeroManifesto !== undefined) {
-              setShowHeroManifesto(data.showHeroManifesto);
-              localStorage.setItem("settings_showHeroManifesto", String(data.showHeroManifesto));
-            }
-            if (data.showHeroButton !== undefined) {
-              setShowHeroButton(data.showHeroButton);
-              localStorage.setItem("settings_showHeroButton", String(data.showHeroButton));
-            }
-            if (data.heroButtonStyle !== undefined) {
-              setHeroButtonStyle(data.heroButtonStyle);
-              localStorage.setItem("settings_heroButtonStyle", data.heroButtonStyle);
-            }
-            if (data.heroButtonSize !== undefined) {
-              setHeroButtonSize(data.heroButtonSize);
-              localStorage.setItem("settings_heroButtonSize", data.heroButtonSize);
-            }
-            if (data.heroButtonColor !== undefined) {
-              setHeroButtonColor(data.heroButtonColor);
-              localStorage.setItem("settings_heroButtonColor", data.heroButtonColor);
-            }
-            if (data.heroButtonTextColor !== undefined) {
-              setHeroButtonTextColor(data.heroButtonTextColor);
-              localStorage.setItem("settings_heroButtonTextColor", data.heroButtonTextColor);
-            }
-            if (data.heroButtonText !== undefined) {
-              setHeroButtonText(data.heroButtonText);
-              localStorage.setItem("settings_heroButtonText", data.heroButtonText);
-            }
-            if (data.heroManifesto !== undefined) {
-              setHeroManifesto(data.heroManifesto);
-              localStorage.setItem("settings_heroManifesto", data.heroManifesto);
-            }
-            if (data.heroManifestoFontType !== undefined) { setHeroManifestoFontType(data.heroManifestoFontType); localStorage.setItem("settings_heroManifestoFontType", data.heroManifestoFontType); }
-            if (data.heroManifestoFontColor !== undefined) { setHeroManifestoFontColor(data.heroManifestoFontColor); localStorage.setItem("settings_heroManifestoFontColor", data.heroManifestoFontColor); }
-            if (data.heroManifestoFontSize !== undefined) { setHeroManifestoFontSize(data.heroManifestoFontSize); localStorage.setItem("settings_heroManifestoFontSize", data.heroManifestoFontSize); }
-            if (data.heroManifestoFontAlignment !== undefined) { setHeroManifestoFontAlignment(data.heroManifestoFontAlignment); localStorage.setItem("settings_heroManifestoFontAlignment", data.heroManifestoFontAlignment); }
-            if (data.heroManifestoFontWeight !== undefined) { setHeroManifestoFontWeight(data.heroManifestoFontWeight); localStorage.setItem("settings_heroManifestoFontWeight", data.heroManifestoFontWeight); }
-            if (data.videoTitle !== undefined) {
-              setVideoTitle(data.videoTitle);
-              localStorage.setItem("settings_videoTitle", data.videoTitle);
-            }
-            if (data.videoSubtitle !== undefined) {
-              setVideoSubtitle(data.videoSubtitle);
-              localStorage.setItem("settings_videoSubtitle", data.videoSubtitle);
-            }
-            if (data.videoUrl !== undefined) {
-              setVideoUrl(data.videoUrl);
-              localStorage.setItem("settings_videoUrl", data.videoUrl);
-            }
-            if (data.videoFallbackColor !== undefined) {
-              setVideoFallbackColor(data.videoFallbackColor);
-              localStorage.setItem("settings_videoFallbackColor", data.videoFallbackColor);
-            }
-            if (data.videoTitleFontType !== undefined) { setVideoTitleFontType(data.videoTitleFontType); localStorage.setItem("settings_videoTitleFontType", data.videoTitleFontType); }
-            if (data.videoTitleFontColor !== undefined) { setVideoTitleFontColor(data.videoTitleFontColor); localStorage.setItem("settings_videoTitleFontColor", data.videoTitleFontColor); }
-            if (data.videoTitleFontSize !== undefined) { setVideoTitleFontSize(data.videoTitleFontSize); localStorage.setItem("settings_videoTitleFontSize", data.videoTitleFontSize); }
-            if (data.videoTitleFontAlignment !== undefined) { setVideoTitleFontAlignment(data.videoTitleFontAlignment); localStorage.setItem("settings_videoTitleFontAlignment", data.videoTitleFontAlignment); }
-            if (data.videoTitleFontWeight !== undefined) { setVideoTitleFontWeight(data.videoTitleFontWeight); localStorage.setItem("settings_videoTitleFontWeight", data.videoTitleFontWeight); }
-            if (data.videoSubtitleFontType !== undefined) { setVideoSubtitleFontType(data.videoSubtitleFontType); localStorage.setItem("settings_videoSubtitleFontType", data.videoSubtitleFontType); }
-            if (data.videoSubtitleFontColor !== undefined) { setVideoSubtitleFontColor(data.videoSubtitleFontColor); localStorage.setItem("settings_videoSubtitleFontColor", data.videoSubtitleFontColor); }
-            if (data.videoSubtitleFontSize !== undefined) { setVideoSubtitleFontSize(data.videoSubtitleFontSize); localStorage.setItem("settings_videoSubtitleFontSize", data.videoSubtitleFontSize); }
-            if (data.videoSubtitleFontAlignment !== undefined) { setVideoSubtitleFontAlignment(data.videoSubtitleFontAlignment); localStorage.setItem("settings_videoSubtitleFontAlignment", data.videoSubtitleFontAlignment); }
-            if (data.videoSubtitleFontWeight !== undefined) { setVideoSubtitleFontWeight(data.videoSubtitleFontWeight); localStorage.setItem("settings_videoSubtitleFontWeight", data.videoSubtitleFontWeight); }
-            if (data.videoTemplate !== undefined) { setVideoTemplate(data.videoTemplate); localStorage.setItem("settings_videoTemplate", data.videoTemplate); }
-            if (data.showVideoTitle !== undefined) { setShowVideoTitle(data.showVideoTitle); localStorage.setItem("settings_showVideoTitle", String(data.showVideoTitle)); }
-            if (data.showVideoSubtitle !== undefined) { setShowVideoSubtitle(data.showVideoSubtitle); localStorage.setItem("settings_showVideoSubtitle", String(data.showVideoSubtitle)); }
-            if (data.showVideoButton !== undefined) { setShowVideoButton(data.showVideoButton); localStorage.setItem("settings_showVideoButton", String(data.showVideoButton)); }
-            if (data.videoButtonText !== undefined) { setVideoButtonText(data.videoButtonText); localStorage.setItem("settings_videoButtonText", data.videoButtonText); }
-            if (data.videoButtonStyle !== undefined) { setVideoButtonStyle(data.videoButtonStyle); localStorage.setItem("settings_videoButtonStyle", data.videoButtonStyle); }
-            if (data.videoButtonSize !== undefined) { setVideoButtonSize(data.videoButtonSize); localStorage.setItem("settings_videoButtonSize", data.videoButtonSize); }
-            if (data.videoButtonColor !== undefined) { setVideoButtonColor(data.videoButtonColor); localStorage.setItem("settings_videoButtonColor", data.videoButtonColor); }
-            if (data.videoButtonTextColor !== undefined) { setVideoButtonTextColor(data.videoButtonTextColor); localStorage.setItem("settings_videoButtonTextColor", data.videoButtonTextColor); }
-            if (data.videoBgType !== undefined) { setVideoBgType(data.videoBgType); localStorage.setItem("settings_videoBgType", data.videoBgType); }
-            if (data.videoBgColor !== undefined) { setVideoBgColor(data.videoBgColor); localStorage.setItem("settings_videoBgColor", data.videoBgColor); }
-            if (data.videoBgImage !== undefined) { setVideoBgImage(data.videoBgImage); localStorage.setItem("settings_videoBgImage", data.videoBgImage); }
-
-            // Mobile Video Layout Loading (unlinked)
-            if (data.mobileVideoTemplate !== undefined) setMobileVideoTemplate(data.mobileVideoTemplate);
-            if (data.mobileVideoTitle !== undefined) setMobileVideoTitle(data.mobileVideoTitle);
-            if (data.mobileVideoTitleFontType !== undefined) setMobileVideoTitleFontType(data.mobileVideoTitleFontType);
-            if (data.mobileVideoTitleFontColor !== undefined) setMobileVideoTitleFontColor(data.mobileVideoTitleFontColor);
-            if (data.mobileVideoTitleFontSize !== undefined) setMobileVideoTitleFontSize(data.mobileVideoTitleFontSize);
-            if (data.mobileVideoTitleFontAlignment !== undefined) setMobileVideoTitleFontAlignment(data.mobileVideoTitleFontAlignment);
-            if (data.mobileVideoTitleFontWeight !== undefined) setMobileVideoTitleFontWeight(data.mobileVideoTitleFontWeight);
-            if (data.showMobileVideoTitle !== undefined) setShowMobileVideoTitle(data.showMobileVideoTitle);
-
-            if (data.mobileVideoSubtitle !== undefined) setMobileVideoSubtitle(data.mobileVideoSubtitle);
-            if (data.mobileVideoSubtitleFontType !== undefined) setMobileVideoSubtitleFontType(data.mobileVideoSubtitleFontType);
-            if (data.mobileVideoSubtitleFontColor !== undefined) setMobileVideoSubtitleFontColor(data.mobileVideoSubtitleFontColor);
-            if (data.mobileVideoSubtitleFontSize !== undefined) setMobileVideoSubtitleFontSize(data.mobileVideoSubtitleFontSize);
-            if (data.mobileVideoSubtitleFontAlignment !== undefined) setMobileVideoSubtitleFontAlignment(data.mobileVideoSubtitleFontAlignment);
-            if (data.mobileVideoSubtitleFontWeight !== undefined) setMobileVideoSubtitleFontWeight(data.mobileVideoSubtitleFontWeight);
-            if (data.showMobileVideoSubtitle !== undefined) setShowMobileVideoSubtitle(data.showMobileVideoSubtitle);
-
-            if (data.mobileVideoButtonText !== undefined) setMobileVideoButtonText(data.mobileVideoButtonText);
-            if (data.mobileVideoButtonStyle !== undefined) setMobileVideoButtonStyle(data.mobileVideoButtonStyle);
-            if (data.mobileVideoButtonSize !== undefined) setMobileVideoButtonSize(data.mobileVideoButtonSize);
-            if (data.mobileVideoButtonColor !== undefined) setMobileVideoButtonColor(data.mobileVideoButtonColor);
-            if (data.mobileVideoButtonTextColor !== undefined) setMobileVideoButtonTextColor(data.mobileVideoButtonTextColor);
-            if (data.showMobileVideoButton !== undefined) setShowMobileVideoButton(data.showMobileVideoButton);
-            if (data.lifestyleText !== undefined) {
-              setLifestyleText(data.lifestyleText);
-              localStorage.setItem("settings_lifestyleText", data.lifestyleText);
-            }
-            if (data.lifestyleImage !== undefined) {
-              setLifestyleImage(data.lifestyleImage);
-              localStorage.setItem("settings_lifestyleImage", data.lifestyleImage);
-            }
-            if (data.lifestyleTextFontType !== undefined) setLifestyleTextFontType(data.lifestyleTextFontType);
-            if (data.lifestyleTextFontColor !== undefined) setLifestyleTextFontColor(data.lifestyleTextFontColor);
-            if (data.lifestyleTextFontSize !== undefined) setLifestyleTextFontSize(data.lifestyleTextFontSize);
-            if (data.lifestyleTextFontAlignment !== undefined) setLifestyleTextFontAlignment(data.lifestyleTextFontAlignment);
-            if (data.lifestyleTextFontWeight !== undefined) setLifestyleTextFontWeight(data.lifestyleTextFontWeight);
-            if (data.showLifestyleText !== undefined) setShowLifestyleText(data.showLifestyleText);
-            if (data.showLifestyleButton !== undefined) setShowLifestyleButton(data.showLifestyleButton);
-            if (data.lifestyleButtonText !== undefined) setLifestyleButtonText(data.lifestyleButtonText);
-            if (data.lifestyleButtonStyle !== undefined) setLifestyleButtonStyle(data.lifestyleButtonStyle);
-            if (data.lifestyleButtonSize !== undefined) setLifestyleButtonSize(data.lifestyleButtonSize);
-            if (data.lifestyleButtonColor !== undefined) setLifestyleButtonColor(data.lifestyleButtonColor);
-            if (data.lifestyleButtonTextColor !== undefined) setLifestyleButtonTextColor(data.lifestyleButtonTextColor);
-
-            if (data.mobileLifestyleText !== undefined) setMobileLifestyleText(data.mobileLifestyleText);
-            if (data.mobileLifestyleTextFontType !== undefined) setMobileLifestyleTextFontType(data.mobileLifestyleTextFontType);
-            if (data.mobileLifestyleTextFontColor !== undefined) setMobileLifestyleTextFontColor(data.mobileLifestyleTextFontColor);
-            if (data.mobileLifestyleTextFontSize !== undefined) setMobileLifestyleTextFontSize(data.mobileLifestyleTextFontSize);
-            if (data.mobileLifestyleTextFontAlignment !== undefined) setMobileLifestyleTextFontAlignment(data.mobileLifestyleTextFontAlignment);
-            if (data.mobileLifestyleTextFontWeight !== undefined) setMobileLifestyleTextFontWeight(data.mobileLifestyleTextFontWeight);
-            if (data.showMobileLifestyleText !== undefined) setShowMobileLifestyleText(data.showMobileLifestyleText);
-            if (data.showMobileLifestyleButton !== undefined) setShowMobileLifestyleButton(data.showMobileLifestyleButton);
-            if (data.mobileLifestyleButtonText !== undefined) setMobileLifestyleButtonText(data.mobileLifestyleButtonText);
-            if (data.mobileLifestyleButtonStyle !== undefined) setMobileLifestyleButtonStyle(data.mobileLifestyleButtonStyle);
-            if (data.mobileLifestyleButtonSize !== undefined) setMobileLifestyleButtonSize(data.mobileLifestyleButtonSize);
-            if (data.mobileLifestyleButtonColor !== undefined) setMobileLifestyleButtonColor(data.mobileLifestyleButtonColor);
-            if (data.mobileLifestyleButtonTextColor !== undefined) setMobileLifestyleButtonTextColor(data.mobileLifestyleButtonTextColor);
-            if (data.primaryColor !== undefined) {
-              setPrimaryColor(data.primaryColor);
-              if (typeof document !== "undefined") document.documentElement.style.setProperty("--primary-brand-color", data.primaryColor);
-              localStorage.setItem("settings_primaryColor", data.primaryColor);
-            }
-            if (data.heroBgType !== undefined) {
-              setHeroBgType(data.heroBgType);
-              localStorage.setItem("settings_heroBgType", data.heroBgType);
-            }
-            if (data.heroBgColor !== undefined) {
-              setHeroBgColor(data.heroBgColor);
-              localStorage.setItem("settings_heroBgColor", data.heroBgColor);
-            }
-            if (data.heroBgImage !== undefined) {
-              setHeroBgImage(data.heroBgImage);
-              localStorage.setItem("settings_heroBgImage", data.heroBgImage);
-            }
-            if (data.heroBgVideo !== undefined) {
-              setHeroBgVideo(data.heroBgVideo);
-              localStorage.setItem("settings_heroBgVideo", data.heroBgVideo);
-            }
-            if (data.showVideo !== undefined) {
-              setShowVideo(data.showVideo);
-              localStorage.setItem("settings_showVideo", String(data.showVideo));
-            }
-            if (data.showLifestyle !== undefined) {
-              setShowLifestyle(data.showLifestyle);
-              localStorage.setItem("settings_showLifestyle", String(data.showLifestyle));
-            }
-            if (data.faqs !== undefined && Array.isArray(data.faqs)) setFaqs(data.faqs);
-          }
-        })
-        .catch(err => console.warn("Quietly catching storefront fetch error:", err.message || err));
-    };
-
     loadData();
-  }, []);
+  }, [loadData]);
 
   const toggleFaq = (index: number) => {
     setActiveFaq(activeFaq === index ? null : index);
@@ -875,6 +890,67 @@ export default function Home() {
 
       {/* 3. Navigation Header */}
       <Navbar onCartClick={() => setShowCartDrawer(true)} />
+
+      {/* 3.5 Storefront Error Alert & Retry Bar */}
+      {isStorefrontError && (
+        <div style={{
+          backgroundColor: "#1f2937",
+          color: "#f9fafb",
+          padding: "12px 24px",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          flexWrap: "wrap",
+          gap: "12px",
+          fontSize: "0.85rem",
+          borderBottom: "1px solid #374151",
+          position: "relative",
+          zIndex: 99
+        }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+            <span style={{ display: "inline-flex", padding: "4px", backgroundColor: "rgba(239, 68, 68, 0.15)", borderRadius: "50%", color: "#ef4444" }}>
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" style={{ width: "18px", height: "18px" }}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
+              </svg>
+            </span>
+            <span>
+              <strong>Server Connection Alert:</strong> Unable to reach live server ({storefrontErrorMessage}). {arrivals.length > 0 ? "Showing cached catalog." : "Please check backend server."}
+            </span>
+          </div>
+          <button
+            onClick={() => loadData()}
+            disabled={isStorefrontLoading}
+            style={{
+              backgroundColor: "#ffffff",
+              color: "#111827",
+              border: "none",
+              padding: "7px 18px",
+              borderRadius: "4px",
+              fontWeight: 700,
+              fontSize: "0.75rem",
+              cursor: isStorefrontLoading ? "not-allowed" : "pointer",
+              textTransform: "uppercase",
+              letterSpacing: "0.06em",
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "6px",
+              transition: "all 0.2s ease",
+              opacity: isStorefrontLoading ? 0.7 : 1
+            }}
+          >
+            {isStorefrontLoading ? (
+              <>Retrying...</>
+            ) : (
+              <>
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" style={{ width: "14px", height: "14px" }}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />
+                </svg>
+                Retry Connection
+              </>
+            )}
+          </button>
+        </div>
+      )}
 
 
       {/* 4. Hero Section */}
@@ -1223,12 +1299,14 @@ export default function Home() {
                               : idx === 0;
 
                             return (
-                              <img 
+                              <Image 
                                 key={`${product._id}_img_${idx}`}
                                 className={styles.productImage} 
                                 src={imgUrl} 
-                                alt={product.name}
-                                loading={idx === 0 ? "eager" : "lazy"}
+                                alt={product.name || "Product image"}
+                                fill
+                                sizes="(max-width: 768px) 50vw, (max-width: 1200px) 25vw, 20vw"
+                                priority={idx === 0}
                                 style={{
                                   position: "absolute",
                                   top: 0,
@@ -1347,7 +1425,33 @@ export default function Home() {
             ))
           ) : (
             <div className={styles.emptyStateContainer}>
-              <p>Our latest perfume arrivals are currently being prepared. Check back soon!</p>
+              {isStorefrontError ? (
+                <div style={{ padding: "30px 15px", textAlign: "center", display: "flex", flexDirection: "column", alignItems: "center", gap: "12px" }}>
+                  <p style={{ margin: 0, color: "#dc2626", fontWeight: 600, fontSize: "0.95rem" }}>
+                    Failed to load latest arrivals from server ({storefrontErrorMessage})
+                  </p>
+                  <button
+                    onClick={() => loadData()}
+                    disabled={isStorefrontLoading}
+                    style={{
+                      padding: "8px 20px",
+                      backgroundColor: "#111827",
+                      color: "#ffffff",
+                      border: "none",
+                      borderRadius: "4px",
+                      fontSize: "0.8rem",
+                      fontWeight: 700,
+                      cursor: isStorefrontLoading ? "not-allowed" : "pointer",
+                      textTransform: "uppercase",
+                      letterSpacing: "0.06em"
+                    }}
+                  >
+                    {isStorefrontLoading ? "Retrying..." : "Retry Connection"}
+                  </button>
+                </div>
+              ) : (
+                <p>Our latest perfume arrivals are currently being prepared. Check back soon!</p>
+              )}
             </div>
           )}
         </div>
@@ -1558,12 +1662,14 @@ export default function Home() {
                               : idx === 0;
 
                             return (
-                              <img 
+                              <Image 
                                 key={`${product._id}_img_${idx}`}
                                 className={styles.productImage} 
                                 src={imgUrl} 
-                                alt={product.name}
-                                loading={idx === 0 ? "eager" : "lazy"}
+                                alt={product.name || "Product image"}
+                                fill
+                                sizes="(max-width: 768px) 50vw, (max-width: 1200px) 25vw, 20vw"
+                                priority={idx === 0}
                                 style={{
                                   position: "absolute",
                                   top: 0,
@@ -1682,7 +1788,33 @@ export default function Home() {
             ))
           ) : (
             <div className={styles.emptyStateContainer}>
-              <p>No featured best sellers cataloged yet. Check back soon!</p>
+              {isStorefrontError ? (
+                <div style={{ padding: "30px 15px", textAlign: "center", display: "flex", flexDirection: "column", alignItems: "center", gap: "12px" }}>
+                  <p style={{ margin: 0, color: "#dc2626", fontWeight: 600, fontSize: "0.95rem" }}>
+                    Failed to load best sellers catalog from server ({storefrontErrorMessage})
+                  </p>
+                  <button
+                    onClick={() => loadData()}
+                    disabled={isStorefrontLoading}
+                    style={{
+                      padding: "8px 20px",
+                      backgroundColor: "#111827",
+                      color: "#ffffff",
+                      border: "none",
+                      borderRadius: "4px",
+                      fontSize: "0.8rem",
+                      fontWeight: 700,
+                      cursor: isStorefrontLoading ? "not-allowed" : "pointer",
+                      textTransform: "uppercase",
+                      letterSpacing: "0.06em"
+                    }}
+                  >
+                    {isStorefrontLoading ? "Retrying..." : "Retry Connection"}
+                  </button>
+                </div>
+              ) : (
+                <p>No featured best sellers cataloged yet. Check back soon!</p>
+              )}
             </div>
           )}
         </div>

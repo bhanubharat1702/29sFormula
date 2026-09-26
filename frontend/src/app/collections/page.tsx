@@ -703,25 +703,27 @@ function CollectionsContent() {
                                 : idx === 0;
 
                               return (
-                                <img 
-                                  key={`${product._id}_img_${idx}`}
-                                  className={styles.productImage} 
-                                  src={imgUrl} 
-                                  alt={product.name}
-                                  loading={idx === 0 ? "eager" : "lazy"}
-                                  style={{
-                                    position: "absolute",
-                                    top: 0,
-                                    left: 0,
-                                    width: "100%",
-                                    height: "100%",
-                                    objectFit: "cover",
-                                    opacity: isVisible ? 1 : 0,
-                                    transform: isHovered ? "scale(1.04)" : "scale(1.00)",
-                                    transition: "opacity 0.5s ease-in-out, transform 0.6s cubic-bezier(0.25, 1, 0.5, 1)",
-                                    pointerEvents: "none"
-                                  }}
-                                />
+                              <Image 
+                                key={`${product._id}_img_${idx}`}
+                                className={styles.productImage} 
+                                src={imgUrl} 
+                                alt={product.name || "Product image"}
+                                fill
+                                sizes="(max-width: 768px) 50vw, (max-width: 1200px) 25vw, 20vw"
+                                priority={idx === 0}
+                                style={{
+                                  position: "absolute",
+                                  top: 0,
+                                  left: 0,
+                                  width: "100%",
+                                  height: "100%",
+                                  objectFit: "cover",
+                                  opacity: isVisible ? 1 : 0,
+                                  transform: isHovered ? "scale(1.04)" : "scale(1.00)",
+                                  transition: "opacity 0.5s ease-in-out, transform 0.6s cubic-bezier(0.25, 1, 0.5, 1)",
+                                  pointerEvents: "none"
+                                }}
+                              />
                               );
                             })}
                           </>
