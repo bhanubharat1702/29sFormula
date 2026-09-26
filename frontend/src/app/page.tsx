@@ -53,7 +53,7 @@ export default function Home() {
   const [arrivals, setArrivals] = useState<any[]>([]);
   const [bestSellers, setBestSellers] = useState<any[]>([]);
   const [isStorefrontError, setIsStorefrontError] = useState<boolean>(false);
-  const [isStorefrontLoading, setIsStorefrontLoading] = useState<boolean>(false);
+  const [isStorefrontLoading, setIsStorefrontLoading] = useState<boolean>(true);
   const [storefrontErrorMessage, setStorefrontErrorMessage] = useState<string>("");
   const [currentReviewIndex, setCurrentReviewIndex] = useState(0);
   const [reviewFade, setReviewFade] = useState(true);
@@ -1213,7 +1213,7 @@ export default function Home() {
         </div>
         <div
           key={`arrivals-${arrivalsPage}`}
-          className={`${arrivals.length > 0 ? styles.arrivalsGrid : styles.emptyStateGrid} ${styles.slideAnimated} ${arrivalsDirection === "forward" ? styles.slideForward : styles.slideBackward}`}
+          className={`${(arrivals.length > 0 || isStorefrontLoading) ? styles.arrivalsGrid : styles.emptyStateGrid} ${styles.slideAnimated} ${arrivalsDirection === "forward" ? styles.slideForward : styles.slideBackward}`}
           onTouchStart={isMobile ? handleTouchStart : undefined}
           onTouchMove={isMobile ? handleTouchMove : undefined}
           onTouchEnd={isMobile ? handleTouchEndArrivals : undefined}
@@ -1423,6 +1423,16 @@ export default function Home() {
                 </div>
               </Link>
             ))
+          ) : isStorefrontLoading ? (
+            Array.from({ length: isMobile ? 2 : 4 }).map((_, idx) => (
+              <div key={`arrival_skel_${idx}`} className={styles.productCard}>
+                <div className="skeleton-shimmer" style={{ width: "100%", aspectRatio: isMobile ? "4/5" : "1/1", borderRadius: "4px" }} />
+                <div className={styles.productInfo} style={{ display: "flex", flexDirection: "column", gap: "8px", marginTop: "4px" }}>
+                  <div className="skeleton-shimmer" style={{ width: "75%", height: "16px", borderRadius: "4px" }} />
+                  <div className="skeleton-shimmer" style={{ width: "40%", height: "18px", borderRadius: "4px" }} />
+                </div>
+              </div>
+            ))
           ) : (
             <div className={styles.emptyStateContainer}>
               {isStorefrontError ? (
@@ -1450,7 +1460,7 @@ export default function Home() {
                   </button>
                 </div>
               ) : (
-                <p>Our latest perfume arrivals are currently being prepared. Check back soon!</p>
+                <p>Our latest arrivals are currently being prepared. Check back soon!</p>
               )}
             </div>
           )}
@@ -1576,7 +1586,7 @@ export default function Home() {
         </div>
         <div
           key={`bestsellers-${bestSellersPage}`}
-          className={`${bestSellers.length > 0 ? styles.arrivalsGrid : styles.emptyStateGrid} ${styles.slideAnimated} ${bestSellersDirection === "forward" ? styles.slideForward : styles.slideBackward}`}
+          className={`${(bestSellers.length > 0 || isStorefrontLoading) ? styles.arrivalsGrid : styles.emptyStateGrid} ${styles.slideAnimated} ${bestSellersDirection === "forward" ? styles.slideForward : styles.slideBackward}`}
           onTouchStart={isMobile ? handleTouchStart : undefined}
           onTouchMove={isMobile ? handleTouchMove : undefined}
           onTouchEnd={isMobile ? handleTouchEndBestSellers : undefined}
@@ -1785,6 +1795,16 @@ export default function Home() {
                   </div>
                 </div>
               </Link>
+            ))
+          ) : isStorefrontLoading ? (
+            Array.from({ length: isMobile ? 2 : 4 }).map((_, idx) => (
+              <div key={`bestseller_skel_${idx}`} className={styles.productCard}>
+                <div className="skeleton-shimmer" style={{ width: "100%", aspectRatio: isMobile ? "4/5" : "1/1", borderRadius: "4px" }} />
+                <div className={styles.productInfo} style={{ display: "flex", flexDirection: "column", gap: "8px", marginTop: "4px" }}>
+                  <div className="skeleton-shimmer" style={{ width: "75%", height: "16px", borderRadius: "4px" }} />
+                  <div className="skeleton-shimmer" style={{ width: "40%", height: "18px", borderRadius: "4px" }} />
+                </div>
+              </div>
             ))
           ) : (
             <div className={styles.emptyStateContainer}>
