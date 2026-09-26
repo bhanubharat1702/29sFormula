@@ -900,18 +900,8 @@ export default function Home() {
               textAlign:
                 activeHeroTemplate === "center" || activeHeroTemplate.endsWith("center") ? "center" :
                   activeHeroTemplate.startsWith("right") ? "right" : "left",
-              minHeight: "80vh",
-              '--hero-title-font': activeHeroTitleFontType ? `"${activeHeroTitleFontType}", sans-serif` : "inherit",
-              '--hero-title-color': activeHeroTitleFontColor || "inherit",
-              '--hero-title-size': activeHeroTitleFontSize || "2.5rem",
-              '--hero-title-weight': activeHeroTitleFontWeight || "600",
-              '--hero-title-align': activeHeroTitleFontAlignment || "inherit",
-              '--hero-manifesto-font': activeHeroManifestoFontType ? `"${activeHeroManifestoFontType}", sans-serif` : "inherit",
-              '--hero-manifesto-color': activeHeroManifestoFontColor || "inherit",
-              '--hero-manifesto-size': activeHeroManifestoFontSize || "1rem",
-              '--hero-manifesto-weight': activeHeroManifestoFontWeight || "400",
-              '--hero-manifesto-align': activeHeroManifestoFontAlignment || "inherit",
-            } as React.CSSProperties}
+              minHeight: "80vh"
+            }}
           >
             {heroBgType === "video" && heroBgVideo && (
               <video src={heroBgVideo} autoPlay muted loop playsInline style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", zIndex: 1 }} />
@@ -920,12 +910,34 @@ export default function Home() {
 
             <div style={{ position: "relative", zIndex: 2, display: "flex", flexDirection: "column", gap: "20px", maxWidth: "800px", width: "100%" }}>
               {activeShowHeroTitle && (
-                <h1 className={styles.heroTitleDynamic}>
+                <h1 style={{
+                  fontFamily: activeHeroTitleFontType ? `"${activeHeroTitleFontType}", sans-serif` : "inherit",
+                  color: activeHeroTitleFontColor,
+                  fontSize: activeHeroTitleFontSize,
+                  fontWeight: Number(activeHeroTitleFontWeight) || activeHeroTitleFontWeight,
+                  textAlign: (activeHeroTitleFontAlignment as any) || "inherit",
+                  margin: 0,
+                  lineHeight: "1.1",
+                  wordBreak: "break-word",
+                  overflowWrap: "break-word"
+                }}>
                   {activeHeroTitle || ""}
                 </h1>
               )}
               {activeShowHeroManifesto && (
-                <p className={styles.heroManifestoDynamic}>
+                <p style={{
+                  fontFamily: activeHeroManifestoFontType ? `"${activeHeroManifestoFontType}", sans-serif` : "inherit",
+                  color: activeHeroManifestoFontColor,
+                  fontSize: activeHeroManifestoFontSize,
+                  fontWeight: Number(activeHeroManifestoFontWeight) || activeHeroManifestoFontWeight,
+                  textAlign: (activeHeroManifestoFontAlignment as any) || "inherit",
+                  margin: 0,
+                  lineHeight: "1.6",
+                  textTransform: "uppercase",
+                  letterSpacing: "0.03em",
+                  wordBreak: "break-word",
+                  overflowWrap: "break-word"
+                }}>
                   {activeHeroManifesto || ""}
                 </p>
               )}
@@ -1029,32 +1041,27 @@ export default function Home() {
 
               {(videoBgType === "video" || videoBgType === "image") && <div className={styles.videoOverlay} style={{ backgroundColor: "rgba(0,0,0,0.4)", position: "absolute", inset: 0 }} />}
 
-              <div
-                className={styles.videoContent}
-                style={{
-                  position: "relative",
-                  zIndex: 10,
-                  textAlign: activeVideoTitleFontAlignment as any,
-                  padding: "20px",
-                  '--video-title-font': activeVideoTitleFontType ? `"${activeVideoTitleFontType}", sans-serif` : "inherit",
-                  '--video-title-color': activeVideoTitleFontColor || "#ffffff",
-                  '--video-title-size': activeVideoTitleFontSize || "3.5rem",
-                  '--video-title-weight': activeVideoTitleFontWeight || "400",
-                  '--video-title-align': activeVideoTitleFontAlignment || "center",
-                  '--video-subtitle-font': activeVideoSubtitleFontType ? `"${activeVideoSubtitleFontType}", sans-serif` : "inherit",
-                  '--video-subtitle-color': activeVideoSubtitleFontColor || "rgba(255, 255, 255, 0.95)",
-                  '--video-subtitle-size': activeVideoSubtitleFontSize || "1rem",
-                  '--video-subtitle-weight': activeVideoSubtitleFontWeight || "400",
-                  '--video-subtitle-align': activeVideoSubtitleFontAlignment || "center",
-                } as React.CSSProperties}
-              >
+              <div className={styles.videoContent} style={{ position: "relative", zIndex: 10, textAlign: activeVideoTitleFontAlignment as any, padding: "20px" }}>
                 {activeShowVideoTitle && (
-                  <h2 className={styles.videoTitleDynamic}>
+                  <h2 style={{
+                    fontFamily: activeVideoTitleFontType ? `"${activeVideoTitleFontType}", sans-serif` : "inherit",
+                    color: activeVideoTitleFontColor,
+                    fontSize: activeVideoTitleFontSize,
+                    fontWeight: activeVideoTitleFontWeight,
+                    margin: "0 0 10px 0"
+                  }}>
                     {activeVideoTitle}
                   </h2>
                 )}
                 {activeShowVideoSubtitle && (
-                  <p className={styles.videoSubtitleDynamic}>
+                  <p style={{
+                    fontFamily: activeVideoSubtitleFontType ? `"${activeVideoSubtitleFontType}", sans-serif` : "inherit",
+                    color: activeVideoSubtitleFontColor,
+                    fontSize: activeVideoSubtitleFontSize,
+                    fontWeight: activeVideoSubtitleFontWeight,
+                    textAlign: activeVideoSubtitleFontAlignment as any,
+                    margin: "0 0 20px 0"
+                  }}>
                     {activeVideoSubtitle}
                   </p>
                 )}
@@ -1418,18 +1425,23 @@ export default function Home() {
               flexDirection: "column",
               alignItems: "center",
               justifyContent: "center",
-              padding: "60px 20px",
-              '--lifestyle-text-font': activeTextFontType ? `"${activeTextFontType}", sans-serif` : "inherit",
-              '--lifestyle-text-color': activeTextFontColor || "#ffffff",
-              '--lifestyle-text-size': activeTextFontSize || "1.15rem",
-              '--lifestyle-text-weight': activeTextFontWeight || "700",
-              '--lifestyle-text-align': activeTextFontAlignment || "center",
-            } as React.CSSProperties}
+              padding: "60px 20px"
+            }}
           >
             <div className={styles.lifestyleOverlay} />
             <div style={{ position: "relative", zIndex: 2, display: "flex", flexDirection: "column", alignItems: "center", gap: "20px", maxWidth: "900px", width: "100%", textAlign: activeTextFontAlignment as any || "center" }}>
               {activeShowLifestyleText && (
-                <p className={styles.lifestyleTextDynamic}>
+                <p
+                  className={styles.lifestyleText}
+                  style={{
+                    fontFamily: activeTextFontType ? `"${activeTextFontType}", sans-serif` : "inherit",
+                    color: activeTextFontColor,
+                    fontSize: activeTextFontSize,
+                    fontWeight: Number(activeTextFontWeight) || 700,
+                    textAlign: (activeTextFontAlignment as any) || "center",
+                    margin: 0
+                  }}
+                >
                   {activeLifestyleText}
                 </p>
               )}
