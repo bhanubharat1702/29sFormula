@@ -16,6 +16,8 @@ import QuickViewDrawer from "@/components/QuickViewDrawer";
 import HeroSection from "@/components/home/HeroSection";
 import VideoBanner from "@/components/home/VideoBanner";
 import ArrivalsSection from "@/components/home/ArrivalsSection";
+import RecentlyViewedSection from "@/components/home/RecentlyViewedSection";
+import TrustIconBar from "@/components/home/TrustIconBar";
 import { useCart } from "@/context/CartContext";
 import { saveCart, clearCart, fetchAndSyncUserCart } from "@/utils/cartSync";
 
@@ -225,7 +227,7 @@ export default function Home() {
 
 
   const [videoTitle, setVideoTitle] = useState<string>("NEW ARRIVALS");
-  const [videoSubtitle, setVideoSubtitle] = useState<string>("Drop's live. Smells divine. Feels better.");
+  const [videoSubtitle, setVideoSubtitle] = useState<string>("Drop's live. Shop the exclusive new collection now.");
   const [videoUrl, setVideoUrl] = useState<string>("");
   const [videoFallbackColor, setVideoFallbackColor] = useState<string>("#121212");
   const [videoTitleFontType, setVideoTitleFontType] = useState<string>("Outfit");
@@ -251,7 +253,7 @@ export default function Home() {
   const [videoBgColor, setVideoBgColor] = useState<string>("#121212");
   const [videoBgImage, setVideoBgImage] = useState<string>("");
 
-  const [lifestyleText, setLifestyleText] = useState<string>("Intense notes, Raw elements. This is 29sFORMULA.");
+  const [lifestyleText, setLifestyleText] = useState<string>("Uncompromising Quality, Curated for You. Discover 29sFORMULA.");
   const [lifestyleImage, setLifestyleImage] = useState<string>("https://images.unsplash.com/photo-1615655096345-61a54750068d?auto=format&fit=crop&w=1800&q=80");
   const [lifestyleTextFontType, setLifestyleTextFontType] = useState<string>("Outfit");
   const [lifestyleTextFontColor, setLifestyleTextFontColor] = useState<string>("#ffffff");
@@ -907,6 +909,15 @@ export default function Home() {
         primaryColor={primaryColor}
       />
 
+      {/* 4.5 Trust Icon Bar Section */}
+      <TrustIconBar primaryColor={primaryColor} isMobile={isMobile} />
+
+      {/* 4.8 Recently Viewed Products Section */}
+      <RecentlyViewedSection
+        setQuickViewProduct={setQuickViewProduct}
+        isMobile={isMobile}
+      />
+
       {/* 5. Video Banner Section */}
       <VideoBanner
         showVideo={showVideo}
@@ -1490,10 +1501,30 @@ export default function Home() {
                 ) : (
                   <>
                     {/* Name and Date Row */}
-                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "8px" }}>
-                      <span style={{ fontWeight: 600, fontSize: "1.1rem", color: "#111827", fontFamily: "Outfit, sans-serif" }}>
-                        {allReviews[currentReviewIndex]?.name}
-                      </span>
+                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "8px", flexWrap: "wrap", gap: "8px" }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: "10px", flexWrap: "wrap" }}>
+                        <span style={{ fontWeight: 600, fontSize: "1.1rem", color: "#111827", fontFamily: "Outfit, sans-serif" }}>
+                          {allReviews[currentReviewIndex]?.name}
+                        </span>
+                        <span style={{
+                          display: "inline-flex",
+                          alignItems: "center",
+                          gap: "4px",
+                          backgroundColor: "#ecfdf5",
+                          color: "#059669",
+                          border: "1px solid #a7f3d0",
+                          borderRadius: "100px",
+                          padding: "2px 8px",
+                          fontSize: "0.72rem",
+                          fontWeight: 600,
+                          letterSpacing: "0.02em"
+                        }}>
+                          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" style={{ width: "13px", height: "13px" }}>
+                            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z" clipRule="evenodd" />
+                          </svg>
+                          Verified Buyer
+                        </span>
+                      </div>
                       {/* Date */}
                       <span style={{
                         fontSize: "0.9rem",

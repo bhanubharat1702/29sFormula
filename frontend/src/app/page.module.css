@@ -1835,4 +1835,123 @@
   flex-shrink: 0 !important;
 }
 
+/* Trust Icon Bar Section - Infinite Marquee */
+.trustIconBarSection {
+  width: 100%;
+  background-color: #fafafa;
+  border-top: 1px solid #eaeaea;
+  border-bottom: 1px solid #eaeaea;
+  padding: 22px 0;
+  overflow: hidden;
+  position: relative;
+  display: flex;
+  align-items: center;
+  box-sizing: border-box;
+  -webkit-mask-image: linear-gradient(to right, transparent 0%, #000 5%, #000 95%, transparent 100%);
+  mask-image: linear-gradient(to right, transparent 0%, #000 5%, #000 95%, transparent 100%);
+}
+
+.trustMarqueeTrack {
+  display: flex;
+  align-items: center;
+  width: max-content;
+  flex-shrink: 0;
+  white-space: nowrap;
+  animation: trustMarqueeScroll 40s linear infinite;
+  will-change: transform;
+}
+
+.trustMarqueeTrack:hover {
+  animation-play-state: paused;
+}
+
+.trustMarqueeGroup {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.trustItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 8px;
+  padding: 0 40px;
+  flex-shrink: 0;
+  box-sizing: border-box;
+}
+
+.trustIconWrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  color: #111827;
+  padding: 0;
+  flex-shrink: 0;
+}
+
+.trustTextWrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.trustTitle {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #111827;
+  font-family: var(--font-outfit), sans-serif;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  line-height: 1.3;
+  white-space: nowrap;
+}
+
+.trustSubtitle {
+  font-size: 0.7rem;
+  font-weight: 500;
+  color: #6b7280;
+  font-family: Inter, sans-serif;
+  margin-top: 2px;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+@keyframes trustMarqueeScroll {
+  0% {
+    transform: translate3d(-50%, 0, 0);
+  }
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@media (max-width: 768px) {
+  .trustIconBarSection {
+    padding: 16px 0;
+  }
+  .trustItem {
+    padding: 0 24px;
+    gap: 6px;
+  }
+  .trustIconWrapper svg {
+    width: 28px !important;
+    height: 28px !important;
+  }
+  .trustTitle {
+    font-size: 0.72rem;
+  }
+  .trustSubtitle {
+    font-size: 0.62rem;
+  }
+}
+
+
 

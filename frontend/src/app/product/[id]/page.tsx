@@ -17,6 +17,7 @@ import QuickViewDrawer from "@/components/QuickViewDrawer";
 import Navbar from "@/components/Navbar/Navbar";
 import { useCart } from "@/context/CartContext";
 import { saveCart, clearCart, fetchAndSyncUserCart } from "@/utils/cartSync";
+import { saveRecentlyViewed } from "@/utils/recentlyViewed";
 
 interface Product {
   _id: string;
@@ -553,6 +554,7 @@ export default function ProductDetailPage() {
       .then((data: Product) => {
         if (data) {
           setProduct(data);
+          saveRecentlyViewed(data as any);
           initializeMedia(data);
           const inStockVar = (data as any).variants?.find((v: any) => (Number(v.quantity) || 0) > 0);
           if (inStockVar) {
