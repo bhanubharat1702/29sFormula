@@ -140,6 +140,65 @@
   background-color: var(--primary-brand-color, #57bc74);
 }
 
+/* Dynamic CSS Variable Driven Classes for Admin Customization */
+.heroTitleDynamic {
+  font-family: var(--hero-title-font, inherit);
+  color: var(--hero-title-color, inherit);
+  font-size: var(--hero-title-size, 2.5rem);
+  font-weight: var(--hero-title-weight, 600);
+  text-align: var(--hero-title-align, inherit);
+  margin: 0;
+  line-height: 1.1;
+  word-break: break-word;
+  overflow-wrap: break-word;
+}
+
+.heroManifestoDynamic {
+  font-family: var(--hero-manifesto-font, inherit);
+  color: var(--hero-manifesto-color, inherit);
+  font-size: var(--hero-manifesto-size, 1rem);
+  font-weight: var(--hero-manifesto-weight, 400);
+  text-align: var(--hero-manifesto-align, inherit);
+  margin: 0;
+  line-height: 1.6;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  word-break: break-word;
+  overflow-wrap: break-word;
+}
+
+.videoTitleDynamic {
+  font-family: var(--video-title-font, inherit);
+  color: var(--video-title-color, #ffffff);
+  font-size: var(--video-title-size, 3.5rem);
+  font-weight: var(--video-title-weight, 400);
+  text-align: var(--video-title-align, center);
+  margin: 0 0 10px 0;
+  line-height: 1.1;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+}
+
+.videoSubtitleDynamic {
+  font-family: var(--video-subtitle-font, inherit);
+  color: var(--video-subtitle-color, rgba(255, 255, 255, 0.95));
+  font-size: var(--video-subtitle-size, 1rem);
+  font-weight: var(--video-subtitle-weight, 400);
+  text-align: var(--video-subtitle-align, center);
+  margin: 0 0 20px 0;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.lifestyleTextDynamic {
+  font-family: var(--lifestyle-text-font, inherit);
+  color: var(--lifestyle-text-color, #ffffff);
+  font-size: var(--lifestyle-text-size, 1.15rem);
+  font-weight: var(--lifestyle-text-weight, 500);
+  text-align: var(--lifestyle-text-align, center);
+  margin: 0;
+  line-height: 1.5;
+}
+
+
 .heroContent {
   display: flex;
   flex-direction: column;
