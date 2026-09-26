@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import styles from "./Navbar.module.css";
 import { fetchAndSyncUserCart } from "@/utils/cartSync";
+import { useCart } from "@/context/CartContext";
 import { SearchListSkeleton } from "@/components/Skeletons/Skeletons";
 
 interface NavbarProps {
@@ -19,7 +20,8 @@ export default function Navbar({ onCartClick }: NavbarProps) {
   const [brandLogoValue, setBrandLogoValue] = useState<string>("");
   const [imageError, setImageError] = useState<boolean>(false);
   const pathname = usePathname();
-  const [cartItemCount, setCartItemCount] = useState<number>(0);
+  // Cart count comes directly from global CartContext — no more DOM event listening
+  const { totalCartCount: cartItemCount } = useCart();
 
   // Search State
   const [isSearchOpen, setIsSearchOpen] = useState<boolean>(false);
@@ -32,26 +34,7 @@ export default function Navbar({ onCartClick }: NavbarProps) {
 
 
   useEffect(() => {
-    const loadCartCount = () => {
-      try {
-        const cart = localStorage.getItem("cart");
-        if (cart) {
-          const itemsList = JSON.parse(cart);
-          if (Array.isArray(itemsList)) {
-            const count = itemsList.reduce((acc, item) => acc + (item.quantity || 1), 0);
-            setCartItemCount(count);
-          }
-        } else {
-          setCartItemCount(0);
-        }
-      } catch (e) {
-        setCartItemCount(0);
-      }
-    };
-    loadCartCount();
     fetchAndSyncUserCart();
-    window.addEventListener("cartUpdated", loadCartCount);
-    window.addEventListener("storage", loadCartCount);
 
     // Check for user session
     const session = localStorage.getItem("userSession");
@@ -87,10 +70,6 @@ export default function Navbar({ onCartClick }: NavbarProps) {
       })
       .catch(err => console.warn("Error fetching logo settings:", err));
 
-    return () => {
-      window.removeEventListener("cartUpdated", loadCartCount);
-      window.removeEventListener("storage", loadCartCount);
-    };
   }, []);
 
   // Search Keyboard Shortcuts

@@ -10,6 +10,7 @@ import CartDrawer from "@/components/CartDrawer";
 import CheckoutDrawer from "@/components/CheckoutDrawer";
 import OrderSuccessModal from "@/components/OrderSuccessModal";
 import CustomSelect from "@/components/CustomSelect/CustomSelect";
+import { useCart } from "@/context/CartContext";
 import { saveCart, clearCart, fetchAndSyncUserCart } from "@/utils/cartSync";
 
 interface Order {
@@ -66,8 +67,19 @@ export default function TrackOrderPage() {
   );
 
   // Session is now handled by Navbar
+  // Global Cart Context
+  const {
+    cartItems,
+    showCartDrawer,
+    setShowCartDrawer,
+    isCartClosing,
+    cartError,
+    updateQuantity,
+    closeCartDrawer,
+    clearCart
+  } = useCart();
+
   const resultsRef = useRef<HTMLDivElement>(null);
-  const [showCartDrawer, setShowCartDrawer] = useState(false);
   const [showCheckoutDrawer, setShowCheckoutDrawer] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState<boolean>(false);
   const [completedOrderId, setCompletedOrderId] = useState<string>("");
@@ -85,30 +97,6 @@ export default function TrackOrderPage() {
     { value: "Incorrect shipping address or details", label: "Incorrect shipping address or details" },
     { value: "Other reason", label: "Other reason" }
   ];
-  const [isCartClosing, setIsCartClosing] = useState(false);
-  const [cartItems, setCartItems] = useState<any[]>([]);
-
-  const [cartError, setCartError] = useState<string | null>(null);
-
-  const showCartError = (msg: string) => {
-    setCartError(msg);
-    setTimeout(() => setCartError(null), 3000);
-  };
-
-  const loadCart = () => {
-    if (typeof window !== "undefined") {
-      const items = localStorage.getItem("cart");
-      if (items) {
-        try {
-          setCartItems(JSON.parse(items));
-        } catch (e) {
-          setCartItems([]);
-        }
-      } else {
-        setCartItems([]);
-      }
-    }
-  };
 
   useEffect(() => {
     if (showCartDrawer) {
@@ -122,51 +110,13 @@ export default function TrackOrderPage() {
   }, [showCartDrawer]);
 
   const handleCloseCart = () => {
-    setIsCartClosing(true);
-    setTimeout(() => {
-      setShowCartDrawer(false);
-      setIsCartClosing(false);
-    }, 300);
+    closeCartDrawer();
   };
 
   const initiateCheckout = () => {
     setShowCartDrawer(false);
     setShowCheckoutDrawer(true);
   };
-
-  const updateQuantity = (index: number, newQuantity: number) => {
-    if (newQuantity <= 0) {
-      const updated = cartItems.filter((_, idx) => idx !== index);
-      setCartItems(updated);
-      saveCart(updated);
-    } else {
-      const item = cartItems[index];
-      if (item.availableQuantity !== undefined && newQuantity > item.availableQuantity) {
-        showCartError(`Only ${item.availableQuantity} units available for ${item.name} (${item.size})`);
-        const updated = [...cartItems];
-        updated[index].quantity = item.availableQuantity;
-        setCartItems(updated);
-        saveCart(updated);
-        return;
-      }
-      const updated = [...cartItems];
-      updated[index].quantity = newQuantity;
-      setCartItems(updated);
-      saveCart(updated);
-    }
-  };
-
-  useEffect(() => {
-    loadCart();
-    fetchAndSyncUserCart();
-    const handleStorageChange = () => loadCart();
-    window.addEventListener("storage", handleStorageChange);
-    window.addEventListener("cartUpdated", handleStorageChange);
-    return () => {
-      window.removeEventListener("storage", handleStorageChange);
-      window.removeEventListener("cartUpdated", handleStorageChange);
-    };
-  }, []);
 
   useEffect(() => {
     fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:5001'}/api/settings`, { cache: "no-store" })

@@ -3,6 +3,7 @@ import { Outfit } from "next/font/google";
 import "./globals.css";
 import SmoothScroll from "@/components/SmoothScroll";
 import SessionTracker from "@/components/SessionTracker";
+import { CartProvider } from "@/context/CartContext";
 import Script from "next/script";
 
 const outfit = Outfit({
@@ -101,10 +102,12 @@ export default function RootLayout({
         />
       </head>
       <body>
-        <SmoothScroll>
-          <SessionTracker />
-          {children}
-        </SmoothScroll>
+        <CartProvider>
+          <SmoothScroll>
+            <SessionTracker />
+            {children}
+          </SmoothScroll>
+        </CartProvider>
       </body>
     </html>
   );

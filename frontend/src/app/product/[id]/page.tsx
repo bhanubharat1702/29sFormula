@@ -15,6 +15,7 @@ import CartDrawer from "@/components/CartDrawer";
 import OrderSuccessModal from "@/components/OrderSuccessModal";
 import QuickViewDrawer from "@/components/QuickViewDrawer";
 import Navbar from "@/components/Navbar/Navbar";
+import { useCart } from "@/context/CartContext";
 import { saveCart, clearCart, fetchAndSyncUserCart } from "@/utils/cartSync";
 
 interface Product {
@@ -60,17 +61,19 @@ export default function ProductDetailPage() {
   const [quantity, setQuantity] = useState<number>(1);
   
 
-  // Cart Drawer State
-  const [showCartDrawer, setShowCartDrawer] = useState<boolean>(false);
-  const [cartItems, setCartItems] = useState<any[]>([]);
-  const [cartError, setCartError] = useState<string | null>(null);
-
-  const showCartError = (msg: string) => {
-    setCartError(msg);
-    setTimeout(() => setCartError(null), 3000);
-  };
-
-  const [isCartClosing, setIsCartClosing] = useState<boolean>(false);
+  // Global Cart Context
+  const {
+    cartItems,
+    showCartDrawer,
+    setShowCartDrawer,
+    isCartClosing,
+    cartError,
+    addToCart,
+    updateQuantity,
+    closeCartDrawer,
+    showCartError,
+    clearCart
+  } = useCart();
 
   // Accordion State
   const [openAccordion, setOpenAccordion] = useState<string | null>(null);
@@ -169,11 +172,7 @@ export default function ProductDetailPage() {
   // Session is now handled by Navbar
 
   const handleCloseCart = () => {
-    setIsCartClosing(true);
-    setTimeout(() => {
-      setShowCartDrawer(false);
-      setIsCartClosing(false);
-    }, 300);
+    closeCartDrawer();
   };
 
   const [showCheckoutDrawer, setShowCheckoutDrawer] = useState<boolean>(false);
@@ -501,109 +500,7 @@ export default function ProductDetailPage() {
     clearCart();
   };
 
-  const loadCart = () => {
-    if (typeof window !== "undefined") {
-      const items = localStorage.getItem("cart");
-      if (items) {
-        try {
-          setCartItems(JSON.parse(items));
-        } catch (e) {
-          setCartItems([]);
-        }
-      } else {
-        setCartItems([]);
-      }
-    }
-  };
 
-  useEffect(() => {
-    loadCart();
-    fetchAndSyncUserCart();
-    const handleStorageChange = () => loadCart();
-    window.addEventListener("storage", handleStorageChange);
-    window.addEventListener("cartUpdated", handleStorageChange);
-    return () => {
-      window.removeEventListener("storage", handleStorageChange);
-      window.removeEventListener("cartUpdated", handleStorageChange);
-    };
-  }, []);
-
-  const addToCart = (product: any, size?: string, qtyToAdd: number = 1) => {
-    const defaultSize = (product?.variants && product.variants.length > 0)
-      ? (product.variants.find((v: any) => (Number(v.quantity) || 0) > 0)?.size || product.variants[0].size)
-      : (product?.sizes?.[0] || "");
-    const targetSize = size || defaultSize;
-    if (typeof window !== "undefined") {
-      const current = localStorage.getItem("cart");
-      let itemsList = [];
-      if (current) {
-        try {
-          itemsList = JSON.parse(current);
-        } catch (e) {}
-      }
-      
-      const existingIdx = itemsList.findIndex((item: any) => item._id === product._id && item.size === targetSize);
-      if (existingIdx > -1) {
-        const maxS = itemsList[existingIdx].maxStock ?? ((product.variants && product.variants.find((v: any) => v.size === targetSize)?.quantity) ?? product.quantity);
-        if (itemsList[existingIdx].quantity + qtyToAdd > maxS) {
-          showCartError(`Only ${maxS} units of ${product.name} (${targetSize}) are available in stock.`);
-          itemsList[existingIdx].quantity = maxS;
-          setShowCartDrawer(true);
-        } else {
-          itemsList[existingIdx].quantity += qtyToAdd;
-        }
-      } else {
-        const variantPrice = (product.options && product.options.find((o: any) => o.size === targetSize)?.price) 
-                          || (product.variants && product.variants.find((v: any) => v.size === targetSize)?.price)
-                          || product.price;
-
-        const variantStrikePrice = ((product as any).options && (product as any).options.find((o: any) => o.size === targetSize)?.strikePrice) || ((product as any).variants && (product as any).variants.find((v: any) => v.size === targetSize)?.strikePrice) || (product as any).strikePrice;
-        const maxS = (product.variants && product.variants.find((v: any) => v.size === targetSize)?.quantity) ?? product.quantity;
-        let qtyToPush = qtyToAdd;
-        if (qtyToAdd > maxS) {
-          showCartError(`Only ${maxS} units of ${product.name} (${size}) are available in stock.`);
-          qtyToPush = maxS;
-          setShowCartDrawer(true);
-        }
-
-        itemsList.push({
-          _id: product._id,
-          name: product.name,
-          price: variantPrice,
-          strikePrice: variantStrikePrice,
-          imageFront: product.imageFront,
-          size: targetSize,
-          quantity: qtyToPush,
-          maxStock: maxS
-        });
-      }
-      saveCart(itemsList);
-      setShowCartDrawer(true);
-    }
-  };
-
-  const updateQuantity = (index: number, newQty: number) => {
-    if (newQty <= 0) {
-      const updated = cartItems.filter((_, idx) => idx !== index);
-      setCartItems(updated);
-      saveCart(updated);
-    } else {
-      const item = cartItems[index];
-      if (item.maxStock !== undefined && newQty > item.maxStock) {
-        showCartError(`Only ${item.maxStock} units of ${item.name} (${item.size}) are available in stock.`);
-        const updated = [...cartItems];
-        updated[index].quantity = item.maxStock;
-        setCartItems(updated);
-        saveCart(updated);
-        setShowCartDrawer(true);
-        return;
-      }
-      const updated = [...cartItems];
-      updated[index].quantity = newQty;
-      setCartItems(updated);
-      saveCart(updated);
-    }
-  };
 
   useEffect(() => {
 

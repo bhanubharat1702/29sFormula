@@ -14,6 +14,7 @@ import CustomCheckbox from "@/components/CustomCheckbox/CustomCheckbox";
 import NewtonsCradleLoader from "@/components/NewtonsCradleLoader";
 import { StorefrontGridSkeleton } from "@/components/Skeletons/Skeletons";
 import QuickViewDrawer from "@/components/QuickViewDrawer";
+import { useCart } from "@/context/CartContext";
 import { saveCart, clearCart, fetchAndSyncUserCart } from "@/utils/cartSync";
 
 interface Variant {
@@ -73,8 +74,18 @@ export default function Shop() {
   const [activeImageIndexes, setActiveImageIndexes] = useState<{ [productId: string]: number }>({});
   const [hoveredProductId, setHoveredProductId] = useState<string | null>(null);
 
-  // Cart Drawer State
-  const [showCartDrawer, setShowCartDrawer] = useState<boolean>(false);
+  // Global Cart Context
+  const {
+    cartItems,
+    showCartDrawer,
+    setShowCartDrawer,
+    isCartClosing,
+    cartError,
+    addToCart,
+    updateQuantity,
+    closeCartDrawer
+  } = useCart();
+
   const [showMobileFilter, setShowMobileFilter] = useState<boolean>(false);
   const [isFilterClosing, setIsFilterClosing] = useState<boolean>(false);
 
@@ -85,16 +96,6 @@ export default function Shop() {
       setIsFilterClosing(false);
     }, 800);
   };
-
-  const [cartItems, setCartItems] = useState<any[]>([]);
-  const [cartError, setCartError] = useState<string | null>(null);
-
-  const showCartError = (msg: string) => {
-    setCartError(msg);
-    setTimeout(() => setCartError(null), 3000);
-  };
-
-  const [isCartClosing, setIsCartClosing] = useState<boolean>(false);
 
   // Prevent background scrolling when cart is open
   useEffect(() => {
@@ -108,120 +109,12 @@ export default function Shop() {
     };
   }, [showCartDrawer]);
 
-
   const handleCloseCart = () => {
-    setIsCartClosing(true);
-    setTimeout(() => {
-      setShowCartDrawer(false);
-      setIsCartClosing(false);
-    }, 300);
+    closeCartDrawer();
   };
 
   const initiateCheckout = () => {
     setShowCheckoutDrawer(true);
-  };
-
-  const loadCart = () => {
-    if (typeof window !== "undefined") {
-      const items = localStorage.getItem("cart");
-      if (items) {
-        try {
-          setCartItems(JSON.parse(items));
-        } catch (e) {
-          setCartItems([]);
-        }
-      } else {
-        setCartItems([]);
-      }
-    }
-  };
-
-  useEffect(() => {
-    loadCart();
-    fetchAndSyncUserCart();
-    const handleStorageChange = () => loadCart();
-    window.addEventListener("storage", handleStorageChange);
-    window.addEventListener("cartUpdated", handleStorageChange);
-    return () => {
-      window.removeEventListener("storage", handleStorageChange);
-      window.removeEventListener("cartUpdated", handleStorageChange);
-    };
-  }, []);
-
-  const addToCart = (product: Product, size?: string, qty: number = 1) => {
-    const selectedSize = size || (product as any)?.variants?.find((v: any) => (Number(v.quantity) || 0) > 0)?.size || (product as any)?.variants?.[0]?.size || (product as any)?.sizes?.[0] || (product as any)?.availableSizes?.[0] || "Standard";
-    if (typeof window !== "undefined") {
-      const current = localStorage.getItem("cart");
-      let itemsList = [];
-      if (current) {
-        try {
-          itemsList = JSON.parse(current);
-        } catch (e) {}
-      }
-      
-      const maxStock = ((product as any).variants && (product as any).variants.find((v: any) => v.size === selectedSize)?.quantity) ?? product.quantity;
-
-      const existingIdx = itemsList.findIndex((item: any) => item._id === product._id && item.size === selectedSize);
-      if (existingIdx > -1) {
-        if (itemsList[existingIdx].quantity + qty > maxStock) {
-          showCartError(`Only ${maxStock} units of ${product.name} (${selectedSize}) are available in stock.`);
-          itemsList[existingIdx].quantity = maxStock;
-          setShowCartDrawer(true);
-        } else {
-          itemsList[existingIdx].quantity += qty;
-        }
-      } else {
-        const variantPrice = ((product as any).options && (product as any).options.find((o: any) => o.size === selectedSize)?.price) 
-                          || ((product as any).variants && (product as any).variants.find((v: any) => v.size === selectedSize)?.price)
-                          || product.price;
-        const variantStrikePrice = ((product as any).options && (product as any).options.find((o: any) => o.size === selectedSize)?.strikePrice) 
-                          || ((product as any).variants && (product as any).variants.find((v: any) => v.size === selectedSize)?.strikePrice)
-                          || (product as any).strikePrice;
-
-        let qtyToPush = qty;
-        if (qty > maxStock) {
-          showCartError(`Only ${maxStock} units of ${product.name} (${selectedSize}) are available in stock.`);
-          qtyToPush = maxStock;
-          setShowCartDrawer(true);
-        }
-
-        itemsList.push({
-          _id: product._id,
-          name: product.name,
-          price: variantPrice,
-          strikePrice: variantStrikePrice,
-          imageFront: product.imageFront,
-          size: selectedSize,
-          quantity: qtyToPush,
-          maxStock: maxStock
-        });
-      }
-      saveCart(itemsList);
-      setShowCartDrawer(true);
-    }
-  };
-
-  const updateQuantity = (index: number, newQty: number) => {
-    if (newQty <= 0) {
-      const updated = cartItems.filter((_, idx) => idx !== index);
-      setCartItems(updated);
-      saveCart(updated);
-    } else {
-      const item = cartItems[index];
-      if (item.maxStock !== undefined && newQty > item.maxStock) {
-        showCartError(`Only ${item.maxStock} units of ${item.name} (${item.size}) are available in stock.`);
-        const updated = [...cartItems];
-        updated[index].quantity = item.maxStock;
-        setCartItems(updated);
-        saveCart(updated);
-        setShowCartDrawer(true);
-        return;
-      }
-      const updated = [...cartItems];
-      updated[index].quantity = newQty;
-      setCartItems(updated);
-      saveCart(updated);
-    }
   };
 
   const getProductImages = (product: Product) => {
@@ -961,7 +854,6 @@ export default function Shop() {
         primaryColor="#d0d0d0"
         onOrderSuccess={(orderId: string, orderDetails: any) => {
           clearCart();
-          setCartItems([]);
           setShowCheckoutDrawer(false);
           setCompletedOrderId(orderId);
           setCompletedOrderDetails(orderDetails);
