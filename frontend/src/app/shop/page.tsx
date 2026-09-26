@@ -404,6 +404,21 @@ export default function Shop() {
             <button 
               className={styles.mobileFilterBtn}
               onClick={() => setShowMobileFilter(true)}
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: "8px",
+                background: "transparent",
+                border: "none",
+                borderRadius: "4px",
+                padding: "8px 16px",
+                fontSize: "0.78rem",
+                fontWeight: 700,
+                letterSpacing: "0.08em",
+                cursor: "pointer",
+                color: "#111827"
+              }}
             >
               FILTER & SORT
               {activeFilterCount > 0 && (

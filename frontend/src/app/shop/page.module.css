@@ -716,6 +716,43 @@
   .productImageContainer:hover .sliderArrow {
     display: none !important;
   }
+
+  /* Mobile Top Filter & Sort Bar Rearrangement */
+  .filtersBar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #e5e7eb;
+    padding-bottom: 14px;
+    margin-bottom: 24px;
+    width: 100%;
+  }
+
+  .filtersLeft {
+    display: none !important;
+  }
+
+  .filtersRight {
+    display: flex !important;
+    width: 100% !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    gap: 0 !important;
+  }
+
+  .filtersRight > .dropdownWrapper,
+  .filtersRight > .layoutToggles {
+    display: none !important;
+  }
+
+  .itemCount {
+    display: block;
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: #64748b;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
 }
 
 /* Hover Slider & Add to Cart Circle styles */
@@ -1240,25 +1277,31 @@
 
 
 /* Mobile/Desktop Filter Drawer Styles */
-.mobileFilterBtn {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
+.mobileFilterBtn, .filterSortBtn {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 8px !important;
   background: transparent !important;
+  background-color: transparent !important;
   border: none !important;
+  border-radius: 4px !important;
+  padding: 8px 16px !important;
+  font-size: 0.78rem !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.08em !important;
+  cursor: pointer !important;
+  color: #111827 !important;
+  font-family: inherit !important;
+  transition: all 0.2s ease !important;
+  visibility: visible !important;
+  opacity: 1 !important;
   box-shadow: none !important;
-  padding: 4px 0;
-  font-size: 0.8rem;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  cursor: pointer;
-  color: #111827;
-  font-family: inherit;
-  transition: opacity 0.2s ease;
 }
 
-.mobileFilterBtn:hover {
-  opacity: 0.7;
+.mobileFilterBtn:hover, .filterSortBtn:hover {
+  background-color: #111827 !important;
+  color: #ffffff !important;
 }
 
 .dropdownWrapper {
