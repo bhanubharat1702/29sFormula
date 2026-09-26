@@ -74,6 +74,8 @@ export default function TrackOrderPage() {
   const [completedOrderDetails, setCompletedOrderDetails] = useState<any>(null);
   const [showCancelConfirmModal, setShowCancelConfirmModal] = useState(false);
   const [selectedCancelReason, setSelectedCancelReason] = useState("Changed my mind");
+  const [showLoginAlertModal, setShowLoginAlertModal] = useState(false);
+  const [loginAlertMsg, setLoginAlertMsg] = useState("");
 
   const CANCELLATION_REASONS = [
     { value: "Changed my mind", label: "Changed my mind" },
@@ -177,13 +179,23 @@ export default function TrackOrderPage() {
       })
       .catch(err => console.warn("Failed to load storefront theme color:", err));
 
+    let urlOrder = "";
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      urlOrder = params.get("orderId") || params.get("order") || params.get("query") || "";
+      if (urlOrder) {
+        setQueryInput(urlOrder);
+        fetchOrderData(urlOrder);
+        return;
+      }
+    }
+
     // Auto-fetch orders if user is logged in
     const session = localStorage.getItem("userSession");
     if (session) {
       try {
         const user = JSON.parse(session);
         if (user && user.email) {
-          // fetchOrderData is defined below, but since useEffect runs after render, it will be available in the closure
           fetchOrderData(user.email);
         }
       } catch (e) {
@@ -247,25 +259,97 @@ export default function TrackOrderPage() {
     await fetchOrderData(queryInput);
   };
 
+  const checkUserLoggedInForAction = (actionType: "cancel" | "return", targetOrder?: Order | null): boolean => {
+    const orderToValidate = targetOrder || currentOrder;
+    if (typeof window === "undefined") return false;
+
+    const sessionStr = localStorage.getItem("userSession");
+    if (!sessionStr) {
+      const msg = "To cancel your order, you must be logged into your account. Please log in using the email or phone number associated with this order to proceed.";
+      setLoginAlertMsg(msg);
+      setShowLoginAlertModal(true);
+      return false;
+    }
+
+    try {
+      const user = JSON.parse(sessionStr);
+      if (!user || (!user.email && !user.phone)) {
+        const msg = "To cancel your order, you must be logged into your account. Please log in using the email or phone number associated with this order to proceed.";
+        setLoginAlertMsg(msg);
+        setShowLoginAlertModal(true);
+        return false;
+      }
+
+      if (orderToValidate) {
+        const userEmail = (user.email || "").toLowerCase().trim();
+        const userPhone = (user.phone || "").trim();
+        const orderEmail = (orderToValidate.customerEmail || "").toLowerCase().trim();
+        const orderPhone = (orderToValidate.customerPhone || "").trim();
+
+        const matchesEmail = Boolean(userEmail && orderEmail && userEmail === orderEmail);
+        const matchesPhone = Boolean(userPhone && orderPhone && userPhone === orderPhone);
+
+        if (!matchesEmail && !matchesPhone) {
+          const msg = "You are currently logged in with a different account. Please log in with the email or phone number associated with this order to cancel it.";
+          setLoginAlertMsg(msg);
+          setShowLoginAlertModal(true);
+          return false;
+        }
+      }
+
+      return true;
+    } catch (e) {
+      const msg = "To cancel your order, you must be logged into your account. Please log in using the email or phone number associated with this order to proceed.";
+      setLoginAlertMsg(msg);
+      setShowLoginAlertModal(true);
+      return false;
+    }
+  };
+
   const handleCancelOrder = async () => {
     if (!currentOrder) return;
+    if (!checkUserLoggedInForAction("cancel", currentOrder)) {
+      return;
+    }
     setShowCancelConfirmModal(true);
   };
 
   const confirmOrderCancellation = async () => {
     if (!currentOrder) return;
+    if (!checkUserLoggedInForAction("cancel", currentOrder)) {
+      setShowCancelConfirmModal(false);
+      return;
+    }
     setShowCancelConfirmModal(false);
     setIsCancelling(true);
     setError(null);
 
     try {
+      const sessionStr = localStorage.getItem("userSession");
+      let userToken = "";
+      let userEmail = currentOrder.customerEmail;
+      let userPhone = currentOrder.customerPhone;
+      if (sessionStr) {
+        try {
+          const user = JSON.parse(sessionStr);
+          if (user.token) userToken = user.token;
+          if (user.email) userEmail = user.email;
+          if (user.phone) userPhone = user.phone;
+        } catch (e) {}
+      }
+
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:5001'}/api/orders/${currentOrder._id}/cancel`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { 
+          "Content-Type": "application/json",
+          ...(userToken ? { "Authorization": `Bearer ${userToken}` } : {}),
+          "x-user-email": userEmail,
+          "x-user-phone": userPhone
+        },
         body: JSON.stringify({
           cancellationReason: selectedCancelReason,
-          email: currentOrder.customerEmail,
-          phone: currentOrder.customerPhone
+          email: userEmail,
+          phone: userPhone
         })
       });
       const data = await res.json();
@@ -716,6 +800,9 @@ export default function TrackOrderPage() {
                             </div>
                             <button 
                               onClick={() => {
+                                if (!checkUserLoggedInForAction("return", order)) {
+                                  return;
+                                }
                                 setModalOrderId(order._id);
                                 setShowReturnModal(true);
                               }} 
@@ -1249,6 +1336,50 @@ export default function TrackOrderPage() {
           </div>
         </div>
       )}
+
+      {/* Login Required System Alert Modal */}
+      {showLoginAlertModal && (() => {
+        const targetOrderId = currentOrder?.orderId || currentOrder?._id || queryInput;
+        const redirectPath = targetOrderId 
+          ? `/track?orderId=${encodeURIComponent(targetOrderId)}`
+          : `/track`;
+        const loginHref = `/login?redirect=${encodeURIComponent(redirectPath)}`;
+
+        return (
+          <div className={styles.modalOverlay} onClick={() => setShowLoginAlertModal(false)}>
+            <div className={styles.modalContent} onClick={(e) => e.stopPropagation()} style={{ maxWidth: "440px", textAlign: "center" }}>
+              <h3 className={styles.modalTitle} style={{ textAlign: "center", marginBottom: "12px", marginTop: "4px" }}>
+                Login Required
+              </h3>
+              <p className={styles.modalBodyText} style={{ textAlign: "center", marginBottom: "24px", fontSize: "0.9rem", color: "#4b5563", lineHeight: 1.5 }}>
+                {loginAlertMsg || "To cancel your order, you must be logged into your account. Please log in using the email or phone number associated with this order to proceed."}
+              </p>
+              <div className={styles.modalFooterBtns}>
+                <button 
+                  className={styles.modalCancelBtn} 
+                  onClick={() => setShowLoginAlertModal(false)}
+                >
+                  Cancel
+                </button>
+                <Link 
+                  href={loginHref}
+                  className={styles.modalConfirmBtn}
+                  style={{
+                    backgroundColor: "#000000",
+                    color: "#ffffff",
+                    textDecoration: "none",
+                    display: "inline-flex",
+                    alignItems: "center",
+                    justifyContent: "center"
+                  }}
+                >
+                  Log In
+                </Link>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
 
       <Footer />
     </div>

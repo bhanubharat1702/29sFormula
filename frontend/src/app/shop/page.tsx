@@ -425,6 +425,13 @@ export default function Shop() {
 
 
 
+  const activeFilterCount = [
+    categoryFilter !== "All",
+    availabilityFilter !== "all" || inStockOnly,
+    priceRange !== "all",
+    sortBy !== "featured"
+  ].filter(Boolean).length;
+
   return (
     <div suppressHydrationWarning className={styles.page}>
       {/* 1. Header Navigation */}
@@ -569,6 +576,9 @@ export default function Shop() {
               onClick={() => setShowMobileFilter(true)}
             >
               FILTER & SORT
+              {activeFilterCount > 0 && (
+                <span className={styles.filterCountBadge}>{activeFilterCount}</span>
+              )}
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" style={{ width: "16px", height: "16px" }}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 6h9.75M10.5 6a1.5 1.5 0 1 1-3 0m3 0a1.5 1.5 0 1 0-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m-9.75 0h9.75" />
               </svg>
@@ -606,67 +616,7 @@ export default function Shop() {
           </div>
         </div>
 
-        {/* Active Filter Badges Bar */}
-        {(availabilityFilter !== "all" || priceRange !== "all" || searchQuery) && (
-          <div className={styles.activeFiltersBar}>
-            <span className={styles.activeFiltersLabel}>Active Filters:</span>
-            {availabilityFilter !== "all" && (
-              <button 
-                className={styles.activeFilterBadge}
-                onClick={() => {
-                  setAvailabilityFilter("all");
-                  setInStockOnly(false);
-                }}
-              >
-                Availability: {availabilityFilter === "in-stock" ? "In Stock" : "Out of Stock"}
-                <span className={styles.removeBadgeIcon}>✕</span>
-              </button>
-            )}
-            {priceRange !== "all" && (
-              <button 
-                className={styles.activeFilterBadge}
-                onClick={() => setPriceRange("all")}
-              >
-                Price: {priceRange === "under-1500" ? "Under ₹1,500" : priceRange === "1500-2000" ? "₹1,500 - ₹2,000" : "Over ₹2,000"}
-                <span className={styles.removeBadgeIcon}>✕</span>
-              </button>
-            )}
-            {searchQuery && (
-              <button 
-                className={styles.activeFilterBadge}
-                onClick={() => {
-                  setSearchQuery("");
-                  if (typeof window !== "undefined") {
-                    const url = new URL(window.location.href);
-                    url.searchParams.delete("search");
-                    window.history.replaceState({}, "", url.toString());
-                  }
-                }}
-              >
-                Search: "{searchQuery}"
-                <span className={styles.removeBadgeIcon}>✕</span>
-              </button>
-            )}
-            <button 
-              className={styles.clearAllBtn}
-              onClick={() => {
-                setCategoryFilter("All");
-                setAvailabilityFilter("all");
-                setInStockOnly(false);
-                setPriceRange("all");
-                setSearchQuery("");
-                if (typeof window !== "undefined") {
-                  const url = new URL(window.location.href);
-                  url.searchParams.delete("category");
-                  url.searchParams.delete("search");
-                  window.history.replaceState({}, "", url.toString());
-                }
-              }}
-            >
-              Clear All
-            </button>
-          </div>
-        )}
+
 
         {/* 3. Catalog Products Grid */}
         {loading ? (

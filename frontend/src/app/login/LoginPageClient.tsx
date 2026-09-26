@@ -127,8 +127,19 @@ export default function LoginPageClient({ initialColor }: { initialColor: string
       localStorage.setItem("lastActivityTime", Date.now().toString());
       await fetchAndSyncUserCart();
 
+      const getTargetRedirect = () => {
+        if (typeof window !== "undefined") {
+          const params = new URLSearchParams(window.location.search);
+          const red = params.get("redirect");
+          if (red && red.startsWith("/")) {
+            return red;
+          }
+        }
+        return "/";
+      };
+
       setTimeout(() => {
-        window.location.href = "/";
+        window.location.href = getTargetRedirect();
       }, 1500);
     } catch (err: any) {
       setError(err.message || "Google Sign-In error.");
@@ -181,8 +192,19 @@ export default function LoginPageClient({ initialColor }: { initialColor: string
 
       await fetchAndSyncUserCart();
 
+      const getTargetRedirect = () => {
+        if (typeof window !== "undefined") {
+          const params = new URLSearchParams(window.location.search);
+          const red = params.get("redirect");
+          if (red && red.startsWith("/")) {
+            return red;
+          }
+        }
+        return "/";
+      };
+
       setTimeout(() => {
-        window.location.href = "/";
+        window.location.href = getTargetRedirect();
       }, 1500);
     } catch (err: any) {
       setError(err.message || "Invalid credentials.");

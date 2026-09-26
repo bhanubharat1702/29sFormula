@@ -1256,6 +1256,21 @@
   color: #000000;
 }
 
+.filterCountBadge {
+  background-color: #000000;
+  color: #ffffff;
+  border-radius: 50%;
+  font-size: 0.68rem;
+  font-weight: 700;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+
 .mobileFilterOverlay {
   position: fixed;
   top: 0;
@@ -1263,21 +1278,22 @@
   width: 100vw;
   height: 100vh;
   background-color: rgba(0, 0, 0, 0.5);
-  z-index: 9990;
+  backdrop-filter: blur(2px);
+  z-index: 12000;
   display: flex;
   justify-content: flex-end;
-  animation: fadeInCart 0.8s ease-out forwards;
+  animation: fadeInCart 0.3s ease-out forwards;
 }
 
 .mobileFilterDrawer {
-  width: 90%;
-  max-width: 400px;
+  width: 85%;
+  max-width: 380px;
   height: 100%;
-  padding-top: 80px; /* navbar offset */
   background-color: #ffffff;
   display: flex;
   flex-direction: column;
-  animation: slideInCart 0.8s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+  box-shadow: -4px 0 20px rgba(0, 0, 0, 0.1);
+  animation: slideInCart 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 .mobileFilterHeader {
