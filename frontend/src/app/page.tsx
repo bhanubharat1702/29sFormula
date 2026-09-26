@@ -13,6 +13,9 @@ import CartDrawer from "@/components/CartDrawer";
 import CheckoutDrawer from "@/components/CheckoutDrawer";
 import OrderSuccessModal from "@/components/OrderSuccessModal";
 import QuickViewDrawer from "@/components/QuickViewDrawer";
+import HeroSection from "@/components/home/HeroSection";
+import VideoBanner from "@/components/home/VideoBanner";
+import ArrivalsSection from "@/components/home/ArrivalsSection";
 import { useCart } from "@/context/CartContext";
 import { saveCart, clearCart, fetchAndSyncUserCart } from "@/utils/cartSync";
 
@@ -850,547 +853,144 @@ export default function Home() {
 
 
       {/* 4. Hero Section */}
-      {(() => {
-        const activeHeroTemplate = isMobile ? (mobileHeroTemplate || heroTemplate || "center") : heroTemplate;
+      <HeroSection
+        isMobile={isMobile}
+        heroTemplate={heroTemplate}
+        mobileHeroTemplate={mobileHeroTemplate}
+        heroTitle={heroTitle}
+        mobileHeroTitle={mobileHeroTitle}
+        heroTitleFontType={heroTitleFontType}
+        mobileHeroTitleFontType={mobileHeroTitleFontType}
+        heroTitleFontColor={heroTitleFontColor}
+        mobileHeroTitleFontColor={mobileHeroTitleFontColor}
+        heroTitleFontSize={heroTitleFontSize}
+        mobileHeroTitleFontSize={mobileHeroTitleFontSize}
+        heroTitleFontAlignment={heroTitleFontAlignment}
+        mobileHeroTitleFontAlignment={mobileHeroTitleFontAlignment}
+        heroTitleFontWeight={heroTitleFontWeight}
+        mobileHeroTitleFontWeight={mobileHeroTitleFontWeight}
+        showHeroTitle={showHeroTitle}
+        showMobileHeroTitle={showMobileHeroTitle}
 
-        const activeHeroTitle = isMobile ? (mobileHeroTitle !== "" && mobileHeroTitle !== undefined ? mobileHeroTitle : heroTitle) : heroTitle;
-        const activeHeroTitleFontType = isMobile ? (mobileHeroTitleFontType || heroTitleFontType) : heroTitleFontType;
-        const activeHeroTitleFontColor = isMobile ? (mobileHeroTitleFontColor || heroTitleFontColor) : heroTitleFontColor;
-        const activeHeroTitleFontSize = isMobile ? (mobileHeroTitleFontSize || "2.5rem") : heroTitleFontSize;
-        const activeHeroTitleFontAlignment = isMobile ? (mobileHeroTitleFontAlignment || heroTitleFontAlignment || "center") : heroTitleFontAlignment;
-        const activeHeroTitleFontWeight = isMobile ? (mobileHeroTitleFontWeight || heroTitleFontWeight) : heroTitleFontWeight;
-        const activeShowHeroTitle = isMobile ? (showMobileHeroTitle !== undefined ? showMobileHeroTitle : showHeroTitle) : showHeroTitle;
+        heroManifesto={heroManifesto}
+        mobileHeroManifesto={mobileHeroManifesto}
+        heroManifestoFontType={heroManifestoFontType}
+        mobileHeroManifestoFontType={mobileHeroManifestoFontType}
+        heroManifestoFontColor={heroManifestoFontColor}
+        mobileHeroManifestoFontColor={mobileHeroManifestoFontColor}
+        heroManifestoFontSize={heroManifestoFontSize}
+        mobileHeroManifestoFontSize={mobileHeroManifestoFontSize}
+        heroManifestoFontAlignment={heroManifestoFontAlignment}
+        mobileHeroManifestoFontAlignment={mobileHeroManifestoFontAlignment}
+        heroManifestoFontWeight={heroManifestoFontWeight}
+        mobileHeroManifestoFontWeight={mobileHeroManifestoFontWeight}
+        showHeroManifesto={showHeroManifesto}
+        showMobileHeroManifesto={showMobileHeroManifesto}
 
-        const activeHeroManifesto = isMobile ? (mobileHeroManifesto !== "" && mobileHeroManifesto !== undefined ? mobileHeroManifesto : heroManifesto) : heroManifesto;
-        const activeHeroManifestoFontType = isMobile ? (mobileHeroManifestoFontType || heroManifestoFontType) : heroManifestoFontType;
-        const activeHeroManifestoFontColor = isMobile ? (mobileHeroManifestoFontColor || heroManifestoFontColor) : heroManifestoFontColor;
-        const activeHeroManifestoFontSize = isMobile ? (mobileHeroManifestoFontSize || "0.85rem") : heroManifestoFontSize;
-        const activeHeroManifestoFontAlignment = isMobile ? (mobileHeroManifestoFontAlignment || heroManifestoFontAlignment || "center") : heroManifestoFontAlignment;
-        const activeHeroManifestoFontWeight = isMobile ? (mobileHeroManifestoFontWeight || heroManifestoFontWeight) : heroManifestoFontWeight;
-        const activeShowHeroManifesto = isMobile ? (showMobileHeroManifesto !== undefined ? showMobileHeroManifesto : showHeroManifesto) : showHeroManifesto;
+        heroButtonText={heroButtonText}
+        mobileHeroButtonText={mobileHeroButtonText}
+        heroButtonStyle={heroButtonStyle}
+        mobileHeroButtonStyle={mobileHeroButtonStyle}
+        heroButtonSize={heroButtonSize}
+        mobileHeroButtonSize={mobileHeroButtonSize}
+        heroButtonColor={heroButtonColor}
+        mobileHeroButtonColor={mobileHeroButtonColor}
+        heroButtonTextColor={heroButtonTextColor}
+        mobileHeroButtonTextColor={mobileHeroButtonTextColor}
+        showHeroButton={showHeroButton}
+        showMobileHeroButton={showMobileHeroButton}
 
-        const activeHeroButtonText = isMobile ? (mobileHeroButtonText || heroButtonText) : heroButtonText;
-        const activeHeroButtonStyle = isMobile ? (mobileHeroButtonStyle || heroButtonStyle) : heroButtonStyle;
-        const activeHeroButtonSize = isMobile ? (mobileHeroButtonSize || "sm") : heroButtonSize;
-        const activeHeroButtonColor = isMobile ? (mobileHeroButtonColor !== "" && mobileHeroButtonColor !== undefined ? mobileHeroButtonColor : heroButtonColor) : heroButtonColor;
-        const activeHeroButtonTextColor = isMobile ? (mobileHeroButtonTextColor || heroButtonTextColor) : heroButtonTextColor;
-        const activeShowHeroButton = isMobile ? (showMobileHeroButton !== undefined ? showMobileHeroButton : showHeroButton) : showHeroButton;
-
-        return (
-          <section
-            className={styles.hero}
-            style={{
-              backgroundColor: heroBgType === "color" ? (heroBgColor || "var(--primary-brand-color, #57bc74)") : "#121212",
-              backgroundImage: heroBgType === "image" && heroBgImage ? `url("${heroBgImage}")` : "none",
-              backgroundSize: "cover",
-              backgroundPosition: "center",
-              position: "relative",
-              overflow: "hidden",
-              display: "flex",
-              flexDirection: "column",
-              justifyContent:
-                activeHeroTemplate === "top-left" || activeHeroTemplate === "right-top" || activeHeroTemplate === "top-center" ? "flex-start" :
-                  activeHeroTemplate === "bottom-left" || activeHeroTemplate === "right-bottom" || activeHeroTemplate === "bottom-center" ? "flex-end" : "center",
-              alignItems:
-                activeHeroTemplate === "center" || activeHeroTemplate.endsWith("center") ? "center" :
-                  activeHeroTemplate.startsWith("right") ? "flex-end" : "flex-start",
-              padding:
-                activeHeroTemplate === "bottom-left" || activeHeroTemplate === "right-bottom" || activeHeroTemplate === "bottom-center" ? "100px 5vw" :
-                  activeHeroTemplate === "top-left" || activeHeroTemplate === "right-top" || activeHeroTemplate === "top-center" ? "100px 5vw" : "0 5vw",
-              textAlign:
-                activeHeroTemplate === "center" || activeHeroTemplate.endsWith("center") ? "center" :
-                  activeHeroTemplate.startsWith("right") ? "right" : "left",
-              minHeight: "80vh"
-            }}
-          >
-            {heroBgType === "video" && heroBgVideo && (
-              <video src={heroBgVideo} autoPlay muted loop playsInline style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", zIndex: 1 }} />
-            )}
-            {heroBgType !== "color" && <div style={{ position: "absolute", inset: 0, backgroundColor: "rgba(0, 0, 0, 0.45)", zIndex: 1 }} />}
-
-            <div style={{ position: "relative", zIndex: 2, display: "flex", flexDirection: "column", gap: "20px", maxWidth: "800px", width: "100%" }}>
-              {activeShowHeroTitle && (
-                <h1 style={{
-                  fontFamily: activeHeroTitleFontType ? `"${activeHeroTitleFontType}", sans-serif` : "inherit",
-                  color: activeHeroTitleFontColor,
-                  fontSize: activeHeroTitleFontSize,
-                  fontWeight: Number(activeHeroTitleFontWeight) || activeHeroTitleFontWeight,
-                  textAlign: (activeHeroTitleFontAlignment as any) || "inherit",
-                  margin: 0,
-                  lineHeight: "1.1",
-                  wordBreak: "break-word",
-                  overflowWrap: "break-word"
-                }}>
-                  {activeHeroTitle || ""}
-                </h1>
-              )}
-              {activeShowHeroManifesto && (
-                <p style={{
-                  fontFamily: activeHeroManifestoFontType ? `"${activeHeroManifestoFontType}", sans-serif` : "inherit",
-                  color: activeHeroManifestoFontColor,
-                  fontSize: activeHeroManifestoFontSize,
-                  fontWeight: Number(activeHeroManifestoFontWeight) || activeHeroManifestoFontWeight,
-                  textAlign: (activeHeroManifestoFontAlignment as any) || "inherit",
-                  margin: 0,
-                  lineHeight: "1.6",
-                  textTransform: "uppercase",
-                  letterSpacing: "0.03em",
-                  wordBreak: "break-word",
-                  overflowWrap: "break-word"
-                }}>
-                  {activeHeroManifesto || ""}
-                </p>
-              )}
-              {activeShowHeroButton && (() => {
-                const btnColor = activeHeroButtonColor ? activeHeroButtonColor : (primaryColor || "#000");
-                const isSolid = activeHeroButtonStyle === "solid";
-                const isOutline = activeHeroButtonStyle === "outline";
-
-                const paddings: Record<string, string> = { sm: "10px 24px", md: "14px 36px", lg: "18px 48px" };
-                const fontSizes: Record<string, string> = { sm: "0.75rem", md: "0.85rem", lg: "0.95rem" };
-
-                return (
-                  <div style={{
-                    marginTop: "10px",
-                    alignSelf:
-                      activeHeroTemplate === "center" || activeHeroTemplate.endsWith("center") ? "center" :
-                        activeHeroTemplate.startsWith("right") ? "flex-end" : "flex-start"
-                  }}>
-                    <Link href="/shop" style={{
-                      display: "inline-block",
-                      padding: paddings[activeHeroButtonSize] || paddings.md,
-                      fontSize: fontSizes[activeHeroButtonSize] || fontSizes.md,
-                      backgroundColor: isSolid ? btnColor : "transparent",
-                      color: isSolid ? (activeHeroButtonTextColor || "#ffffff") : (activeHeroButtonTextColor || btnColor),
-                      border: isSolid || isOutline ? `2px solid ${btnColor}` : "none",
-                      textDecoration: activeHeroButtonStyle === "minimal" ? "underline" : "none",
-                      fontWeight: 700,
-                      textTransform: "uppercase",
-                      letterSpacing: "0.1em",
-                      textAlign: "center"
-                    }}>
-                      {activeHeroButtonText || "Shop Now"}
-                    </Link>
-                  </div>
-                );
-              })()}
-            </div>
-          </section>
-        );
-      })()}
+        heroBgType={heroBgType}
+        heroBgColor={heroBgColor}
+        heroBgImage={heroBgImage}
+        heroBgVideo={heroBgVideo}
+        primaryColor={primaryColor}
+      />
 
       {/* 5. Video Banner Section */}
-      {showVideo && (
-        (() => {
-          const activeVideoTemplate = isMobile ? (mobileVideoTemplate || videoTemplate || "center") : videoTemplate;
-          const activeVideoTitle = isMobile ? (mobileVideoTitle !== "" && mobileVideoTitle !== undefined ? mobileVideoTitle : videoTitle) : videoTitle;
-          const activeVideoTitleFontType = isMobile ? (mobileVideoTitleFontType || videoTitleFontType) : videoTitleFontType;
-          const activeVideoTitleFontColor = isMobile ? (mobileVideoTitleFontColor || videoTitleFontColor) : videoTitleFontColor;
-          const activeVideoTitleFontSize = isMobile ? (mobileVideoTitleFontSize || "2.5rem") : videoTitleFontSize;
-          const activeVideoTitleFontAlignment = isMobile ? (mobileVideoTitleFontAlignment || videoTitleFontAlignment || "center") : videoTitleFontAlignment;
-          const activeVideoTitleFontWeight = isMobile ? (mobileVideoTitleFontWeight || videoTitleFontWeight) : videoTitleFontWeight;
-          const activeShowVideoTitle = isMobile ? (showMobileVideoTitle !== undefined ? showMobileVideoTitle : showVideoTitle) : showVideoTitle;
+      <VideoBanner
+        showVideo={showVideo}
+        isMobile={isMobile}
+        videoTemplate={videoTemplate}
+        mobileVideoTemplate={mobileVideoTemplate}
+        videoTitle={videoTitle}
+        mobileVideoTitle={mobileVideoTitle}
+        videoTitleFontType={videoTitleFontType}
+        mobileVideoTitleFontType={mobileVideoTitleFontType}
+        videoTitleFontColor={videoTitleFontColor}
+        mobileVideoTitleFontColor={mobileVideoTitleFontColor}
+        videoTitleFontSize={videoTitleFontSize}
+        mobileVideoTitleFontSize={mobileVideoTitleFontSize}
+        videoTitleFontAlignment={videoTitleFontAlignment}
+        mobileVideoTitleFontAlignment={mobileVideoTitleFontAlignment}
+        videoTitleFontWeight={videoTitleFontWeight}
+        mobileVideoTitleFontWeight={mobileVideoTitleFontWeight}
+        showVideoTitle={showVideoTitle}
+        showMobileVideoTitle={showMobileVideoTitle}
 
-          const activeVideoSubtitle = isMobile ? (mobileVideoSubtitle !== "" && mobileVideoSubtitle !== undefined ? mobileVideoSubtitle : videoSubtitle) : videoSubtitle;
-          const activeVideoSubtitleFontType = isMobile ? (mobileVideoSubtitleFontType || videoSubtitleFontType) : videoSubtitleFontType;
-          const activeVideoSubtitleFontColor = isMobile ? (mobileVideoSubtitleFontColor || videoSubtitleFontColor) : videoSubtitleFontColor;
-          const activeVideoSubtitleFontSize = isMobile ? (mobileVideoSubtitleFontSize || "0.85rem") : videoSubtitleFontSize;
-          const activeVideoSubtitleFontAlignment = isMobile ? (mobileVideoSubtitleFontAlignment || videoSubtitleFontAlignment || "center") : videoSubtitleFontAlignment;
-          const activeVideoSubtitleFontWeight = isMobile ? (mobileVideoSubtitleFontWeight || videoSubtitleFontWeight) : videoSubtitleFontWeight;
-          const activeShowVideoSubtitle = isMobile ? (showMobileVideoSubtitle !== undefined ? showMobileVideoSubtitle : showVideoSubtitle) : showVideoSubtitle;
+        videoSubtitle={videoSubtitle}
+        mobileVideoSubtitle={mobileVideoSubtitle}
+        videoSubtitleFontType={videoSubtitleFontType}
+        mobileVideoSubtitleFontType={mobileVideoSubtitleFontType}
+        videoSubtitleFontColor={videoSubtitleFontColor}
+        mobileVideoSubtitleFontColor={mobileVideoSubtitleFontColor}
+        videoSubtitleFontSize={videoSubtitleFontSize}
+        mobileVideoSubtitleFontSize={mobileVideoSubtitleFontSize}
+        videoSubtitleFontAlignment={videoSubtitleFontAlignment}
+        mobileVideoSubtitleFontAlignment={mobileVideoSubtitleFontAlignment}
+        videoSubtitleFontWeight={videoSubtitleFontWeight}
+        mobileVideoSubtitleFontWeight={mobileVideoSubtitleFontWeight}
+        showVideoSubtitle={showVideoSubtitle}
+        showMobileVideoSubtitle={showMobileVideoSubtitle}
 
-          const activeVideoButtonText = isMobile ? (mobileVideoButtonText !== "" && mobileVideoButtonText !== undefined ? mobileVideoButtonText : videoButtonText) : videoButtonText;
-          const activeVideoButtonStyle = isMobile ? (mobileVideoButtonStyle || videoButtonStyle) : videoButtonStyle;
-          const activeVideoButtonSize = isMobile ? (mobileVideoButtonSize || videoButtonSize) : videoButtonSize;
-          const activeVideoButtonColor = isMobile ? (mobileVideoButtonColor !== "" && mobileVideoButtonColor !== undefined ? mobileVideoButtonColor : videoButtonColor) : videoButtonColor;
-          const activeVideoButtonTextColor = isMobile ? (mobileVideoButtonTextColor || videoButtonTextColor) : videoButtonTextColor;
-          const activeShowVideoButton = isMobile ? (showMobileVideoButton !== undefined ? showMobileVideoButton : showVideoButton) : showVideoButton;
+        videoButtonText={videoButtonText}
+        mobileVideoButtonText={mobileVideoButtonText}
+        videoButtonStyle={videoButtonStyle}
+        mobileVideoButtonStyle={mobileVideoButtonStyle}
+        videoButtonSize={videoButtonSize}
+        mobileVideoButtonSize={mobileVideoButtonSize}
+        videoButtonColor={videoButtonColor}
+        mobileVideoButtonColor={mobileVideoButtonColor}
+        videoButtonTextColor={videoButtonTextColor}
+        mobileVideoButtonTextColor={mobileVideoButtonTextColor}
+        showVideoButton={showVideoButton}
+        showMobileVideoButton={showMobileVideoButton}
 
-          return (
-            <section
-              className={styles.videoSection}
-              style={{
-                backgroundColor: videoBgType === "color" ? videoBgColor : videoFallbackColor,
-                backgroundImage: videoBgType === "image" && videoBgImage ? `url(${videoBgImage})` : "none",
-                backgroundSize: "cover",
-                backgroundPosition: "center",
-                display: "flex",
-                alignItems: activeVideoTemplate === "bottom" ? "flex-end" : activeVideoTemplate === "top" ? "flex-start" : "center",
-                justifyContent: "center",
-                position: "relative",
-                minHeight: "100vh"
-              }}
-            >
-              {videoBgType === "video" && videoUrl && (
-                <video
-                  ref={videoRef}
-                  key={videoUrl}
-                  className={styles.bgVideo}
-                  autoPlay
-                  muted
-                  loop
-                  playsInline
-                  preload="auto"
-                >
-                  <source src={videoUrl} type="video/mp4" />
-                  <source src={videoUrl} type="video/webm" />
-                  <source src={videoUrl} type="video/ogg" />
-                  Your browser does not support the video tag.
-                </video>
-              )}
-
-              {(videoBgType === "video" || videoBgType === "image") && <div className={styles.videoOverlay} style={{ backgroundColor: "rgba(0,0,0,0.4)", position: "absolute", inset: 0 }} />}
-
-              <div className={styles.videoContent} style={{ position: "relative", zIndex: 10, textAlign: activeVideoTitleFontAlignment as any, padding: "20px" }}>
-                {activeShowVideoTitle && (
-                  <h2 style={{
-                    fontFamily: activeVideoTitleFontType ? `"${activeVideoTitleFontType}", sans-serif` : "inherit",
-                    color: activeVideoTitleFontColor,
-                    fontSize: activeVideoTitleFontSize,
-                    fontWeight: activeVideoTitleFontWeight,
-                    margin: "0 0 10px 0"
-                  }}>
-                    {activeVideoTitle}
-                  </h2>
-                )}
-                {activeShowVideoSubtitle && (
-                  <p style={{
-                    fontFamily: activeVideoSubtitleFontType ? `"${activeVideoSubtitleFontType}", sans-serif` : "inherit",
-                    color: activeVideoSubtitleFontColor,
-                    fontSize: activeVideoSubtitleFontSize,
-                    fontWeight: activeVideoSubtitleFontWeight,
-                    textAlign: activeVideoSubtitleFontAlignment as any,
-                    margin: "0 0 20px 0"
-                  }}>
-                    {activeVideoSubtitle}
-                  </p>
-                )}
-                {activeShowVideoButton && (() => {
-                  const btnColor = activeVideoButtonColor ? activeVideoButtonColor : (primaryColor || "#ffffff");
-                  const isSolid = activeVideoButtonStyle === "solid";
-                  const isOutline = activeVideoButtonStyle === "outline";
-
-                  const paddings: Record<string, string> = { sm: "10px 24px", md: "14px 36px", lg: "18px 48px" };
-                  const fontSizes: Record<string, string> = { sm: "0.75rem", md: "0.85rem", lg: "0.95rem" };
-
-                  return (
-                    <Link href="/shop" style={{ textDecoration: "none", display: "inline-block" }}>
-                      <button style={{
-                        display: "inline-block",
-                        padding: paddings[activeVideoButtonSize] || paddings.md,
-                        fontSize: fontSizes[activeVideoButtonSize] || fontSizes.md,
-                        fontWeight: 700,
-                        cursor: "pointer",
-                        borderRadius: "4px",
-                        transition: "all 0.3s ease",
-                        backgroundColor: isSolid ? btnColor : "transparent",
-                        color: isSolid ? (activeVideoButtonTextColor || "#121212") : (activeVideoButtonTextColor || btnColor),
-                        border: isSolid || isOutline ? `2px solid ${btnColor}` : "none",
-                        textDecoration: activeVideoButtonStyle === "minimal" ? "underline" : "none",
-                        textTransform: "uppercase",
-                        letterSpacing: "0.08em"
-                      }}>
-                        {activeVideoButtonText || "Shop Now"}
-                      </button>
-                    </Link>
-                  );
-                })()}
-              </div>
-            </section>
-          );
-        })()
-      )}
+        videoBgType={videoBgType}
+        videoBgColor={videoBgColor}
+        videoFallbackColor={videoFallbackColor}
+        videoBgImage={videoBgImage}
+        videoUrl={videoUrl}
+        videoRef={videoRef}
+        primaryColor={primaryColor}
+      />
 
       {/* 6. Latest Arrivals Products Section */}
-      <section className={styles.arrivalsSection}>
-        <div className={styles.arrivalsHeader}>
-          <h2 className={styles.arrivalsTitle}>LATEST ARRIVALS</h2>
-          <Link href="/collections?category=arrivals" className={styles.viewAllLink}>VIEW ALL</Link>
-        </div>
-        <div
-          key={`arrivals-${arrivalsPage}`}
-          className={`${(arrivals.length > 0 || isStorefrontLoading) ? styles.arrivalsGrid : styles.emptyStateGrid} ${styles.slideAnimated} ${arrivalsDirection === "forward" ? styles.slideForward : styles.slideBackward}`}
-          onTouchStart={isMobile ? handleTouchStart : undefined}
-          onTouchMove={isMobile ? handleTouchMove : undefined}
-          onTouchEnd={isMobile ? handleTouchEndArrivals : undefined}
-        >
-          {arrivals.length > 0 ? (
-            displayedArrivals.map((product) => (
-              <Link
-                key={product._id}
-                href={`/product/${product._id}`}
-                onClick={(e) => {
-                  if (product.quantity === 0) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                  }
-                }}
-                style={{
-                  textDecoration: "none",
-                  color: "inherit",
-                  display: "block",
-                  cursor: product.quantity === 0 ? "not-allowed" : "pointer"
-                }}
-              >
-                <div 
-                  className={styles.productCard} 
-                  style={product.quantity === 0 ? { pointerEvents: "none" } : {}}
-                  onMouseEnter={() => {
-                    if (product.quantity === 0) return;
-                    setHoveredProductId(product._id);
-                    const imgs = getProductImages(product);
-                    if (imgs.length > 1 && (activeImageIndexes[product._id] === undefined || activeImageIndexes[product._id] === 0)) {
-                      setActiveImageIndexes(prev => ({ ...prev, [product._id]: 1 }));
-                    }
-                  }}
-                  onMouseLeave={() => {
-                    if (product.quantity === 0) return;
-                    setHoveredProductId(null);
-                    setActiveImageIndexes(prev => ({ ...prev, [product._id]: 0 }));
-                  }}
-                >
-                  <div className={styles.productImageContainer} style={product.quantity === 0 ? { filter: "grayscale(1)", opacity: 0.7 } : {}}>
-                    {(() => {
-                      const cats = Array.isArray(product.category)
-                        ? product.category.map((c: any) => String(c).toLowerCase().trim())
-                        : [String(product.category || '').toLowerCase().trim()];
-                      const isBestSeller = cats.some((c: string) => c.includes("best seller") || c.includes("bestseller"));
-                      const isLatest = !isBestSeller && cats.some((c: string) => c.includes("latest") || c.includes("new arrival"));
-                      if (isBestSeller || isLatest) {
-                        return (
-                          <span 
-                            style={{
-                              position: "absolute",
-                              top: "10px",
-                              right: "10px",
-                              backgroundColor: isBestSeller ? "#000000" : "#111827",
-                              color: "#ffffff",
-                              fontSize: "0.62rem",
-                              fontWeight: 700,
-                              letterSpacing: "0.08em",
-                              padding: "4px 8px",
-                              borderRadius: "2px",
-                              zIndex: 8,
-                              boxShadow: "0 2px 4px rgba(0,0,0,0.15)",
-                              pointerEvents: "none",
-                              textTransform: "uppercase"
-                            }}
-                          >
-                            {isBestSeller ? "BEST SELLER" : "LATEST ARRIVAL"}
-                          </span>
-                        );
-                      }
-                      return null;
-                    })()}
-                    {(() => {
-                      const imagesList = getProductImages(product);
-                      const activeIdx = activeImageIndexes[product._id] ?? 0;
-                      const isHovered = hoveredProductId === product._id;
-
-                      return (
-                        <>
-                          {imagesList.map((imgUrl: string, idx: number) => {
-                            const isVisible = isHovered && imagesList.length > 1 
-                              ? idx === activeIdx 
-                              : idx === 0;
-
-                            return (
-                              <Image 
-                                key={`${product._id}_img_${idx}`}
-                                className={styles.productImage} 
-                                src={imgUrl} 
-                                alt={product.name || "Product image"}
-                                fill
-                                sizes="(max-width: 768px) 50vw, (max-width: 1200px) 25vw, 20vw"
-                                priority={idx === 0}
-                                style={{
-                                  position: "absolute",
-                                  top: 0,
-                                  left: 0,
-                                  width: "100%",
-                                  height: "100%",
-                                  objectFit: "cover",
-                                  opacity: isVisible ? 1 : 0,
-                                  transform: isHovered ? "scale(1.04)" : "scale(1.00)",
-                                  transition: "opacity 0.5s ease-in-out, transform 0.6s cubic-bezier(0.25, 1, 0.5, 1)",
-                                  pointerEvents: "none"
-                                }}
-                              />
-                            );
-                          })}
-                        </>
-                      );
-                    })()}
-
-                    {/* Arrow controls */}
-                    {(() => {
-                      const imagesList = getProductImages(product);
-                      if (imagesList.length > 1) {
-                        return (
-                          <>
-                            <button
-                              aria-label="Previous image"
-                              className={`${styles.sliderArrow} ${styles.sliderArrowLeft}`}
-                              onClick={(e) => handlePrevImage(e, product)}
-                            >
-                              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className={styles.arrowIcon}>
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18" />
-                              </svg>
-                            </button>
-                            <button
-                              aria-label="Next image"
-                              className={`${styles.sliderArrow} ${styles.sliderArrowRight}`}
-                              onClick={(e) => handleNextImage(e, product)}
-                            >
-                              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className={styles.arrowIcon}>
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
-                              </svg>
-                            </button>
-                          </>
-                        );
-                      }
-                      return null;
-                    })()}
-
-                    <button
-                      aria-label="Add to cart"
-                      className={styles.addToCartCircle}
-                      onClick={(e) => { e.preventDefault(); e.stopPropagation(); setQuickViewProduct(product); }}
-                    >
-                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" className={styles.cartIcon}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 10.5V6a3.75 3.75 0 1 0-7.5 0v4.5m11.356-1.993 1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 0 1-1.12-1.243l1.264-12A1.125 1.125 0 0 1 5.513 7.5h12.974c.576 0 1.059.435 1.119 1.007ZM8.625 10.5a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm7.5 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" />
-                      </svg>
-                    </button>
-                  </div>
-                  <div className={styles.productInfo}>
-                    <h3 className={styles.productTitle}>{product.name}</h3>
-                    {(() => {
-                      const inStockVariants = product.variants ? product.variants.filter((v: any) => (Number(v.quantity) || 0) > 0) : [];
-                      const cheapestVariant = inStockVariants.length > 0
-                        ? [...inStockVariants].sort((a, b) => a.price - b.price)[0]
-                        : (product.variants && product.variants.length > 0 ? [...product.variants].sort((a, b) => a.price - b.price)[0] : null);
-
-                      const displayPrice = cheapestVariant ? cheapestVariant.price : product.price;
-                      const displayStrikePrice = cheapestVariant ? cheapestVariant.strikePrice : product.strikePrice;
-
-                      return (
-                        <p className={styles.productPrice}>
-                          {displayStrikePrice && displayStrikePrice > displayPrice && (
-                            <span style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "2px" }}>
-                              <span style={{ display: "inline-flex", alignItems: "center", gap: "8px" }}>
-                                <span style={{ color: "#ef4444", fontSize: "0.75em", fontWeight: 400 }}>
-                                  -{Math.round(((displayStrikePrice - displayPrice) / displayStrikePrice) * 100)}%
-                                </span>
-                                <span style={{ fontSize: "1.5em", fontWeight: 400, color: "#111" }}>
-                                  ₹ {displayPrice.toLocaleString("en-IN")}.00
-                                </span>
-                              </span>
-                              <span style={{ color: "#9ca3af", fontSize: "0.85em" }}>
-                                M.R.P: <del>₹ {displayStrikePrice.toLocaleString("en-IN")}.00</del>
-                              </span>
-                            </span>
-                          )}
-                          {(!displayStrikePrice || displayStrikePrice <= displayPrice) && (
-                            <span style={{ fontSize: "1.5em", fontWeight: 400, color: "#111" }}>
-                              ₹ {displayPrice.toLocaleString("en-IN")}.00
-                            </span>
-                          )}
-                        </p>
-                      );
-                    })()}
-                    {product.quantity !== undefined && product.quantity <= 5 && (
-                      <p style={{ color: "#dc2626", fontSize: "0.72rem", fontWeight: 700, marginTop: "4px", letterSpacing: "0.02em" }}>
-                        {product.quantity === 0 ? "OUT OF STOCK" : `ONLY ${product.quantity} LEFT`}
-                      </p>
-                    )}
-                    {isMobile && (
-                      <span
-                        className={styles.productAddToBag}
-                        onClick={(e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          setQuickViewProduct(product);
-                        }}
-                      >
-                        ADD TO BAG
-                      </span>
-                    )}
-                  </div>
-                </div>
-              </Link>
-            ))
-          ) : isStorefrontLoading ? (
-            Array.from({ length: isMobile ? 2 : 4 }).map((_, idx) => (
-              <div key={`arrival_skel_${idx}`} className={styles.productCard}>
-                <div className="skeleton-shimmer" style={{ width: "100%", aspectRatio: isMobile ? "4/5" : "1/1", borderRadius: "4px" }} />
-                <div className={styles.productInfo} style={{ display: "flex", flexDirection: "column", gap: "8px", marginTop: "4px" }}>
-                  <div className="skeleton-shimmer" style={{ width: "75%", height: "16px", borderRadius: "4px" }} />
-                  <div className="skeleton-shimmer" style={{ width: "40%", height: "18px", borderRadius: "4px" }} />
-                </div>
-              </div>
-            ))
-          ) : (
-            <div className={styles.emptyStateContainer}>
-              {isStorefrontError ? (
-                <div style={{ padding: "30px 15px", textAlign: "center", display: "flex", flexDirection: "column", alignItems: "center", gap: "12px" }}>
-                  <p style={{ margin: 0, color: "#dc2626", fontWeight: 600, fontSize: "0.95rem" }}>
-                    Failed to load latest arrivals from server ({storefrontErrorMessage})
-                  </p>
-                  <button
-                    onClick={() => loadData()}
-                    disabled={isStorefrontLoading}
-                    style={{
-                      padding: "8px 20px",
-                      backgroundColor: "#111827",
-                      color: "#ffffff",
-                      border: "none",
-                      borderRadius: "4px",
-                      fontSize: "0.8rem",
-                      fontWeight: 700,
-                      cursor: isStorefrontLoading ? "not-allowed" : "pointer",
-                      textTransform: "uppercase",
-                      letterSpacing: "0.06em"
-                    }}
-                  >
-                    {isStorefrontLoading ? "Retrying..." : "Retry Connection"}
-                  </button>
-                </div>
-              ) : (
-                <p>Our latest arrivals are currently being prepared. Check back soon!</p>
-              )}
-            </div>
-          )}
-        </div>
-        {isMobile && totalArrivalsPages > 1 && (
-          <div className={styles.mobilePagination}>
-            <button
-              className={styles.paginationBtn}
-              onClick={() => {
-                setArrivalsDirection("backward");
-                setArrivalsPage(p => Math.max(1, p - 1));
-              }}
-              disabled={arrivalsPage === 1}
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={3} stroke="currentColor" style={{ width: '18px', height: '18px' }}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
-              </svg>
-            </button>
-            <span>{arrivalsPage} / {totalArrivalsPages}</span>
-            <button
-              className={styles.paginationBtn}
-              onClick={() => {
-                setArrivalsDirection("forward");
-                setArrivalsPage(p => Math.min(totalArrivalsPages, p + 1));
-              }}
-              disabled={arrivalsPage === totalArrivalsPages}
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={3} stroke="currentColor" style={{ width: '18px', height: '18px' }}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
-              </svg>
-            </button>
-          </div>
-        )}
-      </section>
+      <ArrivalsSection
+        arrivals={arrivals}
+        displayedArrivals={displayedArrivals}
+        isStorefrontLoading={isStorefrontLoading}
+        isStorefrontError={isStorefrontError}
+        storefrontErrorMessage={storefrontErrorMessage}
+        isMobile={isMobile}
+        arrivalsPage={arrivalsPage}
+        totalArrivalsPages={totalArrivalsPages}
+        arrivalsDirection={arrivalsDirection}
+        activeImageIndexes={activeImageIndexes}
+        hoveredProductId={hoveredProductId}
+        setHoveredProductId={setHoveredProductId}
+        setActiveImageIndexes={setActiveImageIndexes}
+        handlePrevImage={handlePrevImage}
+        handleNextImage={handleNextImage}
+        handleTouchStart={handleTouchStart}
+        handleTouchMove={handleTouchMove}
+        handleTouchEndArrivals={handleTouchEndArrivals}
+        setArrivalsDirection={setArrivalsDirection}
+        setArrivalsPage={setArrivalsPage}
+        setQuickViewProduct={setQuickViewProduct}
+        loadData={loadData}
+        getProductImages={getProductImages}
+      />
 
       {/* 7. Lifestyle Banner Section */}
       {(() => {
