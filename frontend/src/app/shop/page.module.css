@@ -285,9 +285,7 @@
 .layoutToggles {
   display: flex;
   align-items: center;
-  gap: 8px;
-  border-left: 1px solid #e2e8f0;
-  padding-left: 15px;
+  gap: 12px;
 }
 
 .layoutBtn {
@@ -1241,19 +1239,30 @@
 }
 
 
-/* Mobile Filter Drawer Styles */
+/* Mobile/Desktop Filter Drawer Styles */
 .mobileFilterBtn {
-  display: none; /* hidden on desktop */
+  display: inline-flex;
   align-items: center;
-  gap: 6px;
-  background: none;
-  border: 1px solid #e5e7eb;
-  padding: 8px 12px;
-  font-size: 0.85rem;
-  font-weight: 400;
+  gap: 8px;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding: 4px 0;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
   cursor: pointer;
-  border-radius: 4px;
-  color: #000000;
+  color: #111827;
+  font-family: inherit;
+  transition: opacity 0.2s ease;
+}
+
+.mobileFilterBtn:hover {
+  opacity: 0.7;
+}
+
+.dropdownWrapper {
+  display: none !important;
 }
 
 .filterCountBadge {
@@ -1353,20 +1362,16 @@
 
 @media (max-width: 768px) {
   .mobileFilterBtn {
-    display: flex;
+    display: inline-flex;
   }
   
-  .filtersLeft,
-  .dropdownWrapper,
-  .layoutToggles {
-    display: none !important;
+  .filtersLeft {
+    width: auto;
   }
 
   .filtersRight {
-    width: 100%;
-    justify-content: space-between;
+    gap: 12px;
   }
-
 }
 
 .mobileFilterOverlayClosing {

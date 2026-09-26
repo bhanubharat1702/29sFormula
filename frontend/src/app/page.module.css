@@ -1838,17 +1838,23 @@
 /* Trust Icon Bar Section - Infinite Marquee */
 .trustIconBarSection {
   width: 100%;
+  max-width: 100vw;
+  height: auto;
+  max-height: 110px;
+  min-height: 75px;
+  flex-shrink: 0 !important;
   background-color: #fafafa;
   border-top: 1px solid #eaeaea;
   border-bottom: 1px solid #eaeaea;
-  padding: 22px 0;
+  padding: 18px 0;
   overflow: hidden;
   position: relative;
   display: flex;
   align-items: center;
   box-sizing: border-box;
-  -webkit-mask-image: linear-gradient(to right, transparent 0%, #000 5%, #000 95%, transparent 100%);
-  mask-image: linear-gradient(to right, transparent 0%, #000 5%, #000 95%, transparent 100%);
+  z-index: 5;
+  -webkit-mask-image: linear-gradient(to right, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 1) 5%, rgba(0, 0, 0, 1) 95%, rgba(0, 0, 0, 0) 100%);
+  mask-image: linear-gradient(to right, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 1) 5%, rgba(0, 0, 0, 1) 95%, rgba(0, 0, 0, 0) 100%);
 }
 
 .trustMarqueeTrack {
@@ -1856,9 +1862,10 @@
   align-items: center;
   width: max-content;
   flex-shrink: 0;
-  white-space: nowrap;
+  white-space: nowrap !important;
   animation: trustMarqueeScroll 40s linear infinite;
   will-change: transform;
+  transform: translateZ(0);
 }
 
 .trustMarqueeTrack:hover {
@@ -1869,6 +1876,7 @@
   display: flex;
   align-items: center;
   flex-shrink: 0;
+  white-space: nowrap !important;
 }
 
 .trustItem {
@@ -1881,6 +1889,7 @@
   padding: 0 40px;
   flex-shrink: 0;
   box-sizing: border-box;
+  white-space: nowrap !important;
 }
 
 .trustIconWrapper {
@@ -1893,6 +1902,8 @@
   color: #111827;
   padding: 0;
   flex-shrink: 0;
+  width: 36px;
+  height: 36px;
 }
 
 .trustTextWrapper {
@@ -1901,6 +1912,7 @@
   align-items: center;
   text-align: center;
   flex-shrink: 0;
+  white-space: nowrap !important;
 }
 
 .trustTitle {
@@ -1911,7 +1923,7 @@
   letter-spacing: 0.06em;
   text-transform: uppercase;
   line-height: 1.3;
-  white-space: nowrap;
+  white-space: nowrap !important;
 }
 
 .trustSubtitle {
@@ -1921,7 +1933,7 @@
   font-family: Inter, sans-serif;
   margin-top: 2px;
   line-height: 1.2;
-  white-space: nowrap;
+  white-space: nowrap !important;
 }
 
 @keyframes trustMarqueeScroll {
@@ -1935,11 +1947,17 @@
 
 @media (max-width: 768px) {
   .trustIconBarSection {
-    padding: 16px 0;
+    padding: 14px 0;
+    max-height: 90px;
+    min-height: 65px;
   }
   .trustItem {
     padding: 0 24px;
-    gap: 6px;
+    gap: 5px;
+  }
+  .trustIconWrapper {
+    width: 28px;
+    height: 28px;
   }
   .trustIconWrapper svg {
     width: 28px !important;

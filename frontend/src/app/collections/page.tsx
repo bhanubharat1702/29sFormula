@@ -306,6 +306,20 @@ function CollectionsContent() {
     sortBy !== "featured"
   ].filter(Boolean).length;
 
+  const resetAllFilters = () => {
+    setCategoryFilter("All");
+    setSortBy("featured");
+    setPriceRange("all");
+    setAvailabilityFilter("all");
+    setInStockOnly(false);
+    if (typeof window !== "undefined") {
+      const url = new URL(window.location.href);
+      url.searchParams.delete("category");
+      url.searchParams.delete("search");
+      window.history.replaceState({}, "", url.toString());
+    }
+  };
+
   return (
     <div suppressHydrationWarning className={styles.page}>
       {/* 1. Header Navigation */}
@@ -316,180 +330,9 @@ function CollectionsContent() {
 
 
         {/* 2. Advanced Filters and Sort Bar */}
-        <div className={styles.filtersBar} ref={dropdownRef}>
-              <div className={styles.filtersLeft}>
-                {/* Category Dropdown */}
-                <div className={styles.dropdownWrapper}>
-                  <button 
-                    className={styles.filterTrigger} 
-                    onClick={() => toggleDropdown("category")}
-                  >
-                    CATEGORY{categoryFilter !== "All" ? `: ${categoryFilter.toUpperCase()}` : ""}
-                    <svg className={`${styles.chevron} ${activeDropdown === "category" ? styles.rotated : ""}`} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
-                    </svg>
-                  </button>
-                  {activeDropdown === "category" && (
-                    <div className={styles.dropdownContent}>
-                      {categoryOptions.map(cat => (
-                        <button
-                          key={cat}
-                          className={`${styles.sortOption} ${categoryFilter === cat ? styles.activeSortOption : ""}`}
-                          onClick={() => {
-                            setCategoryFilter(cat);
-                            setActiveDropdown(null);
-                            if (typeof window !== "undefined") {
-                              const url = new URL(window.location.href);
-                              if (cat === "All") url.searchParams.delete("category");
-                              else url.searchParams.set("category", cat === "Latest Arrivals" ? "arrivals" : cat === "Best Seller" ? "bestsellers" : cat);
-                              window.history.replaceState({}, "", url.toString());
-                            }
-                          }}
-                        >
-                          {cat === "All" ? "All Categories" : cat}
-                        </button>
-                      ))}
-                    </div>
-                  )}
-                </div>
-
-                {/* Availability Dropdown */}
-                <div className={styles.dropdownWrapper}>
-                  <button 
-                    className={styles.filterTrigger} 
-                    onClick={() => toggleDropdown("availability")}
-                  >
-                    AVAILABILITY 
-                    <svg className={`${styles.chevron} ${activeDropdown === "availability" ? styles.rotated : ""}`} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
-                    </svg>
-                  </button>
-                  {activeDropdown === "availability" && (
-                    <div className={styles.dropdownContent}>
-                      <label className={styles.radioLabel}>
-                        <input 
-                          type="radio" 
-                          name="availabilityFilter" 
-                          checked={availabilityFilter === "all" && !inStockOnly} 
-                          onChange={() => { setAvailabilityFilter("all"); setInStockOnly(false); }} 
-                        />
-                        All Products
-                      </label>
-                      <label className={styles.radioLabel}>
-                        <input 
-                          type="radio" 
-                          name="availabilityFilter" 
-                          checked={availabilityFilter === "in-stock" || inStockOnly} 
-                          onChange={() => { setAvailabilityFilter("in-stock"); setInStockOnly(true); }} 
-                        />
-                        In Stock
-                      </label>
-                      <label className={styles.radioLabel}>
-                        <input 
-                          type="radio" 
-                          name="availabilityFilter" 
-                          checked={availabilityFilter === "out-of-stock"} 
-                          onChange={() => { setAvailabilityFilter("out-of-stock"); setInStockOnly(false); }} 
-                        />
-                        Out of Stock
-                      </label>
-                    </div>
-                  )}
-                </div>
-
-                {/* Price Range Dropdown */}
-                <div className={styles.dropdownWrapper}>
-                  <button 
-                    className={styles.filterTrigger} 
-                    onClick={() => toggleDropdown("price")}
-                  >
-                    PRICE 
-                    <svg className={`${styles.chevron} ${activeDropdown === "price" ? styles.rotated : ""}`} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
-                    </svg>
-                  </button>
-                  {activeDropdown === "price" && (
-                    <div className={styles.dropdownContent}>
-                      <label className={styles.radioLabel}>
-                        <input 
-                          type="radio" 
-                          name="priceRange" 
-                          checked={priceRange === "all"} 
-                          onChange={() => setPriceRange("all")} 
-                        />
-                        All Prices
-                      </label>
-                      <label className={styles.radioLabel}>
-                        <input 
-                          type="radio" 
-                          name="priceRange" 
-                          checked={priceRange === "under-1500"} 
-                          onChange={() => setPriceRange("under-1500")} 
-                        />
-                        Under Rs. 1,500
-                      </label>
-                      <label className={styles.radioLabel}>
-                        <input 
-                          type="radio" 
-                          name="priceRange" 
-                          checked={priceRange === "1500-2000"} 
-                          onChange={() => setPriceRange("1500-2000")} 
-                        />
-                        Rs. 1,500 - Rs. 2,000
-                      </label>
-                      <label className={styles.radioLabel}>
-                        <input 
-                          type="radio" 
-                          name="priceRange" 
-                          checked={priceRange === "over-2000"} 
-                          onChange={() => setPriceRange("over-2000")} 
-                        />
-                        Over Rs. 2,000
-                      </label>
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              <div className={styles.filtersRight}>
-                <span className={styles.itemCount}>{sortedProducts.length} ITEMS</span>
-
-                {/* Sort Dropdown */}
-                <div className={styles.dropdownWrapper}>
-                  <button 
-                    className={styles.filterTrigger} 
-                    onClick={() => toggleDropdown("sort")}
-                  >
-                    SORT: {sortBy.replace("-", " ").toUpperCase()}
-                    <svg className={`${styles.chevron} ${activeDropdown === "sort" ? styles.rotated : ""}`} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
-                    </svg>
-                  </button>
-                  {activeDropdown === "sort" && (
-                    <div className={styles.dropdownContent} style={{ right: 0 }}>
-                      <button onClick={() => { setSortBy("featured"); setActiveDropdown(null); }} className={styles.sortOption}>Featured</button>
-                      <button onClick={() => { setSortBy("low-to-high"); setActiveDropdown(null); }} className={styles.sortOption}>Price: Low to High</button>
-                      <button onClick={() => { setSortBy("high-to-low"); setActiveDropdown(null); }} className={styles.sortOption}>Price: High to Low</button>
-                      <button onClick={() => { setSortBy("a-z"); setActiveDropdown(null); }} className={styles.sortOption}>Alphabetically: A-Z</button>
-                      <button onClick={() => { setSortBy("z-a"); setActiveDropdown(null); }} className={styles.sortOption}>Alphabetically: Z-A</button>
-                    </div>
-                  )}
-                </div>
-
-                {/* Mobile Filter Trigger */}
-                <button 
-                  className={styles.mobileFilterBtn}
-                  onClick={() => setShowMobileFilter(true)}
-                >
-                  FILTER & SORT
-                  {activeFilterCount > 0 && (
-                    <span className={styles.filterCountBadge}>{activeFilterCount}</span>
-                  )}
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" style={{ width: "16px", height: "16px" }}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 6h9.75M10.5 6a1.5 1.5 0 1 1-3 0m3 0a1.5 1.5 0 1 0-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m-9.75 0h9.75" />
-                  </svg>
-                </button>
-                <div className={styles.layoutToggles}>
+        <div className={styles.filtersBar}>
+          <div className={styles.filtersLeft}>
+            <div className={styles.layoutToggles}>
               {/* Grid Toggle */}
               <button 
                 aria-label="Grid view"
@@ -520,7 +363,26 @@ function CollectionsContent() {
               </button>
             </div>
           </div>
+
+          <div className={styles.filtersRight}>
+            <span className={styles.itemCount}>{sortedProducts.length} ITEMS</span>
+            {/* Filter & Sort Drawer Trigger */}
+            <button 
+              className={styles.mobileFilterBtn}
+              onClick={() => setShowMobileFilter(true)}
+            >
+              FILTER & SORT
+              {activeFilterCount > 0 && (
+                <span className={styles.filterCountBadge}>{activeFilterCount}</span>
+              )}
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" style={{ width: "16px", height: "16px" }}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 6h9.75M10.5 6a1.5 1.5 0 1 1-3 0m3 0a1.5 1.5 0 1 0-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m-9.75 0h9.75" />
+              </svg>
+            </button>
+          </div>
         </div>
+
+
 
 
 
@@ -761,7 +623,24 @@ function CollectionsContent() {
             </div>
             <div className={styles.mobileFilterBody}>
               <div className={styles.mobileFilterGroup}>
-                <h3 className={styles.mobileFilterGroupTitle}>CATEGORY</h3>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "15px" }}>
+                  <h3 className={styles.mobileFilterGroupTitle} style={{ margin: 0 }}>CATEGORY</h3>
+                  {categoryFilter !== "All" && (
+                    <button 
+                      onClick={() => {
+                        setCategoryFilter("All");
+                        if (typeof window !== "undefined") {
+                          const url = new URL(window.location.href);
+                          url.searchParams.delete("category");
+                          window.history.replaceState({}, "", url.toString());
+                        }
+                      }}
+                      style={{ background: "none", border: "none", color: "#ef4444", fontSize: "0.75rem", fontWeight: 600, cursor: "pointer", textDecoration: "underline" }}
+                    >
+                      Clear
+                    </button>
+                  )}
+                </div>
                 <div className={styles.mobileFilterOptions}>
                   {categoryOptions.map((cat) => (
                     <label key={cat} className={styles.radioLabel}>
@@ -786,7 +665,17 @@ function CollectionsContent() {
               </div>
 
               <div className={styles.mobileFilterGroup}>
-                <h3 className={styles.mobileFilterGroupTitle}>SORT BY</h3>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "15px" }}>
+                  <h3 className={styles.mobileFilterGroupTitle} style={{ margin: 0 }}>SORT BY</h3>
+                  {sortBy !== "featured" && (
+                    <button 
+                      onClick={() => setSortBy("featured")}
+                      style={{ background: "none", border: "none", color: "#ef4444", fontSize: "0.75rem", fontWeight: 600, cursor: "pointer", textDecoration: "underline" }}
+                    >
+                      Clear
+                    </button>
+                  )}
+                </div>
                 <div className={styles.mobileFilterOptions}>
                   {[
                     { val: "featured", label: "Featured" },
@@ -809,7 +698,17 @@ function CollectionsContent() {
               </div>
 
               <div className={styles.mobileFilterGroup}>
-                <h3 className={styles.mobileFilterGroupTitle}>PRICE</h3>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "15px" }}>
+                  <h3 className={styles.mobileFilterGroupTitle} style={{ margin: 0 }}>PRICE</h3>
+                  {priceRange !== "all" && (
+                    <button 
+                      onClick={() => setPriceRange("all")}
+                      style={{ background: "none", border: "none", color: "#ef4444", fontSize: "0.75rem", fontWeight: 600, cursor: "pointer", textDecoration: "underline" }}
+                    >
+                      Clear
+                    </button>
+                  )}
+                </div>
                 <div className={styles.mobileFilterOptions}>
                   {[
                     { val: "all", label: "All Prices" },
@@ -831,7 +730,17 @@ function CollectionsContent() {
               </div>
 
               <div className={styles.mobileFilterGroup}>
-                <h3 className={styles.mobileFilterGroupTitle}>AVAILABILITY</h3>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "15px" }}>
+                  <h3 className={styles.mobileFilterGroupTitle} style={{ margin: 0 }}>AVAILABILITY</h3>
+                  {(availabilityFilter !== "all" || inStockOnly) && (
+                    <button 
+                      onClick={() => { setAvailabilityFilter("all"); setInStockOnly(false); }}
+                      style={{ background: "none", border: "none", color: "#ef4444", fontSize: "0.75rem", fontWeight: 600, cursor: "pointer", textDecoration: "underline" }}
+                    >
+                      Clear
+                    </button>
+                  )}
+                </div>
                 <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
                   <label className={styles.radioLabel}>
                     <input 
@@ -864,8 +773,27 @@ function CollectionsContent() {
               </div>
             </div>
 
-            <div className={styles.mobileFilterFooter}>
-              <button className={styles.applyFilterBtn} onClick={handleCloseFilter}>
+            <div className={styles.mobileFilterFooter} style={{ display: "flex", gap: "10px" }}>
+              {activeFilterCount > 0 && (
+                <button 
+                  onClick={resetAllFilters}
+                  style={{
+                    flex: 1,
+                    padding: "15px",
+                    backgroundColor: "#ffffff",
+                    color: "#111827",
+                    border: "1px solid #e2e8f0",
+                    fontWeight: 700,
+                    borderRadius: "4px",
+                    cursor: "pointer",
+                    fontSize: "0.8rem",
+                    letterSpacing: "0.05em"
+                  }}
+                >
+                  CLEAR ALL
+                </button>
+              )}
+              <button className={styles.applyFilterBtn} style={{ flex: 2 }} onClick={handleCloseFilter}>
                 APPLY ({sortedProducts.length} ITEMS)
               </button>
             </div>
