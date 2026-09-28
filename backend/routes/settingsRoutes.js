@@ -219,6 +219,10 @@ router.post("/api/settings", async (req, res) => {
     if (req.body.brandLogoType !== undefined) settings.brandLogoType = req.body.brandLogoType;
     if (req.body.brandLogoValue !== undefined) settings.brandLogoValue = req.body.brandLogoValue;
     if (showTicker !== undefined) settings.showTicker = showTicker;
+    if (req.body.showTrustMarquee !== undefined) settings.showTrustMarquee = req.body.showTrustMarquee;
+    if (req.body.trustMarqueeDirection !== undefined) settings.trustMarqueeDirection = req.body.trustMarqueeDirection;
+    if (req.body.trustMarqueeSpeed !== undefined) settings.trustMarqueeSpeed = req.body.trustMarqueeSpeed;
+    if (req.body.trustMarqueeItems !== undefined) settings.trustMarqueeItems = req.body.trustMarqueeItems;
     if (showAnnouncement !== undefined) settings.showAnnouncement = showAnnouncement;
     if (showVideo !== undefined) settings.showVideo = showVideo;
     if (showLifestyle !== undefined) settings.showLifestyle = showLifestyle;
@@ -237,7 +241,8 @@ router.post("/api/settings", async (req, res) => {
 
     await settings.save();
 
-    // Update in-memory cache
+    // Invalidate in-memory and Redis cache so changes reflect instantly
+    invalidateSettingsCache();
     setCachedSettings(settings);
 
     // Delete old background video from Cloudinary if changed/removed

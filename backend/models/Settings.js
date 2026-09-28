@@ -159,6 +159,24 @@ const settingsSchema = new mongoose.Schema({
   brandLogoType: { type: String, default: "text" },
   brandLogoValue: { type: String, default: "29sFORMULA" },
   showTicker: { type: Boolean, default: true },
+  showTrustMarquee: { type: Boolean, default: true },
+  trustMarqueeDirection: { type: String, default: "left" },
+  trustMarqueeSpeed: { type: Number, default: 35 },
+  trustMarqueeItems: {
+    type: [{
+      id: { type: String },
+      title: { type: String },
+      subtitle: { type: String },
+      icon: { type: String, default: "shipping" }
+    }],
+    default: [
+      { id: "shipping", title: "EXPRESS SHIPPING", subtitle: "Fast 48hr Dispatch", icon: "shipping" },
+      { id: "security", title: "100% SECURE CHECKOUT", subtitle: "256-Bit SSL Encrypted", icon: "security" },
+      { id: "authenticity", title: "100% GENUINE PRODUCTS", subtitle: "100% Original Guarantee", icon: "authenticity" },
+      { id: "returns", title: "EASY 7-DAY RETURNS", subtitle: "Hassle-Free Policy", icon: "returns" },
+      { id: "support", title: "24/7 CUSTOMER SUPPORT", subtitle: "Dedicated Assistance", icon: "support" }
+    ]
+  },
   showAnnouncement: { type: Boolean, default: true },
   showVideo: { type: Boolean, default: true },
   showLifestyle: { type: Boolean, default: true },

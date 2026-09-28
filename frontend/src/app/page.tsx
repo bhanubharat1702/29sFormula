@@ -776,7 +776,7 @@ export default function Home() {
       {/* 2.5 Top Marquee Ticker */}
       {globalSettings?.showTicker && globalSettings?.tickerText && (
         <div className={styles.tickerContainer} style={{ backgroundColor: globalSettings?.tickerBgColor || "#ffffff", color: globalSettings?.tickerTextColor || "#000000" }}>
-          <div className={styles.tickerTrack} style={{ animationDuration: `${(globalSettings.tickerSpeed || 60)}s` }}>
+          <div className={styles.tickerTrack} style={{ animationDuration: `${(globalSettings.tickerSpeed || 60)}s`, animationDirection: globalSettings?.tickerDirection === "right" ? "reverse" : "normal" }}>
             {/* Group 1 (First 50%) */}
             {[...Array(4)].map((_, i) => (
               <span key={`t1-${i}`}>{globalSettings.tickerText}</span>
@@ -910,7 +910,12 @@ export default function Home() {
       />
 
       {/* 4.5 Trust Icon Bar Section */}
-      <TrustIconBar primaryColor={primaryColor} isMobile={isMobile} />
+      <TrustIconBar 
+        showTrustMarquee={globalSettings?.showTrustMarquee}
+        trustMarqueeDirection={globalSettings?.trustMarqueeDirection}
+        trustMarqueeSpeed={globalSettings?.trustMarqueeSpeed}
+        trustMarqueeItems={globalSettings?.trustMarqueeItems}
+      />
 
       {/* 4.8 Recently Viewed Products Section */}
       <RecentlyViewedSection

@@ -483,28 +483,59 @@ export default function ReviewsSubTab({
                       onClick={() => setActiveCustomizerSection(activeCustomizerSection === "video" ? null : "video")}
                     >
                       <h2 className={styles.cardHeaderTitleNoBorder}>Video Section Banner</h2>
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        strokeWidth={2.5}
-                        stroke="currentColor"
-                        className={`${styles.chevronIcon} ${activeCustomizerSection === "video" ? styles.chevronRotated : ""}`}
-                      >
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
-                      </svg>
+                      <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+                        {activeCustomizerSection === "video" && (
+                          <div 
+                            onClick={(e) => e.stopPropagation()} 
+                            style={{ display: "flex", alignItems: "center", gap: "10px" }}
+                          >
+                            <span style={{ fontWeight: 500, fontSize: "0.85rem", color: "#4b5563" }}>Enabled</span>
+                            <button
+                              type="button"
+                              onClick={() => setShowVideo && setShowVideo(!showVideo)}
+                              style={{
+                                width: "44px",
+                                height: "24px",
+                                borderRadius: "12px",
+                                backgroundColor: showVideo ? "#181b24" : "#e5e7eb",
+                                border: "none",
+                                padding: "2px",
+                                cursor: "pointer",
+                                display: "flex",
+                                alignItems: "center",
+                                transition: "background-color 0.2s ease"
+                              }}
+                            >
+                              <div
+                                style={{
+                                  width: "20px",
+                                  height: "20px",
+                                  borderRadius: "50%",
+                                  backgroundColor: "#ffffff",
+                                  boxShadow: "0 1px 3px rgba(0,0,0,0.2)",
+                                  transform: showVideo ? "translateX(20px)" : "translateX(0px)",
+                                  transition: "transform 0.2s ease"
+                                }}
+                              />
+                            </button>
+                          </div>
+                        )}
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          strokeWidth={2.5}
+                          stroke="currentColor"
+                          className={`${styles.chevronIcon} ${activeCustomizerSection === "video" ? styles.chevronRotated : ""}`}
+                        >
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+                        </svg>
+                      </div>
                     </div>
 
                     {activeCustomizerSection === "video" && (
                       <div className={styles.accordionContent}>
-                        <div className={styles.toggleRow} style={{ marginBottom: "15px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                          <span className={styles.toggleLabel} style={{ fontWeight: 600, fontSize: "0.85rem", color: "#374151" }}>Display Video Section on Storefront</span>
-                          <CustomCheckbox
-                            checked={showVideo}
-                            onChange={(e: any) => setShowVideo(e.target.checked)}
-                            style={{ '--checkbox-color': '#111827' } as React.CSSProperties}
-                          />
-                        </div>
+
                         <div className={styles.inputRow} style={{ marginBottom: "15px" }}>
                           <div className={styles.inputGroup}>
                             <label className={styles.inputLabel}>Headline Title</label>
@@ -660,28 +691,59 @@ export default function ReviewsSubTab({
                       onClick={() => setActiveCustomizerSection(activeCustomizerSection === "lifestyle" ? null : "lifestyle")}
                     >
                       <h2 className={styles.cardHeaderTitleNoBorder}>Lifestyle Banner</h2>
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        strokeWidth={2.5}
-                        stroke="currentColor"
-                        className={`${styles.chevronIcon} ${activeCustomizerSection === "lifestyle" ? styles.chevronRotated : ""}`}
-                      >
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
-                      </svg>
+                      <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+                        {activeCustomizerSection === "lifestyle" && (
+                          <div 
+                            onClick={(e) => e.stopPropagation()} 
+                            style={{ display: "flex", alignItems: "center", gap: "10px" }}
+                          >
+                            <span style={{ fontWeight: 500, fontSize: "0.85rem", color: "#4b5563" }}>Enabled</span>
+                            <button
+                              type="button"
+                              onClick={() => setShowLifestyle && setShowLifestyle(!showLifestyle)}
+                              style={{
+                                width: "44px",
+                                height: "24px",
+                                borderRadius: "12px",
+                                backgroundColor: showLifestyle ? "#181b24" : "#e5e7eb",
+                                border: "none",
+                                padding: "2px",
+                                cursor: "pointer",
+                                display: "flex",
+                                alignItems: "center",
+                                transition: "background-color 0.2s ease"
+                              }}
+                            >
+                              <div
+                                style={{
+                                  width: "20px",
+                                  height: "20px",
+                                  borderRadius: "50%",
+                                  backgroundColor: "#ffffff",
+                                  boxShadow: "0 1px 3px rgba(0,0,0,0.2)",
+                                  transform: showLifestyle ? "translateX(20px)" : "translateX(0px)",
+                                  transition: "transform 0.2s ease"
+                                }}
+                              />
+                            </button>
+                          </div>
+                        )}
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          strokeWidth={2.5}
+                          stroke="currentColor"
+                          className={`${styles.chevronIcon} ${activeCustomizerSection === "lifestyle" ? styles.chevronRotated : ""}`}
+                        >
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+                        </svg>
+                      </div>
                     </div>
 
                     {activeCustomizerSection === "lifestyle" && (
                       <div className={styles.accordionContent}>
-                        <div className={styles.toggleRow} style={{ marginBottom: "15px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                          <span className={styles.toggleLabel} style={{ fontWeight: 600, fontSize: "0.85rem", color: "#374151" }}>Display Lifestyle Banner on Storefront</span>
-                          <CustomCheckbox
-                            checked={showLifestyle}
-                            onChange={(e: any) => setShowLifestyle(e.target.checked)}
-                            style={{ '--checkbox-color': '#111827' } as React.CSSProperties}
-                          />
-                        </div>
+
                         <div className={styles.inputGroup}>
                           <label className={styles.inputLabel}>Lifestyle Overlay Text Copy</label>
                           <input

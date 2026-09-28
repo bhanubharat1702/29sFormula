@@ -266,9 +266,20 @@ export default function AdminDashboard() {
 
   // Storefront CMS Configuration State
   const [tickerText, setTickerText] = useState<string>("");
+  const [tickerDirection, setTickerDirection] = useState<string>("left");
   const [tickerSpeed, setTickerSpeed] = useState<number>(60);
   const [tickerBgColor, setTickerBgColor] = useState<string>("#ffffff");
   const [tickerTextColor, setTickerTextColor] = useState<string>("#000000");
+  const [showTrustMarquee, setShowTrustMarquee] = useState<boolean>(true);
+  const [trustMarqueeDirection, setTrustMarqueeDirection] = useState<string>("left");
+  const [trustMarqueeSpeed, setTrustMarqueeSpeed] = useState<number>(35);
+  const [trustMarqueeItems, setTrustMarqueeItems] = useState<any[]>([
+    { id: "shipping", title: "EXPRESS SHIPPING", subtitle: "Fast 48hr Dispatch", icon: "shipping" },
+    { id: "security", title: "100% SECURE CHECKOUT", subtitle: "256-Bit SSL Encrypted", icon: "security" },
+    { id: "authenticity", title: "100% GENUINE PRODUCTS", subtitle: "100% Original Guarantee", icon: "authenticity" },
+    { id: "returns", title: "EASY 7-DAY RETURNS", subtitle: "Hassle-Free Policy", icon: "returns" },
+    { id: "support", title: "24/7 CUSTOMER SUPPORT", subtitle: "Dedicated Assistance", icon: "support" }
+  ]);
   const [announcementText, setAnnouncementText] = useState<string>("");
   const [heroTitle, setHeroTitle] = useState<string>("");
   const [heroTitleFontType, setHeroTitleFontType] = useState<string>("Outfit");
@@ -471,13 +482,42 @@ export default function AdminDashboard() {
   const [customAlert, setCustomAlert] = useState<{ title: string; message: string } | null>(null);
   const [showResetConfirmModal, setShowResetConfirmModal] = useState<boolean>(false);
 
+  const cleanTrustItems = (items: any[]) => {
+    if (!Array.isArray(items) || items.length === 0) return [
+      { id: "shipping", title: "EXPRESS SHIPPING", subtitle: "Fast 48hr Dispatch", icon: "shipping" },
+      { id: "security", title: "100% SECURE CHECKOUT", subtitle: "256-Bit SSL Encrypted", icon: "security" },
+      { id: "authenticity", title: "100% GENUINE PRODUCTS", subtitle: "100% Original Guarantee", icon: "authenticity" },
+      { id: "returns", title: "EASY 7-DAY RETURNS", subtitle: "Hassle-Free Policy", icon: "returns" },
+      { id: "support", title: "24/7 CUSTOMER SUPPORT", subtitle: "Dedicated Assistance", icon: "support" }
+    ];
+    return items.map((item: any, idx: number) => ({
+      id: item.id || `item_${idx}`,
+      title: item.title || "",
+      subtitle: item.subtitle || "",
+      icon: item.icon || "star"
+    }));
+  };
+
+  const cleanFaqs = (items: any[]) => {
+    if (!Array.isArray(items)) return [];
+    return items.map((f: any) => ({
+      question: f.question || "",
+      answer: f.answer || ""
+    }));
+  };
+
   const normalizeSettingsSnapshot = (data: any) => {
     if (!data) return null;
     return {
       tickerText: data.tickerText || "",
+      tickerDirection: data.tickerDirection || "left",
       tickerSpeed: data.tickerSpeed || 60,
       tickerBgColor: data.tickerBgColor || "#ffffff",
       tickerTextColor: data.tickerTextColor || "#000000",
+      showTrustMarquee: data.showTrustMarquee !== false,
+      trustMarqueeDirection: data.trustMarqueeDirection || "left",
+      trustMarqueeSpeed: data.trustMarqueeSpeed || 35,
+      trustMarqueeItems: cleanTrustItems(data.trustMarqueeItems),
       announcementText: data.announcementText || "",
       heroTitle: data.heroTitle || "",
       heroTitleFontType: data.heroTitleFontType || "Outfit",
@@ -634,9 +674,14 @@ export default function AdminDashboard() {
 
   const hasUnsavedChanges = originalSettings ? (
     tickerText !== originalSettings.tickerText ||
+    tickerDirection !== originalSettings.tickerDirection ||
     tickerSpeed !== originalSettings.tickerSpeed ||
     tickerBgColor !== originalSettings.tickerBgColor ||
     tickerTextColor !== originalSettings.tickerTextColor ||
+    showTrustMarquee !== originalSettings.showTrustMarquee ||
+    trustMarqueeDirection !== originalSettings.trustMarqueeDirection ||
+    trustMarqueeSpeed !== originalSettings.trustMarqueeSpeed ||
+    JSON.stringify(cleanTrustItems(trustMarqueeItems)) !== JSON.stringify(originalSettings.trustMarqueeItems || []) ||
     announcementText !== originalSettings.announcementText ||
     heroTitle !== originalSettings.heroTitle ||
     heroTitleFontType !== originalSettings.heroTitleFontType ||
@@ -786,7 +831,7 @@ export default function AdminDashboard() {
     contactUsText !== originalSettings.contactUsText ||
     returnPolicyText !== originalSettings.returnPolicyText ||
     shippingPolicyText !== originalSettings.shippingPolicyText ||
-    JSON.stringify(faqs) !== JSON.stringify(originalSettings.faqs || [])
+    JSON.stringify(cleanFaqs(faqs)) !== JSON.stringify(cleanFaqs(originalSettings.faqs || []))
   ) : false;
 
   const getChangedFieldsList = () => {
@@ -926,9 +971,14 @@ export default function AdminDashboard() {
       const data = await res.json();
       if (data) {
         setTickerText(data.tickerText || "");
+        setTickerDirection(data.tickerDirection || "left");
         setTickerSpeed(data.tickerSpeed || 60);
         setTickerBgColor(data.tickerBgColor || "#ffffff");
         setTickerTextColor(data.tickerTextColor || "#000000");
+        setShowTrustMarquee(data.showTrustMarquee !== false);
+        setTrustMarqueeDirection(data.trustMarqueeDirection || "left");
+        setTrustMarqueeSpeed(data.trustMarqueeSpeed || 35);
+        setTrustMarqueeItems(cleanTrustItems(data.trustMarqueeItems));
         setAnnouncementText(data.announcementText || "");
         setHeroTitle(data.heroTitle || "");
         setHeroTitleFontType(data.heroTitleFontType || "Outfit");
@@ -1285,9 +1335,14 @@ export default function AdminDashboard() {
     try {
       const payload = {
         tickerText,
+        tickerDirection,
         tickerSpeed,
         tickerBgColor,
         tickerTextColor,
+        showTrustMarquee,
+        trustMarqueeDirection,
+        trustMarqueeSpeed,
+        trustMarqueeItems: cleanTrustItems(trustMarqueeItems),
         announcementText,
         heroTitle,
         heroTitleFontType,
@@ -1569,6 +1624,10 @@ export default function AdminDashboard() {
       setBrandLogoType(originalSettings.brandLogoType || "text");
       setBrandLogoValue(originalSettings.brandLogoValue || "29sFORMULA");
       setShowTicker(originalSettings.showTicker !== undefined ? originalSettings.showTicker : true);
+      setShowTrustMarquee(originalSettings.showTrustMarquee !== undefined ? originalSettings.showTrustMarquee : true);
+      setTrustMarqueeDirection(originalSettings.trustMarqueeDirection || "left");
+      setTrustMarqueeSpeed(originalSettings.trustMarqueeSpeed || 35);
+      setTrustMarqueeItems(originalSettings.trustMarqueeItems || []);
       setShowAnnouncement(originalSettings.showAnnouncement !== undefined ? originalSettings.showAnnouncement : true);
       setShowVideo(originalSettings.showVideo !== undefined ? originalSettings.showVideo : true);
       setShowLifestyle(originalSettings.showLifestyle !== undefined ? originalSettings.showLifestyle : true);
@@ -1623,6 +1682,10 @@ export default function AdminDashboard() {
           tickerSpeed,
           tickerBgColor,
           tickerTextColor,
+          showTrustMarquee,
+          trustMarqueeDirection,
+          trustMarqueeSpeed,
+          trustMarqueeItems: cleanTrustItems(trustMarqueeItems),
           announcementText,
           heroTitle,
           heroTitleFontType,
@@ -3303,12 +3366,22 @@ export default function AdminDashboard() {
             saveSettingsSilent={saveSettingsSilent}
             tickerText={tickerText}
             setTickerText={setTickerText}
+            tickerDirection={tickerDirection}
+            setTickerDirection={setTickerDirection}
             tickerSpeed={tickerSpeed}
             setTickerSpeed={setTickerSpeed}
             tickerBgColor={tickerBgColor}
             setTickerBgColor={setTickerBgColor}
             tickerTextColor={tickerTextColor}
             setTickerTextColor={setTickerTextColor}
+            showTrustMarquee={showTrustMarquee}
+            setShowTrustMarquee={setShowTrustMarquee}
+            trustMarqueeDirection={trustMarqueeDirection}
+            setTrustMarqueeDirection={setTrustMarqueeDirection}
+            trustMarqueeSpeed={trustMarqueeSpeed}
+            setTrustMarqueeSpeed={setTrustMarqueeSpeed}
+            trustMarqueeItems={trustMarqueeItems}
+            setTrustMarqueeItems={setTrustMarqueeItems}
             setSuccessMessage={setSuccessMessage}
             hasUnsavedChanges={hasUnsavedChanges}
           />
