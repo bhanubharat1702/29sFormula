@@ -11,6 +11,7 @@ const addressItemSchema = new mongoose.Schema({
 
 // Define User Schema
 const userSchema = new mongoose.Schema({
+  storeId: { type: mongoose.Schema.Types.ObjectId, ref: "Store", index: true },
   name: { type: String, required: true },
   email: { type: String, required: true, unique: true },
   password: { type: String },

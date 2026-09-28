@@ -12,6 +12,7 @@ const productSchema = new mongoose.Schema({
   onlineOrder: { type: String, default: "" },
   
   // Denormalized computed values for fast storefront query rendering
+  storeId: { type: mongoose.Schema.Types.ObjectId, ref: "Store", index: true },
   price: { type: Number },
   strikePrice: { type: Number },
   makingPrice: { type: Number, default: 0 },
@@ -21,8 +22,8 @@ const productSchema = new mongoose.Schema({
 }, { timestamps: true });
 
 // ─── Indexes ────────────────────────────────────────────────────────────────
-// Storefront: filter by category, show newest first (ESR: equality → sort)
-productSchema.index({ category: 1, createdAt: -1 });
+// Storefront: filter by storeId and category, show newest first
+productSchema.index({ storeId: 1, category: 1, createdAt: -1 });
 
 // Admin all-products listing sorted by newest
 productSchema.index({ createdAt: -1 });

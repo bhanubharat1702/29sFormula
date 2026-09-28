@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 
 // Define Review Schema
 const reviewSchema = new mongoose.Schema({
+  storeId: { type: mongoose.Schema.Types.ObjectId, ref: "Store", index: true },
   productId: { type: mongoose.Schema.Types.ObjectId, ref: "Product", required: true },
   author: { type: String, required: true },
   avatar: { type: String },

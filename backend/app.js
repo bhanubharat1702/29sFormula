@@ -18,6 +18,9 @@ import adminRoutes from "./routes/adminRoutes.js";
 import productRoutes from "./routes/productRoutes.js";
 import reviewRoutes from "./routes/reviewRoutes.js";
 import discountRoutes from "./routes/discountRoutes.js";
+import superAdminRoutes from "./routes/superAdminRoutes.js";
+
+import { tenantResolver } from "./middleware/tenantResolver.js";
 
 const app = express();
 
@@ -27,6 +30,9 @@ initSentry(app);
 app.use(cors());
 app.use(express.json({ limit: "100mb" }));
 app.use(express.urlencoded({ limit: "100mb", extended: true }));
+
+// Resolve Tenant Context (req.storeId & req.store) for every incoming request
+app.use(tenantResolver);
 
 // Apply general API rate limiting
 app.use("/api", generalLimiter);
@@ -42,6 +48,7 @@ app.use("/", adminRoutes);
 app.use("/", productRoutes);
 app.use("/", reviewRoutes);
 app.use("/", discountRoutes);
+app.use("/", superAdminRoutes);
 
 // Global Error Handler Middleware with Sentry Exception Capture
 app.use((err, req, res, next) => {

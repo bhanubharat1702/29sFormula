@@ -11,8 +11,9 @@ const addressItemSchema = new mongoose.Schema({
 
 // Define Customer Schema
 const customerSchema = new mongoose.Schema({
+  storeId: { type: mongoose.Schema.Types.ObjectId, ref: "Store", index: true },
   name: { type: String, required: true },
-  email: { type: String, required: true, unique: true },
+  email: { type: String, required: true },
   phone: { type: String },
   address: { type: String },
   addresses: [addressItemSchema],
@@ -21,8 +22,8 @@ const customerSchema = new mongoose.Schema({
   totalSpend: { type: Number, default: 0 }
 }, { timestamps: true });
 
-// ─── Indexes ────────────────────────────────────────────────────────────────
-// NOTE: { email: 1 } unique index is auto-created from schema unique: true above
+// Customer per store unique index
+customerSchema.index({ storeId: 1, email: 1 }, { unique: true });
 
 // Admin customer listing: new signups sorted by date
 customerSchema.index({ createdAt: -1 });

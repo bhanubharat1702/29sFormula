@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 
 const returnRequestSchema = new mongoose.Schema({
+  storeId: { type: mongoose.Schema.Types.ObjectId, ref: "Store", index: true },
   orderId: { type: String, required: true },
   orderObjectId: { type: mongoose.Schema.Types.ObjectId, ref: "Order", required: true },
   reason: { type: String, required: true },

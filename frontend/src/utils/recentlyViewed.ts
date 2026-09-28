@@ -16,14 +16,22 @@ export interface RecentlyViewedProduct {
   [key: string]: any;
 }
 
-const STORAGE_KEY = "recently_viewed_products";
+const DEFAULT_STORAGE_KEY = "recently_viewed_products";
 const MAX_ITEMS = 8;
 
-export function saveRecentlyViewed(product: RecentlyViewedProduct): void {
+function getStorageKey(storeId?: string): string {
+  if (storeId && typeof storeId === "string" && storeId.trim()) {
+    return `recently_viewed_products_${storeId.trim()}`;
+  }
+  return DEFAULT_STORAGE_KEY;
+}
+
+export function saveRecentlyViewed(product: RecentlyViewedProduct, storeId?: string): void {
   if (typeof window === "undefined" || !product || !product._id) return;
 
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
+    const key = getStorageKey(storeId);
+    const raw = localStorage.getItem(key);
     let items: RecentlyViewedProduct[] = [];
 
     if (raw) {
@@ -62,18 +70,19 @@ export function saveRecentlyViewed(product: RecentlyViewedProduct): void {
       items = items.slice(0, MAX_ITEMS);
     }
 
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+    localStorage.setItem(key, JSON.stringify(items));
     window.dispatchEvent(new Event("recentlyViewedUpdated"));
   } catch (err) {
     console.warn("Failed to save recently viewed product:", err);
   }
 }
 
-export function getRecentlyViewed(): RecentlyViewedProduct[] {
+export function getRecentlyViewed(storeId?: string): RecentlyViewedProduct[] {
   if (typeof window === "undefined") return [];
 
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
+    const key = getStorageKey(storeId);
+    const raw = localStorage.getItem(key);
     if (!raw) return [];
 
     const parsed = JSON.parse(raw);
@@ -86,10 +95,11 @@ export function getRecentlyViewed(): RecentlyViewedProduct[] {
   }
 }
 
-export function clearRecentlyViewed(): void {
+export function clearRecentlyViewed(storeId?: string): void {
   if (typeof window === "undefined") return;
   try {
-    localStorage.removeItem(STORAGE_KEY);
+    const key = getStorageKey(storeId);
+    localStorage.removeItem(key);
     window.dispatchEvent(new Event("recentlyViewedUpdated"));
   } catch (err) {
     console.warn("Failed to clear recently viewed products:", err);
