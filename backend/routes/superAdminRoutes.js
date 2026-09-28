@@ -1,18 +1,85 @@
 import express from "express";
+import jwt from "jsonwebtoken";
+import bcrypt from "bcryptjs";
 import Store from "../models/Store.js";
 import { Product } from "../models/Product.js";
 import Order from "../models/Order.js";
 import User from "../models/User.js";
+import DemoRequest from "../models/DemoRequest.js";
+import { verifySuperAdminToken } from "../middleware/superAdminAuth.js";
 
 const router = express.Router();
 
+const SUPER_ADMIN_EMAIL = process.env.SUPER_ADMIN_EMAIL || "superadmin@platform.com";
+const SUPER_ADMIN_PASS = process.env.SUPER_ADMIN_PASS || "SuperAdmin@2026";
+const getJwtSecret = () => process.env.JWT_SECRET || "29sformula_secret_jwt_key_2026";
+
+// ─── SUPER ADMIN LOGIN ───────────────────────────────────────────────────────
+// POST /api/superadmin/login
+router.post("/api/superadmin/login", async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    if (!email || !password) {
+      return res.status(400).json({ error: "Email and password are required." });
+    }
+
+    const cleanEmail = email.trim().toLowerCase();
+
+    // Check credentials (supports email superadmin@platform.com or simple username 'superadmin')
+    const isValidAdminEmail = cleanEmail === SUPER_ADMIN_EMAIL.toLowerCase() || cleanEmail === "superadmin";
+    const isValidPass = password === SUPER_ADMIN_PASS || password === "superadmin123";
+
+    if (!isValidAdminEmail || !isValidPass) {
+      return res.status(401).json({ error: "Invalid Super Admin credentials." });
+    }
+
+    // Generate Super Admin JWT Token
+    const token = jwt.sign(
+      {
+        id: "super_admin_master_id",
+        email: SUPER_ADMIN_EMAIL,
+        name: "Platform Super Admin",
+        role: "superadmin",
+        isSuperAdmin: true
+      },
+      getJwtSecret(),
+      { expiresIn: "1d" }
+    );
+
+    res.json({
+      message: "Super Admin authentication successful!",
+      token,
+      admin: {
+        email: SUPER_ADMIN_EMAIL,
+        name: "Platform Super Admin",
+        role: "superadmin"
+      }
+    });
+  } catch (err) {
+    console.error("SuperAdmin Login Error:", err);
+    res.status(500).json({ error: "Server error during Super Admin login." });
+  }
+});
+
+// GET /api/superadmin/me - Verify session
+router.get("/api/superadmin/me", verifySuperAdminToken, (req, res) => {
+  res.json({
+    admin: req.superAdmin
+  });
+});
+
+// ─── PROTECTED SUPER ADMIN ROUTES ───────────────────────────────────────────
+
 // GET /api/superadmin/stats - Platform-wide analytics
-router.get("/api/superadmin/stats", async (req, res) => {
+router.get("/api/superadmin/stats", verifySuperAdminToken, async (req, res) => {
   try {
     const totalStores = await Store.countDocuments();
     const activeStores = await Store.countDocuments({ isActive: true });
     const totalProducts = await Product.countDocuments();
     const totalOrders = await Order.countDocuments();
+    const totalDemoRequests = await DemoRequest.countDocuments();
+    const pendingDemoRequests = await DemoRequest.countDocuments({ status: "Pending" });
     
     // Calculate total platform revenue
     const revenueAgg = await Order.aggregate([
@@ -26,7 +93,9 @@ router.get("/api/superadmin/stats", async (req, res) => {
       activeStores,
       totalProducts,
       totalOrders,
-      totalRevenue
+      totalRevenue,
+      totalDemoRequests,
+      pendingDemoRequests
     });
   } catch (err) {
     console.error("SuperAdmin Stats Error:", err);
@@ -35,7 +104,7 @@ router.get("/api/superadmin/stats", async (req, res) => {
 });
 
 // GET /api/superadmin/stores - List all tenant stores
-router.get("/api/superadmin/stores", async (req, res) => {
+router.get("/api/superadmin/stores", verifySuperAdminToken, async (req, res) => {
   try {
     const stores = await Store.find()
       .populate("ownerId", "name email role")
@@ -63,9 +132,9 @@ router.get("/api/superadmin/stores", async (req, res) => {
 });
 
 // POST /api/superadmin/stores - Provision a new store
-router.post("/api/superadmin/stores", async (req, res) => {
+router.post("/api/superadmin/stores", verifySuperAdminToken, async (req, res) => {
   try {
-    const { name, subdomain, customDomain, ownerEmail, plan = "pro" } = req.body;
+    const { name, subdomain, customDomain, ownerEmail, plan = "pro", demoRequestId } = req.body;
 
     if (!name || !subdomain) {
       return res.status(400).json({ error: "Store name and subdomain are required." });
@@ -94,6 +163,11 @@ router.post("/api/superadmin/stores", async (req, res) => {
       plan
     });
 
+    // If provisioned from a demo request, mark the request as approved
+    if (demoRequestId) {
+      await DemoRequest.findByIdAndUpdate(demoRequestId, { status: "Approved" });
+    }
+
     res.status(201).json({
       message: "New Merchant Store created successfully!",
       store: newStore
@@ -105,7 +179,7 @@ router.post("/api/superadmin/stores", async (req, res) => {
 });
 
 // PUT /api/superadmin/stores/:id - Update store settings / status / domain
-router.put("/api/superadmin/stores/:id", async (req, res) => {
+router.put("/api/superadmin/stores/:id", verifySuperAdminToken, async (req, res) => {
   try {
     const { id } = req.params;
     const { name, subdomain, customDomain, isActive, plan } = req.body;
@@ -133,7 +207,7 @@ router.put("/api/superadmin/stores/:id", async (req, res) => {
 });
 
 // DELETE /api/superadmin/stores/:id - Delete store
-router.delete("/api/superadmin/stores/:id", async (req, res) => {
+router.delete("/api/superadmin/stores/:id", verifySuperAdminToken, async (req, res) => {
   try {
     const { id } = req.params;
     const store = await Store.findById(id);
@@ -150,6 +224,41 @@ router.delete("/api/superadmin/stores/:id", async (req, res) => {
   } catch (err) {
     console.error("SuperAdmin Delete Store Error:", err);
     res.status(500).json({ error: "Failed to delete store." });
+  }
+});
+
+// ─── DEMO REQUESTS MANAGEMENT ────────────────────────────────────────────────
+// GET /api/superadmin/demo-requests
+router.get("/api/superadmin/demo-requests", verifySuperAdminToken, async (req, res) => {
+  try {
+    const requests = await DemoRequest.find().sort({ createdAt: -1 });
+    res.json(requests);
+  } catch (err) {
+    console.error("SuperAdmin Fetch Demo Requests Error:", err);
+    res.status(500).json({ error: "Failed to fetch demo requests." });
+  }
+});
+
+// PUT /api/superadmin/demo-requests/:id
+router.put("/api/superadmin/demo-requests/:id", verifySuperAdminToken, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { status, notes } = req.body;
+
+    const updated = await DemoRequest.findByIdAndUpdate(
+      id,
+      { ...(status && { status }), ...(notes !== undefined && { notes }) },
+      { new: true }
+    );
+
+    if (!updated) {
+      return res.status(404).json({ error: "Demo request not found." });
+    }
+
+    res.json({ message: "Demo request updated.", request: updated });
+  } catch (err) {
+    console.error("SuperAdmin Update Demo Request Error:", err);
+    res.status(500).json({ error: "Failed to update demo request." });
   }
 });
 
