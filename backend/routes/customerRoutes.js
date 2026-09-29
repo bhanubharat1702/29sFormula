@@ -10,6 +10,7 @@ import { getBrandInfo } from "../utils/brandHelper.js";
 import { verifyToken, isAdmin } from "../middleware/authMiddleware.js";
 import { otpLimiter } from "../middleware/rateLimiter.js";
 import { getPaginationParams, buildPaginatedResponse, setPaginationHeaders } from "../utils/paginationHelper.js";
+import { getTenantStoreId } from "../utils/tenantHelper.js";
 
 dotenv.config();
 
@@ -189,7 +190,11 @@ router.get("/api/customers", verifyToken, isAdmin, async (req, res) => {
   try {
     const { page, limit, skip, cursor, isExplicitPagination } = getPaginationParams(req, 20, 100);
 
+    const storeId = getTenantStoreId(req);
     const filter = {};
+    if (storeId) {
+      filter.storeId = storeId;
+    }
     if (req.query.search) {
       const searchRegex = new RegExp(String(req.query.search).trim(), "i");
       filter.$or = [

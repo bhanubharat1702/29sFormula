@@ -178,15 +178,26 @@ export default function LoginPageClient({ initialColor }: { initialColor: string
       if (data.token) {
         localStorage.setItem("adminToken", data.token);
       }
-      if (isSystemAdmin || data.isAdmin || data.role === "admin") {
+      const isOwnerOrAdmin = isSystemAdmin || data.isAdmin || data.role === "admin" || data.isOwner || data.role === "owner";
+      if (isOwnerOrAdmin) {
         localStorage.setItem("adminSession", "true");
+        if (data.storeId) {
+          localStorage.setItem("merchantStoreId", String(data.storeId));
+        }
       }
       localStorage.setItem("lastActivityTime", Date.now().toString());
 
-      if (isSystemAdmin || data.isAdmin || data.role === "admin") {
+      if (isOwnerOrAdmin) {
         setTimeout(() => {
+          if (data.dashboardUrl && typeof window !== "undefined") {
+            const currentHost = window.location.host;
+            if (data.storeSubdomain && !currentHost.startsWith(data.storeSubdomain)) {
+              window.location.href = data.dashboardUrl;
+              return;
+            }
+          }
           window.location.href = "/admin";
-        }, 1500);
+        }, 1200);
         return;
       }
 

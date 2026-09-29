@@ -6,6 +6,7 @@ import Order from "../models/Order.js";
 import ReturnRequest from "../models/ReturnRequest.js";
 import Customer from "../models/Customer.js";
 import User from "../models/User.js";
+import Store from "../models/Store.js";
 import { Product, ProductVariant } from "../models/Product.js";
 import { invalidateProductsCache } from "../utils/cache.js";
 import { queueEmail } from "../utils/emailQueue.js";
@@ -18,6 +19,7 @@ import { syncCustomerStats } from "../utils/customerHelper.js";
 import { calculateOrderPricing } from "../utils/pricingHelper.js";
 import { verifyToken, isAdmin } from "../middleware/authMiddleware.js";
 import { getPaginationParams, buildPaginatedResponse, setPaginationHeaders } from "../utils/paginationHelper.js";
+import { getTenantStoreId } from "../utils/tenantHelper.js";
 
 const router = express.Router();
 
@@ -55,7 +57,7 @@ export const generateTrackingUrl = (courierPartner, awbNumber, customUrl) => {
 
 const sendReturnUpdateEmail = async (order, customerEmail, customerName, returnStatus, adminNotes) => {
   try {
-    const { brandName, brandLogoUrl, headerHtml, brandTagline, primaryColor, frontendUrl } = await getBrandInfo();
+    const { brandName, brandLogoUrl, headerHtml, brandTagline, primaryColor, frontendUrl } = await getBrandInfo(order?.storeId);
     let subject = `Update on your Return Request - ${order.orderId}`;
     let heading = "Return Request Update";
     let message = "";
@@ -116,7 +118,7 @@ const sendReturnUpdateEmail = async (order, customerEmail, customerName, returnS
 
 const sendOrderUpdateEmail = async (order, customerEmail, customerName) => {
   try {
-    const { brandName, brandLogoUrl, headerHtml, brandTagline, primaryColor, frontendUrl } = await getBrandInfo();
+    const { brandName, brandLogoUrl, headerHtml, brandTagline, primaryColor, frontendUrl } = await getBrandInfo(order?.storeId);
     let subject = `Order Update - ${order.orderId}`;
     let heading = "An Update on Your Order";
     let message = `The status of your order is now: <strong style="font-weight: 600; color: #111;">${order.status}</strong>`;
@@ -199,11 +201,29 @@ const sendOrderUpdateEmail = async (order, customerEmail, customerName) => {
 
 
 const sendAdminNewOrderEmail = async (order) => {
-  const adminEmail = process.env.ADMIN_EMAIL;
+  let adminEmail = process.env.ADMIN_EMAIL;
+
+  // Resolve store owner's email address if available
+  if (order && order.storeId) {
+    try {
+      const storeDoc = await Store.findById(order.storeId).lean();
+      if (storeDoc && storeDoc.ownerEmail) {
+        adminEmail = storeDoc.ownerEmail;
+      } else if (storeDoc && storeDoc.ownerId) {
+        const ownerUser = await User.findById(storeDoc.ownerId).lean();
+        if (ownerUser && ownerUser.email) {
+          adminEmail = ownerUser.email;
+        }
+      }
+    } catch (e) {
+      console.warn("Could not lookup merchant store email:", e.message);
+    }
+  }
+
   if (!adminEmail) return;
 
   try {
-    const { brandName, brandLogoUrl, headerHtml, frontendUrl } = await getBrandInfo();
+    const { brandName, brandLogoUrl, headerHtml, frontendUrl } = await getBrandInfo(order?.storeId);
     const itemsHtml = (order.cartItems || []).map(item => `
       <tr>
         <td style="padding: 12px 10px; border-bottom: 1px solid #eee; font-size: 14px; color: #333;">
@@ -312,7 +332,7 @@ const sendAdminNewOrderEmail = async (order) => {
         </div>
       `
     });
-    console.log(`Admin new-order notification sent for ${order.orderId}`);
+    console.log(`Admin new-order notification sent to ${adminEmail} for ${order.orderId}`);
   } catch (err) {
     console.error('Failed to send admin new-order email:', err);
   }
@@ -320,7 +340,7 @@ const sendAdminNewOrderEmail = async (order) => {
 
 const sendOrderConfirmationEmail = async (order, customerEmail, customerName) => {
   try {
-    const { brandName, brandLogoUrl, headerHtml, brandTagline, primaryColor } = await getBrandInfo();
+    const { brandName, brandLogoUrl, headerHtml, brandTagline, primaryColor } = await getBrandInfo(order?.storeId);
     const itemsHtml = (order.cartItems || []).map(item => `
       <tr>
         <td style="padding: 10px; border-bottom: 1px solid #eee;">${item.name} (${item.size})</td>
@@ -412,39 +432,30 @@ router.post("/api/orders", async (req, res) => {
     const email = customerEmail.toLowerCase().trim();
 
     // Start MongoDB ACID Transaction (with graceful fallback if standalone DB without replica set)
-    const session = await mongoose.startSession();
+    let session = null;
     let transactionStarted = false;
-    try {
-      session.startTransaction();
-      transactionStarted = true;
-    } catch (txnError) {
-      transactionStarted = false;
-    }
 
-    let newOrder;
-    let stockDeduction;
-
-    try {
-      const activeSession = transactionStarted ? session : null;
+    const executeOrderCreation = async (activeSession) => {
       const opts = activeSession ? { session: activeSession } : {};
 
-      // Perform atomic stock deduction within transaction
-      stockDeduction = await deductStockAtomically(resolvedCartItems, activeSession);
+      // Perform atomic stock deduction
+      const stockDeduction = await deductStockAtomically(resolvedCartItems, activeSession);
       if (!stockDeduction.success) {
-        if (transactionStarted) {
-          await session.abortTransaction();
-          session.endSession();
-        }
-        return res.status(400).json({ error: stockDeduction.error });
+        return { success: false, statusCode: 400, error: stockDeduction.error, stockDeduction };
       }
 
       let customer = await Customer.findOne({ email }, null, opts);
+      const customerAddrStr = typeof shippingAddress === 'string'
+        ? shippingAddress
+        : [shippingAddress?.addressLine1, shippingAddress?.addressLine2, shippingAddress?.city, shippingAddress?.state, shippingAddress?.pincode, shippingAddress?.country]
+            .filter(Boolean).join(', ');
+
       if (customer) {
         customer.totalOrders += 1;
         customer.totalSpend += secureTotalAmount;
         if (customerName) customer.name = customerName;
         if (customerPhone) customer.phone = customerPhone;
-        if (shippingAddress) customer.address = shippingAddress;
+        if (customerAddrStr) customer.address = customerAddrStr;
         await customer.save(opts);
       } else {
         const createdCustomers = await Customer.create(
@@ -452,7 +463,7 @@ router.post("/api/orders", async (req, res) => {
             name: customerName,
             email,
             phone: customerPhone,
-            address: shippingAddress,
+            address: customerAddrStr,
             totalOrders: 1,
             totalSpend: secureTotalAmount
           }],
@@ -470,8 +481,10 @@ router.post("/api/orders", async (req, res) => {
       }
 
       const orderId = await getNextOrderId(activeSession);
+      const storeId = getTenantStoreId(req);
 
-      newOrder = new Order({
+      const createdOrder = new Order({
+        storeId: storeId || undefined,
         orderId,
         customerId: customer._id,
         customerName,
@@ -490,21 +503,68 @@ router.post("/api/orders", async (req, res) => {
         timeline: [{ event: "Order Placed (Pending Review)" }]
       });
 
-      await newOrder.save(opts);
+      await createdOrder.save(opts);
+      return { success: true, order: createdOrder, stockDeduction };
+    };
 
-      if (transactionStarted) {
+    let newOrder;
+    let stockDeduction;
+
+    try {
+      try {
+        session = await mongoose.startSession();
+        session.startTransaction();
+        transactionStarted = true;
+      } catch (txnInitErr) {
+        transactionStarted = false;
+      }
+
+      const activeSession = transactionStarted ? session : null;
+      const result = await executeOrderCreation(activeSession);
+
+      if (!result.success) {
+        if (transactionStarted && session) {
+          await session.abortTransaction();
+          session.endSession();
+        }
+        return res.status(result.statusCode || 400).json({ error: result.error });
+      }
+
+      newOrder = result.order;
+      stockDeduction = result.stockDeduction;
+
+      if (transactionStarted && session) {
         await session.commitTransaction();
         session.endSession();
       }
     } catch (orderError) {
-      if (transactionStarted) {
-        await session.abortTransaction();
-        session.endSession();
-      } else if (stockDeduction && stockDeduction.deducted) {
-        await rollbackStock(stockDeduction.deducted);
+      if (transactionStarted && session) {
+        try { await session.abortTransaction(); session.endSession(); } catch (e) {}
       }
-      console.error("Order Creation Error:", orderError);
-      return res.status(500).json({ error: "Failed to create order: " + orderError.message });
+
+      // Fallback for standalone MongoDB databases without replica set support
+      if (orderError.message && orderError.message.includes("Transaction numbers are only allowed")) {
+        try {
+          const fallbackResult = await executeOrderCreation(null);
+          if (!fallbackResult.success) {
+            return res.status(fallbackResult.statusCode || 400).json({ error: fallbackResult.error });
+          }
+          newOrder = fallbackResult.order;
+          stockDeduction = fallbackResult.stockDeduction;
+        } catch (fallbackErr) {
+          if (stockDeduction && stockDeduction.deducted) {
+            await rollbackStock(stockDeduction.deducted);
+          }
+          console.error("Order Creation Fallback Error:", fallbackErr);
+          return res.status(500).json({ error: "Failed to create order: " + fallbackErr.message });
+        }
+      } else {
+        if (stockDeduction && stockDeduction.deducted) {
+          await rollbackStock(stockDeduction.deducted);
+        }
+        console.error("Order Creation Error:", orderError);
+        return res.status(500).json({ error: "Failed to create order: " + orderError.message });
+      }
     }
 
     // Sync Customer analytics (totalOrders & totalSpend based on active non-cancelled orders)
@@ -542,7 +602,11 @@ router.get("/api/orders", verifyToken, isAdmin, async (req, res) => {
   try {
     const { page, limit, skip, cursor, isExplicitPagination } = getPaginationParams(req, 20, 100);
 
+    const storeId = getTenantStoreId(req);
     const filter = {};
+    if (storeId) {
+      filter.storeId = storeId;
+    }
     if (req.query.status) {
       filter.status = req.query.status;
     }

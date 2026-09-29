@@ -1,21 +1,21 @@
 import { v2 as cloudinary } from "cloudinary";
 import multer from "multer";
+import dotenv from "dotenv";
+
+dotenv.config();
 
 // Configure Cloudinary
-if (process.env.CLOUDINARY_CLOUD_NAME && process.env.CLOUDINARY_API_KEY && process.env.CLOUDINARY_API_SECRET) {
-  cloudinary.config({
-    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-    api_key: process.env.CLOUDINARY_API_KEY,
-    api_secret: process.env.CLOUDINARY_API_SECRET,
-    secure: true,
-    timeout: 120000
-  });
-} else {
-  cloudinary.config({
-    secure: true,
-    timeout: 120000
-  });
-}
+const cloudName = process.env.CLOUDINARY_CLOUD_NAME || "ocz1cqha";
+const apiKey = process.env.CLOUDINARY_API_KEY || "714212782988944";
+const apiSecret = process.env.CLOUDINARY_API_SECRET || "FEBtJbexqfENHAlw23ubQ8udTi4";
+
+cloudinary.config({
+  cloud_name: cloudName,
+  api_key: apiKey,
+  api_secret: apiSecret,
+  secure: true,
+  timeout: 120000
+});
 
 // Configure Multer Memory Storage
 const storage = multer.memoryStorage();

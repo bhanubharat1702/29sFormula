@@ -4,6 +4,7 @@ import jwt from "jsonwebtoken";
 import User from "../models/User.js";
 import Customer from "../models/Customer.js";
 import Order from "../models/Order.js";
+import Store from "../models/Store.js";
 import { queueEmail } from "../utils/emailQueue.js";
 import { getBrandInfo } from "../utils/brandHelper.js";
 import { loginLimiter, otpLimiter } from "../middleware/rateLimiter.js";
@@ -18,12 +19,15 @@ const generateToken = (user) => {
     user.role === "admin" || 
     (process.env.ADMIN_EMAIL && user.email?.toLowerCase() === process.env.ADMIN_EMAIL.toLowerCase())
   );
+  const isOwnerUser = Boolean(user.isOwner || user.role === "owner");
   return jwt.sign(
     {
       id: user._id,
       email: user.email,
-      role: isAdminUser ? "admin" : "user",
-      isAdmin: isAdminUser
+      role: isOwnerUser ? "owner" : (isAdminUser ? "admin" : "user"),
+      isAdmin: isAdminUser,
+      isOwner: isOwnerUser,
+      storeId: user.storeId || null
     },
     process.env.JWT_SECRET || "ecommerce_secret_jwt_key_2026",
     { expiresIn: "7d" }
@@ -158,6 +162,23 @@ router.post("/api/auth/login", loginLimiter, validate(loginSchema), async (req, 
 
     const token = generateToken(user);
 
+    // Look up merchant store details if user is an owner or linked to a store
+    const isOwner = Boolean(user.isOwner || user.role === "owner");
+    const store = (user.storeId || isOwner)
+      ? await Store.findOne({
+          $or: [
+            ...(user.storeId ? [{ _id: user.storeId }] : []),
+            { ownerId: user._id },
+            { ownerEmail: user.email }
+          ]
+        }).lean()
+      : null;
+
+    const baseDomain = process.env.PLATFORM_DOMAIN || "localhost:3000";
+    const dashboardUrl = store
+      ? `http://${store.subdomain}.${baseDomain}/admin`
+      : "/admin";
+
     res.json({
       token,
       _id: user._id,
@@ -165,8 +186,15 @@ router.post("/api/auth/login", loginLimiter, validate(loginSchema), async (req, 
       email: user.email,
       phone: user.phone || existingCustomer?.phone || lastOrder?.customerPhone || "",
       address: existingCustomer?.address || lastOrder?.shippingAddress || "",
-      role: user.role || (user.email?.toLowerCase() === process.env.ADMIN_EMAIL?.toLowerCase() ? "admin" : "user"),
+      role: user.role || (isOwner ? "owner" : (user.email?.toLowerCase() === process.env.ADMIN_EMAIL?.toLowerCase() ? "admin" : "user")),
       isAdmin: user.isAdmin || (user.email?.toLowerCase() === process.env.ADMIN_EMAIL?.toLowerCase()),
+      isOwner,
+      mustChangePassword: Boolean(user.mustChangePassword),
+      storeId: store ? store._id : user.storeId,
+      storeSubdomain: store ? store.subdomain : null,
+      storeName: store ? store.name : null,
+      storeUrl: store ? `http://${store.subdomain}.${baseDomain}` : null,
+      dashboardUrl,
       isGoogleUser: false
     });
   } catch (error) {

@@ -12,7 +12,9 @@ export const redisCache = (prefix = "cache", ttlSeconds = 300) => {
       return next();
     }
 
-    const cacheKey = `${prefix}:${req.originalUrl || req.url}`;
+    // Key cache strictly by tenant storeId or domain host
+    const tenantId = req.user?.storeId || req.storeId || req.headers["x-tenant-id"] || req.headers["x-store-id"] || req.headers["host"] || "default";
+    const cacheKey = `${prefix}:${tenantId}:${req.originalUrl || req.url}`;
 
     try {
       const cachedData = await getCache(cacheKey);

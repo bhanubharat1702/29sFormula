@@ -3,10 +3,11 @@ import { Product, ProductVariant } from "../models/Product.js";
 import Order from "../models/Order.js";
 import Review from "../models/Review.js";
 import Customer from "../models/Customer.js";
-import { cachedProducts, setCachedProducts, cachedProductDetails, invalidateProductsCache } from "../utils/cache.js";
+import { cachedProductDetails, invalidateProductsCache } from "../utils/cache.js";
 import { deleteFromCloudinary } from "../utils/cloudinary.js";
 import { getPaginationParams, buildPaginatedResponse, setPaginationHeaders } from "../utils/paginationHelper.js";
 import { redisCache } from "../middleware/cacheMiddleware.js";
+import { getTenantStoreId, withTenantFilter } from "../utils/tenantHelper.js";
 
 const router = express.Router();
 
@@ -37,7 +38,11 @@ router.get("/api/products", redisCache("products", 300), async (req, res) => {
   try {
     const { page, limit, skip, cursor, isExplicitPagination } = getPaginationParams(req, 20, 100);
 
+    const storeId = getTenantStoreId(req);
     const filter = {};
+    if (storeId) {
+      filter.storeId = storeId;
+    }
     if (req.query.category) {
       filter.category = req.query.category;
     }
@@ -132,7 +137,10 @@ router.post("/api/products", async (req, res) => {
       computedCategory.push("Latest Arrivals");
     }
 
+    const storeId = getTenantStoreId(req);
+
     const newProduct = new Product({
+      storeId: storeId || undefined,
       name,
       description,
       additionalInformation,
@@ -388,13 +396,20 @@ router.put("/api/categories/rename", async (req, res) => {
 router.get("/api/products/:id", async (req, res) => {
   try {
     const { id } = req.params;
-    if (cachedProductDetails.has(id)) {
-      return res.json(cachedProductDetails.get(id));
+    const storeId = getTenantStoreId(req);
+    const cacheKey = storeId ? `${storeId}:${id}` : id;
+
+    if (cachedProductDetails.has(cacheKey)) {
+      return res.json(cachedProductDetails.get(cacheKey));
     }
-    const product = await Product.findById(id).lean();
+
+    const query = { _id: id };
+    let product = await Product.findOne(query).lean();
+    
     if (!product) {
       return res.status(404).json({ error: "Product not found" });
     }
+
     let variants = await ProductVariant.find({ productId: id }).lean();
     variants.sort((a, b) => (Number(a.price) || 0) - (Number(b.price) || 0));
     product.variants = variants;
@@ -405,9 +420,10 @@ router.get("/api/products/:id", async (req, res) => {
       product.sizes = variants.map(v => v.size).filter(Boolean);
     }
 
-    cachedProductDetails.set(id, product);
+    cachedProductDetails.set(cacheKey, product);
     res.json(product);
   } catch (error) {
+    console.error("Error fetching product details:", error);
     res.status(500).json({ error: "Failed to fetch product details" });
   }
 });

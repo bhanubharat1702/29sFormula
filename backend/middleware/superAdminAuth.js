@@ -1,4 +1,5 @@
 import jwt from "jsonwebtoken";
+import { runWithoutTenant } from "../utils/tenantContext.js";
 
 const SUPER_ADMIN_EMAIL = process.env.SUPER_ADMIN_EMAIL || "superadmin@platform.com";
 const getJwtSecret = () => process.env.JWT_SECRET || "ecommerce_secret_jwt_key_2026";
@@ -25,7 +26,10 @@ export const verifySuperAdminToken = (req, res, next) => {
     }
 
     req.superAdmin = decoded;
-    next();
+    // SuperAdmin operations run without tenant filtering to view platform-wide data
+    return runWithoutTenant(() => {
+      next();
+    });
   } catch (error) {
     console.error("Super Admin Token Error:", error.message);
     return res.status(401).json({ error: "Invalid or expired Super Admin session." });

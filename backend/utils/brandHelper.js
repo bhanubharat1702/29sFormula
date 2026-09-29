@@ -1,18 +1,39 @@
 import Settings from "../models/Settings.js";
-import { cachedSettings } from "./cache.js";
+import Store from "../models/Store.js";
+import { getCachedSettingsForStore, setCachedSettingsForStore } from "./cache.js";
+import { getTenantStoreIdFromContext } from "./tenantContext.js";
 
-export const getBrandInfo = async () => {
+export const getBrandInfo = async (storeId = null) => {
   try {
-    let settings = cachedSettings;
+    const activeStoreId = storeId || getTenantStoreIdFromContext();
+    let settings = getCachedSettingsForStore(activeStoreId);
     if (!settings) {
-      settings = await Settings.findOne({});
+      if (activeStoreId) {
+        settings = await Settings.findOne({ storeId: activeStoreId }).lean();
+      }
+      if (!settings) {
+        settings = await Settings.findOne({}).lean();
+      }
+      if (settings && activeStoreId) {
+        setCachedSettingsForStore(activeStoreId, settings);
+      }
     }
+
+    // Fallback store name lookup if brandLogoValue is not set
+    let storeNameFromModel = "";
+    if (activeStoreId && (!settings || !settings.brandLogoValue)) {
+      const storeDoc = await Store.findById(activeStoreId).lean();
+      if (storeDoc) {
+        storeNameFromModel = storeDoc.businessName || storeDoc.name || "";
+      }
+    }
+
     const brandLogoType = settings?.brandLogoType || "text";
-    const brandLogoValue = settings?.brandLogoValue || "";
+    const brandLogoValue = settings?.brandLogoValue || storeNameFromModel || "";
     
     // Determine brand logo image URL and clean brand text name set by admin
     const brandLogoUrl = brandLogoType === "image" && brandLogoValue ? brandLogoValue : null;
-    let brandName = "Store";
+    let brandName = storeNameFromModel || "Store";
     if (brandLogoType === "text" && brandLogoValue) {
       brandName = brandLogoValue;
     } else if (settings?.heroTitle) {
@@ -52,4 +73,3 @@ export const getBrandInfo = async () => {
     };
   }
 };
-

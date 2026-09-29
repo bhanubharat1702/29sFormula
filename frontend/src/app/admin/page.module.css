@@ -27,11 +27,112 @@
   gap: 25px;
 }
 
+/* Top Sidebar Header Matching Screenshot */
+.sidebarHeaderTop {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 6px;
+}
+
 .brandRow {
   display: flex;
-  justify-content: center;
   align-items: center;
+  justify-content: space-between;
   width: 100%;
+}
+
+.brandLeft {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.brandLogoCircle {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background-color: #0c0a09;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.brandNameDropdown {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+}
+
+.brandNameTitle {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #0c0a09;
+  letter-spacing: -0.01em;
+}
+
+.sidebarCollapseBtn {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  padding: 0;
+}
+
+.sidebarCollapseBtn:hover {
+  background: #f3f4f6;
+  border-color: #d1d5db;
+}
+
+.sidebarSearchWrapper {
+  display: flex;
+  align-items: center;
+  background: #f4f4f5;
+  border: 1px solid #e4e4e7;
+  border-radius: 8px;
+  padding: 6px 10px;
+  gap: 8px;
+}
+
+.sidebarSearchIcon {
+  width: 16px;
+  height: 16px;
+  color: #a1a1aa;
+  flex-shrink: 0;
+}
+
+.sidebarSearchInput {
+  background: transparent;
+  border: none;
+  outline: none;
+  font-size: 0.84rem;
+  color: #18181b;
+  width: 100%;
+}
+
+.sidebarSearchInput::placeholder {
+  color: #a1a1aa;
+}
+
+.sidebarKbdBadge {
+  background: #ffffff;
+  border: 1px solid #e4e4e7;
+  border-radius: 5px;
+  padding: 1px 5px;
+  font-size: 0.7rem;
+  font-weight: 500;
+  color: #71717a;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+  font-family: inherit;
+  flex-shrink: 0;
 }
 
 .brandName {

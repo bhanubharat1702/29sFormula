@@ -1,45 +1,128 @@
 import Store from "../models/Store.js";
+import { runWithTenant } from "../utils/tenantContext.js";
+import jwt from "jsonwebtoken";
 
 // Cache in-memory for fast domain -> storeId resolution
 const domainStoreCache = new Map();
 
+/**
+ * Invalidates the tenant resolution cache for a given store ID, domain, or clears all.
+ * @param {string|null} identifier 
+ */
+export const invalidateTenantCache = (identifier = null) => {
+  if (!identifier) {
+    domainStoreCache.clear();
+    return;
+  }
+  const strId = String(identifier);
+  domainStoreCache.delete(strId);
+  for (const [key, value] of domainStoreCache.entries()) {
+    if (value && (String(value._id) === strId || value.subdomain === strId || value.customDomain === strId)) {
+      domainStoreCache.delete(key);
+    }
+  }
+};
+
+/**
+ * Extracts candidate hostnames from headers in priority order:
+ * 1. x-store-domain header
+ * 2. Origin header (e.g. "http://demo.localhost:3000" -> "demo.localhost:3000")
+ * 3. Referer header (e.g. "http://demo.localhost:3000/admin" -> "demo.localhost:3000")
+ * 4. Host header
+ */
+const extractCandidateHosts = (req) => {
+  const candidates = [];
+  
+  if (req.headers["x-store-domain"]) {
+    candidates.push(req.headers["x-store-domain"]);
+  }
+
+  if (req.headers["origin"]) {
+    try {
+      const url = new URL(req.headers["origin"]);
+      if (url.host) candidates.push(url.host);
+    } catch (e) {}
+  }
+
+  if (req.headers["referer"]) {
+    try {
+      const url = new URL(req.headers["referer"]);
+      if (url.host) candidates.push(url.host);
+    } catch (e) {}
+  }
+
+  if (req.headers["host"]) {
+    candidates.push(req.headers["host"]);
+  }
+
+  return candidates;
+};
+
 export const tenantResolver = async (req, res, next) => {
   try {
-    let storeId = req.headers["x-tenant-id"] || req.headers["x-store-id"];
+    let storeId = req.headers["x-tenant-id"] || req.headers["x-store-id"] || req.body?.storeId || req.query?.storeId;
     let store = null;
 
-    if (storeId) {
-      if (domainStoreCache.has(storeId)) {
-        store = domainStoreCache.get(storeId);
-      } else {
-        store = await Store.findById(storeId).lean();
-        if (store) domainStoreCache.set(storeId, store);
+    // Check authorization header if storeId not provided in custom header
+    if (!storeId && (req.headers.authorization || req.headers.Authorization)) {
+      const authHeader = req.headers.authorization || req.headers.Authorization;
+      if (authHeader && authHeader.startsWith("Bearer ")) {
+        const token = authHeader.split(" ")[1];
+        try {
+          const decoded = jwt.decode(token);
+          if (decoded && decoded.storeId) {
+            storeId = decoded.storeId;
+          }
+        } catch (e) {}
       }
     }
 
-    if (!store) {
-      const host = req.headers["x-store-domain"] || req.headers["host"] || "";
-      const cleanHost = host.split(":")[0].toLowerCase();
+    // 1. Direct storeId from headers or token
+    if (storeId) {
+      if (domainStoreCache.has(String(storeId))) {
+        store = domainStoreCache.get(String(storeId));
+      } else {
+        store = await Store.findById(storeId).lean();
+        if (store) domainStoreCache.set(String(storeId), store);
+      }
+    }
 
-      if (cleanHost && domainStoreCache.has(cleanHost)) {
-        store = domainStoreCache.get(cleanHost);
-      } else if (cleanHost) {
-        // Search by customDomain or subdomain
+    // 2. Resolve from Origin / Referer / Host headers (e.g. demo.localhost:3000)
+    if (!store) {
+      const candidateHosts = extractCandidateHosts(req);
+
+      for (const hostStr of candidateHosts) {
+        const cleanHost = hostStr.split(":")[0].toLowerCase();
+        
+        // Skip generic localhost/ip without subdomain
+        if (!cleanHost || cleanHost === "localhost" || cleanHost === "127.0.0.1") {
+          continue;
+        }
+
+        if (domainStoreCache.has(cleanHost)) {
+          store = domainStoreCache.get(cleanHost);
+          break;
+        }
+
+        // Subdomain is first part before dot (e.g. "demo" from "demo.localhost")
+        const subdomainPart = cleanHost.split(".")[0];
+        
         store = await Store.findOne({
           $or: [
             { customDomain: cleanHost },
-            { subdomain: cleanHost.split(".")[0] }
+            { subdomain: subdomainPart }
           ],
           isActive: true
         }).lean();
 
         if (store) {
           domainStoreCache.set(cleanHost, store);
+          break;
         }
       }
     }
 
-    // Fallback to Default Store if not found
+    // 3. Fallback to Default Store if no specific tenant domain matched
     if (!store) {
       if (domainStoreCache.has("default")) {
         store = domainStoreCache.get("default");
@@ -54,9 +137,14 @@ export const tenantResolver = async (req, res, next) => {
       req.store = store;
     }
 
-    next();
+    const activeStoreId = req.storeId ? String(req.storeId) : null;
+    return runWithTenant(activeStoreId, () => {
+      next();
+    });
   } catch (err) {
     console.error("Tenant Resolution Error:", err);
-    next();
+    return runWithTenant(null, () => {
+      next();
+    });
   }
 };

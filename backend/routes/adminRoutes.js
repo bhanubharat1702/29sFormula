@@ -5,6 +5,7 @@ import { Product, ProductVariant } from "../models/Product.js";
 import Customer from "../models/Customer.js";
 import Review from "../models/Review.js";
 import { verifyToken, isAdmin } from "../middleware/authMiddleware.js";
+import { getTenantStoreId } from "../utils/tenantHelper.js";
 
 const router = express.Router();
 
@@ -13,6 +14,9 @@ router.use("/api/admin", verifyToken, isAdmin);
 
 router.get("/api/admin/dashboard-stats", async (req, res) => {
   try {
+    const storeId = getTenantStoreId(req);
+    const storeFilter = storeId ? { storeId } : {};
+
     const { timeline } = req.query;
     let dateFilter = {};
     const now = new Date();
@@ -33,13 +37,13 @@ router.get("/api/admin/dashboard-stats", async (req, res) => {
     }
 
     const [totalProducts, latestArrivalsCount, bestSellersCount, allCustomers, allOrders, topProducts, recentOrders, allVariants, allBaseProducts] = await Promise.all([
-      Product.countDocuments(),
-      Product.countDocuments({ category: "Latest Arrivals" }),
-      Product.countDocuments({ category: "Best Seller" }),
-      Customer.find({}, "createdAt").lean(),
-      Order.find({}, "totalAmount status deletedByAdmin createdAt cartItems rtoCharges").lean(),
+      Product.countDocuments(storeFilter),
+      Product.countDocuments({ ...storeFilter, category: "Latest Arrivals" }),
+      Product.countDocuments({ ...storeFilter, category: "Best Seller" }),
+      Customer.find(storeFilter, "createdAt").lean(),
+      Order.find(storeFilter, "totalAmount status deletedByAdmin createdAt cartItems rtoCharges").lean(),
       Order.aggregate([
-        { $match: { ...dateFilter, deletedByAdmin: false, status: { $nin: ["Cancelled"] } } },
+        { $match: { ...dateFilter, ...(storeId ? { storeId: new mongoose.Types.ObjectId(String(storeId)) } : {}), deletedByAdmin: false, status: { $nin: ["Cancelled"] } } },
         { $unwind: "$cartItems" },
         { $group: { _id: "$cartItems.productId", totalSold: { $sum: "$cartItems.quantity" } } },
         { $sort: { totalSold: -1 } },
@@ -49,12 +53,12 @@ router.get("/api/admin/dashboard-stats", async (req, res) => {
           .map(t => t._id)
           .filter(id => id && mongoose.Types.ObjectId.isValid(id));
         if (validProductIds.length === 0) return [];
-        const products = await Product.find({ _id: { $in: validProductIds } }).lean();
+        const products = await Product.find({ ...storeFilter, _id: { $in: validProductIds } }).lean();
         return topSales.map(t => products.find(p => String(p._id) === String(t._id))).filter(Boolean).slice(0, 5);
       }),
-      Order.find({ deletedByAdmin: false }).sort({ createdAt: -1 }).limit(5).populate("customerId").lean(),
-      ProductVariant.find({}, "productId size makingPrice").lean(),
-      Product.find({}, "makingPrice").lean()
+      Order.find({ ...storeFilter, deletedByAdmin: false }).sort({ createdAt: -1 }).limit(5).populate("customerId").lean(),
+      ProductVariant.find(storeFilter, "productId size makingPrice").lean(),
+      Product.find(storeFilter, "makingPrice").lean()
     ]);
 
     const orders = allOrders.filter(o => {

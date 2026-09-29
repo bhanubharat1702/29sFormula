@@ -162,7 +162,7 @@ export default function PlatformLandingPage() {
               <span className={`${styles.dot} ${styles.dotGreen}`} />
             </div>
             <div className={styles.urlBar}>
-              https://yourbrand.storeengine.com/admin
+              http://yourbrand.localhost:3000/admin
             </div>
             <div style={{ fontSize: "0.78rem", color: "#10b981", fontWeight: 600 }}>
               ● Live Multi-Tenant Sandbox
@@ -232,7 +232,7 @@ export default function PlatformLandingPage() {
             <div className={styles.cardIcon}>⚡</div>
             <h3 className={styles.cardTitle}>Multi-Tenant Engine</h3>
             <p className={styles.cardText}>
-              Every merchant gets their own isolated tenant environment. Subdomain routing (`brand.storeengine.com`) works automatically with zero cross-tenant data leaks.
+              Every merchant gets their own isolated tenant environment. Subdomain routing (`brand.localhost:3000`) works automatically with zero cross-tenant data leaks.
             </p>
           </div>
 
@@ -408,7 +408,7 @@ export default function PlatformLandingPage() {
                     <input 
                       type="text" 
                       className={styles.input} 
-                      placeholder="mybrand (.storeengine.com)"
+                      placeholder="mybrand (.localhost:3000)"
                       value={subdomain}
                       onChange={(e) => setSubdomain(e.target.value)}
                     />

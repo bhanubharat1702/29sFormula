@@ -3,23 +3,27 @@ import { Product, ProductVariant } from "../models/Product.js";
 import Review from "../models/Review.js";
 import Order from "../models/Order.js";
 import Settings from "../models/Settings.js";
-import { cachedProducts, cachedSettings } from "../utils/cache.js";
 import { getPaginationParams, buildPaginatedResponse, setPaginationHeaders } from "../utils/paginationHelper.js";
+import { getTenantStoreId } from "../utils/tenantHelper.js";
 
 const router = express.Router();
 
 router.get("/api/storefront/shop", async (req, res) => {
   try {
-    const { page, limit, skip, cursor, isExplicitPagination } = getPaginationParams(req, 20, 100);
+    const { page, limit, skip, cursor } = getPaginationParams(req, 20, 100);
+    const storeId = getTenantStoreId(req);
 
     const filter = {};
+    if (storeId) {
+      filter.storeId = storeId;
+    }
     if (cursor) {
       filter._id = { $lt: cursor };
     }
 
     const totalProducts = await Product.countDocuments(filter);
     const [settings, products] = await Promise.all([
-      Settings.findOne().lean(),
+      Settings.findOne(storeId ? { storeId } : {}).lean(),
       Product.find(filter)
         .sort({ _id: -1 })
         .skip(cursor ? 0 : skip)
@@ -65,14 +69,18 @@ router.get("/api/storefront/shop", async (req, res) => {
 
 router.get("/api/storefront/home", async (req, res) => {
   try {
+    const storeId = getTenantStoreId(req);
+    const storeFilter = storeId ? { storeId } : {};
+
     const [settings, arrivals, reviews] = await Promise.all([
-      Settings.findOne().lean(),
-      Product.find({ category: "Latest Arrivals" }).sort({ createdAt: -1 }).limit(10).lean(),
-      Review.find({}).sort({ createdAt: -1 }).limit(10).lean()
+      Settings.findOne(storeFilter).lean(),
+      Product.find({ ...storeFilter, category: "Latest Arrivals" }).sort({ createdAt: -1 }).limit(10).lean(),
+      Review.find(storeFilter).sort({ createdAt: -1 }).limit(10).lean()
     ]);
 
-    // Aggregate to find true best sellers based on order quantity
+    // Aggregate to find true best sellers based on order quantity for this specific store
     const salesAggregation = await Order.aggregate([
+      ...(storeId ? [{ $match: { storeId } }] : []),
       { $unwind: "$cartItems" },
       {
         $group: {
@@ -85,7 +93,7 @@ router.get("/api/storefront/home", async (req, res) => {
     ]);
 
     const topSellingIds = salesAggregation.map(item => item._id);
-    let bestSellers = await Product.find({ _id: { $in: topSellingIds } }).lean();
+    let bestSellers = await Product.find({ ...storeFilter, _id: { $in: topSellingIds } }).lean();
 
     // Sort to match aggregation order
     bestSellers.sort((a, b) => {
@@ -97,6 +105,7 @@ router.get("/api/storefront/home", async (req, res) => {
     // Fill remaining if less than 4 products have been sold
     if (bestSellers.length < 4) {
       const additional = await Product.find({ 
+        ...storeFilter,
         category: "Best Seller", 
         _id: { $nin: topSellingIds } 
       }).sort({ createdAt: -1 }).limit(4 - bestSellers.length).lean();

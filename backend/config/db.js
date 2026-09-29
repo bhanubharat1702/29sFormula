@@ -7,8 +7,8 @@ dotenv.config();
 // Bypass SSL certificate check for local development network environments
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
 
-// Disable mongoose query buffering globally to avoid server hangs on slow DB connections
-mongoose.set("bufferCommands", false);
+// Enable mongoose query buffering to prevent startup race condition when database is connecting
+mongoose.set("bufferCommands", true);
 
 const mongoURL = process.env.mongoURL;
 

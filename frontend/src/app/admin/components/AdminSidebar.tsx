@@ -46,14 +46,43 @@ export default function AdminSidebar({
   return (
     <aside className={`${styles.sidebar} ${isMobileMenuOpen ? styles.sidebarOpen : ''}`}>
       <div className={styles.sidebarTop}>
-        <div className={styles.brandRow}>
-          <span className={styles.brandName} style={{ display: 'flex', alignItems: 'center' }}>
-            {brandLogoType === "image" && brandLogoValue ? (
-              <img src={brandLogoValue} alt="Brand Logo" style={{ maxHeight: "30px", maxWidth: "150px", objectFit: "contain" }} />
-            ) : (
-              brandLogoValue || "MY STORE"
-            )}
-          </span>
+        <div className={styles.sidebarHeaderTop}>
+          <div className={styles.brandRow}>
+            <div className={styles.brandLeft}>
+              <div className={styles.brandLogoCircle}>
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" style={{ width: "18px", height: "18px", color: "#ffffff" }}>
+                  <path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2Zm0 3a1.5 1.5 0 1 1-1.5 1.5A1.5 1.5 0 0 1 12 5Zm-4 2.5a1.5 1.5 0 1 1-1.5 1.5A1.5 1.5 0 0 1 8 7.5Zm-2.5 4a1.5 1.5 0 1 1 1.5 1.5A1.5 1.5 0 0 1 5.5 11.5Zm2.5 4a1.5 1.5 0 1 1 1.5 1.5A1.5 1.5 0 0 1 8 15.5Zm4 2.5a1.5 1.5 0 1 1 1.5-1.5A1.5 1.5 0 0 1 12 18Zm4-2.5a1.5 1.5 0 1 1 1.5-1.5A1.5 1.5 0 0 1 16 15.5Zm2.5-4a1.5 1.5 0 1 1-1.5-1.5A1.5 1.5 0 0 1 18.5 11.5Zm-2.5-4a1.5 1.5 0 1 1-1.5-1.5A1.5 1.5 0 0 1 16 7.5Z"/>
+                </svg>
+              </div>
+              <div className={styles.brandNameDropdown}>
+                <span className={styles.brandNameTitle}>
+                  {brandLogoType === "image" && brandLogoValue ? (
+                    <img src={brandLogoValue} alt="Brand Logo" style={{ maxHeight: "24px", maxWidth: "120px", objectFit: "contain" }} />
+                  ) : (
+                    brandLogoValue || "My Store"
+                  )}
+                </span>
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" style={{ width: "14px", height: "14px", color: "#6b7280" }}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
+                </svg>
+              </div>
+            </div>
+
+            <button className={styles.sidebarCollapseBtn} title="Toggle Sidebar" onClick={() => setIsMobileMenuOpen && setIsMobileMenuOpen(!isMobileMenuOpen)}>
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.8} stroke="currentColor" style={{ width: "16px", height: "16px", color: "#374151" }}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
+                <path strokeLinecap="round" strokeLinejoin="round" d="M19 5v14" />
+              </svg>
+            </button>
+          </div>
+
+          <div className={styles.sidebarSearchWrapper}>
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className={styles.sidebarSearchIcon}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
+            </svg>
+            <input type="text" placeholder="Search..." className={styles.sidebarSearchInput} />
+            <kbd className={styles.sidebarKbdBadge}>⌘1</kbd>
+          </div>
         </div>
 
         <nav className={styles.navMenu}>

@@ -1,7 +1,10 @@
 import express from "express";
 import Settings from "../models/Settings.js";
-import { cachedSettings, setCachedSettings, invalidateSettingsCache } from "../utils/cache.js";
+import Store from "../models/Store.js";
+import { setCachedSettingsForStore, invalidateSettingsCache } from "../utils/cache.js";
+import { invalidateTenantCache } from "../middleware/tenantResolver.js";
 import { redisCache } from "../middleware/cacheMiddleware.js";
+import { getTenantStoreId } from "../utils/tenantHelper.js";
 
 const router = express.Router();
 
@@ -98,21 +101,26 @@ const cleanLegacySettings = async (settings) => {
   return settings;
 };
 
-router.get("/api/settings", redisCache("settings", 300), async (req, res) => {
+router.get("/api/settings", async (req, res) => {
   try {
-    if (cachedSettings) {
-      return res.json(cachedSettings);
-    }
-    let settings = await Settings.findOne({});
+    const storeId = getTenantStoreId(req);
+    const filter = storeId ? { storeId } : {};
+
+    let settings = await Settings.findOne(filter);
     if (!settings) {
-      settings = new Settings();
+      const store = storeId ? await Store.findById(storeId).lean() : null;
+      const brandName = store ? (store.businessName || store.name) : "MY STORE";
+      settings = new Settings({
+        storeId: storeId || undefined,
+        brandLogoValue: brandName
+      });
       await settings.save();
     } else {
       await cleanLegacySettings(settings);
     }
-    setCachedSettings(settings);
     res.json(settings);
   } catch (error) {
+    console.error("Fetch Settings Error:", error);
     res.status(500).json({ error: "Failed to fetch settings" });
   }
 });
@@ -152,9 +160,12 @@ router.post("/api/settings", async (req, res) => {
       contactLink
     } = req.body;
     
-    let settings = await Settings.findOne({});
+    const storeId = getTenantStoreId(req);
+    const filter = storeId ? { storeId } : {};
+
+    let settings = await Settings.findOne(filter);
     if (!settings) {
-      settings = new Settings();
+      settings = new Settings({ storeId: storeId || undefined });
     }
 
     const oldVideoUrl = settings.videoUrl;
@@ -328,9 +339,20 @@ router.post("/api/settings", async (req, res) => {
 
     await settings.save();
 
-    // Invalidate in-memory and Redis cache so changes reflect instantly
-    invalidateSettingsCache();
-    setCachedSettings(settings);
+    // Sync brand name back to Store model so Super Admin reflects changes made by merchant
+    if (req.body.brandLogoValue !== undefined && settings.storeId) {
+      await Store.findByIdAndUpdate(settings.storeId, {
+        name: req.body.brandLogoValue.trim(),
+        businessName: req.body.brandLogoValue.trim()
+      });
+    }
+
+    // Invalidate in-memory and Redis cache for this store so changes reflect instantly
+    invalidateSettingsCache(settings.storeId);
+    invalidateTenantCache(settings.storeId);
+    if (settings.storeId) {
+      setCachedSettingsForStore(settings.storeId, settings);
+    }
 
     // Delete old background video from Cloudinary if changed/removed
     if (videoUrl !== undefined && oldVideoUrl && oldVideoUrl !== videoUrl) {

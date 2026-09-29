@@ -1,4 +1,5 @@
 import jwt from "jsonwebtoken";
+import { setTenantStoreId } from "../utils/tenantContext.js";
 
 const getJwtSecret = () => process.env.JWT_SECRET || "ecommerce_secret_jwt_key_2026";
 
@@ -17,6 +18,10 @@ export const verifyToken = (req, res, next) => {
   try {
     const decoded = jwt.verify(token, getJwtSecret());
     req.user = decoded;
+    if (decoded.storeId) {
+      req.storeId = decoded.storeId;
+      setTenantStoreId(decoded.storeId);
+    }
     next();
   } catch (error) {
     console.error("JWT Verification Error:", error.message);
@@ -51,6 +56,10 @@ export const optionalAuth = (req, res, next) => {
     try {
       const decoded = jwt.verify(token, getJwtSecret());
       req.user = decoded;
+      if (decoded.storeId) {
+        req.storeId = decoded.storeId;
+        setTenantStoreId(decoded.storeId);
+      }
     } catch (err) {
       // Ignore token errors for optional auth
     }
