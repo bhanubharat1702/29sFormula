@@ -135,6 +135,7 @@ export const tenantResolver = async (req, res, next) => {
     if (store) {
       req.storeId = store._id;
       req.store = store;
+      req.isStoreSuspended = Boolean(store.status === "suspended" || store.isActive === false);
     }
 
     const activeStoreId = req.storeId ? String(req.storeId) : null;

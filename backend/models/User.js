@@ -39,6 +39,9 @@ const userSchema = new mongoose.Schema({
   // ── Tenant Owner Flags ───────────────────────────────────────
   mustChangePassword:  { type: Boolean, default: false },  // force change on first login
   onboardingComplete:  { type: Boolean, default: false },  // has completed onboarding wizard
+  tokenVersion:        { type: Number, default: 0 },       // increment to invalidate sessions
+  lastLoginAt:         { type: Date, default: null },
+  lastLogoutAt:        { type: Date, default: null },
 
   // ── OAuth ────────────────────────────────────────────────────
   googleId:       { type: String },

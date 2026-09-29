@@ -1,5 +1,41 @@
 import mongoose from 'mongoose';
 
+const invoiceSchema = new mongoose.Schema({
+  invoiceId: { type: String, required: true },
+  amount: { type: Number, required: true },
+  date: { type: Date, default: Date.now },
+  status: { type: String, enum: ['paid', 'pending', 'failed', 'refunded'], default: 'paid' },
+  downloadUrl: { type: String, default: '' }
+}, { _id: true });
+
+const noteSchema = new mongoose.Schema({
+  text: { type: String, required: true },
+  author: { type: String, default: 'Super Admin' },
+  createdAt: { type: Date, default: Date.now }
+}, { _id: true });
+
+const auditTrailSchema = new mongoose.Schema({
+  action: { type: String, required: true },
+  performedBy: { type: String, default: 'Super Admin' },
+  details: { type: String, default: '' },
+  timestamp: { type: Date, default: Date.now }
+}, { _id: true });
+
+const impersonationLogSchema = new mongoose.Schema({
+  superAdminEmail: { type: String, required: true },
+  reason: { type: String, required: true },
+  timestamp: { type: Date, default: Date.now },
+  expiresAt: { type: Date, required: true }
+}, { _id: true });
+
+const domainItemSchema = new mongoose.Schema({
+  domain: { type: String, required: true, lowercase: true, trim: true },
+  type: { type: String, enum: ['subdomain', 'custom'], default: 'custom' },
+  isPrimary: { type: Boolean, default: false },
+  sslStatus: { type: String, enum: ['active', 'pending', 'failed'], default: 'active' },
+  createdAt: { type: Date, default: Date.now }
+}, { _id: true });
+
 const StoreSchema = new mongoose.Schema({
   // ── Core Identity ────────────────────────────────────────────
   name: {
@@ -54,6 +90,7 @@ const StoreSchema = new mongoose.Schema({
   },
   country:  { type: String, default: 'India' },
   currency: { type: String, default: 'INR' },
+  timezone: { type: String, default: 'Asia/Kolkata' },
 
   // ── Plan & Subscription ──────────────────────────────────────
   plan: {
@@ -63,19 +100,62 @@ const StoreSchema = new mongoose.Schema({
   },
   status: {
     type: String,
-    enum: ['trial', 'active', 'suspended', 'cancelled'],
+    enum: ['trial', 'active', 'past_due', 'suspended', 'cancelled'],
     default: 'trial'
   },
   trialDays:   { type: Number, default: 14 },
   trialEndsAt: { type: Date,   default: null },
+  mrr:         { type: Number, default: 0 },
+  healthScore: { type: Number, default: 95 },
+  lastActiveAt:{ type: Date,   default: Date.now },
 
-  // ── Flags ────────────────────────────────────────────────────
+  // ── Billing Sub-document ─────────────────────────────────────
+  billing: {
+    subscriptionId: { type: String, default: '' },
+    billingCycle: { type: String, enum: ['monthly', 'annual'], default: 'monthly' },
+    paymentMethod: { type: String, default: 'Credit Card **** 4242' },
+    credits: { type: Number, default: 0 },
+    discountPercent: { type: Number, default: 0 },
+    invoices: [invoiceSchema]
+  },
+
+  // ── Limit Overrides (Custom Quotas) ──────────────────────────
+  limitOverrides: {
+    maxProducts: { type: Number, default: null },
+    maxOrders:   { type: Number, default: null },
+    maxStaff:    { type: Number, default: null },
+    maxStorageMB:{ type: Number, default: null }
+  },
+
+  // ── Feature Flags Overrides ──────────────────────────────────
+  featureFlags: {
+    customDomain:      { type: Boolean, default: true },
+    advancedAnalytics: { type: Boolean, default: true },
+    aiTools:           { type: Boolean, default: true },
+    loyaltyProgram:    { type: Boolean, default: false },
+    multiCurrency:     { type: Boolean, default: false },
+    betaCheckout:      { type: Boolean, default: false }
+  },
+
+  // ── Domains list ─────────────────────────────────────────────
+  domains: [domainItemSchema],
+
+  // ── Notes & Audit Log ────────────────────────────────────────
+  internalNotes: { type: String, default: '' },
+  notes: [noteSchema],
+  auditTrail: [auditTrailSchema],
+  impersonationLogs: [impersonationLogSchema],
+
+  // ── Flags & Infrastructure ───────────────────────────────────
   isActive: {
     type: Boolean,
     default: true
   },
-
-  // ── Provisioning Metadata ────────────────────────────────────
+  isolationTier: {
+    type: String,
+    enum: ['shared', 'dedicated_db', 'enterprise_cluster'],
+    default: 'shared'
+  },
   provisionedBy: {
     type: String,
     enum: ['superadmin', 'self_signup', 'demo_request'],
@@ -86,7 +166,10 @@ const StoreSchema = new mongoose.Schema({
     ref: 'DemoRequest',
     default: null
   },
-  internalNotes: { type: String, default: '' },
+
+  // ── Soft Delete Grace Period ─────────────────────────────────
+  deletedAt:     { type: Date, default: null },
+  deletedReason: { type: String, default: '' },
 
   // ── Theme (legacy) ───────────────────────────────────────────
   themeConfig: {
@@ -97,3 +180,4 @@ const StoreSchema = new mongoose.Schema({
 
 const Store = mongoose.models.Store || mongoose.model('Store', StoreSchema);
 export default Store;
+

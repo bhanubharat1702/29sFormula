@@ -174,6 +174,14 @@ router.post("/api/auth/login", loginLimiter, validate(loginSchema), async (req, 
         }).lean()
       : null;
 
+    // Block login for merchant store owners/staff if store is suspended
+    if (store && (store.status === "suspended" || store.isActive === false) && (isOwner || user.role === "admin" || user.isAdmin)) {
+      return res.status(403).json({ error: "Your merchant account is currently suspended. Please contact platform support." });
+    }
+
+    // Update lastLoginAt timestamp on user
+    await User.findByIdAndUpdate(user._id, { lastLoginAt: new Date() });
+
     const baseDomain = process.env.PLATFORM_DOMAIN || "localhost:3000";
     const dashboardUrl = store
       ? `http://${store.subdomain}.${baseDomain}/admin`
