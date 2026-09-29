@@ -6,13 +6,14 @@ import { Product } from "../models/Product.js";
 import Order from "../models/Order.js";
 import User from "../models/User.js";
 import DemoRequest from "../models/DemoRequest.js";
+import Settings from "../models/Settings.js";
 import { verifySuperAdminToken } from "../middleware/superAdminAuth.js";
 
 const router = express.Router();
 
 const SUPER_ADMIN_EMAIL = process.env.SUPER_ADMIN_EMAIL || "superadmin@platform.com";
 const SUPER_ADMIN_PASS = process.env.SUPER_ADMIN_PASS || "SuperAdmin@2026";
-const getJwtSecret = () => process.env.JWT_SECRET || "29sformula_secret_jwt_key_2026";
+const getJwtSecret = () => process.env.JWT_SECRET || "ecommerce_secret_jwt_key_2026";
 
 // ─── SUPER ADMIN LOGIN ───────────────────────────────────────────────────────
 // POST /api/superadmin/login
@@ -161,6 +162,38 @@ router.post("/api/superadmin/stores", verifySuperAdminToken, async (req, res) =>
       ownerId: owner ? owner._id : null,
       isActive: true,
       plan
+    });
+
+    // Provision clean default e-commerce settings for the new merchant store
+    await Settings.create({
+      storeId: newStore._id,
+      brandLogoValue: name || "MY STORE",
+      heroTitle: "WELCOME TO OUR STORE",
+      heroTitleFontColor: "#ffffff",
+      heroManifestoFontColor: "#ffffff",
+      mobileHeroTitleFontColor: "#ffffff",
+      mobileHeroManifestoFontColor: "#ffffff",
+      heroManifesto: "PREMIUM QUALITY YOU CAN TRUST. EVERY PRODUCT IS CRAFTED WITH CARE AND DELIVERED WITH PASSION.",
+      heroButtonColor: "#ffffff",
+      heroButtonTextColor: "#000000",
+      mobileHeroButtonColor: "#ffffff",
+      mobileHeroButtonTextColor: "#000000",
+      videoTitle: "NEW ARRIVALS",
+      videoTitleFontColor: "#ffffff",
+      videoSubtitleFontColor: "#ffffff",
+      videoSubtitle: "Explore our latest arrivals crafted with care and premium quality.",
+      videoButtonColor: "#ffffff",
+      videoButtonTextColor: "#000000",
+      mobileVideoButtonColor: "#ffffff",
+      mobileVideoButtonTextColor: "#000000",
+      lifestyleText: "Uncompromising Quality, Curated for You.",
+      lifestyleTextFontColor: "#ffffff",
+      lifestyleButtonColor: "#ffffff",
+      lifestyleButtonTextColor: "#000000",
+      mobileLifestyleButtonColor: "#ffffff",
+      mobileLifestyleButtonTextColor: "#000000",
+      primaryColor: "#ffffff",
+      contactUsText: `Need help? Email us at support@${cleanSubdomain}.com and our support team will get back to you within 24 hours.`
     });
 
     // If provisioned from a demo request, mark the request as approved

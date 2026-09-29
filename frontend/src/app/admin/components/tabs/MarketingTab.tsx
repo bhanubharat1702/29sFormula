@@ -650,7 +650,7 @@ export default function MarketingTab({
             <div>
               <input
                 type="text"
-                placeholder="🔍 Search icons (e.g. shipping, bottle, shield, star, vegan, card)..."
+                placeholder="🔍 Search icons (e.g. shipping, package, shield, star, vegan, card)..."
                 value={iconSearchQuery}
                 onChange={(e) => setIconSearchQuery(e.target.value)}
                 className={styles.textInput}

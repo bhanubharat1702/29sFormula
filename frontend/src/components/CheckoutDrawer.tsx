@@ -580,7 +580,7 @@ export default function CheckoutDrawer({ isOpen, onClose, cartItems, primaryColo
           amount: initData.amount,
           currency: initData.currency,
           name: brandLogoValue || "",
-          description: "Fine Artisan Perfumery",
+          description: "E-Commerce Checkout",
           order_id: initData.order_id,
           handler: async function (response: any) {
             try {

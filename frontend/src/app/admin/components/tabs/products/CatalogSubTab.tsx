@@ -74,7 +74,7 @@ export default function CatalogSubTab({
                   <h1 className={styles.pageHeading} style={{ margin: 0, fontSize: "1.25rem" }}>Products</h1>
                 </div>
                 <button
-                  className={`${styles.addPerfumeBtn} ${styles.hideOnMobile}`}
+                  className={`${styles.addProductBtn} ${styles.hideOnMobile}`}
                   onClick={() => {
                     setIsEditing(false);
                     resetForm();
@@ -105,7 +105,7 @@ export default function CatalogSubTab({
                     </div>
                   ) : filteredProducts.length === 0 ? (
                     <div className={styles.emptyState}>
-                      <p>No perfumes cataloged. Create your first product by clicking &quot;Add new product&quot; above!</p>
+                      <p>No products cataloged. Create your first product by clicking &quot;Add new product&quot; above!</p>
                     </div>
                   ) : (
                     <div className={styles.tableResponsive}>
@@ -516,7 +516,7 @@ export default function CatalogSubTab({
                     onClick={() => {
                       setShowCategoryAddOptionsModal(true);
                     }}
-                    className={styles.addPerfumeBtn}
+                    className={styles.addProductBtn}
                     style={{ padding: "8px 16px", fontSize: "0.7rem" }}
                   >
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" style={{ width: "14px", height: "14px" }}>
@@ -798,7 +798,7 @@ export default function CatalogSubTab({
                       setCategoryModalError(null);
                       setShowAddCategoryModal(true);
                     }}
-                    className={styles.addPerfumeBtn}
+                    className={styles.addProductBtn}
                     style={{ padding: "8px 16px", fontSize: "0.7rem" }}
                   >
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" style={{ width: "14px", height: "14px" }}>

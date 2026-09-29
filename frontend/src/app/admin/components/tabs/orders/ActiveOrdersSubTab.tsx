@@ -167,7 +167,7 @@ export default function ActiveOrdersSubTab({
                   )}
                   <button
                     onClick={() => { setIsRefreshing(true); fetchOrders(); setTimeout(() => setIsRefreshing(false), 1000); }}
-                    className={styles.addPerfumeBtn}
+                    className={styles.addProductBtn}
                     title="Reload Orders"
                   >
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" style={{ width: "14px", height: "14px" }}>

@@ -20,7 +20,7 @@ export default function CustomizeLayoutModal({
   onApply,
   initialConfig,
   sectionName = "Hero Section",
-  primaryColor = "#57bc74"
+  primaryColor = "#ffffff"
 }: CustomizeLayoutModalProps) {
 
   // Local copies of the config
@@ -1283,7 +1283,7 @@ export default function CustomizeLayoutModal({
                     height: previewDevice === 'desktop' ? "800px" : "852px",
                     transform: previewDevice === 'desktop' ? "translate(-50%, -50%) scale(0.55)" : "translate(-50%, -50%) scale(0.58)",
                     transformOrigin: "center center",
-                    backgroundColor: bgType === "color" ? (bgColor || "var(--primary-brand-color, #57bc74)") : "#121212",
+                    backgroundColor: bgType === "color" ? (bgColor || "var(--primary-brand-color, #ffffff)") : "#121212",
                     backgroundImage: bgType === "image" && bgImage ? `url("${bgImage}")` : "none",
                     backgroundSize: "cover",
                     backgroundPosition: "center",

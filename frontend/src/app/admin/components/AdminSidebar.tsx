@@ -51,7 +51,7 @@ export default function AdminSidebar({
             {brandLogoType === "image" && brandLogoValue ? (
               <img src={brandLogoValue} alt="Brand Logo" style={{ maxHeight: "30px", maxWidth: "150px", objectFit: "contain" }} />
             ) : (
-              brandLogoValue || "29sFORMULA"
+              brandLogoValue || "MY STORE"
             )}
           </span>
         </div>

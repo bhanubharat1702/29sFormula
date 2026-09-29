@@ -63,7 +63,7 @@ export default function TrackOrderPage() {
   const [isUploading, setIsUploading] = useState(false);
   const [modalOrderId, setModalOrderId] = useState<string | null>(null);
   const [primaryColor, setPrimaryColor] = useState<string>(
-    "#57bc74"
+    "#ffffff"
   );
 
   // Session is now handled by Navbar
@@ -1080,7 +1080,7 @@ export default function TrackOrderPage() {
                   </label>
                   <textarea
                     required
-                    placeholder="e.g. Received bottle broken inside the package during transit..."
+                    placeholder="e.g. Received damaged item inside the package during transit..."
                     value={returnReason}
                     onChange={(e) => setReturnReason(e.target.value)}
                     style={{

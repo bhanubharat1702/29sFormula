@@ -16,5 +16,5 @@ export default async function RegisterPage() {
     // silently fail and fallback to default color
   }
 
-  return <RegisterPageClient initialColor={primaryColor || "#57bc74"} />;
+  return <RegisterPageClient initialColor={primaryColor || "#ffffff"} />;
 }

@@ -1,5 +1,5 @@
 {
-  "name": "29s-formula-root",
+  "name": "ecommerce-platform-root",
   "version": "1.0.0",
   "private": true,
   "type": "module",
@@ -9,7 +9,7 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "description": "Root project runner for 29sFormula",
+  "description": "Root project runner for E-Commerce Multi-Tenant Platform",
   "dependencies": {
     "puppeteer": "^25.7.0"
   }

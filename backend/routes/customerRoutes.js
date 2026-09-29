@@ -222,6 +222,32 @@ router.get("/api/customers", verifyToken, isAdmin, async (req, res) => {
   }
 });
 
+// DELETE /api/customers/:id
+router.delete("/api/customers/:id", verifyToken, isAdmin, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const filter = { _id: id };
+    if (req.storeId) {
+      filter.storeId = req.storeId;
+    }
+
+    const customer = await Customer.findOneAndDelete(filter);
+    if (!customer) {
+      return res.status(404).json({ success: false, error: "Customer not found" });
+    }
+
+    // Clean up corresponding user account if not an admin
+    if (customer.email) {
+      await User.deleteMany({ email: new RegExp(`^${customer.email.trim()}$`, 'i'), isAdmin: { $ne: true } });
+    }
+
+    return res.json({ success: true, message: "Customer deleted successfully" });
+  } catch (error) {
+    console.error("Failed to delete customer:", error);
+    return res.status(500).json({ success: false, error: "Failed to delete customer" });
+  }
+});
+
 router.get("/api/cart", async (req, res) => {
   try {
     const { email } = req.query;

@@ -22,7 +22,7 @@ router.post("/api/upload", upload.single("file"), async (req, res) => {
     const uploadStream = cloudinary.uploader.upload_stream(
       {
         resource_type: "auto",
-        folder: "29sformula",
+        folder: "store-engine",
         timeout: 120000
       },
       (error, result) => {

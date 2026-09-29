@@ -80,7 +80,7 @@ export default function CategoriesSubTab({
                     resetForm();
                     setShowCrudModal(true);
                   }}
-                  className={styles.addPerfumeBtn}
+                  className={styles.addProductBtn}
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" style={{ width: "14px", height: "14px" }}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
@@ -103,7 +103,7 @@ export default function CategoriesSubTab({
                     </div>
                   ) : filteredProducts.length === 0 ? (
                     <div className={styles.emptyState}>
-                      <p>No perfumes cataloged. Create your first product by clicking &quot;Add new product&quot; above!</p>
+                      <p>No products cataloged. Create your first product by clicking &quot;Add new product&quot; above!</p>
                     </div>
                   ) : (
                     <div className={styles.tableResponsive}>
@@ -371,7 +371,7 @@ export default function CategoriesSubTab({
                     onClick={() => {
                       setShowCategoryAddOptionsModal(true);
                     }}
-                    className={styles.addPerfumeBtn}
+                    className={styles.addProductBtn}
                     style={{ padding: "8px 16px", fontSize: "0.7rem" }}
                   >
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" style={{ width: "14px", height: "14px" }}>
@@ -737,7 +737,7 @@ export default function CategoriesSubTab({
                       setCategoryModalError(null);
                       setShowAddCategoryModal(true);
                     }}
-                    className={styles.addPerfumeBtn}
+                    className={styles.addProductBtn}
                     style={{ padding: "8px 16px", fontSize: "0.7rem" }}
                   >
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" style={{ width: "14px", height: "14px" }}>

@@ -258,7 +258,7 @@ export default function SuperAdminPage() {
     return (
       <div className={styles.loginContainer}>
         <div className={styles.loginCard}>
-          <div className={styles.loginLogo}>29s ENGINE</div>
+          <div className={styles.loginLogo}>STORE ENGINE</div>
           <p className={styles.loginSubtitle}>Super Admin Telemetry & Merchant Control</p>
 
           <div className={styles.credBox}>
@@ -327,7 +327,7 @@ export default function SuperAdminPage() {
       <aside className={styles.sidebar}>
         <div className={styles.sidebarTop}>
           <div className={styles.brandRow}>
-            <span className={styles.brandName}>29s SUPERADMIN</span>
+            <span className={styles.brandName}>PLATFORM SUPERADMIN</span>
           </div>
 
           <nav className={styles.navMenu}>
@@ -482,7 +482,7 @@ export default function SuperAdminPage() {
                     <tr key={store._id}>
                       <td>
                         <div className={styles.storeName}>{store.name}</div>
-                        <div className={styles.subdomain}>{store.subdomain}.29sformula.com</div>
+                        <div className={styles.subdomain}>{store.subdomain}.storeengine.com</div>
                       </td>
                       <td>
                         {store.customDomain ? (
@@ -630,7 +630,7 @@ export default function SuperAdminPage() {
                 <input
                   type="text"
                   required
-                  placeholder="e.g. Luxe Fragrances"
+                  placeholder="e.g. Acme Store"
                   value={newStoreName}
                   onChange={(e) => setNewStoreName(e.target.value)}
                   className={styles.input}

@@ -325,7 +325,7 @@ export const TRUST_ICON_LIBRARY: Record<string, { label: string; icon: React.Rea
     ),
   },
   store: {
-    label: "Master Perfumer Studio",
+    label: "Master Studio Quality",
     icon: (
       <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" style={{ width: "32px", height: "32px" }}>
         <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 21v-7.5a.75.75 0 0 1 .75-.75h3a.75.75 0 0 1 .75.75V21m-4.5 0H2.25a.75.75 0 0 1-.75-.75V10.5M13.5 21h8.25a.75.75 0 0 0 .75-.75V10.5M2.25 10.5l9.75-6 9.75 6" />
@@ -351,9 +351,9 @@ export const TRUST_ICON_LIBRARY: Record<string, { label: string; icon: React.Rea
     ),
   },
 
-  // --- 7. FRAGRANCE, FORMULA & BOTTLING ---
+  // --- 7. QUALITY, CRAFTSMANSHIP & PACKAGING ---
   sparkle: {
-    label: "Artisan Fragrance Sparkle",
+    label: "Artisan Product Sparkle",
     icon: (
       <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" style={{ width: "32px", height: "32px" }}>
         <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09ZM18.259 8.715 18 9.75l-.259-1.035a3.375 3.375 0 0 0-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 0 0 2.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 0 0 2.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 0 0-2.456 2.456ZM16.894 20.567 16.5 21.75l-.394-1.183a2.25 2.25 0 0 0-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 0 0 1.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 0 0 1.423 1.423l1.183.394-1.183.394a2.25 2.25 0 0 0-1.423 1.423Z" />
@@ -361,7 +361,7 @@ export const TRUST_ICON_LIBRARY: Record<string, { label: string; icon: React.Rea
     ),
   },
   droplet: {
-    label: "Pure Fragrance Oils",
+    label: "Pure Essential Oils",
     icon: (
       <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" style={{ width: "32px", height: "32px" }}>
         <path strokeLinecap="round" strokeLinejoin="round" d="M12 2.25c-5.25 6.75-8.25 10.5-8.25 14.25a8.25 8.25 0 1 0 16.5 0c0-3.75-3-7.5-8.25-14.25Z" />
@@ -369,7 +369,7 @@ export const TRUST_ICON_LIBRARY: Record<string, { label: string; icon: React.Rea
     ),
   },
   flask: {
-    label: "Scientific Precision Formula",
+    label: "Scientific Precision Quality",
     icon: (
       <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" style={{ width: "32px", height: "32px" }}>
         <path strokeLinecap="round" strokeLinejoin="round" d="M9.75 3.104v5.714a2.25 2.25 0 0 1-.659 1.591L5.08 14.42a4.5 4.5 0 0 0 3.182 7.68h7.476a4.5 4.5 0 0 0 3.182-7.68l-4.011-4.011a2.25 2.25 0 0 1-.659-1.591V3.104M9.75 3.104h4.5M9.75 3.104H8.25m6 0h1.5" />
@@ -386,7 +386,7 @@ export const TRUST_ICON_LIBRARY: Record<string, { label: string; icon: React.Rea
     ),
   },
   sun: {
-    label: "Day Scent Profile",
+    label: "Day Usage Profile",
     icon: (
       <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" style={{ width: "32px", height: "32px" }}>
         <path strokeLinecap="round" strokeLinejoin="round" d="M12 3v2.25m0 13.5V21m8.966-8.966h-2.25M4.284 12h-2.25m15.356-6.364-1.591 1.591M6.343 17.657l-1.591 1.591m12.728 0-1.591-1.591M6.343 6.343 4.752 4.752M12 7.5a4.5 4.5 0 1 0 0 9 4.5 4.5 0 0 0 0-9Z" />
@@ -394,7 +394,7 @@ export const TRUST_ICON_LIBRARY: Record<string, { label: string; icon: React.Rea
     ),
   },
   moon: {
-    label: "Night Scent Profile",
+    label: "Night Usage Profile",
     icon: (
       <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" style={{ width: "32px", height: "32px" }}>
         <path strokeLinecap="round" strokeLinejoin="round" d="M21.752 15.002A9.72 9.72 0 0 1 18 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 0 0 3 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 0 0 9.002-5.998Z" />
@@ -402,7 +402,7 @@ export const TRUST_ICON_LIBRARY: Record<string, { label: string; icon: React.Rea
     ),
   },
   scales: {
-    label: "Balanced Fragrance Notes",
+    label: "Balanced Quality & Craft",
     icon: (
       <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" style={{ width: "32px", height: "32px" }}>
         <path strokeLinecap="round" strokeLinejoin="round" d="M12 3v18m-6-3h12M4.5 8.25l7.5-3.75 7.5 3.75M4.5 8.25l3 6m-3-6h6m0 0l-3 6m12-6l-3 6m3-6h-6m0 0l3 6" />
@@ -410,7 +410,7 @@ export const TRUST_ICON_LIBRARY: Record<string, { label: string; icon: React.Rea
     ),
   },
   calendar: {
-    label: "12+ Hour Wear Time",
+    label: "12+ Hour Durability",
     icon: (
       <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" style={{ width: "32px", height: "32px" }}>
         <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5" />
@@ -434,7 +434,7 @@ export const TRUST_ICON_LIBRARY: Record<string, { label: string; icon: React.Rea
     ),
   },
   recycling: {
-    label: "Eco Glass Bottle",
+    label: "Eco Packaging",
     icon: (
       <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" style={{ width: "32px", height: "32px" }}>
         <path strokeLinecap="round" strokeLinejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99" />

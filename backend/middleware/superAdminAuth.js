@@ -1,7 +1,7 @@
 import jwt from "jsonwebtoken";
 
 const SUPER_ADMIN_EMAIL = process.env.SUPER_ADMIN_EMAIL || "superadmin@platform.com";
-const getJwtSecret = () => process.env.JWT_SECRET || "29sformula_secret_jwt_key_2026";
+const getJwtSecret = () => process.env.JWT_SECRET || "ecommerce_secret_jwt_key_2026";
 
 export const verifySuperAdminToken = (req, res, next) => {
   const authHeader = req.headers.authorization || req.headers.Authorization;

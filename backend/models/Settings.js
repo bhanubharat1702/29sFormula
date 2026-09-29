@@ -21,17 +21,17 @@ const settingsSchema = new mongoose.Schema({
   },
   announcementText: { 
     type: String, 
-    default: "EVERY BOTTLE IS PREPARED WITH CARE. DUE TO SEASONAL DEMAND, PROCESSING MAY TAKE UP TO 5-7 DAYS BEFORE DISPATCH." 
+    default: "EVERY ORDER IS PREPARED WITH CARE. DUE TO SEASONAL DEMAND, PROCESSING MAY TAKE UP TO 5-7 DAYS BEFORE DISPATCH." 
   },
-  heroTitle: { type: String, default: "29sFORMULA" },
+  heroTitle: { type: String, default: "WELCOME TO OUR STORE" },
   heroTitleFontType: { type: String, default: "Outfit" },
-  heroTitleFontColor: { type: String, default: "#111827" },
+  heroTitleFontColor: { type: String, default: "#ffffff" },
   heroTitleFontSize: { type: String, default: "4.5rem" },
   heroTitleFontAlignment: { type: String, default: "center" },
   heroTitleFontWeight: { type: String, default: "700" },
   heroManifesto: { 
     type: String, 
-    default: "SCENT IS THE DIFFERENCE YOU FEEL AND NEVER FAKE. EVERY 29S FORMULA BOTTLE IS CRAFTED BY HANDS THAT CARE, NOT MACHINES THAT RUSH." 
+    default: "PREMIUM QUALITY YOU CAN TRUST. EVERY PRODUCT IS CRAFTED WITH CARE AND DELIVERED WITH PASSION." 
   },
   heroBgType: { type: String, default: "color" },
   heroBgColor: { type: String, default: "#121212" },
@@ -49,14 +49,14 @@ const settingsSchema = new mongoose.Schema({
   heroButtonText: { type: String, default: "Shop Now" },
   heroButtonStyle: { type: String, default: "solid" },
   heroButtonSize: { type: String, default: "md" },
-  heroButtonColor: { type: String, default: "" },
-  heroButtonTextColor: { type: String, default: "#ffffff" },
+  heroButtonColor: { type: String, default: "#ffffff" },
+  heroButtonTextColor: { type: String, default: "#000000" },
 
   // Mobile-specific Hero Layout
   mobileHeroTemplate: { type: String, default: "center" },
   mobileHeroTitle: { type: String, default: "" },
   mobileHeroTitleFontType: { type: String, default: "Outfit" },
-  mobileHeroTitleFontColor: { type: String, default: "#111827" },
+  mobileHeroTitleFontColor: { type: String, default: "#ffffff" },
   mobileHeroTitleFontSize: { type: String, default: "2.5rem" },
   mobileHeroTitleFontAlignment: { type: String, default: "center" },
   mobileHeroTitleFontWeight: { type: String, default: "700" },
@@ -73,11 +73,11 @@ const settingsSchema = new mongoose.Schema({
   mobileHeroButtonText: { type: String, default: "Shop Now" },
   mobileHeroButtonStyle: { type: String, default: "solid" },
   mobileHeroButtonSize: { type: String, default: "sm" },
-  mobileHeroButtonColor: { type: String, default: "" },
-  mobileHeroButtonTextColor: { type: String, default: "#ffffff" },
+  mobileHeroButtonColor: { type: String, default: "#ffffff" },
+  mobileHeroButtonTextColor: { type: String, default: "#000000" },
   showMobileHeroButton: { type: Boolean, default: true },
-            videoTitle: { type: String, default: "NEW ARRIVALS" },
-  videoSubtitle: { type: String, default: "Drop's live. Smells divine. Feels better." },
+  videoTitle: { type: String, default: "NEW ARRIVALS" },
+  videoSubtitle: { type: String, default: "Explore our latest arrivals crafted with care and premium quality." },
   videoUrl: { type: String, default: "" },
   videoFallbackColor: { type: String, default: "#121212" },
   videoTitleFontType: { type: String, default: "Outfit" },
@@ -98,7 +98,7 @@ const settingsSchema = new mongoose.Schema({
   videoButtonStyle: { type: String, default: "outline" },
   videoButtonSize: { type: String, default: "md" },
   videoButtonColor: { type: String, default: "#ffffff" },
-  videoButtonTextColor: { type: String, default: "#121212" },
+  videoButtonTextColor: { type: String, default: "#000000" },
   videoBgType: { type: String, default: "video" },
   videoBgColor: { type: String, default: "#121212" },
   videoBgImage: { type: String, default: "" },
@@ -125,10 +125,10 @@ const settingsSchema = new mongoose.Schema({
   mobileVideoButtonStyle: { type: String, default: "outline" },
   mobileVideoButtonSize: { type: String, default: "sm" },
   mobileVideoButtonColor: { type: String, default: "#ffffff" },
-  mobileVideoButtonTextColor: { type: String, default: "#121212" },
+  mobileVideoButtonTextColor: { type: String, default: "#000000" },
   showMobileVideoButton: { type: Boolean, default: true },
 
-  lifestyleText: { type: String, default: "Intense notes, Raw elements. This is 29sFORMULA." },
+  lifestyleText: { type: String, default: "Uncompromising Quality, Curated for You." },
   lifestyleTextFontType: { type: String, default: "Outfit" },
   lifestyleTextFontColor: { type: String, default: "#ffffff" },
   lifestyleTextFontSize: { type: String, default: "2.5rem" },
@@ -139,8 +139,8 @@ const settingsSchema = new mongoose.Schema({
   lifestyleButtonText: { type: String, default: "Shop Now" },
   lifestyleButtonStyle: { type: String, default: "solid" },
   lifestyleButtonSize: { type: String, default: "md" },
-  lifestyleButtonColor: { type: String, default: "" },
-  lifestyleButtonTextColor: { type: String, default: "#ffffff" },
+  lifestyleButtonColor: { type: String, default: "#ffffff" },
+  lifestyleButtonTextColor: { type: String, default: "#000000" },
   lifestyleImage: { type: String, default: "https://images.unsplash.com/photo-1615655096345-61a54750068d?auto=format&fit=crop&w=1800&q=80" },
 
   mobileLifestyleText: { type: String, default: "" },
@@ -154,11 +154,11 @@ const settingsSchema = new mongoose.Schema({
   mobileLifestyleButtonText: { type: String, default: "Shop Now" },
   mobileLifestyleButtonStyle: { type: String, default: "solid" },
   mobileLifestyleButtonSize: { type: String, default: "sm" },
-  mobileLifestyleButtonColor: { type: String, default: "" },
-  mobileLifestyleButtonTextColor: { type: String, default: "#ffffff" },
-  primaryColor: { type: String, default: "#57bc74" },
+  mobileLifestyleButtonColor: { type: String, default: "#ffffff" },
+  mobileLifestyleButtonTextColor: { type: String, default: "#000000" },
+  primaryColor: { type: String, default: "#ffffff" },
   brandLogoType: { type: String, default: "text" },
-  brandLogoValue: { type: String, default: "29sFORMULA" },
+  brandLogoValue: { type: String, default: "MY STORE" },
   showTicker: { type: Boolean, default: true },
   showTrustMarquee: { type: Boolean, default: true },
   trustMarqueeDirection: { type: String, default: "left" },
@@ -171,7 +171,7 @@ const settingsSchema = new mongoose.Schema({
       icon: { type: String, default: "shipping" }
     }],
     default: [
-      { id: "shipping", title: "EXPRESS SHIPPING", subtitle: "Fast 48hr Dispatch", icon: "shipping" },
+      { id: "shipping", title: "EXPRESS SHIPPING", subtitle: "Fast Dispatch", icon: "shipping" },
       { id: "security", title: "100% SECURE CHECKOUT", subtitle: "256-Bit SSL Encrypted", icon: "security" },
       { id: "authenticity", title: "100% GENUINE PRODUCTS", subtitle: "100% Original Guarantee", icon: "authenticity" },
       { id: "returns", title: "EASY 7-DAY RETURNS", subtitle: "Hassle-Free Policy", icon: "returns" },
@@ -192,7 +192,7 @@ const settingsSchema = new mongoose.Schema({
   showProductFaq: { type: Boolean, default: true },
   usageGuideText: { 
     type: String, 
-    default: "Fits your mood. Handcrafted with scientific precision. Refer to our USAGE GUIDE for layering notes." 
+    default: "Handcrafted with precision. Refer to our USAGE GUIDE for additional details." 
   },
   exploreMoreTitle: { 
     type: String, 
@@ -204,7 +204,7 @@ const settingsSchema = new mongoose.Schema({
   },
   contactUsText: { 
     type: String, 
-    default: "Need help? Email us at hello@29sformula.in and our support team will get back to you within 24 hours."
+    default: "Need help? Email us at support@yourstore.com and our support team will get back to you within 24 hours."
   },
   returnPolicyText: {
     type: String,
@@ -214,7 +214,7 @@ const settingsSchema = new mongoose.Schema({
   supportText: { type: String, default: "For support inquiries, please contact us." },
   careersText: { type: String, default: "Join our team! Check out our open positions." },
   tradeEnquiryText: { type: String, default: "For trade and wholesale inquiries, contact our B2B team." },
-  aboutUsText: { type: String, default: "We are 29sFORMULA, redefining luxury." },
+  aboutUsText: { type: String, default: "We deliver quality products with exceptional customer service." },
   
   instagramLink: { type: String, default: "#" },
   facebookLink: { type: String, default: "#" },

@@ -140,7 +140,7 @@ export default function HeroSection({
     <section
       className={styles.hero}
       style={{
-        backgroundColor: heroBgType === "color" ? (heroBgColor || "var(--primary-brand-color, #57bc74)") : "#121212",
+        backgroundColor: heroBgType === "color" ? (heroBgColor || "var(--primary-brand-color, #ffffff)") : "#121212",
         backgroundImage: heroBgType === "image" && heroBgImage ? `url("${heroBgImage}")` : "none",
         backgroundSize: "cover",
         backgroundPosition: "center",

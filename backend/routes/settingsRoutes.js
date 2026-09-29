@@ -7,11 +7,96 @@ const router = express.Router();
 
 router.get("/api", (req, res) => {
   res.json({
-    message: "Welcome to the 29s Formula Perfume E-commerce API",
+    message: "Welcome to the Store Engine E-commerce API",
     status: "healthy",
     version: "1.0.0"
   });
 });
+
+const cleanLegacySettings = async (settings) => {
+  let isDirty = false;
+  if (!settings.brandLogoValue || /29s/i.test(settings.brandLogoValue) || settings.brandLogoValue === "STORE ENGINE") {
+    settings.brandLogoValue = "MY STORE";
+    isDirty = true;
+  }
+  if (!settings.heroTitle || /29s/i.test(settings.heroTitle) || settings.heroTitle === "STORE ENGINE") {
+    settings.heroTitle = "WELCOME TO OUR STORE";
+    isDirty = true;
+  }
+  if (!settings.heroManifesto || /29s/i.test(settings.heroManifesto) || /SCENT IS THE DIFFERENCE/i.test(settings.heroManifesto) || /BOTTLE/i.test(settings.heroManifesto)) {
+    settings.heroManifesto = "PREMIUM QUALITY YOU CAN TRUST. EVERY PRODUCT IS CRAFTED WITH CARE AND DELIVERED WITH PASSION.";
+    isDirty = true;
+  }
+  if (!settings.videoSubtitle || /Smells divine/i.test(settings.videoSubtitle) || /Drop's live/i.test(settings.videoSubtitle)) {
+    settings.videoSubtitle = "Explore our latest arrivals crafted with care and premium quality.";
+    isDirty = true;
+  }
+  if (!settings.lifestyleText || /29s/i.test(settings.lifestyleText) || /Intense notes/i.test(settings.lifestyleText) || /Raw elements/i.test(settings.lifestyleText)) {
+    settings.lifestyleText = "Uncompromising Quality, Curated for You.";
+    isDirty = true;
+  }
+  if (!settings.contactUsText || /storeengine\.com/i.test(settings.contactUsText) || /29s/i.test(settings.contactUsText)) {
+    settings.contactUsText = "Need help? Email us at support@yourstore.com and our support team will get back to you within 24 hours.";
+    isDirty = true;
+  }
+  if (!settings.primaryColor || settings.primaryColor === "#57bc74") {
+    settings.primaryColor = "#ffffff";
+    isDirty = true;
+  }
+  if (!settings.heroTitleFontColor || settings.heroTitleFontColor === "#111827") {
+    settings.heroTitleFontColor = "#ffffff";
+    isDirty = true;
+  }
+  if (!settings.mobileHeroTitleFontColor || settings.mobileHeroTitleFontColor === "#111827") {
+    settings.mobileHeroTitleFontColor = "#ffffff";
+    isDirty = true;
+  }
+  if (!settings.heroButtonColor || settings.heroButtonColor === "") {
+    settings.heroButtonColor = "#ffffff";
+    isDirty = true;
+  }
+  if (!settings.heroButtonTextColor || settings.heroButtonTextColor === "#ffffff") {
+    settings.heroButtonTextColor = "#000000";
+    isDirty = true;
+  }
+  if (!settings.mobileHeroButtonColor || settings.mobileHeroButtonColor === "") {
+    settings.mobileHeroButtonColor = "#ffffff";
+    isDirty = true;
+  }
+  if (!settings.mobileHeroButtonTextColor || settings.mobileHeroButtonTextColor === "#ffffff") {
+    settings.mobileHeroButtonTextColor = "#000000";
+    isDirty = true;
+  }
+  if (!settings.videoButtonTextColor || settings.videoButtonTextColor === "#121212") {
+    settings.videoButtonTextColor = "#000000";
+    isDirty = true;
+  }
+  if (!settings.mobileVideoButtonTextColor || settings.mobileVideoButtonTextColor === "#121212") {
+    settings.mobileVideoButtonTextColor = "#000000";
+    isDirty = true;
+  }
+  if (!settings.lifestyleButtonColor || settings.lifestyleButtonColor === "") {
+    settings.lifestyleButtonColor = "#ffffff";
+    isDirty = true;
+  }
+  if (!settings.lifestyleButtonTextColor || settings.lifestyleButtonTextColor === "#ffffff") {
+    settings.lifestyleButtonTextColor = "#000000";
+    isDirty = true;
+  }
+  if (!settings.mobileLifestyleButtonColor || settings.mobileLifestyleButtonColor === "") {
+    settings.mobileLifestyleButtonColor = "#ffffff";
+    isDirty = true;
+  }
+  if (!settings.mobileLifestyleButtonTextColor || settings.mobileLifestyleButtonTextColor === "#ffffff") {
+    settings.mobileLifestyleButtonTextColor = "#000000";
+    isDirty = true;
+  }
+
+  if (isDirty) {
+    await settings.save();
+  }
+  return settings;
+};
 
 router.get("/api/settings", redisCache("settings", 300), async (req, res) => {
   try {
@@ -22,6 +107,8 @@ router.get("/api/settings", redisCache("settings", 300), async (req, res) => {
     if (!settings) {
       settings = new Settings();
       await settings.save();
+    } else {
+      await cleanLegacySettings(settings);
     }
     setCachedSettings(settings);
     res.json(settings);

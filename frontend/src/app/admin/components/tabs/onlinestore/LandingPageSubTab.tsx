@@ -224,7 +224,7 @@ export default function LandingPageSubTab({
                               type="text"
                               value={heroTitle || ""}
                               onChange={(e: any) => setHeroTitle(e.target.value)}
-                              placeholder="29sFORMULA"
+                              placeholder="WELCOME TO OUR STORE"
                               className={styles.textInput}
                               style={{ flex: 1 }}
                             />
@@ -235,7 +235,7 @@ export default function LandingPageSubTab({
                           <textarea
                             value={heroManifesto || ""}
                             onChange={(e: any) => setHeroManifesto(e.target.value)}
-                            placeholder="SCENT IS THE DIFFERENCE YOU FEEL AND NEVER FAKE..."
+                            placeholder="PREMIUM QUALITY YOU CAN TRUST..."
                             className={styles.textareaInput}
                             rows={3}
                           />
@@ -427,13 +427,13 @@ export default function LandingPageSubTab({
                         <button
                           type="button"
                           onClick={() => {
-                            setHeroTitle("29sFORMULA");
+                            setHeroTitle("WELCOME TO OUR STORE");
                             setHeroTitleFontType("Outfit");
-                            setHeroTitleFontColor("#111827");
+                            setHeroTitleFontColor("#ffffff");
                             setHeroTitleFontSize("4.5rem");
                             setHeroTitleFontAlignment("center");
                             setHeroTitleFontWeight("700");
-                            setHeroManifesto("SCENT IS THE DIFFERENCE YOU FEEL AND NEVER FAKE. EVERY 29S FORMULA BOTTLE IS CRAFTED BY HANDS THAT CARE, NOT MACHINES THAT RUSH.");
+                            setHeroManifesto("PREMIUM QUALITY YOU CAN TRUST. EVERY PRODUCT IS CRAFTED WITH CARE AND DELIVERED WITH PASSION.");
                           }}
                           style={{
                             backgroundColor: "#f3f4f6",
@@ -561,7 +561,7 @@ export default function LandingPageSubTab({
                               type="text"
                               value={videoSubtitle || ""}
                               onChange={(e: any) => setVideoSubtitle(e.target.value)}
-                              placeholder="Drop's live. Smells divine..."
+                              placeholder="Explore our latest arrivals crafted with care..."
                               className={styles.textInput}
                               disabled={!showVideo}
                             />
@@ -766,7 +766,7 @@ export default function LandingPageSubTab({
                           onClick={() => {
                             setShowVideo(true);
                             setVideoTitle("NEW ARRIVALS");
-                            setVideoSubtitle("Drop's live. Smells divine. Feels better.");
+                            setVideoSubtitle("Explore our latest arrivals crafted with care and premium quality.");
                             setVideoUrl("");
                             setVideoFallbackColor("#57bc74");
                           }}
@@ -884,7 +884,7 @@ export default function LandingPageSubTab({
                             type="text"
                             value={lifestyleText || ""}
                             onChange={(e: any) => setLifestyleText(e.target.value)}
-                            placeholder="Intense notes, Raw elements. This is 29sFORMULA."
+                            placeholder="Uncompromising Quality, Curated for You."
                             className={styles.textInput}
                             disabled={!showLifestyle}
                           />
@@ -938,7 +938,7 @@ export default function LandingPageSubTab({
                           type="button"
                           onClick={() => {
                             setShowLifestyle(true);
-                            setLifestyleText("Intense notes, Raw elements. This is 29sFORMULA.");
+                            setLifestyleText("Uncompromising Quality, Curated for You.");
                             setLifestyleImage("https://images.unsplash.com/photo-1615655096345-61a54750068d?auto=format&fit=crop&w=1800&q=80");
                           }}
                           style={{
@@ -1040,7 +1040,7 @@ export default function LandingPageSubTab({
                               type="text"
                               value={brandLogoValue}
                               onChange={(e: any) => setBrandLogoValue(e.target.value)}
-                              placeholder="29sFORMULA"
+                              placeholder="MY STORE"
                               className={styles.textInput}
                               style={{ marginTop: "8px" }}
                             />
@@ -1384,12 +1384,12 @@ export default function LandingPageSubTab({
                         </div>
 
                         <div className={styles.inputGroup} style={{ marginBottom: "15px" }}>
-                          <label className={styles.inputLabel}>Usage & Layering Guide Subtext</label>
+                          <label className={styles.inputLabel}>Usage Guide Subtext</label>
                           <input
                             type="text"
                             value={usageGuideText}
                             onChange={(e: any) => setUsageGuideText(e.target.value)}
-                            placeholder="Fits your mood. Handcrafted with scientific precision..."
+                            placeholder="Handcrafted with precision. Refer to our USAGE GUIDE..."
                             className={styles.textInput}
                           />
                         </div>

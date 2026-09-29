@@ -17,5 +17,5 @@ export default async function LoginPage() {
     // silently fail and fallback to default color
   }
 
-  return <LoginPageClient initialColor={primaryColor || "#57bc74"} />;
+  return <LoginPageClient initialColor={primaryColor || "#ffffff"} />;
 }

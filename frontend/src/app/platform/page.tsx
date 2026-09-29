@@ -101,7 +101,7 @@ export default function PlatformLandingPage() {
       {/* Navbar */}
       <nav className={styles.navbar}>
         <div className={styles.brand}>
-          29s ENGINE <span className={styles.brandBadge}>SaaS OS</span>
+          STORE ENGINE <span className={styles.brandBadge}>SaaS OS</span>
         </div>
         <div className={styles.navLinks}>
           <a href="#features" className={styles.navLink}>Capabilities</a>
@@ -162,7 +162,7 @@ export default function PlatformLandingPage() {
               <span className={`${styles.dot} ${styles.dotGreen}`} />
             </div>
             <div className={styles.urlBar}>
-              https://yourbrand.29sformula.com/admin
+              https://yourbrand.storeengine.com/admin
             </div>
             <div style={{ fontSize: "0.78rem", color: "#10b981", fontWeight: 600 }}>
               ● Live Multi-Tenant Sandbox
@@ -232,7 +232,7 @@ export default function PlatformLandingPage() {
             <div className={styles.cardIcon}>⚡</div>
             <h3 className={styles.cardTitle}>Multi-Tenant Engine</h3>
             <p className={styles.cardText}>
-              Every merchant gets their own isolated tenant environment. Subdomain routing (`brand.29sformula.com`) works automatically with zero cross-tenant data leaks.
+              Every merchant gets their own isolated tenant environment. Subdomain routing (`brand.storeengine.com`) works automatically with zero cross-tenant data leaks.
             </p>
           </div>
 
@@ -408,7 +408,7 @@ export default function PlatformLandingPage() {
                     <input 
                       type="text" 
                       className={styles.input} 
-                      placeholder="mybrand (.29sformula.com)"
+                      placeholder="mybrand (.storeengine.com)"
                       value={subdomain}
                       onChange={(e) => setSubdomain(e.target.value)}
                     />
@@ -506,7 +506,7 @@ export default function PlatformLandingPage() {
 
       {/* Footer */}
       <footer className={styles.footer}>
-        <div>29s ENGINE SaaS Platform © 2026 • Multi-Tenant D2C Operating System</div>
+        <div>STORE ENGINE SaaS Platform © 2026 • Multi-Tenant D2C Operating System</div>
         <div style={{ marginTop: "0.75rem", fontSize: "0.8rem", color: "#a1a1aa" }}>
           <button 
             style={{ background: "none", border: "none", color: "#ffffff", cursor: "pointer", textDecoration: "underline" }}

@@ -47,7 +47,7 @@ export default function Shop() {
   const [categoryFilter, setCategoryFilter] = useState<string>("All");
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [primaryColor, setPrimaryColor] = useState<string>(
-    "#57bc74"
+    "#ffffff"
   );
 
   // Filtering & Sorting State
@@ -231,7 +231,7 @@ export default function Shop() {
     setActiveDropdown(prev => (prev === dropdown ? null : dropdown));
   };
 
-  // Helper to generate color swatches based on perfume name
+  // Helper to generate color swatches based on product name
   const getSwatchesForProduct = (name: string) => {
     const lowerName = name.toLowerCase();
     if (lowerName.includes("oud") || lowerName.includes("classic")) {
@@ -651,7 +651,7 @@ export default function Shop() {
           </div>
         ) : (
           <div className={styles.emptyStateContainer}>
-            <p>No matching fragrances cataloged at the moment. Try a different query.</p>
+            <p>No matching products cataloged at the moment. Try a different query.</p>
           </div>
         )}
       </main>

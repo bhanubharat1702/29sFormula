@@ -1134,12 +1134,12 @@ export default function AdminModals(props: any) {
                     </button>
                   </div>
 
-                  {/* Card 3: Perfume Images */}
+                  {/* Card 3: Product Images */}
                   <div style={{ backgroundColor: "#ffffff", border: "1px solid #e5e7eb", borderRadius: "10px", padding: "18px", marginBottom: "14px", boxShadow: "0 1px 3px rgba(0,0,0,0.05)" }}>
                     <h4 style={{ fontSize: "0.92rem", fontWeight: 700, color: "#111827", textTransform: "uppercase", letterSpacing: "0.03em", margin: "0 0 14px 0" }}>Product Images</h4>
 
                     <div className={styles.inputGroup} style={{ marginBottom: "14px" }}>
-                      <label className={styles.inputLabel} style={{ marginBottom: "6px" }}>Perfume Images (Upload 3 to 6 images) *</label>
+                      <label className={styles.inputLabel} style={{ marginBottom: "6px" }}>Product Images (Upload 3 to 6 images) *</label>
                       <label style={{ display: "block" }}>
                         <input
                           type="file"
@@ -1212,7 +1212,7 @@ export default function AdminModals(props: any) {
                               >
                                 <img
                                   src={url}
-                                  alt={`Uploaded perfume ${index + 1}`}
+                                  alt={`Uploaded product ${index + 1}`}
                                   style={{ width: "100%", height: "60px", objectFit: "cover", borderRadius: "5px" }}
                                 />
 
@@ -1278,7 +1278,7 @@ export default function AdminModals(props: any) {
                   <div style={{ backgroundColor: "#ffffff", border: "1px solid #e5e7eb", borderRadius: "10px", padding: "18px", marginBottom: "14px", boxShadow: "0 1px 3px rgba(0,0,0,0.05)" }}>
                     <h4 style={{ fontSize: "0.92rem", fontWeight: 700, color: "#111827", textTransform: "uppercase", letterSpacing: "0.03em", margin: "0 0 14px 0" }}>Product details</h4>
                     <div className={styles.inputGroup} style={{ marginBottom: "14px" }}>
-                      <label className={styles.inputLabel}>PerfumeName *</label>
+                      <label className={styles.inputLabel}>Product Name *</label>
                       <input id="mobile-name" type="text" value={name} onChange={(e) => setName(e.target.value)} className={styles.textInput} style={{ padding: "8px 12px", fontSize: "0.85rem" }} required={mobileCrudStep === 1} />
                     </div>
                     <div className={styles.inputGroup} style={{ marginBottom: "14px" }}>
@@ -1382,7 +1382,7 @@ export default function AdminModals(props: any) {
                   <div style={{ backgroundColor: "#ffffff", border: "1px solid #e5e7eb", borderRadius: "10px", padding: "18px", marginBottom: "14px", boxShadow: "0 1px 3px rgba(0,0,0,0.05)" }}>
                     <h4 style={{ fontSize: "0.92rem", fontWeight: 700, color: "#111827", textTransform: "uppercase", letterSpacing: "0.03em", margin: "0 0 14px 0" }}>Product Images</h4>
                     <div className={styles.inputGroup} style={{ marginBottom: "14px" }}>
-                      <label className={styles.inputLabel} style={{ marginBottom: "6px" }}>Perfume Images (Upload 3 to 6 images) *</label>
+                      <label className={styles.inputLabel} style={{ marginBottom: "6px" }}>Product Images (Upload 3 to 6 images) *</label>
                       <label style={{ display: "block" }}>
                         <input type="file" accept="image/*" multiple style={{ display: "none" }} onChange={handleMultipleFilesUpload} disabled={uploading} />
                         <div style={{ border: "2px dashed #d1d5db", borderRadius: "8px", padding: "20px 12px", textAlign: "center", backgroundColor: "#fafafa", cursor: uploading ? "not-allowed" : "pointer" }}>
@@ -1405,7 +1405,7 @@ export default function AdminModals(props: any) {
                             const isCover = imageFront === url;
                             return (
                               <div key={index} style={{ position: "relative", borderRadius: "8px", border: isCover ? "2px solid #000000" : "1px solid #e5e7eb", padding: "3px", backgroundColor: "#ffffff", display: "flex", flexDirection: "column", alignItems: "center", cursor: "pointer" }} onClick={() => setImageFront(url)}>
-                                <img src={url} alt={`Uploaded perfume ${index + 1}`} style={{ width: "100%", height: "60px", objectFit: "cover", borderRadius: "5px" }} />
+                                <img src={url} alt={`Uploaded product ${index + 1}`} style={{ width: "100%", height: "60px", objectFit: "cover", borderRadius: "5px" }} />
                                 <span style={{ fontSize: "0.6rem", fontWeight: 700, color: isCover ? "#000000" : "#9ca3af", textTransform: "uppercase", marginTop: "4px", paddingBottom: "2px" }}>{isCover ? "★ Cover" : "Set Cover"}</span>
                                 <button type="button" onClick={(e) => { e.stopPropagation(); handleRemoveImage(index); }} style={{ position: "absolute", top: "-6px", right: "-6px", backgroundColor: "#ef4444", color: "#ffffff", border: "none", borderRadius: "50%", width: "20px", height: "20px", fontSize: "0.75rem", fontWeight: 700, display: "flex", alignItems: "center", justifyContent: "center" }}>✕</button>
                               </div>
@@ -1649,7 +1649,7 @@ export default function AdminModals(props: any) {
                 </div>
                 <div style={{ display: "flex", flexDirection: "column", gap: "2px" }}>
                   <span style={{ fontSize: "0.92rem", fontWeight: 600, color: "#000" }}>Create New Product</span>
-                  <span style={{ fontSize: "0.78rem", color: "#6b7280" }}>Create a brand new perfume catalog listing from scratch.</span>
+                  <span style={{ fontSize: "0.78rem", color: "#6b7280" }}>Create a brand new product catalog listing from scratch.</span>
                 </div>
               </div>
 
@@ -1869,11 +1869,11 @@ export default function AdminModals(props: any) {
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="#ef4444" className={styles.mobileAlertIcon} style={{ width: "24px", height: "24px", marginRight: "10px" }}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="m14.74 9-.34 9m-4.78 0L9 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
               </svg>
-              <h3>Delete Perfume?</h3>
+              <h3>Delete Product?</h3>
             </div>
 
             <p className={`${styles.modalDescription} ${styles.mobileAlertDescription}`}>
-              Are you sure you want to delete this perfume from your inventory catalog? This action is permanent and cannot be undone.
+              Are you sure you want to delete this product from your inventory catalog? This action is permanent and cannot be undone.
             </p>
 
             <div className={`${styles.modalActionRow} ${styles.mobileAlertActionRow}`}>
@@ -2213,18 +2213,18 @@ export default function AdminModals(props: any) {
                                   item.giftSetDetails.map((sub: any, sIdx: number) => (
                                     <div key={sIdx} style={{ fontSize: "0.75rem", color: "#334155", display: "flex", alignItems: "center", gap: "6px" }}>
                                       {sub.imageFront && <img src={sub.imageFront} alt={sub.name} style={{ width: "16px", height: "16px", borderRadius: "2px", objectFit: "cover" }} />}
-                                      <span>{sub.name || (typeof sub === 'string' ? sub : 'Fragrance Item')}</span>
+                                      <span>{sub.name || (typeof sub === 'string' ? sub : 'Product Item')}</span>
                                     </div>
                                   ))
                                 ) : item.giftSetItems && item.giftSetItems.length > 0 ? (
                                   item.giftSetItems.map((subName: any, sIdx: number) => (
                                     <div key={sIdx} style={{ fontSize: "0.75rem", color: "#334155", display: "flex", alignItems: "center", gap: "6px" }}>
                                       <span style={{ width: "6px", height: "6px", borderRadius: "50%", backgroundColor: "#94a3b8" }}></span>
-                                      <span>{typeof subName === 'string' ? subName : (subName.name || 'Fragrance Item')}</span>
+                                      <span>{typeof subName === 'string' ? subName : (subName.name || 'Product Item')}</span>
                                     </div>
                                   ))
                                 ) : (
-                                  <div style={{ fontSize: "0.75rem", color: "#64748b" }}>Custom Fragrance Set ({item.size || '3 items'})</div>
+                                  <div style={{ fontSize: "0.75rem", color: "#64748b" }}>Custom Product Bundle ({item.size || '3 items'})</div>
                                 )}
                               </div>
                             </div>
@@ -2605,7 +2605,7 @@ export default function AdminModals(props: any) {
                                           </div>
                                         ))
                                       ) : (
-                                        <div style={{ fontSize: "0.75rem", color: "#64748b" }}>Custom Fragrance Set ({item.size || '3 items'})</div>
+                                        <div style={{ fontSize: "0.75rem", color: "#64748b" }}>Custom Product Bundle ({item.size || '3 items'})</div>
                                       )}
                                     </div>
                                   </div>

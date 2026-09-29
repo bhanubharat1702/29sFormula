@@ -184,7 +184,7 @@ export default function Navbar({ onCartClick }: NavbarProps) {
               style={{ maxHeight: "35px", objectFit: "contain", display: "block" }}
             />
           ) : (
-            brandLogoValue
+            brandLogoValue || "MY STORE"
           )}
         </Link>
         <nav className={styles.navLinks}>
@@ -377,7 +377,7 @@ export default function Navbar({ onCartClick }: NavbarProps) {
             <input
               ref={searchInputRef}
               type="text"
-              placeholder="Search Fragrance..."
+              placeholder="Search products..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               style={{

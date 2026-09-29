@@ -45,7 +45,7 @@ function CollectionsContent() {
   const [loading, setLoading] = useState<boolean>(true);
   const [categoryFilter, setCategoryFilter] = useState<string>("All");
   const [searchQuery, setSearchQuery] = useState<string>("");
-  const [primaryColor, setPrimaryColor] = useState<string>("#57bc74");
+  const [primaryColor, setPrimaryColor] = useState<string>("#ffffff");
 
   // Filtering & Sorting State
   const [inStockOnly, setInStockOnly] = useState<boolean>(false);
@@ -610,7 +610,7 @@ function CollectionsContent() {
           </div>
         ) : (
           <div className={styles.emptyStateContainer}>
-            <p>No matching fragrances cataloged at the moment. Try a different category or query.</p>
+            <p>No matching products cataloged at the moment. Try a different category or query.</p>
           </div>
         )}
       </main>

@@ -1,6 +1,6 @@
 import jwt from "jsonwebtoken";
 
-const getJwtSecret = () => process.env.JWT_SECRET || "29sformula_secret_jwt_key_2026";
+const getJwtSecret = () => process.env.JWT_SECRET || "ecommerce_secret_jwt_key_2026";
 
 /**
  * Middleware to verify JWT token from Authorization header (Bearer token)

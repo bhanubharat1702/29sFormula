@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import dotenv from "dotenv";
+import { runMigration } from "../scripts/migrateMultiTenant.js";
 
 dotenv.config();
 
@@ -11,7 +12,6 @@ mongoose.set("bufferCommands", false);
 
 const mongoURL = process.env.mongoURL;
 
-
 export const connectDB = async () => {
   if (!mongoURL) {
     console.warn("Warning: mongoURL is not defined in the .env file.");
@@ -19,6 +19,10 @@ export const connectDB = async () => {
     try {
       await mongoose.connect(mongoURL);
       console.log("Connected to MongoDB successfully!");
+      // Automatically run multi-tenant seed migration and legacy data sanitizer on server startup
+      runMigration({ standalone: false }).catch((err) => {
+        console.warn("Startup migration warning:", err.message);
+      });
     } catch (err) {
       console.error("Failed to connect to MongoDB:", err.message);
       if (mongoURL.includes("<") && mongoURL.includes(">")) {

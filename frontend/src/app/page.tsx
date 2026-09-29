@@ -253,7 +253,7 @@ export default function Home() {
   const [videoBgColor, setVideoBgColor] = useState<string>("#121212");
   const [videoBgImage, setVideoBgImage] = useState<string>("");
 
-  const [lifestyleText, setLifestyleText] = useState<string>("Uncompromising Quality, Curated for You. Discover 29sFORMULA.");
+  const [lifestyleText, setLifestyleText] = useState<string>("Uncompromising Quality, Curated for You.");
   const [lifestyleImage, setLifestyleImage] = useState<string>("https://images.unsplash.com/photo-1615655096345-61a54750068d?auto=format&fit=crop&w=1800&q=80");
   const [lifestyleTextFontType, setLifestyleTextFontType] = useState<string>("Outfit");
   const [lifestyleTextFontColor, setLifestyleTextFontColor] = useState<string>("#ffffff");
@@ -297,7 +297,7 @@ export default function Home() {
     });
   }, [heroTitleFontType, heroManifestoFontType, videoTitleFontType, videoSubtitleFontType, mobileHeroTitleFontType, mobileHeroManifestoFontType, mobileVideoTitleFontType, mobileVideoSubtitleFontType, lifestyleTextFontType, mobileLifestyleTextFontType]);
   const [primaryColor, setPrimaryColor] = useState<string>(
-    "#57bc74"
+    "#ffffff"
   );
   const [showVideo, setShowVideo] = useState<boolean>(true);
   const [showLifestyle, setShowLifestyle] = useState<boolean>(true);

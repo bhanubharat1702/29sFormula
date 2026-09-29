@@ -1,5 +1,5 @@
 {
-  "name": "29s-formula-backend",
+  "name": "store-engine-backend",
   "version": "1.0.0",
   "main": "index.js",
   "type": "module",
@@ -11,7 +11,7 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "description": "Backend API for 29sFormula perfume brand",
+  "description": "Backend API for Multi-Tenant E-Commerce Platform",
   "dependencies": {
     "@sentry/node": "^10.75.1",
     "axios": "^1.19.0",

@@ -283,7 +283,7 @@ export default function AdminDashboard() {
   const [announcementText, setAnnouncementText] = useState<string>("");
   const [heroTitle, setHeroTitle] = useState<string>("");
   const [heroTitleFontType, setHeroTitleFontType] = useState<string>("Outfit");
-  const [heroTitleFontColor, setHeroTitleFontColor] = useState<string>("#111827");
+  const [heroTitleFontColor, setHeroTitleFontColor] = useState<string>("#ffffff");
   const [heroTitleFontSize, setHeroTitleFontSize] = useState<string>("4.5rem");
   const [heroTitleFontAlignment, setHeroTitleFontAlignment] = useState<string>("center");
   const [heroTitleFontWeight, setHeroTitleFontWeight] = useState<string>("700");
@@ -295,8 +295,8 @@ export default function AdminDashboard() {
   const [heroButtonText, setHeroButtonText] = useState<string>("Shop Now");
   const [heroButtonStyle, setHeroButtonStyle] = useState<string>("solid");
   const [heroButtonSize, setHeroButtonSize] = useState<string>("md");
-  const [heroButtonColor, setHeroButtonColor] = useState<string>("");
-  const [heroButtonTextColor, setHeroButtonTextColor] = useState<string>("#ffffff");
+  const [heroButtonColor, setHeroButtonColor] = useState<string>("#ffffff");
+  const [heroButtonTextColor, setHeroButtonTextColor] = useState<string>("#000000");
   const [heroManifesto, setHeroManifesto] = useState<string>("");
   const [heroManifestoFontType, setHeroManifestoFontType] = useState<string>("Outfit");
   const [heroManifestoFontColor, setHeroManifestoFontColor] = useState<string>("#ffffff");
@@ -308,7 +308,7 @@ export default function AdminDashboard() {
   const [mobileHeroTemplate, setMobileHeroTemplate] = useState<string>("center");
   const [mobileHeroTitle, setMobileHeroTitle] = useState<string>("");
   const [mobileHeroTitleFontType, setMobileHeroTitleFontType] = useState<string>("Outfit");
-  const [mobileHeroTitleFontColor, setMobileHeroTitleFontColor] = useState<string>("#111827");
+  const [mobileHeroTitleFontColor, setMobileHeroTitleFontColor] = useState<string>("#ffffff");
   const [mobileHeroTitleFontSize, setMobileHeroTitleFontSize] = useState<string>("2.5rem");
   const [mobileHeroTitleFontAlignment, setMobileHeroTitleFontAlignment] = useState<string>("center");
   const [mobileHeroTitleFontWeight, setMobileHeroTitleFontWeight] = useState<string>("700");
@@ -325,8 +325,8 @@ export default function AdminDashboard() {
   const [mobileHeroButtonText, setMobileHeroButtonText] = useState<string>("Shop Now");
   const [mobileHeroButtonStyle, setMobileHeroButtonStyle] = useState<string>("solid");
   const [mobileHeroButtonSize, setMobileHeroButtonSize] = useState<string>("sm");
-  const [mobileHeroButtonColor, setMobileHeroButtonColor] = useState<string>("");
-  const [mobileHeroButtonTextColor, setMobileHeroButtonTextColor] = useState<string>("#ffffff");
+  const [mobileHeroButtonColor, setMobileHeroButtonColor] = useState<string>("#ffffff");
+  const [mobileHeroButtonTextColor, setMobileHeroButtonTextColor] = useState<string>("#000000");
   const [showMobileHeroButton, setShowMobileHeroButton] = useState<boolean>(true);
 
 
@@ -338,12 +338,12 @@ export default function AdminDashboard() {
   const [lifestyleText, setLifestyleText] = useState<string>("");
   const [lifestyleImage, setLifestyleImage] = useState<string>("");
   const [uploadingLifestyle, setUploadingLifestyle] = useState<boolean>(false);
-  const [primaryColor, setPrimaryColor] = useState<string>("#57bc74");
+  const [primaryColor, setPrimaryColor] = useState<string>("#ffffff");
   const [brandLogoType, setBrandLogoType] = useState<string>("text");
-  const [brandLogoValue, setBrandLogoValue] = useState<string>("29sFORMULA");
+  const [brandLogoValue, setBrandLogoValue] = useState<string>("MY STORE");
   const [uploadingLogo, setUploadingLogo] = useState<boolean>(false);
   const [heroBgType, setHeroBgType] = useState<string>("color");
-  const [heroBgColor, setHeroBgColor] = useState<string>("#57bc74");
+  const [heroBgColor, setHeroBgColor] = useState<string>("#ffffff");
   const [heroBgImage, setHeroBgImage] = useState<string>("");
   const [heroBgVideo, setHeroBgVideo] = useState<string>("");
   const [showTicker, setShowTicker] = useState<boolean>(true);
@@ -369,7 +369,7 @@ export default function AdminDashboard() {
   const [videoButtonStyle, setVideoButtonStyle] = useState<string>("outline");
   const [videoButtonSize, setVideoButtonSize] = useState<string>("md");
   const [videoButtonColor, setVideoButtonColor] = useState<string>("#ffffff");
-  const [videoButtonTextColor, setVideoButtonTextColor] = useState<string>("#121212");
+  const [videoButtonTextColor, setVideoButtonTextColor] = useState<string>("#000000");
   const [videoBgType, setVideoBgType] = useState<string>("video");
   const [videoBgColor, setVideoBgColor] = useState<string>("#121212");
   const [videoBgImage, setVideoBgImage] = useState<string>("");
@@ -396,7 +396,7 @@ export default function AdminDashboard() {
   const [mobileVideoButtonStyle, setMobileVideoButtonStyle] = useState<string>("outline");
   const [mobileVideoButtonSize, setMobileVideoButtonSize] = useState<string>("sm");
   const [mobileVideoButtonColor, setMobileVideoButtonColor] = useState<string>("#ffffff");
-  const [mobileVideoButtonTextColor, setMobileVideoButtonTextColor] = useState<string>("#121212");
+  const [mobileVideoButtonTextColor, setMobileVideoButtonTextColor] = useState<string>("#000000");
   const [showMobileVideoButton, setShowMobileVideoButton] = useState<boolean>(true);
   const [isLifestyleCustomizerModalOpen, setIsLifestyleCustomizerModalOpen] = useState(false);
   const [lifestyleTextFontType, setLifestyleTextFontType] = useState<string>("Outfit");
@@ -409,8 +409,8 @@ export default function AdminDashboard() {
   const [lifestyleButtonText, setLifestyleButtonText] = useState<string>("Explore Now");
   const [lifestyleButtonStyle, setLifestyleButtonStyle] = useState<string>("solid");
   const [lifestyleButtonSize, setLifestyleButtonSize] = useState<string>("md");
-  const [lifestyleButtonColor, setLifestyleButtonColor] = useState<string>("");
-  const [lifestyleButtonTextColor, setLifestyleButtonTextColor] = useState<string>("#ffffff");
+  const [lifestyleButtonColor, setLifestyleButtonColor] = useState<string>("#ffffff");
+  const [lifestyleButtonTextColor, setLifestyleButtonTextColor] = useState<string>("#000000");
 
   const [mobileLifestyleText, setMobileLifestyleText] = useState<string>("");
   const [mobileLifestyleTextFontType, setMobileLifestyleTextFontType] = useState<string>("Outfit");
@@ -423,17 +423,17 @@ export default function AdminDashboard() {
   const [mobileLifestyleButtonText, setMobileLifestyleButtonText] = useState<string>("Explore Now");
   const [mobileLifestyleButtonStyle, setMobileLifestyleButtonStyle] = useState<string>("solid");
   const [mobileLifestyleButtonSize, setMobileLifestyleButtonSize] = useState<string>("sm");
-  const [mobileLifestyleButtonColor, setMobileLifestyleButtonColor] = useState<string>("");
-  const [mobileLifestyleButtonTextColor, setMobileLifestyleButtonTextColor] = useState<string>("#ffffff");
+  const [mobileLifestyleButtonColor, setMobileLifestyleButtonColor] = useState<string>("#ffffff");
+  const [mobileLifestyleButtonTextColor, setMobileLifestyleButtonTextColor] = useState<string>("#000000");
   const [showLifestyle, setShowLifestyle] = useState<boolean>(true);
   const [supportText, setSupportText] = useState<string>("For support inquiries, please contact us.");
   const [careersText, setCareersText] = useState<string>("Join our team! Check out our open positions.");
   const [tradeEnquiryText, setTradeEnquiryText] = useState<string>("For trade and wholesale inquiries, contact our B2B team.");
-  const [aboutUsText, setAboutUsText] = useState<string>("We are 29sFORMULA, redefining luxury.");
+  const [aboutUsText, setAboutUsText] = useState<string>("We deliver quality products with exceptional customer service.");
   const [instagramLink, setInstagramLink] = useState<string>("#");
   const [facebookLink, setFacebookLink] = useState<string>("#");
   const [contactLink, setContactLink] = useState<string>("#");
-  const [contactUsText, setContactUsText] = useState<string>("Need help? Email us at hello@29sformula.in and our support team will get back to you within 24 hours.");
+  const [contactUsText, setContactUsText] = useState<string>("Need help? Email us at support@yourstore.com and our support team will get back to you within 24 hours.");
   const [returnPolicyText, setReturnPolicyText] = useState<string>("We offer a 7-day hassle-free return policy. If you're not fully satisfied with your purchase, contact our support team for a full refund.");
   const [shippingPolicyText, setShippingPolicyText] = useState<string>("We offer free shipping across India. Orders are typically processed within 1-2 business days and delivered within 4-7 business days.");
   const [googleClientId, setGoogleClientId] = useState<string>("523936375845-75tjhav8ce01o9mdk325iggb1glgpi21.apps.googleusercontent.com");
@@ -442,7 +442,7 @@ export default function AdminDashboard() {
   const [showProductReviews, setShowProductReviews] = useState<boolean>(true);
   const [showProductExploreMore, setShowProductExploreMore] = useState<boolean>(true);
   const [showProductFaq, setShowProductFaq] = useState<boolean>(true);
-  const [usageGuideText, setUsageGuideText] = useState<string>("Fits your mood. Handcrafted with scientific precision. Refer to our USAGE GUIDE for layering notes.");
+  const [usageGuideText, setUsageGuideText] = useState<string>("Handcrafted with precision. Refer to our USAGE GUIDE for additional details.");
   const [exploreMoreTitle, setExploreMoreTitle] = useState<string>("Don't Stop. Explore More.");
   const [deliverySubtext, setDeliverySubtext] = useState<string>("TAXES INCLUDED. SHIPPING CALCULATED AT CHECKOUT.");
 
@@ -521,7 +521,7 @@ export default function AdminDashboard() {
       announcementText: data.announcementText || "",
       heroTitle: data.heroTitle || "",
       heroTitleFontType: data.heroTitleFontType || "Outfit",
-      heroTitleFontColor: data.heroTitleFontColor || "#111827",
+      heroTitleFontColor: data.heroTitleFontColor || "#ffffff",
       heroTitleFontSize: data.heroTitleFontSize || "4.5rem",
       heroTitleFontAlignment: data.heroTitleFontAlignment || "center",
       heroTitleFontWeight: data.heroTitleFontWeight || "700",
@@ -538,12 +538,12 @@ export default function AdminDashboard() {
       heroButtonText: data.heroButtonText || "Shop Now",
       heroButtonStyle: data.heroButtonStyle || "solid",
       heroButtonSize: data.heroButtonSize || "md",
-      heroButtonColor: data.heroButtonColor || "",
-      heroButtonTextColor: data.heroButtonTextColor || "#ffffff",
+      heroButtonColor: data.heroButtonColor || "#ffffff",
+      heroButtonTextColor: data.heroButtonTextColor || "#000000",
       mobileHeroTemplate: data.mobileHeroTemplate || data.heroTemplate || "center",
       mobileHeroTitle: data.mobileHeroTitle !== undefined ? data.mobileHeroTitle : "",
       mobileHeroTitleFontType: data.mobileHeroTitleFontType || data.heroTitleFontType || "Outfit",
-      mobileHeroTitleFontColor: data.mobileHeroTitleFontColor || data.heroTitleFontColor || "#111827",
+      mobileHeroTitleFontColor: data.mobileHeroTitleFontColor || data.heroTitleFontColor || "#ffffff",
       mobileHeroTitleFontSize: data.mobileHeroTitleFontSize || "2.5rem",
       mobileHeroTitleFontAlignment: data.mobileHeroTitleFontAlignment || data.heroTitleFontAlignment || "center",
       mobileHeroTitleFontWeight: data.mobileHeroTitleFontWeight || data.heroTitleFontWeight || "700",
@@ -560,8 +560,8 @@ export default function AdminDashboard() {
       mobileHeroButtonText: data.mobileHeroButtonText || data.heroButtonText || "Shop Now",
       mobileHeroButtonStyle: data.mobileHeroButtonStyle || data.heroButtonStyle || "solid",
       mobileHeroButtonSize: data.mobileHeroButtonSize || "sm",
-      mobileHeroButtonColor: data.mobileHeroButtonColor !== undefined ? data.mobileHeroButtonColor : "",
-      mobileHeroButtonTextColor: data.mobileHeroButtonTextColor || data.heroButtonTextColor || "#ffffff",
+      mobileHeroButtonColor: data.mobileHeroButtonColor !== undefined ? data.mobileHeroButtonColor : "#ffffff",
+      mobileHeroButtonTextColor: data.mobileHeroButtonTextColor || data.heroButtonTextColor || "#000000",
       showMobileHeroButton: data.showMobileHeroButton !== undefined ? data.showMobileHeroButton : true,
       videoTitle: data.videoTitle || "",
       videoSubtitle: data.videoSubtitle || "",
@@ -585,7 +585,7 @@ export default function AdminDashboard() {
       videoButtonStyle: data.videoButtonStyle || "outline",
       videoButtonSize: data.videoButtonSize || "md",
       videoButtonColor: data.videoButtonColor || "#ffffff",
-      videoButtonTextColor: data.videoButtonTextColor || "#121212",
+      videoButtonTextColor: data.videoButtonTextColor || "#000000",
       videoBgType: data.videoBgType || "video",
       videoBgColor: data.videoBgColor || "#121212",
       videoBgImage: data.videoBgImage || "",
@@ -610,7 +610,7 @@ export default function AdminDashboard() {
       mobileVideoButtonStyle: data.mobileVideoButtonStyle !== undefined ? data.mobileVideoButtonStyle : (data.videoButtonStyle || "outline"),
       mobileVideoButtonSize: data.mobileVideoButtonSize !== undefined ? data.mobileVideoButtonSize : "sm",
       mobileVideoButtonColor: data.mobileVideoButtonColor !== undefined ? data.mobileVideoButtonColor : "#ffffff",
-      mobileVideoButtonTextColor: data.mobileVideoButtonTextColor !== undefined ? data.mobileVideoButtonTextColor : (data.videoButtonTextColor || "#121212"),
+      mobileVideoButtonTextColor: data.mobileVideoButtonTextColor !== undefined ? data.mobileVideoButtonTextColor : (data.videoButtonTextColor || "#000000"),
       showMobileVideoButton: data.showMobileVideoButton !== undefined ? data.showMobileVideoButton : true,
       lifestyleText: data.lifestyleText || "",
       lifestyleImage: data.lifestyleImage || "https://images.unsplash.com/photo-1615655096345-61a54750068d?auto=format&fit=crop&w=1800&q=80",
@@ -624,8 +624,8 @@ export default function AdminDashboard() {
       lifestyleButtonText: data.lifestyleButtonText !== undefined ? data.lifestyleButtonText : "Explore Now",
       lifestyleButtonStyle: data.lifestyleButtonStyle !== undefined ? data.lifestyleButtonStyle : "solid",
       lifestyleButtonSize: data.lifestyleButtonSize !== undefined ? data.lifestyleButtonSize : "md",
-      lifestyleButtonColor: data.lifestyleButtonColor !== undefined ? data.lifestyleButtonColor : "",
-      lifestyleButtonTextColor: data.lifestyleButtonTextColor !== undefined ? data.lifestyleButtonTextColor : "#ffffff",
+      lifestyleButtonColor: data.lifestyleButtonColor !== undefined ? data.lifestyleButtonColor : "#ffffff",
+      lifestyleButtonTextColor: data.lifestyleButtonTextColor !== undefined ? data.lifestyleButtonTextColor : "#000000",
 
       mobileLifestyleText: data.mobileLifestyleText !== undefined ? data.mobileLifestyleText : "",
       mobileLifestyleTextFontType: data.mobileLifestyleTextFontType || data.lifestyleTextFontType || "Outfit",
@@ -638,13 +638,13 @@ export default function AdminDashboard() {
       mobileLifestyleButtonText: data.mobileLifestyleButtonText !== undefined ? data.mobileLifestyleButtonText : (data.lifestyleButtonText || "Explore Now"),
       mobileLifestyleButtonStyle: data.mobileLifestyleButtonStyle !== undefined ? data.mobileLifestyleButtonStyle : (data.lifestyleButtonStyle || "solid"),
       mobileLifestyleButtonSize: data.mobileLifestyleButtonSize !== undefined ? data.mobileLifestyleButtonSize : "sm",
-      mobileLifestyleButtonColor: data.mobileLifestyleButtonColor !== undefined ? data.mobileLifestyleButtonColor : (data.lifestyleButtonColor || ""),
-      mobileLifestyleButtonTextColor: data.mobileLifestyleButtonTextColor !== undefined ? data.mobileLifestyleButtonTextColor : (data.lifestyleButtonTextColor || "#ffffff"),
-      primaryColor: data.primaryColor || "#57bc74",
+      mobileLifestyleButtonColor: data.mobileLifestyleButtonColor !== undefined ? data.mobileLifestyleButtonColor : (data.lifestyleButtonColor || "#ffffff"),
+      mobileLifestyleButtonTextColor: data.mobileLifestyleButtonTextColor !== undefined ? data.mobileLifestyleButtonTextColor : (data.lifestyleButtonTextColor || "#000000"),
+      primaryColor: data.primaryColor || "#ffffff",
       brandLogoType: data.brandLogoType || "text",
-      brandLogoValue: data.brandLogoValue || "29sFORMULA",
+      brandLogoValue: data.brandLogoValue || "MY STORE",
       heroBgType: data.heroBgType || "color",
-      heroBgColor: data.heroBgColor || "#57bc74",
+      heroBgColor: data.heroBgColor || "#ffffff",
       heroBgImage: data.heroBgImage || "",
       heroBgVideo: data.heroBgVideo || "",
       showTicker: data.showTicker !== undefined ? data.showTicker : true,
@@ -654,18 +654,18 @@ export default function AdminDashboard() {
       showProductReviews: data.showProductReviews !== undefined ? data.showProductReviews : true,
       showProductExploreMore: data.showProductExploreMore !== undefined ? data.showProductExploreMore : true,
       showProductFaq: data.showProductFaq !== undefined ? data.showProductFaq : true,
-      usageGuideText: data.usageGuideText || "Fits your mood. Handcrafted with scientific precision. Refer to our USAGE GUIDE for layering notes.",
+      usageGuideText: data.usageGuideText || "Handcrafted with precision. Refer to our USAGE GUIDE for additional details.",
       exploreMoreTitle: data.exploreMoreTitle || "Don't Stop. Explore More.",
       deliverySubtext: data.deliverySubtext || "TAXES INCLUDED. SHIPPING CALCULATED AT CHECKOUT.",
       googleClientId: data.googleClientId || "523936375845-75tjhav8ce01o9mdk325iggb1glgpi21.apps.googleusercontent.com",
       supportText: data.supportText !== undefined ? data.supportText : "For support inquiries, please contact us.",
       careersText: data.careersText !== undefined ? data.careersText : "Join our team! Check out our open positions.",
       tradeEnquiryText: data.tradeEnquiryText !== undefined ? data.tradeEnquiryText : "For trade and wholesale inquiries, contact our B2B team.",
-      aboutUsText: data.aboutUsText !== undefined ? data.aboutUsText : "We are 29sFORMULA, redefining luxury.",
+      aboutUsText: data.aboutUsText !== undefined ? data.aboutUsText : "We deliver quality products with exceptional customer service.",
       instagramLink: data.instagramLink !== undefined ? data.instagramLink : "#",
       facebookLink: data.facebookLink !== undefined ? data.facebookLink : "#",
       contactLink: data.contactLink !== undefined ? data.contactLink : "#",
-      contactUsText: data.contactUsText !== undefined ? data.contactUsText : "Need help? Email us at hello@29sformula.in and our support team will get back to you within 24 hours.",
+      contactUsText: data.contactUsText !== undefined ? data.contactUsText : "Need help? Email us at support@yourstore.com and our support team will get back to you within 24 hours.",
       returnPolicyText: data.returnPolicyText !== undefined ? data.returnPolicyText : "We offer a 7-day hassle-free return policy. If you're not fully satisfied with your purchase, contact our support team for a full refund.",
       shippingPolicyText: data.shippingPolicyText !== undefined ? data.shippingPolicyText : "We offer free shipping across India. Orders are typically processed within 1-2 business days and delivered within 4-7 business days.",
       faqs: data.faqs || []
@@ -917,10 +917,10 @@ export default function AdminDashboard() {
     if (mobileLifestyleButtonSize !== (originalSettings.mobileLifestyleButtonSize || "sm")) changes.push("Mobile lifestyle button size");
     if (mobileLifestyleButtonColor !== (originalSettings.mobileLifestyleButtonColor || "")) changes.push("Mobile lifestyle button color");
     if (mobileLifestyleButtonTextColor !== (originalSettings.mobileLifestyleButtonTextColor || "#ffffff")) changes.push("Mobile lifestyle button text color");
-    if (primaryColor !== (originalSettings.primaryColor || "#57bc74")) changes.push("Primary brand theme color");
-    if (brandLogoType !== (originalSettings.brandLogoType || "text") || brandLogoValue !== (originalSettings.brandLogoValue || "29sFORMULA")) changes.push("Brand Logo");
+    if (primaryColor !== (originalSettings.primaryColor || "#ffffff")) changes.push("Primary brand theme color");
+    if (brandLogoType !== (originalSettings.brandLogoType || "text") || brandLogoValue !== (originalSettings.brandLogoValue || "MY STORE")) changes.push("Brand Logo");
     if (heroBgType !== (originalSettings.heroBgType || "color")) changes.push("Hero section background layout type");
-    if (heroBgColor !== (originalSettings.heroBgColor || "#57bc74")) changes.push("Hero section custom background color");
+    if (heroBgColor !== (originalSettings.heroBgColor || "#ffffff")) changes.push("Hero section custom background color");
     if (heroBgImage !== (originalSettings.heroBgImage || "")) changes.push("Hero section background image URL");
     if (heroBgVideo !== (originalSettings.heroBgVideo || "")) changes.push("Hero section background video URL");
     if (showTicker !== (originalSettings.showTicker !== undefined ? originalSettings.showTicker : true)) changes.push("Marquee Ticker visibility toggle");
@@ -1104,11 +1104,11 @@ export default function AdminDashboard() {
         setMobileLifestyleButtonSize(data.mobileLifestyleButtonSize || "sm");
         setMobileLifestyleButtonColor(data.mobileLifestyleButtonColor !== undefined ? data.mobileLifestyleButtonColor : data.lifestyleButtonColor);
         setMobileLifestyleButtonTextColor(data.mobileLifestyleButtonTextColor || data.lifestyleButtonTextColor || "#ffffff");
-        setPrimaryColor(data.primaryColor || "#57bc74");
+        setPrimaryColor(data.primaryColor || "#ffffff");
         setBrandLogoType(data.brandLogoType || "text");
-        setBrandLogoValue(data.brandLogoValue || "29sFORMULA");
+        setBrandLogoValue(data.brandLogoValue || "MY STORE");
         setHeroBgType(data.heroBgType || "color");
-        setHeroBgColor(data.heroBgColor || "#57bc74");
+        setHeroBgColor(data.heroBgColor || "#ffffff");
         setHeroBgImage(data.heroBgImage || "");
         setHeroBgVideo(data.heroBgVideo || "");
         setShowTicker(data.showTicker !== undefined ? data.showTicker : true);
@@ -1118,7 +1118,7 @@ export default function AdminDashboard() {
         setShowProductReviews(data.showProductReviews !== undefined ? data.showProductReviews : true);
         setShowProductExploreMore(data.showProductExploreMore !== undefined ? data.showProductExploreMore : true);
         setShowProductFaq(data.showProductFaq !== undefined ? data.showProductFaq : true);
-        setUsageGuideText(data.usageGuideText || "Fits your mood. Handcrafted with scientific precision. Refer to our USAGE GUIDE for layering notes.");
+        setUsageGuideText(data.usageGuideText || "Handcrafted with precision. Refer to our USAGE GUIDE for additional details.");
         setExploreMoreTitle(data.exploreMoreTitle || "Don't Stop. Explore More.");
         setDeliverySubtext(data.deliverySubtext || "TAXES INCLUDED. SHIPPING CALCULATED AT CHECKOUT.");
         setGoogleClientId(data.googleClientId || "523936375845-75tjhav8ce01o9mdk325iggb1glgpi21.apps.googleusercontent.com");
@@ -1617,12 +1617,12 @@ export default function AdminDashboard() {
       setMobileLifestyleButtonColor(originalSettings.mobileLifestyleButtonColor || "");
       setMobileLifestyleButtonTextColor(originalSettings.mobileLifestyleButtonTextColor || "#ffffff");
       setHeroBgType(originalSettings.heroBgType || "color");
-      setHeroBgColor(originalSettings.heroBgColor || "#57bc74");
+      setHeroBgColor(originalSettings.heroBgColor || "#ffffff");
       setHeroBgImage(originalSettings.heroBgImage || "");
       setHeroBgVideo(originalSettings.heroBgVideo || "");
-      setPrimaryColor(originalSettings.primaryColor || "#57bc74");
+      setPrimaryColor(originalSettings.primaryColor || "#ffffff");
       setBrandLogoType(originalSettings.brandLogoType || "text");
-      setBrandLogoValue(originalSettings.brandLogoValue || "29sFORMULA");
+      setBrandLogoValue(originalSettings.brandLogoValue || "MY STORE");
       setShowTicker(originalSettings.showTicker !== undefined ? originalSettings.showTicker : true);
       setShowTrustMarquee(originalSettings.showTrustMarquee !== undefined ? originalSettings.showTrustMarquee : true);
       setTrustMarqueeDirection(originalSettings.trustMarqueeDirection || "left");
@@ -1635,11 +1635,11 @@ export default function AdminDashboard() {
       setSupportText(originalSettings.supportText || "For support inquiries, please contact us.");
       setCareersText(originalSettings.careersText || "Join our team! Check out our open positions.");
       setTradeEnquiryText(originalSettings.tradeEnquiryText || "For trade and wholesale inquiries, contact our B2B team.");
-      setAboutUsText(originalSettings.aboutUsText || "We are 29sFORMULA, redefining luxury.");
+      setAboutUsText(originalSettings.aboutUsText || "We deliver quality products with exceptional customer service.");
       setInstagramLink(originalSettings.instagramLink || "#");
       setFacebookLink(originalSettings.facebookLink || "#");
       setContactLink(originalSettings.contactLink || "#");
-      setContactUsText(originalSettings.contactUsText || "Need help? Email us at hello@29sformula.in and our support team will get back to you within 24 hours.");
+      setContactUsText(originalSettings.contactUsText || "Need help? Email us at support@yourstore.com and our support team will get back to you within 24 hours.");
       setReturnPolicyText(originalSettings.returnPolicyText || "We offer a 7-day hassle-free return policy. If you're not fully satisfied with your purchase, contact our support team for a full refund.");
       setShippingPolicyText(originalSettings.shippingPolicyText || "We offer free shipping across India. Orders are typically processed within 1-2 business days and delivered within 4-7 business days.");
       setFaqs(originalSettings.faqs || []);
@@ -1922,15 +1922,17 @@ export default function AdminDashboard() {
           ...authHeaders
         }
       });
-      const data = await res.json();
-      if (data.success) {
+      const contentType = res.headers.get("content-type");
+      const data = contentType && contentType.includes("application/json") ? await res.json() : {};
+      if (res.ok && data.success) {
         fetchCustomers();
         setSelectedCustomer(null);
       } else {
-        alert("Failed to delete customer");
+        alert(data.error || data.message || "Failed to delete customer");
       }
     } catch (err) {
       console.error("Error deleting customer:", err);
+      alert("An unexpected error occurred while deleting customer.");
     } finally {
       setIsDeletingCustomer(false);
       setDeleteCustomerTargetId(null);
@@ -2367,18 +2369,37 @@ export default function AdminDashboard() {
   const handleResetToDefaults = () => {
     setTickerText("7-DAY EASY RETURNS & EXCHANGES | FREE SHIPPING ACROSS INDIA | 7-DAY EASY RETURNS & EXCHANGES | FREE SHIPPING ACROSS INDIA | 7-DAY EASY RETURNS & EXCHANGES | FREE SHIPPING ACROSS INDIA | ");
     setTickerSpeed(60);
-    setAnnouncementText("EVERY BOTTLE IS PREPARED WITH CARE. DUE TO SEASONAL DEMAND, PROCESSING MAY TAKE UP TO 5-7 DAYS BEFORE DISPATCH.");
-    setHeroTitle("29sFORMULA");
-    setHeroManifesto("SCENT IS THE DIFFERENCE YOU FEEL AND NEVER FAKE. EVERY 29S FORMULA BOTTLE IS CRAFTED BY HANDS THAT CARE, NOT MACHINES THAT RUSH.");
+    setAnnouncementText("EVERY ORDER IS PREPARED WITH CARE. DUE TO SEASONAL DEMAND, PROCESSING MAY TAKE UP TO 5-7 DAYS BEFORE DISPATCH.");
+    setHeroTitleFontColor("#ffffff");
+    setHeroManifestoFontColor("#ffffff");
+    setMobileHeroTitleFontColor("#ffffff");
+    setMobileHeroManifestoFontColor("#ffffff");
+    setHeroButtonColor("#ffffff");
+    setHeroButtonTextColor("#000000");
+    setMobileHeroButtonColor("#ffffff");
+    setMobileHeroButtonTextColor("#000000");
+    setVideoTitleFontColor("#ffffff");
+    setVideoSubtitleFontColor("#ffffff");
+    setVideoButtonColor("#ffffff");
+    setVideoButtonTextColor("#000000");
+    setMobileVideoButtonColor("#ffffff");
+    setMobileVideoButtonTextColor("#000000");
+    setLifestyleTextFontColor("#ffffff");
+    setLifestyleButtonColor("#ffffff");
+    setLifestyleButtonTextColor("#000000");
+    setMobileLifestyleButtonColor("#ffffff");
+    setMobileLifestyleButtonTextColor("#000000");
+    setHeroTitle("WELCOME TO OUR STORE");
+    setHeroManifesto("PREMIUM QUALITY YOU CAN TRUST. EVERY PRODUCT IS CRAFTED WITH CARE AND DELIVERED WITH PASSION.");
     setVideoTitle("NEW ARRIVALS");
-    setVideoSubtitle("Drop's live. Smells divine. Feels better.");
+    setVideoSubtitle("Explore our latest arrivals crafted with care and premium quality.");
     setVideoUrl("");
     setVideoFallbackColor("#121212");
-    setLifestyleText("Intense notes, Raw elements. This is 29sFORMULA.");
+    setLifestyleText("Uncompromising Quality, Curated for You.");
     setLifestyleImage("https://images.unsplash.com/photo-1615655096345-61a54750068d?auto=format&fit=crop&w=1800&q=80");
-    setPrimaryColor("#57bc74");
+    setPrimaryColor("#ffffff");
     setBrandLogoType("text");
-    setBrandLogoValue("29sFORMULA");
+    setBrandLogoValue("MY STORE");
     setShowTicker(true);
     setShowAnnouncement(true);
     setShowVideo(true);
@@ -2892,7 +2913,7 @@ export default function AdminDashboard() {
           {brandLogoType === "image" && brandLogoValue ? (
             <img src={brandLogoValue} alt="Brand Logo" style={{ maxHeight: "24px", maxWidth: "120px", objectFit: "contain" }} />
           ) : (
-            brandLogoValue || "29sFORMULA"
+            brandLogoValue || "MY STORE"
           )}
         </span>
         <button className={styles.hamburgerBtn} onClick={() => {

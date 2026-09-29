@@ -45,7 +45,7 @@ export default function ProductDetailPage() {
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [primaryColor, setPrimaryColor] = useState<string>(
-    "#57bc74"
+    "#ffffff"
   );
   const [allProducts, setAllProducts] = useState<Product[]>(defaultProducts);
   
@@ -270,7 +270,7 @@ export default function ProductDetailPage() {
   const [showProductReviews, setShowProductReviews] = useState<boolean>(true);
   const [showProductExploreMore, setShowProductExploreMore] = useState<boolean>(true);
   const [showProductFaq, setShowProductFaq] = useState<boolean>(true);
-  const [usageGuideText, setUsageGuideText] = useState<string>("Fits your mood. Handcrafted with scientific precision. Refer to our USAGE GUIDE for layering notes.");
+  const [usageGuideText, setUsageGuideText] = useState<string>("Handcrafted with precision. Refer to our USAGE GUIDE for additional details.");
   const [exploreMoreTitle, setExploreMoreTitle] = useState<string>("Don't Stop. Explore More.");
   const [deliverySubtext, setDeliverySubtext] = useState<string>("TAXES INCLUDED. SHIPPING CALCULATED AT CHECKOUT.");
 
@@ -947,7 +947,7 @@ export default function ProductDetailPage() {
                     {product.additionalInformation ? (
                       <div dangerouslySetInnerHTML={{ __html: product.additionalInformation }} />
                     ) : (
-                      <p>Key ingredients, scent notes, and other additional product details.</p>
+                      <p>Key features, specifications, and other additional product details.</p>
                     )}
                   </div>
                 </div>
@@ -1616,7 +1616,7 @@ export default function ProductDetailPage() {
                         style={{ display: "none" }}
                         disabled={uploadingImage}
                       />
-                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.8} stroke="currentColor" style={{ width: "22px", height: "22px", color: primaryColor || "#57bc74" }}>
+                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.8} stroke="currentColor" style={{ width: "22px", height: "22px", color: primaryColor || "#ffffff" }}>
                         <path strokeLinecap="round" strokeLinejoin="round" d="M6.827 6.175A2.31 2.31 0 0 1 5.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 0 0-1.134-.175 2.31 2.31 0 0 1-1.64-1.055l-.822-1.316a2.192 2.192 0 0 0-1.736-1.039 48.774 48.774 0 0 0-5.232 0 2.192 2.192 0 0 0-1.736 1.039l-.821 1.316Z" />
                         <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 12.75a4.5 4.5 0 1 1-9 0 4.5 4.5 0 0 1 9 0ZM18.75 10.5h.008v.008h-.008V10.5Z" />
                       </svg>
@@ -1675,7 +1675,7 @@ export default function ProductDetailPage() {
           <h3 className={styles.moderationTitle}>MODERATION CHART</h3>
           <p className={styles.moderationText}>
             Each review is moderated manually by our Customer Service before its publication to verify its compliance with our publication criteria addressed in <a href="#" style={{ textDecoration: "underline", color: "#111827" }}>legal mentions</a>.<br /><br />
-            Reviews will be published regardless of their rating as long as they meet all the publication criteria. To be able to write a review on one of our products, the customer must have previously purchased the product on <a href="#" style={{ textDecoration: "underline", color: "#111827" }}>29sformula.com</a> in the last year.<br /><br />
+            Reviews will be published regardless of their rating as long as they meet all the publication criteria. To be able to write a review on one of our products, the customer must have previously purchased the product on our store in the last year.<br /><br />
             Reviews are posted on our site in chronological order.
           </p>
         </div>

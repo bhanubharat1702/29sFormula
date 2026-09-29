@@ -25,7 +25,7 @@ const generateToken = (user) => {
       role: isAdminUser ? "admin" : "user",
       isAdmin: isAdminUser
     },
-    process.env.JWT_SECRET || "29sformula_secret_jwt_key_2026",
+    process.env.JWT_SECRET || "ecommerce_secret_jwt_key_2026",
     { expiresIn: "7d" }
   );
 };

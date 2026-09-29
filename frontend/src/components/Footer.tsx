@@ -163,15 +163,15 @@ export default function Footer() {
             <img src={brandLogoValue} alt="Brand Logo" style={{ maxHeight: "120px", maxWidth: "90%", objectFit: "contain" }} />
           ) : (
             <span style={{
-              fontSize: `min(25vw, calc(140vw / ${Math.max(1, (brandLogoValue || "").length)}))`
+              fontSize: `min(25vw, calc(140vw / ${Math.max(1, (brandLogoValue || "MY STORE").length)}))`
             }}>
-              {brandLogoValue || ""}
+              {brandLogoValue || "MY STORE"}
             </span>
           )}
         </div>
         <div className={styles.subFooterDivider}></div>
         <div className={styles.subFooterCopyright}>
-          <p>© {new Date().getFullYear()} {brandLogoValue || ""}, ALL RIGHTS RESERVED</p>
+          <p>© {new Date().getFullYear()} {brandLogoValue || "MY STORE"}, ALL RIGHTS RESERVED</p>
         </div>
       </section>
       {mounted && createPortal(

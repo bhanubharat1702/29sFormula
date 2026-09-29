@@ -13,8 +13,8 @@ const outfit = Outfit({
 });
 
 export const metadata: Metadata = {
-  title: "29sFormula",
-  description: "A premium luxury perfume brand handcrafted by PhD students. Discover scientifically curated fragrances where scent is the difference you feel.",
+  title: "Store Engine",
+  description: "A high-performance multi-tenant e-commerce platform for modern brands.",
 };
 
 export const viewport = {
