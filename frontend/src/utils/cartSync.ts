@@ -49,50 +49,11 @@ export const fetchAndSyncUserCart = async (): Promise<any[]> => {
 
     const data = await res.json();
     const serverCart = Array.isArray(data.cart) ? data.cart : [];
-    const localCart = getStoredCart();
 
-    // If server has cart items or local has cart items, merge them
-    if (serverCart.length === 0 && localCart.length > 0) {
-      // User added items before logging in — push local items to server
-      saveCart(localCart);
-      return localCart;
-    }
-
-    if (serverCart.length > 0) {
-      // Merge local items with server items (prevent duplicates by _id and size)
-      const mergedMap = new Map();
-      
-      serverCart.forEach((item: any) => {
-        const key = `${item._id || item.productId}_${item.size || 'default'}`;
-        mergedMap.set(key, item);
-      });
-
-      localCart.forEach((item: any) => {
-        const key = `${item._id || item.productId}_${item.size || 'default'}`;
-        if (mergedMap.has(key)) {
-          // Keep max quantity if present in both
-          const existing = mergedMap.get(key);
-          mergedMap.set(key, { ...existing, quantity: Math.max(existing.quantity || 1, item.quantity || 1) });
-        } else {
-          mergedMap.set(key, item);
-        }
-      });
-
-      const mergedCart = Array.from(mergedMap.values());
-      localStorage.setItem('cart', JSON.stringify(mergedCart));
-      window.dispatchEvent(new Event('cartUpdated'));
-
-      // Also ensure backend has the full merged cart
-      fetch(`${API_BASE}/api/cart`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: user.email, cart: mergedCart })
-      }).catch(err => console.error('Failed to sync merged cart:', err));
-
-      return mergedCart;
-    }
-
-    return localCart;
+    // Overwrite local cart with server cart (cleaned of deleted products)
+    localStorage.setItem('cart', JSON.stringify(serverCart));
+    window.dispatchEvent(new Event('cartUpdated'));
+    return serverCart;
   } catch (e) {
     console.error('Failed to fetch user cart:', e);
     return getStoredCart();

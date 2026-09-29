@@ -2,6 +2,7 @@ import express from "express";
 import { Product, ProductVariant } from "../models/Product.js";
 import Order from "../models/Order.js";
 import Review from "../models/Review.js";
+import Customer from "../models/Customer.js";
 import { cachedProducts, setCachedProducts, cachedProductDetails, invalidateProductsCache } from "../utils/cache.js";
 import { deleteFromCloudinary } from "../utils/cloudinary.js";
 import { getPaginationParams, buildPaginatedResponse, setPaginationHeaders } from "../utils/paginationHelper.js";
@@ -304,10 +305,31 @@ router.delete("/api/products/:id", async (req, res) => {
       });
     }
 
+    // Find associated variants to get their IDs for cart cleanup
+    const variants = await ProductVariant.find({ productId: req.params.id }).select("_id").lean();
+    const variantIds = variants.map(v => String(v._id));
+    const targetIds = [String(req.params.id), ...variantIds];
+
     const deletedProduct = await Product.findByIdAndDelete(req.params.id);
 
     // Delete associated variants
     await ProductVariant.deleteMany({ productId: req.params.id });
+
+    // Automatically remove deleted product & variants from all customer carts
+    await Customer.updateMany(
+      {},
+      {
+        $pull: {
+          cart: {
+            $or: [
+              { _id: { $in: targetIds } },
+              { productId: { $in: targetIds } },
+              { id: { $in: targetIds } }
+            ]
+          }
+        }
+      }
+    );
 
     // Find and delete associated reviews
     const reviews = await Review.find({ productId: req.params.id });
@@ -330,6 +352,7 @@ router.delete("/api/products/:id", async (req, res) => {
 
     res.json({ message: "Product deleted successfully", id: req.params.id });
   } catch (error) {
+    console.error("Error deleting product:", error);
     res.status(500).json({ error: "Failed to delete product" });
   }
 });

@@ -1,6 +1,7 @@
 import express from "express";
 import Customer from "../models/Customer.js";
 import User from "../models/User.js";
+import { Product, ProductVariant } from "../models/Product.js";
 import Order from "../models/Order.js";
 import Otp from "../models/Otp.js";
 import dotenv from "dotenv";
@@ -258,7 +259,29 @@ router.get("/api/cart", async (req, res) => {
     if (!customer) {
       return res.json({ cart: [] });
     }
-    res.json({ cart: customer.cart || [] });
+
+    let cart = customer.cart || [];
+    if (cart.length > 0) {
+      const activeProducts = await Product.find({}, "_id").lean();
+      const activeVariants = await ProductVariant.find({}, "_id productId").lean();
+
+      const validProductIds = new Set(activeProducts.map(p => String(p._id)));
+      const validVariantIds = new Set(activeVariants.map(v => String(v._id)));
+      const validVariantProductIds = new Set(activeVariants.map(v => String(v.productId)));
+
+      const cleanedCart = cart.filter(item => {
+        const idToCheck = String(item._id || item.id || item.productId || "");
+        return validProductIds.has(idToCheck) || validVariantIds.has(idToCheck) || validVariantProductIds.has(idToCheck);
+      });
+
+      if (cleanedCart.length !== cart.length) {
+        customer.cart = cleanedCart;
+        await customer.save();
+        cart = cleanedCart;
+      }
+    }
+
+    res.json({ cart });
   } catch (error) {
     console.error("Failed to fetch cart:", error);
     res.status(500).json({ error: "Failed to fetch cart" });
@@ -272,7 +295,23 @@ router.post("/api/cart", async (req, res) => {
       return res.status(400).json({ error: "Email is required" });
     }
     const cleanEmail = email.trim().toLowerCase();
-    const cartItems = Array.isArray(cart) ? cart : [];
+    const rawCartItems = Array.isArray(cart) ? cart : [];
+
+    // Filter out deleted products before saving
+    let cartItems = rawCartItems;
+    if (rawCartItems.length > 0) {
+      const activeProducts = await Product.find({}, "_id").lean();
+      const activeVariants = await ProductVariant.find({}, "_id productId").lean();
+
+      const validProductIds = new Set(activeProducts.map(p => String(p._id)));
+      const validVariantIds = new Set(activeVariants.map(v => String(v._id)));
+      const validVariantProductIds = new Set(activeVariants.map(v => String(v.productId)));
+
+      cartItems = rawCartItems.filter(item => {
+        const idToCheck = String(item._id || item.id || item.productId || "");
+        return validProductIds.has(idToCheck) || validVariantIds.has(idToCheck) || validVariantProductIds.has(idToCheck);
+      });
+    }
 
     let customer = await Customer.findOne({ email: new RegExp(`^${cleanEmail}$`, 'i') });
     if (customer) {
