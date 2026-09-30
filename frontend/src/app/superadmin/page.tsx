@@ -15,6 +15,7 @@ import { DemoRequestsKanban } from "./components/crm/DemoRequestsKanban";
 import { DemoRequestDetailModal } from "./components/crm/DemoRequestDetailModal";
 import TabPlaceholder from "./components/common/TabPlaceholder";
 import BillingTab from "./components/BillingTab";
+import AnalyticsTab from "./components/AnalyticsTab";
 import SettingsTab from "./components/settings/SettingsTab";
 import CreateStoreModal from "./components/modals/CreateStoreModal";
 import EditStoreModal from "./components/modals/EditStoreModal";
@@ -875,6 +876,13 @@ export default function SuperAdminPage() {
 
         {activeTab === "billing" && (
           <BillingTab
+            token={localStorage.getItem("superAdminToken") || ""}
+            onShowToast={triggerToast}
+          />
+        )}
+
+        {activeTab === "analytics" && (
+          <AnalyticsTab
             token={localStorage.getItem("superAdminToken") || ""}
             onShowToast={triggerToast}
           />

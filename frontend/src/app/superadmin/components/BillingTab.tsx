@@ -86,7 +86,7 @@ export default function BillingTab({ token, onShowToast }: BillingTabProps) {
 
   const fetchOverview = async () => {
     try {
-      const res = await fetch("http://localhost:5001/api/superadmin/billing/overview", { headers: getAuthHeaders() });
+      const res = await fetch("/api/superadmin/billing/overview", { headers: getAuthHeaders() });
       if (res.ok) setOverview(await res.json());
     } catch (e) {
       console.error(e);
@@ -95,7 +95,7 @@ export default function BillingTab({ token, onShowToast }: BillingTabProps) {
 
   const fetchPlans = async () => {
     try {
-      const res = await fetch("http://localhost:5001/api/superadmin/billing/plans", { headers: getAuthHeaders() });
+      const res = await fetch("/api/superadmin/billing/plans", { headers: getAuthHeaders() });
       if (res.ok) setPlans(await res.json());
     } catch (e) {
       console.error(e);
@@ -104,7 +104,7 @@ export default function BillingTab({ token, onShowToast }: BillingTabProps) {
 
   const fetchSubscriptions = async () => {
     try {
-      const res = await fetch("http://localhost:5001/api/superadmin/billing/subscriptions", { headers: getAuthHeaders() });
+      const res = await fetch("/api/superadmin/billing/subscriptions", { headers: getAuthHeaders() });
       if (res.ok) setSubscriptions(await res.json());
     } catch (e) {
       console.error(e);
@@ -113,7 +113,7 @@ export default function BillingTab({ token, onShowToast }: BillingTabProps) {
 
   const fetchInvoices = async () => {
     try {
-      const res = await fetch("http://localhost:5001/api/superadmin/billing/invoices", { headers: getAuthHeaders() });
+      const res = await fetch("/api/superadmin/billing/invoices", { headers: getAuthHeaders() });
       if (res.ok) setInvoices(await res.json());
     } catch (e) {
       console.error(e);
@@ -122,7 +122,7 @@ export default function BillingTab({ token, onShowToast }: BillingTabProps) {
 
   const fetchPayments = async () => {
     try {
-      const res = await fetch("http://localhost:5001/api/superadmin/billing/payments", { headers: getAuthHeaders() });
+      const res = await fetch("/api/superadmin/billing/payments", { headers: getAuthHeaders() });
       if (res.ok) setPaymentLogs(await res.json());
     } catch (e) {
       console.error(e);
@@ -131,7 +131,7 @@ export default function BillingTab({ token, onShowToast }: BillingTabProps) {
 
   const fetchCoupons = async () => {
     try {
-      const res = await fetch("http://localhost:5001/api/superadmin/billing/coupons", { headers: getAuthHeaders() });
+      const res = await fetch("/api/superadmin/billing/coupons", { headers: getAuthHeaders() });
       if (res.ok) setCoupons(await res.json());
     } catch (e) {
       console.error(e);
@@ -140,7 +140,7 @@ export default function BillingTab({ token, onShowToast }: BillingTabProps) {
 
   const fetchTaxConfigs = async () => {
     try {
-      const res = await fetch("http://localhost:5001/api/superadmin/billing/tax-currency", { headers: getAuthHeaders() });
+      const res = await fetch("/api/superadmin/billing/tax-currency", { headers: getAuthHeaders() });
       if (res.ok) setTaxConfigs(await res.json());
     } catch (e) {
       console.error(e);
@@ -188,7 +188,7 @@ export default function BillingTab({ token, onShowToast }: BillingTabProps) {
         isPopular: planForm.isPopular
       };
 
-      const res = await fetch("http://localhost:5001/api/superadmin/billing/plans", {
+      const res = await fetch("/api/superadmin/billing/plans", {
         method: "POST",
         headers: getAuthHeaders(),
         body: JSON.stringify(payload)
@@ -247,7 +247,7 @@ export default function BillingTab({ token, onShowToast }: BillingTabProps) {
         isPopular: planForm.isPopular
       };
 
-      const res = await fetch(`http://localhost:5001/api/superadmin/billing/plans/${editingPlan._id}`, {
+      const res = await fetch(`/api/superadmin/billing/plans/${editingPlan._id}`, {
         method: "PUT",
         headers: getAuthHeaders(),
         body: JSON.stringify(payload)
@@ -267,7 +267,7 @@ export default function BillingTab({ token, onShowToast }: BillingTabProps) {
   const handleSubscriptionAction = async () => {
     if (!selectedSub || !subActionType) return;
     try {
-      const res = await fetch(`http://localhost:5001/api/superadmin/billing/subscriptions/${selectedSub._id}/action`, {
+      const res = await fetch(`/api/superadmin/billing/subscriptions/${selectedSub._id}/action`, {
         method: "PUT",
         headers: getAuthHeaders(),
         body: JSON.stringify({
@@ -291,7 +291,7 @@ export default function BillingTab({ token, onShowToast }: BillingTabProps) {
   // Invoice Status Action
   const handleInvoiceStatus = async (invId: string, status: string) => {
     try {
-      const res = await fetch(`http://localhost:5001/api/superadmin/billing/invoices/${invId}/status`, {
+      const res = await fetch(`/api/superadmin/billing/invoices/${invId}/status`, {
         method: "PUT",
         headers: getAuthHeaders(),
         body: JSON.stringify({ status })
@@ -309,7 +309,7 @@ export default function BillingTab({ token, onShowToast }: BillingTabProps) {
   // Payment Retry Action
   const handleRetryPayment = async (logId: string) => {
     try {
-      const res = await fetch(`http://localhost:5001/api/superadmin/billing/payments/retry`, {
+      const res = await fetch(`/api/superadmin/billing/payments/retry`, {
         method: "POST",
         headers: getAuthHeaders(),
         body: JSON.stringify({ paymentLogId: logId })
@@ -329,7 +329,7 @@ export default function BillingTab({ token, onShowToast }: BillingTabProps) {
   const handleCreateCoupon = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const res = await fetch("http://localhost:5001/api/superadmin/billing/coupons", {
+      const res = await fetch("/api/superadmin/billing/coupons", {
         method: "POST",
         headers: getAuthHeaders(),
         body: JSON.stringify(couponForm)
@@ -348,7 +348,7 @@ export default function BillingTab({ token, onShowToast }: BillingTabProps) {
   // Update Tax Config
   const handleUpdateTaxRate = async (id: string, taxRatePercent: number) => {
     try {
-      const res = await fetch(`http://localhost:5001/api/superadmin/billing/tax-currency/${id}`, {
+      const res = await fetch(`/api/superadmin/billing/tax-currency/${id}`, {
         method: "PUT",
         headers: getAuthHeaders(),
         body: JSON.stringify({ taxRatePercent })
