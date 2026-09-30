@@ -10,6 +10,7 @@ import { getBrandInfo } from "../utils/brandHelper.js";
 import { loginLimiter, otpLimiter } from "../middleware/rateLimiter.js";
 import { validate } from "../middleware/validate.js";
 import { registerSchema, loginSchema, sendOtpSchema, resetPasswordSchema } from "../utils/schemas.js";
+import { runWithoutTenant } from "../utils/tenantContext.js";
 
 const router = express.Router();
 
@@ -133,7 +134,7 @@ router.post("/api/auth/login", loginLimiter, validate(loginSchema), async (req, 
       });
     }
 
-    const user = await User.findOne({ email: trimmedEmail });
+    const user = await User.findOne({ email: trimmedEmail }).setOptions({ skipTenantFilter: true });
     if (!user) {
       return res.status(400).json({ error: "Invalid email or password." });
     }
@@ -171,7 +172,7 @@ router.post("/api/auth/login", loginLimiter, validate(loginSchema), async (req, 
             { ownerId: user._id },
             { ownerEmail: user.email }
           ]
-        }).lean()
+        }).setOptions({ skipTenantFilter: true }).lean()
       : null;
 
     // Block login for merchant store owners/staff if store is suspended

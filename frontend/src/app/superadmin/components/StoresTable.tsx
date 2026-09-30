@@ -9,6 +9,7 @@ interface StoresTableProps {
   onOpenEditModal: (store: StoreItem) => void;
   onToggleStatus: (store: StoreItem) => void;
   onDeleteStore: (storeId: string, subdomain: string) => void;
+  onSelectStore?: (store: StoreItem) => void;
 }
 
 export const StoresTable: React.FC<StoresTableProps> = ({
@@ -17,7 +18,8 @@ export const StoresTable: React.FC<StoresTableProps> = ({
   filteredStores,
   onOpenEditModal,
   onToggleStatus,
-  onDeleteStore
+  onDeleteStore,
+  onSelectStore
 }) => {
   if (activeTab !== "stores" && activeTab !== "dashboard") return null;
 
@@ -50,18 +52,53 @@ export const StoresTable: React.FC<StoresTableProps> = ({
             </tr>
           ) : (
             filteredStores.map((store) => (
-              <tr key={store._id}>
+              <tr
+                key={store._id}
+                onClick={() => onSelectStore && onSelectStore(store)}
+                style={{ cursor: "pointer" }}
+                title="Click anywhere on this row to view full merchant information"
+              >
                 <td>
-                  <div className={styles.storeName}>{store.name}</div>
-                  <div className={styles.subdomain}>
-                    <a
-                      href={`http://${store.subdomain}.localhost:3000`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      style={{ color: "inherit", textDecoration: "none" }}
-                    >
-                      {store.subdomain}.localhost:3000
-                    </a>
+                  <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                    {store.businessLogo ? (
+                      <img
+                        src={store.businessLogo}
+                        alt={store.name}
+                        style={{ width: "32px", height: "32px", borderRadius: "6px", objectFit: "cover", border: "1px solid #e5e7eb" }}
+                      />
+                    ) : (
+                      <div
+                        style={{
+                          width: "32px",
+                          height: "32px",
+                          borderRadius: "6px",
+                          backgroundColor: "#f3f4f6",
+                          color: "#374151",
+                          fontWeight: 700,
+                          fontSize: "0.85rem",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          border: "1px solid #e5e7eb"
+                        }}
+                      >
+                        {(store.name || "M").charAt(0).toUpperCase()}
+                      </div>
+                    )}
+                    <div>
+                      <div className={styles.storeName}>{store.name}</div>
+                      <div className={styles.subdomain}>
+                        <a
+                          href={`http://${store.subdomain}.localhost:3000`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          onClick={(e) => e.stopPropagation()}
+                          style={{ color: "inherit", textDecoration: "none" }}
+                        >
+                          {store.subdomain}.localhost:3000
+                        </a>
+                      </div>
+                    </div>
                   </div>
                 </td>
                 <td>
@@ -94,21 +131,30 @@ export const StoresTable: React.FC<StoresTableProps> = ({
                 <td>
                   <div style={{ display: "flex", gap: "6px" }}>
                     <button
-                      onClick={() => onOpenEditModal(store)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onOpenEditModal(store);
+                      }}
                       className={styles.btnAction}
                       style={{ background: "#f3f4f6", color: "#374151" }}
                     >
                       Edit
                     </button>
                     <button
-                      onClick={() => onToggleStatus(store)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onToggleStatus(store);
+                      }}
                       className={styles.btnAction}
                     >
                       {store.isActive ? "Suspend" : "Activate"}
                     </button>
                     {store.subdomain !== "default" && (
                       <button
-                        onClick={() => onDeleteStore(store._id, store.subdomain)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onDeleteStore(store._id, store.subdomain);
+                        }}
                         className={`${styles.btnAction} ${styles.btnActionDanger}`}
                       >
                         Delete

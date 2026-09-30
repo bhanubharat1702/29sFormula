@@ -139,13 +139,31 @@ router.get("/api/superadmin/stores", verifySuperAdminToken, async (req, res) => 
 // POST /api/superadmin/stores - Provision a new store
 router.post("/api/superadmin/stores", verifySuperAdminToken, async (req, res) => {
   try {
-    const { name, subdomain, customDomain, ownerEmail, plan = "pro", demoRequestId } = req.body;
+    const {
+      name,
+      subdomain,
+      customDomain,
+      businessLogo,
+      ownerName,
+      ownerEmail,
+      ownerPhone,
+      password,
+      plan = "pro",
+      businessType = "retail",
+      country = "India",
+      currency = "INR",
+      timezone = "Asia/Kolkata",
+      internalNotes = "",
+      demoRequestId
+    } = req.body;
 
-    if (!name || !subdomain) {
-      return res.status(400).json({ error: "Store name and subdomain are required." });
+    if (!name || !subdomain || !ownerEmail) {
+      return res.status(400).json({ error: "Store name, subdomain, and owner email are required." });
     }
 
     const cleanSubdomain = subdomain.toLowerCase().trim();
+    const cleanEmail = ownerEmail.toLowerCase().trim();
+    const finalPassword = password || "MerchantPass123!";
 
     // Check if subdomain already exists
     const existing = await Store.findOne({ subdomain: cleanSubdomain });
@@ -153,25 +171,67 @@ router.post("/api/superadmin/stores", verifySuperAdminToken, async (req, res) =>
       return res.status(400).json({ error: `Subdomain '${cleanSubdomain}' is already taken.` });
     }
 
-    // Find owner if email supplied
-    let owner = null;
-    if (ownerEmail) {
-      owner = await User.findOne({ email: ownerEmail.toLowerCase().trim() });
+    // 1. Find or create merchant owner User document
+    let owner = await User.findOne({ email: cleanEmail });
+    const hashedPassword = await bcrypt.hash(finalPassword, 12);
+
+    if (!owner) {
+      owner = await User.create({
+        name: (ownerName || name || "Merchant Owner").trim(),
+        email: cleanEmail,
+        phone: (ownerPhone || "").trim(),
+        password: hashedPassword,
+        role: "owner",
+        isOwner: true,
+        isAdmin: true,
+        mustChangePassword: true,
+        onboardingComplete: false
+      });
+    } else {
+      owner.role = "owner";
+      owner.isOwner = true;
+      owner.isAdmin = true;
+      if (password) {
+        owner.password = hashedPassword;
+      }
+      if (ownerName) owner.name = ownerName.trim();
+      if (ownerPhone) owner.phone = ownerPhone.trim();
+      await owner.save();
     }
 
+    // 2. Create Store document with complete merchant info & logo
     const newStore = await Store.create({
-      name,
+      name: name.trim(),
       subdomain: cleanSubdomain,
       customDomain: customDomain ? customDomain.toLowerCase().trim() : "",
-      ownerId: owner ? owner._id : null,
+      businessName: name.trim(),
+      businessLogo: (businessLogo || "").trim(),
+      ownerId: owner._id,
+      ownerName: owner.name,
+      ownerEmail: owner.email,
+      ownerPhone: owner.phone || "",
+      businessType: businessType || "retail",
+      country: country || "India",
+      currency: currency || "INR",
+      timezone: timezone || "Asia/Kolkata",
+      plan,
+      status: "trial",
+      trialDays: 14,
+      trialEndsAt: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000),
+      internalNotes: internalNotes || "",
       isActive: true,
-      plan
+      provisionedBy: "superadmin",
+      demoRequestId: demoRequestId || null
     });
 
-    // Provision clean default e-commerce settings for the new merchant store
+    // 3. Link storeId on User document
+    owner.storeId = newStore._id;
+    await owner.save();
+
+    // 4. Provision clean default e-commerce settings for the store
     await Settings.create({
       storeId: newStore._id,
-      brandLogoValue: name || "MY STORE",
+      brandLogoValue: (businessLogo || name || "MY STORE").trim(),
       heroTitle: "WELCOME TO OUR STORE",
       heroTitleFontColor: "#ffffff",
       heroManifestoFontColor: "#ffffff",
@@ -200,14 +260,20 @@ router.post("/api/superadmin/stores", verifySuperAdminToken, async (req, res) =>
       contactUsText: `Need help? Email us at support@${cleanSubdomain}.com and our support team will get back to you within 24 hours.`
     });
 
-    // If provisioned from a demo request, mark the request as approved
+    // 5. If provisioned from a demo request, mark request as Approved
     if (demoRequestId) {
       await DemoRequest.findByIdAndUpdate(demoRequestId, { status: "Approved" });
     }
 
     res.status(201).json({
       message: "New Merchant Store created successfully!",
-      store: newStore
+      store: newStore,
+      owner: {
+        _id: owner._id,
+        email: owner.email,
+        name: owner.name,
+        role: owner.role
+      }
     });
   } catch (err) {
     console.error("SuperAdmin Create Store Error:", err);
@@ -215,27 +281,67 @@ router.post("/api/superadmin/stores", verifySuperAdminToken, async (req, res) =>
   }
 });
 
-// PUT /api/superadmin/stores/:id - Update store settings / status / domain
+// PUT /api/superadmin/stores/:id - Update store settings / status / domain / owner info / logo
 router.put("/api/superadmin/stores/:id", verifySuperAdminToken, async (req, res) => {
   try {
     const { id } = req.params;
-    const { name, subdomain, customDomain, isActive, plan } = req.body;
+    const {
+      name,
+      subdomain,
+      customDomain,
+      businessLogo,
+      ownerName,
+      ownerEmail,
+      ownerPhone,
+      businessType,
+      isActive,
+      plan,
+      internalNotes
+    } = req.body;
 
-    const updateData = {};
-    if (name !== undefined) updateData.name = name;
-    if (subdomain !== undefined) updateData.subdomain = subdomain.toLowerCase().trim();
-    if (customDomain !== undefined) updateData.customDomain = customDomain.toLowerCase().trim();
-    if (isActive !== undefined) updateData.isActive = isActive;
-    if (plan !== undefined) updateData.plan = plan;
-
-    const updatedStore = await Store.findByIdAndUpdate(id, updateData, { new: true });
-    if (!updatedStore) {
+    const store = await Store.findById(id);
+    if (!store) {
       return res.status(404).json({ error: "Store not found." });
+    }
+
+    if (name !== undefined) {
+      store.name = name;
+      store.businessName = name;
+    }
+    if (subdomain !== undefined) store.subdomain = subdomain.toLowerCase().trim();
+    if (customDomain !== undefined) store.customDomain = customDomain.toLowerCase().trim();
+    if (businessLogo !== undefined) store.businessLogo = businessLogo.trim();
+    if (ownerName !== undefined) store.ownerName = ownerName.trim();
+    if (ownerEmail !== undefined) store.ownerEmail = ownerEmail.toLowerCase().trim();
+    if (ownerPhone !== undefined) store.ownerPhone = ownerPhone.trim();
+    if (businessType !== undefined) store.businessType = businessType;
+    if (isActive !== undefined) store.isActive = isActive;
+    if (plan !== undefined) store.plan = plan;
+    if (internalNotes !== undefined) store.internalNotes = internalNotes;
+
+    await store.save();
+
+    // Sync owner User document
+    if (store.ownerEmail) {
+      let owner = store.ownerId ? await User.findById(store.ownerId) : await User.findOne({ email: store.ownerEmail });
+      if (owner) {
+        if (ownerName !== undefined) owner.name = ownerName.trim();
+        if (ownerPhone !== undefined) owner.phone = ownerPhone.trim();
+        owner.role = "owner";
+        owner.isOwner = true;
+        owner.isAdmin = true;
+        owner.storeId = store._id;
+        await owner.save();
+        if (!store.ownerId) {
+          store.ownerId = owner._id;
+          await store.save();
+        }
+      }
     }
 
     res.json({
       message: "Store updated successfully!",
-      store: updatedStore
+      store
     });
   } catch (err) {
     console.error("SuperAdmin Update Store Error:", err);

@@ -14,6 +14,7 @@ import TabPlaceholder from "./components/TabPlaceholder";
 import SettingsTab from "./components/SettingsTab";
 import CreateStoreModal from "./components/CreateStoreModal";
 import EditStoreModal from "./components/EditStoreModal";
+import { MerchantDetailsModal } from "./components/MerchantDetailsModal";
 import InviteAdminModal from "./components/InviteAdminModal";
 import ConfirmModal from "./components/ConfirmModal";
 import ToastNotification from "./components/ToastNotification";
@@ -39,6 +40,8 @@ export default function SuperAdminPage() {
   const [selectedDemoId, setSelectedDemoId] = useState<string | null>(null);
   const [newStoreName, setNewStoreName] = useState("");
   const [newSubdomain, setNewSubdomain] = useState("");
+  const [newBusinessLogo, setNewBusinessLogo] = useState("");
+  const [newBusinessType, setNewBusinessType] = useState("retail");
   const [newOwnerEmail, setNewOwnerEmail] = useState("");
   const [newOwnerName, setNewOwnerName] = useState("");
   const [newOwnerPhone, setNewOwnerPhone] = useState("");
@@ -53,6 +56,7 @@ export default function SuperAdminPage() {
   const [editingStoreId, setEditingStoreId] = useState<string | null>(null);
   const [editStoreName, setEditStoreName] = useState("");
   const [editSubdomain, setEditSubdomain] = useState("");
+  const [editBusinessLogo, setEditBusinessLogo] = useState("");
   const [editPlan, setEditPlan] = useState("pro");
   const [editCustomDomain, setEditCustomDomain] = useState("");
   const [editOwnerName, setEditOwnerName] = useState("");
@@ -63,6 +67,9 @@ export default function SuperAdminPage() {
   const [editInternalNotes, setEditInternalNotes] = useState("");
   const [editFormError, setEditFormError] = useState("");
   const [editSubmitting, setEditSubmitting] = useState(false);
+
+  // Detail Modal
+  const [selectedDetailStore, setSelectedDetailStore] = useState<StoreItem | null>(null);
 
   // Settings sub-navigation
   const [activeSettingsSection, setActiveSettingsSection] = useState<
@@ -299,6 +306,8 @@ export default function SuperAdminPage() {
         body: JSON.stringify({
           name: newStoreName,
           subdomain: newSubdomain.toLowerCase().trim(),
+          businessLogo: newBusinessLogo.trim() || undefined,
+          businessType: newBusinessType,
           ownerEmail: newOwnerEmail,
           ownerName: newOwnerName,
           ownerPhone: newOwnerPhone,
@@ -313,6 +322,8 @@ export default function SuperAdminPage() {
         setIsModalOpen(false);
         setNewStoreName("");
         setNewSubdomain("");
+        setNewBusinessLogo("");
+        setNewBusinessType("retail");
         setNewOwnerEmail("");
         setNewOwnerName("");
         setNewOwnerPhone("");
@@ -323,7 +334,7 @@ export default function SuperAdminPage() {
         triggerToast("Store provisioned successfully!");
         fetchData();
       } else {
-        setFormError(data.message || "Failed to create merchant store.");
+        setFormError(data.message || data.error || "Failed to create merchant store.");
       }
     } catch {
       setFormError("Network error provisioning merchant store.");
@@ -336,6 +347,7 @@ export default function SuperAdminPage() {
     setEditingStoreId(store._id);
     setEditStoreName(store.name);
     setEditSubdomain(store.subdomain);
+    setEditBusinessLogo(store.businessLogo || "");
     setEditPlan(store.plan || "pro");
     setEditCustomDomain(store.customDomain || "");
     setEditOwnerName(store.ownerName || "");
@@ -368,6 +380,7 @@ export default function SuperAdminPage() {
         body: JSON.stringify({
           name: editStoreName,
           subdomain: editSubdomain.toLowerCase().trim(),
+          businessLogo: editBusinessLogo.trim(),
           plan: editPlan,
           customDomain: editCustomDomain.trim() || undefined,
           ownerName: editOwnerName,
@@ -384,7 +397,7 @@ export default function SuperAdminPage() {
         triggerToast("Tenant updated successfully!");
         fetchData();
       } else {
-        setEditFormError(data.message || "Failed to update tenant.");
+        setEditFormError(data.message || data.error || "Failed to update tenant.");
       }
     } catch {
       setEditFormError("Network error updating tenant.");
@@ -537,6 +550,7 @@ export default function SuperAdminPage() {
           onOpenEditModal={handleOpenEditModal}
           onToggleStatus={handleToggleStatus}
           onDeleteStore={handleDeleteStore}
+          onSelectStore={(store) => setSelectedDetailStore(store)}
         />
 
         <DemoRequestsTable
@@ -673,6 +687,10 @@ export default function SuperAdminPage() {
         setNewStoreName={setNewStoreName}
         newSubdomain={newSubdomain}
         setNewSubdomain={setNewSubdomain}
+        newBusinessLogo={newBusinessLogo}
+        setNewBusinessLogo={setNewBusinessLogo}
+        newBusinessType={newBusinessType}
+        setNewBusinessType={setNewBusinessType}
         newPlan={newPlan}
         setNewPlan={setNewPlan}
         newCustomDomain={newCustomDomain}
@@ -697,6 +715,8 @@ export default function SuperAdminPage() {
         setEditStoreName={setEditStoreName}
         editSubdomain={editSubdomain}
         setEditSubdomain={setEditSubdomain}
+        editBusinessLogo={editBusinessLogo}
+        setEditBusinessLogo={setEditBusinessLogo}
         editPlan={editPlan}
         setEditPlan={setEditPlan}
         editCustomDomain={editCustomDomain}
@@ -732,6 +752,19 @@ export default function SuperAdminPage() {
       <ConfirmModal
         confirmModal={confirmModal}
         onClose={() => setConfirmModal(null)}
+      />
+
+      <MerchantDetailsModal
+        store={selectedDetailStore}
+        onClose={() => setSelectedDetailStore(null)}
+        onOpenEdit={(store) => {
+          setSelectedDetailStore(null);
+          handleOpenEditModal(store);
+        }}
+        onToggleStatus={(store) => {
+          handleToggleStatus(store);
+          setSelectedDetailStore((prev) => (prev ? { ...prev, isActive: !prev.isActive } : null));
+        }}
       />
 
       <ToastNotification message={toastMessage} />

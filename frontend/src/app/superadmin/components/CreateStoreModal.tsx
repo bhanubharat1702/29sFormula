@@ -14,6 +14,10 @@ interface CreateStoreModalProps {
   setNewStoreName: (val: string) => void;
   newSubdomain: string;
   setNewSubdomain: (val: string) => void;
+  newBusinessLogo: string;
+  setNewBusinessLogo: (val: string) => void;
+  newBusinessType: string;
+  setNewBusinessType: (val: string) => void;
   newPlan: string;
   setNewPlan: (val: string) => void;
   newCustomDomain: string;
@@ -39,6 +43,10 @@ export default function CreateStoreModal({
   setNewStoreName,
   newSubdomain,
   setNewSubdomain,
+  newBusinessLogo,
+  setNewBusinessLogo,
+  newBusinessType,
+  setNewBusinessType,
   newPlan,
   setNewPlan,
   newCustomDomain,
@@ -56,9 +64,9 @@ export default function CreateStoreModal({
 
   return (
     <div className={styles.modalOverlay}>
-      <div className={styles.modalBox} style={{ maxWidth: "560px" }}>
+      <div className={styles.modalBox} style={{ maxWidth: "620px" }}>
         <h2 className={styles.modalTitle}>Provision Merchant Store</h2>
-        <p className={styles.modalSubtitle}>Configure tenant details, owner credentials, and subscription plan</p>
+        <p className={styles.modalSubtitle}>Configure tenant details, owner credentials, brand logo, and subscription plan</p>
 
         {selectedDemoId && (
           <div style={{ background: "#ecfdf5", border: "1px solid #a7f3d0", borderRadius: "8px", padding: "10px", marginBottom: "16px", fontSize: "0.85rem", color: "#047857" }}>
@@ -92,6 +100,47 @@ export default function CreateStoreModal({
                 onChange={(e) => setNewSubdomain(e.target.value)}
                 className={styles.input}
               />
+            </div>
+          </div>
+
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
+            <div className={styles.formGroup}>
+              <label className={styles.label}>Merchant Logo URL (Optional)</label>
+              <input
+                type="text"
+                placeholder="e.g. https://cdn.example.com/logo.png"
+                value={newBusinessLogo}
+                onChange={(e) => setNewBusinessLogo(e.target.value)}
+                className={styles.input}
+              />
+              {newBusinessLogo && (
+                <div style={{ marginTop: "4px", display: "flex", alignItems: "center", gap: "8px" }}>
+                  <img
+                    src={newBusinessLogo}
+                    alt="Logo Preview"
+                    style={{ width: "24px", height: "24px", borderRadius: "4px", objectFit: "cover", border: "1px solid #e5e7eb" }}
+                    onError={(e) => (e.currentTarget.style.display = "none")}
+                  />
+                  <span style={{ fontSize: "0.72rem", color: "#6b7280" }}>Logo Preview</span>
+                </div>
+              )}
+            </div>
+
+            <div className={styles.formGroup}>
+              <label className={styles.label}>Business Category</label>
+              <select
+                value={newBusinessType}
+                onChange={(e) => setNewBusinessType(e.target.value)}
+                className={styles.input}
+              >
+                <option value="retail">Retail Store</option>
+                <option value="fashion">Fashion & Apparel</option>
+                <option value="electronics">Electronics & Tech</option>
+                <option value="food">Food & Grocery</option>
+                <option value="beauty">Beauty & Wellness</option>
+                <option value="services">Services</option>
+                <option value="other">Other</option>
+              </select>
             </div>
           </div>
 
@@ -174,7 +223,7 @@ export default function CreateStoreModal({
           </div>
 
           <div className={styles.formGroup}>
-            <label className={styles.label}>Owner Temporary Password *</label>
+            <label className={styles.label}>Owner Password *</label>
             <input
               type="password"
               required
@@ -184,7 +233,7 @@ export default function CreateStoreModal({
               className={styles.input}
             />
             <span style={{ fontSize: "0.72rem", color: "#6b7280", marginTop: "3px", display: "block" }}>
-              🔑 Merchant will be required to change this password upon first login.
+              🔑 Used for merchant login at /admin/login or storefront.
             </span>
           </div>
 

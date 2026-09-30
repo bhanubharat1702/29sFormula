@@ -3,7 +3,8 @@ export interface StoreItem {
   name: string;
   subdomain: string;
   customDomain?: string;
-  ownerId?: { name?: string; email?: string } | string;
+  businessLogo?: string;
+  ownerId?: { _id?: string; name?: string; email?: string; phone?: string } | string;
   ownerName?: string;
   ownerEmail?: string;
   ownerPhone?: string;
@@ -11,6 +12,7 @@ export interface StoreItem {
   businessType?: string;
   country?: string;
   currency?: string;
+  timezone?: string;
   productCount?: number;
   orderCount?: number;
   plan?: string;
@@ -18,6 +20,13 @@ export interface StoreItem {
   isActive?: boolean;
   internalNotes?: string;
   createdAt?: string;
+  updatedAt?: string;
+  mrr?: number;
+  healthScore?: number;
+  trialDays?: number;
+  trialEndsAt?: string;
+  isolationTier?: string;
+  provisionedBy?: string;
 }
 
 export interface DemoRequestItem {

@@ -13,6 +13,8 @@ interface EditStoreModalProps {
   setEditStoreName: (val: string) => void;
   editSubdomain: string;
   setEditSubdomain: (val: string) => void;
+  editBusinessLogo: string;
+  setEditBusinessLogo: (val: string) => void;
   editPlan: string;
   setEditPlan: (val: string) => void;
   editCustomDomain: string;
@@ -41,6 +43,8 @@ export default function EditStoreModal({
   setEditStoreName,
   editSubdomain,
   setEditSubdomain,
+  editBusinessLogo,
+  setEditBusinessLogo,
   editPlan,
   setEditPlan,
   editCustomDomain,
@@ -62,9 +66,9 @@ export default function EditStoreModal({
 
   return (
     <div className={styles.modalOverlay}>
-      <div className={styles.modalBox} style={{ maxWidth: "560px" }}>
+      <div className={styles.modalBox} style={{ maxWidth: "620px" }}>
         <h2 className={styles.modalTitle}>Edit Tenant Account</h2>
-        <p className={styles.modalSubtitle}>Update store parameters, owner details, and plan configuration</p>
+        <p className={styles.modalSubtitle}>Update store parameters, owner details, logo, and plan configuration</p>
 
         {editFormError && <div className={styles.errorBanner}>{editFormError}</div>}
 
@@ -91,6 +95,28 @@ export default function EditStoreModal({
                 className={styles.input}
               />
             </div>
+          </div>
+
+          <div className={styles.formGroup}>
+            <label className={styles.label}>Merchant Logo URL</label>
+            <input
+              type="text"
+              placeholder="e.g. https://cdn.example.com/logo.png"
+              value={editBusinessLogo}
+              onChange={(e) => setEditBusinessLogo(e.target.value)}
+              className={styles.input}
+            />
+            {editBusinessLogo && (
+              <div style={{ marginTop: "4px", display: "flex", alignItems: "center", gap: "8px" }}>
+                <img
+                  src={editBusinessLogo}
+                  alt="Logo Preview"
+                  style={{ width: "24px", height: "24px", borderRadius: "4px", objectFit: "cover", border: "1px solid #e5e7eb" }}
+                  onError={(e) => (e.currentTarget.style.display = "none")}
+                />
+                <span style={{ fontSize: "0.72rem", color: "#6b7280" }}>Logo Preview</span>
+              </div>
+            )}
           </div>
 
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
@@ -178,6 +204,7 @@ export default function EditStoreModal({
                 <option value="fashion">Fashion & Apparel</option>
                 <option value="electronics">Electronics & Tech</option>
                 <option value="food">Food & Grocery</option>
+                <option value="beauty">Beauty & Wellness</option>
                 <option value="services">Services</option>
                 <option value="other">Other</option>
               </select>
