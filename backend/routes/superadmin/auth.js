@@ -1,6 +1,7 @@
 import express from "express";
 import jwt from "jsonwebtoken";
 import { verifySuperAdminToken } from "../../middleware/superAdminAuth.js";
+import { recordAuditLog } from "../../services/auditLogService.js";
 
 const router = express.Router();
 
@@ -24,8 +25,34 @@ router.post("/api/superadmin/login", async (req, res) => {
     const isValidPass = password === SUPER_ADMIN_PASS || password === "superadmin123";
 
     if (!isValidAdminEmail || !isValidPass) {
+      await recordAuditLog({
+        adminUser: cleanEmail,
+        adminEmail: cleanEmail,
+        role: "Unknown / Attacker",
+        action: "Failed Super Admin Login Attempt",
+        actionCategory: "auth",
+        target: "Super Admin Portal",
+        ipAddress: req.ip || req.headers["x-forwarded-for"] || "127.0.0.1",
+        userAgent: req.headers["user-agent"] || "",
+        result: "failed",
+        isSuspicious: true,
+        suspiciousReason: "Invalid email or password attempt on Super Admin auth portal"
+      });
       return res.status(401).json({ error: "Invalid Super Admin credentials." });
     }
+
+    // Record successful login audit entry
+    await recordAuditLog({
+      adminUser: "Platform Super Admin",
+      adminEmail: SUPER_ADMIN_EMAIL,
+      role: "Super Admin",
+      action: "Super Admin Login Successful",
+      actionCategory: "auth",
+      target: "Platform Control Panel",
+      ipAddress: req.ip || req.headers["x-forwarded-for"] || "127.0.0.1",
+      userAgent: req.headers["user-agent"] || "",
+      result: "success"
+    });
 
     // Generate Super Admin JWT Token
     const token = jwt.sign(

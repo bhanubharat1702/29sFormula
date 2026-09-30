@@ -8,6 +8,7 @@ import billingRouter from "./superadmin/billing.js";
 import analyticsRouter from "./superadmin/analytics.js";
 import communicationsRouter from "./superadmin/communications.js";
 import domainsRouter from "./superadmin/domains.js";
+import auditLogsRouter from "./superadmin/auditLogs.js";
 
 const router = express.Router();
 
@@ -21,6 +22,7 @@ router.use(billingRouter);
 router.use(analyticsRouter);
 router.use(communicationsRouter);
 router.use(domainsRouter);
+router.use(auditLogsRouter);
 
 export default router;
 
