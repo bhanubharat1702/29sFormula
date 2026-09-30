@@ -1,4 +1,5 @@
 import DemoRequest from "../../models/DemoRequest.js";
+import { dispatchCommunicationEvent } from "./communicationsController.js";
 
 // GET /api/superadmin/demo-requests - Fetch all leads with SLA calculation
 export const getDemoRequests = async (req, res) => {
@@ -348,17 +349,34 @@ export const sendLeadEmail = async (req, res) => {
       lead.status = "Contacted";
     }
 
+    // Unify CRM email with Communications module pipeline and delivery logs
+    const commResult = await dispatchCommunicationEvent({
+      category: templateType || "acknowledgement",
+      recipientEmail: lead.email,
+      storeId: lead.convertedStoreId || null,
+      storeName: lead.storeName || "Prospect Lead",
+      variables: {
+        store_name: lead.storeName || "Your Store",
+        owner_name: lead.ownerName || "Merchant",
+        email: lead.email,
+        phone: lead.phone || ""
+      },
+      customSubject: customSubject?.trim() || undefined,
+      customBody: customBody?.trim() || undefined
+    });
+
     lead.timeline.push({
-      action: "Email Sent",
-      details: `Sent "${templateName}" email to ${lead.email}${customSubject ? `. Subject: "${customSubject}"` : ""}`,
+      action: "Email Sent via Communications Pipeline",
+      details: `Sent "${templateName}" email to ${lead.email}${customSubject ? `. Subject: "${customSubject}"` : ""}${commResult?.logId ? ` (Log ID: ${commResult.logId})` : ""}`,
       performedBy: req.adminUser?.name || "Super Admin",
       timestamp: new Date()
     });
 
     await lead.save();
     res.json({
-      message: `Email template "${templateName}" logged & sent successfully to ${lead.email}`,
-      request: lead
+      message: `Email template "${templateName}" dispatched via Communications module & logged to Delivery Logs! Sent to ${lead.email}`,
+      request: lead,
+      deliveryLogId: commResult?.logId || null
     });
   } catch (err) {
     console.error("Send Email Error:", err);

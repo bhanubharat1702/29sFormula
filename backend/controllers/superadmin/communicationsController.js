@@ -68,6 +68,73 @@ export const seedCommunicationDefaults = async () => {
           textContent: "Payment failed for {{store_name}}. Amount: \${{amount}}. Please update your payment method.",
           variables: ["store_name", "owner_name", "plan", "amount"],
           isTransactional: true
+        },
+        {
+          key: "acknowledgement",
+          name: "CRM Lead Demo Request Acknowledgement",
+          category: "acknowledgement",
+          subject: "Thank you for requesting a demo for {{store_name}}!",
+          htmlContent: `
+            <div style="font-family: Arial, sans-serif; padding: 20px; color: #1f2937;">
+              <h2 style="color: #4f46e5;">Demo Request Received 🎉</h2>
+              <p>Hello {{owner_name}},</p>
+              <p>Thank you for requesting a demo for <strong>{{store_name}}</strong>. Our enterprise team will get in touch with you shortly.</p>
+              <p>Best regards,<br/>Platform Team</p>
+            </div>
+          `,
+          textContent: "Hello {{owner_name}}, thank you for requesting a demo for {{store_name}}. Our team will contact you shortly.",
+          variables: ["store_name", "owner_name"],
+          isTransactional: true
+        },
+        {
+          key: "demo_confirmation",
+          name: "CRM Demo Scheduled Confirmation",
+          category: "demo_confirmation",
+          subject: "Demo Scheduled: {{store_name}} Platform Tour",
+          htmlContent: `
+            <div style="font-family: Arial, sans-serif; padding: 20px; color: #1f2937;">
+              <h2 style="color: #10b981;">Your Demo is Confirmed 📅</h2>
+              <p>Hello {{owner_name}},</p>
+              <p>Your scheduled product demo for <strong>{{store_name}}</strong> has been confirmed.</p>
+              <p>Best regards,<br/>Platform Sales Team</p>
+            </div>
+          `,
+          textContent: "Hello {{owner_name}}, your product demo for {{store_name}} is confirmed.",
+          variables: ["store_name", "owner_name"],
+          isTransactional: true
+        },
+        {
+          key: "follow_up",
+          name: "CRM Lead Follow-up Reminder",
+          category: "follow_up",
+          subject: "Following up on your e-commerce platform request for {{store_name}}",
+          htmlContent: `
+            <div style="font-family: Arial, sans-serif; padding: 20px; color: #1f2937;">
+              <h2 style="color: #2563eb;">Checking In 👋</h2>
+              <p>Hello {{owner_name}},</p>
+              <p>We're following up regarding your demo request for <strong>{{store_name}}</strong>. Let us know if you have any questions or want to jump on a quick call!</p>
+              <p>Best regards,<br/>Platform Sales Team</p>
+            </div>
+          `,
+          textContent: "Hello {{owner_name}}, following up on your demo request for {{store_name}}.",
+          variables: ["store_name", "owner_name"],
+          isTransactional: false
+        },
+        {
+          key: "rejection",
+          name: "CRM Polite Decline / Rejection Notice",
+          category: "rejection",
+          subject: "Update regarding your demo request for {{store_name}}",
+          htmlContent: `
+            <div style="font-family: Arial, sans-serif; padding: 20px; color: #1f2937;">
+              <p>Hello {{owner_name}},</p>
+              <p>Thank you for your interest in our platform for <strong>{{store_name}}</strong>. At this time, we are unable to fulfill your request.</p>
+              <p>Best regards,<br/>Platform Team</p>
+            </div>
+          `,
+          textContent: "Hello {{owner_name}}, thank you for your interest in {{store_name}}. We cannot fulfill your request at this time.",
+          variables: ["store_name", "owner_name"],
+          isTransactional: false
         }
       ]);
     }
@@ -120,19 +187,23 @@ export const dispatchCommunicationEvent = async ({
   storeId = null,
   storeName = "",
   variables = {},
-  channel = "email"
+  channel = "email",
+  customSubject = null,
+  customBody = null
 }) => {
   try {
     const unsub = await UnsubscribedEmail.findOne({ email: recipientEmail.toLowerCase().trim() });
-    const template = await EmailTemplate.findOne({ category });
-    
-    let subject = template ? template.subject : `Notification: ${category}`;
-    let body = template ? template.htmlContent : `Notification details for ${category}`;
+    const template = await EmailTemplate.findOne({
+      $or: [{ category }, { key: category }]
+    });
+
+    let subject = customSubject || (template ? template.subject : `Notification: ${category}`);
+    let body = customBody || (template ? template.htmlContent : `Notification details for ${category}`);
 
     Object.keys(variables).forEach((varName) => {
       const reg = new RegExp(`{{${varName}}}`, 'g');
-      subject = subject.replace(reg, variables[varName]);
-      body = body.replace(reg, variables[varName]);
+      subject = subject.replace(reg, variables[varName] || "");
+      body = body.replace(reg, variables[varName] || "");
     });
 
     const isTransactional = template ? template.isTransactional : true;

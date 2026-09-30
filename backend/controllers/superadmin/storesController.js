@@ -280,13 +280,39 @@ export const createStoreHandler = async (req, res) => {
       await owner.save(opts);
     }
 
-    // 2. Create Store document
+    // 2. Create Store document with domain records and MRR
+    const planPrices = { starter: 29, growth: 49, pro: 79, enterprise: 299 };
+    const calculatedMrr = planPrices[plan.toLowerCase()] || 79;
+    const cleanCustomDomain = customDomain ? customDomain.toLowerCase().trim() : "";
+
+    const domainsList = [
+      {
+        domain: `${cleanSubdomain}.yourplatform.com`,
+        type: "subdomain",
+        isPrimary: !cleanCustomDomain,
+        dnsStatus: "dns_verified",
+        sslStatus: "active",
+        createdAt: new Date()
+      }
+    ];
+
+    if (cleanCustomDomain) {
+      domainsList.push({
+        domain: cleanCustomDomain,
+        type: "custom",
+        isPrimary: true,
+        dnsStatus: "pending",
+        sslStatus: "pending",
+        createdAt: new Date()
+      });
+    }
+
     const newStores = await Store.create(
       [
         {
           name: name.trim(),
           subdomain: cleanSubdomain,
-          customDomain: customDomain ? customDomain.toLowerCase().trim() : "",
+          customDomain: cleanCustomDomain,
           businessName: name.trim(),
           businessLogo: (businessLogo || "").trim(),
           ownerId: owner._id,
@@ -298,10 +324,12 @@ export const createStoreHandler = async (req, res) => {
           currency: currency || "INR",
           timezone: timezone || "Asia/Kolkata",
           plan,
+          mrr: calculatedMrr,
           status: "trial",
           trialDays: 14,
           trialEndsAt: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000),
           internalNotes: internalNotes || "",
+          domains: domainsList,
           isActive: true,
           provisionedBy: req.superAdmin?.email || "superadmin",
           demoRequestId: demoRequestId || null
@@ -354,7 +382,50 @@ export const createStoreHandler = async (req, res) => {
     );
     createdSettingsId = newSettings[0]._id;
 
-    // 4. Update Demo Request if converted
+    // 4. Create Initial Billing Subscription & Provisioning Invoice
+    const basePrice = calculatedMrr;
+    const tax = Math.round(basePrice * 0.18);
+    await BillingInvoice.create(
+      [
+        {
+          invoiceNumber: `INV-${Date.now().toString().slice(-6)}-${Math.floor(1000 + Math.random() * 9000)}`,
+          storeId: newStore._id,
+          storeName: newStore.name,
+          subdomain: newStore.subdomain,
+          amount: basePrice,
+          taxAmount: tax,
+          taxRate: 18,
+          totalAmount: basePrice + tax,
+          currency: currency || "USD",
+          status: "paid",
+          billingCycle: "monthly",
+          description: `Initial Provisioning & 14-Day Free Trial (${plan.toUpperCase()} Plan)`,
+          paidAt: new Date(),
+          dueDate: new Date(),
+          taxDetails: { country: country || "India" }
+        }
+      ],
+      opts
+    );
+
+    // 5. Trigger In-App Onboarding Notice for Merchant
+    await InAppNotification.create(
+      [
+        {
+          title: `Welcome to ${newStore.name}! 🎉`,
+          message: `Your store onboarding sequence has begun on the ${plan.toUpperCase()} plan. Configure your payment gateways and catalog to get started.`,
+          type: "info",
+          targetPlan: "all",
+          targetStoreId: newStore._id,
+          actionUrl: "/admin/settings",
+          actionLabel: "Configure Store",
+          status: "active"
+        }
+      ],
+      opts
+    );
+
+    // 6. Update Demo Request if converted from CRM (CRM Stage Update)
     if (demoRequestId) {
       await DemoRequest.findByIdAndUpdate(
         demoRequestId,
@@ -366,7 +437,7 @@ export const createStoreHandler = async (req, res) => {
           $push: {
             timeline: {
               action: "Converted to Merchant",
-              details: `Store "${newStore.name}" (${newStore.subdomain}) provisioned successfully`,
+              details: `Store "${newStore.name}" (${newStore.subdomain}) provisioned successfully with full onboarding chain (Email, Billing, Domain, Audit, CRM stage update)`,
               performedBy: req.superAdmin?.email || "Super Admin",
               timestamp: new Date()
             }
@@ -381,17 +452,17 @@ export const createStoreHandler = async (req, res) => {
       session.endSession();
     }
 
-    // 5. Audit Log Entry
+    // 7. SOC 2 Audit Log Entry
     const clientMeta = getClientMeta(req);
     await recordAuditLog({
       ...clientMeta,
-      action: "Create Merchant Store",
+      action: demoRequestId ? "Lead Converted to Merchant" : "Create Merchant Store",
       actionCategory: "tenant",
       target: name.trim(),
       targetId: newStore._id.toString(),
       storeId: newStore._id,
       storeName: newStore.name,
-      afterValue: { name: newStore.name, subdomain: cleanSubdomain, plan, ownerEmail: cleanEmail, businessType },
+      afterValue: { name: newStore.name, subdomain: cleanSubdomain, plan, ownerEmail: cleanEmail, businessType, mrr: calculatedMrr },
       diff: {
         name: { after: newStore.name },
         subdomain: { after: cleanSubdomain },
@@ -400,7 +471,7 @@ export const createStoreHandler = async (req, res) => {
       }
     });
 
-    // 6. Automated Welcome Email Trigger
+    // 8. Automated Welcome Email Trigger (writes to DeliveryLog in Communications module)
     dispatchCommunicationEvent({
       category: "welcome",
       recipientEmail: cleanEmail,
