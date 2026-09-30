@@ -122,14 +122,16 @@ const StoreSchema = new mongoose.Schema({
   },
   status: {
     type: String,
-    enum: ['trial', 'active', 'past_due', 'suspended', 'cancelled'],
+    enum: ['trial', 'active', 'past_due', 'suspended', 'cancelled', 'scheduled_for_deletion'],
     default: 'trial'
   },
+  scheduledDeletionAt: { type: Date, default: null },
   trialDays:   { type: Number, default: 14 },
   trialEndsAt: { type: Date,   default: null },
   mrr:         { type: Number, default: 0 },
   healthScore: { type: Number, default: 95 },
   lastActiveAt:{ type: Date,   default: Date.now },
+
 
   // ── Billing Sub-document ─────────────────────────────────────
   billing: {
@@ -180,9 +182,9 @@ const StoreSchema = new mongoose.Schema({
   },
   provisionedBy: {
     type: String,
-    enum: ['superadmin', 'self_signup', 'demo_request'],
     default: 'superadmin'
   },
+
   demoRequestId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'DemoRequest',
