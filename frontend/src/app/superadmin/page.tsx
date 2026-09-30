@@ -14,7 +14,9 @@ import { DemoRequestsCrmHeader } from "./components/crm/DemoRequestsCrmHeader";
 import { DemoRequestsKanban } from "./components/crm/DemoRequestsKanban";
 import { DemoRequestDetailModal } from "./components/crm/DemoRequestDetailModal";
 import TabPlaceholder from "./components/common/TabPlaceholder";
+import DashboardTab from "./components/DashboardTab";
 import BillingTab from "./components/BillingTab";
+
 import AnalyticsTab from "./components/AnalyticsTab";
 import CommunicationsTab from "./components/CommunicationsTab";
 import DomainsTab from "./components/DomainsTab";
@@ -816,25 +818,42 @@ export default function SuperAdminPage() {
           }}
         />
 
-        <StatsGrid stats={stats} activeTab={activeTab} />
+        {activeTab === "dashboard" && (
+          <DashboardTab
+            stats={stats}
+            stores={stores}
+            setActiveTab={setActiveTab}
+            onOpenCreateModal={() => {
+              setSelectedDemoId(null);
+              setFormError("");
+              setIsModalOpen(true);
+            }}
+            onSelectStore={(store) => setSelectedDetailStore(store)}
+          />
+        )}
 
-        <ActionBar
-          activeTab={activeTab}
-          storeStatusFilter={storeStatusFilter}
-          setStoreStatusFilter={setStoreStatusFilter}
-          searchQuery={searchQuery}
-          setSearchQuery={setSearchQuery}
-        />
+        {activeTab === "stores" && (
+          <>
+            <StatsGrid stats={stats} activeTab={activeTab} />
+            <ActionBar
+              activeTab={activeTab}
+              storeStatusFilter={storeStatusFilter}
+              setStoreStatusFilter={setStoreStatusFilter}
+              searchQuery={searchQuery}
+              setSearchQuery={setSearchQuery}
+            />
+            <StoresTable
+              activeTab={activeTab}
+              loading={loading}
+              filteredStores={filteredStores}
+              onOpenEditModal={handleOpenEditModal}
+              onToggleStatus={handleToggleStatus}
+              onDeleteStore={handleDeleteStore}
+              onSelectStore={(store) => setSelectedDetailStore(store)}
+            />
+          </>
+        )}
 
-        <StoresTable
-          activeTab={activeTab}
-          loading={loading}
-          filteredStores={filteredStores}
-          onOpenEditModal={handleOpenEditModal}
-          onToggleStatus={handleToggleStatus}
-          onDeleteStore={handleDeleteStore}
-          onSelectStore={(store) => setSelectedDetailStore(store)}
-        />
 
         {activeTab === "demo-requests" && (
           <div>

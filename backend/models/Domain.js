@@ -153,3 +153,6 @@ const domainSettingsSchema = new mongoose.Schema({
 export const DomainItem = mongoose.models.DomainItem || mongoose.model('DomainItem', domainSchema);
 export const ReservedSubdomain = mongoose.models.ReservedSubdomain || mongoose.model('ReservedSubdomain', reservedSubdomainSchema);
 export const DomainSettings = mongoose.models.DomainSettings || mongoose.model('DomainSettings', domainSettingsSchema);
+
+export default DomainItem;
+

@@ -110,6 +110,18 @@ export interface Stats {
   totalRevenue: number;
   totalDemoRequests?: number;
   pendingDemoRequests?: number;
+  mrr?: number;
+  arr?: number;
+  planCounts?: { starter: number; pro: number; enterprise: number; custom?: number };
+  pendingDomains?: number;
+  recentLogs?: any[];
+  recentStores?: any[];
+  systemHealth?: {
+    database: string;
+    api: string;
+    storage: string;
+    uptimeSeconds: number;
+  };
 }
 
 export interface AdminUser {
