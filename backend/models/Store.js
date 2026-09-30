@@ -32,7 +32,29 @@ const domainItemSchema = new mongoose.Schema({
   domain: { type: String, required: true, lowercase: true, trim: true },
   type: { type: String, enum: ['subdomain', 'custom'], default: 'custom' },
   isPrimary: { type: Boolean, default: false },
-  sslStatus: { type: String, enum: ['active', 'pending', 'failed'], default: 'active' },
+  dnsStatus: { 
+    type: String, 
+    enum: ['pending', 'dns_verified', 'ssl_issued', 'active', 'failed'], 
+    default: 'pending' 
+  },
+  sslStatus: { 
+    type: String, 
+    enum: ['pending', 'issuing', 'active', 'expiring_soon', 'expired', 'failed'], 
+    default: 'pending' 
+  },
+  verificationToken: { type: String, default: '' },
+  targetCname: { type: String, default: 'stores.yourplatform.com' },
+  targetA: { type: String, default: '192.0.2.1' },
+  redirectWwwToRoot: { type: Boolean, default: true },
+  redirectSubdomainToCustom: { type: Boolean, default: true },
+  requiresManualApproval: { type: Boolean, default: false },
+  approvedByAdmin: { type: Boolean, default: true },
+  isBlocked: { type: Boolean, default: false },
+  blockReason: { type: String, default: '' },
+  lastDnsCheckAt: { type: Date, default: null },
+  dnsFailureReason: { type: String, default: '' },
+  sslIssuedAt: { type: Date, default: null },
+  sslExpiresAt: { type: Date, default: null },
   createdAt: { type: Date, default: Date.now }
 }, { _id: true });
 
