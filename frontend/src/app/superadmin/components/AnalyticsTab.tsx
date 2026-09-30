@@ -81,19 +81,53 @@ export default function AnalyticsTab({ token, onShowToast }: AnalyticsTabProps) 
     fetchSavedReports();
   }, []);
 
-  const handleExportCsv = () => {
+  const handleExportCsv = async () => {
+    try {
+      const path = `/api/superadmin/analytics/export?group=${reportGroup}&dateRange=${dateRange}&plan=${selectedPlan}&country=${selectedCountry}`;
+      let res = await fetch(path, { headers: getAuthHeaders() });
+      if (!res.ok) {
+        res = await fetch(`http://localhost:5001${path}`, { headers: getAuthHeaders() });
+      }
+      if (res.ok) {
+        const blob = await res.blob();
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `analytics_${reportGroup}_${dateRange}.csv`;
+        a.click();
+        URL.revokeObjectURL(url);
+        onShowToast("CSV Report exported successfully!");
+        return;
+      }
+    } catch (e) {
+      console.error("Export CSV Error:", e);
+    }
+
+    // Fallback client-side CSV generator if backend fetch fails
     if (!analyticsData || !analyticsData.data) {
       alert("No data available to export.");
       return;
     }
-    const jsonStr = JSON.stringify(analyticsData.data, null, 2);
-    const blob = new Blob([jsonStr], { type: "application/json" });
+    const rows = [["Metric / Category", "Value", "Details"]];
+    const flattenObj = (obj: any, prefix = "") => {
+      for (const key in obj) {
+        if (typeof obj[key] === "object" && obj[key] !== null) {
+          flattenObj(obj[key], `${prefix}${key}.`);
+        } else {
+          rows.push([`"${prefix}${key}"`, `"${obj[key]}"`, ""]);
+        }
+      }
+    };
+    flattenObj(analyticsData.data);
+    const csvContent = "\uFEFF" + rows.map(r => r.join(",")).join("\n");
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `analytics_${reportGroup}_${dateRange}.json`;
+    a.download = `analytics_${reportGroup}_${dateRange}.csv`;
     a.click();
-    onShowToast("Report exported successfully!");
+    URL.revokeObjectURL(url);
+    onShowToast("CSV Report exported successfully!");
   };
 
   const handleCreateSchedule = async (payload: any) => {

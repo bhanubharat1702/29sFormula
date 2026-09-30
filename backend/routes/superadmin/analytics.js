@@ -4,6 +4,7 @@ import {
   getAnalytics,
   getSavedReports,
   createSavedReport,
+  exportAnalyticsCsv,
   seedAnalyticsDemoMetrics
 } from "../../controllers/superadmin/analyticsController.js";
 
@@ -12,6 +13,7 @@ const router = express.Router();
 export { seedAnalyticsDemoMetrics };
 
 router.get("/api/superadmin/analytics", verifySuperAdminToken, getAnalytics);
+router.get("/api/superadmin/analytics/export", verifySuperAdminToken, exportAnalyticsCsv);
 router.get("/api/superadmin/analytics/reports", verifySuperAdminToken, getSavedReports);
 router.post("/api/superadmin/analytics/reports", verifySuperAdminToken, createSavedReport);
 
