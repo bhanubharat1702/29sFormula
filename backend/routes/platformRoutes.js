@@ -1,5 +1,6 @@
 import express from "express";
 import DemoRequest from "../models/DemoRequest.js";
+import { dispatchCommunicationEvent } from "./superadmin/communications.js";
 
 const router = express.Router();
 
@@ -79,6 +80,19 @@ router.post("/api/platform/demo-request", async (req, res) => {
         }
       ]
     });
+
+    // Dispatch Communication Event (Demo Confirmation)
+    dispatchCommunicationEvent({
+      category: "demo confirmation",
+      recipientEmail: cleanEmail,
+      storeName: storeName.trim(),
+      variables: {
+        store_name: storeName.trim(),
+        owner_name: ownerName.trim(),
+        plan: "Trial / Demo"
+      },
+      channel: "email"
+    }).catch(err => console.error("Communication dispatch error:", err));
 
     res.status(201).json({
       message: "Thank you for requesting a demo! Our team will contact you within 24 hours.",

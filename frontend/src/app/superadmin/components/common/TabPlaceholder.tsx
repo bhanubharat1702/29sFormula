@@ -8,17 +8,6 @@ interface TabPlaceholderProps {
 }
 
 export default function TabPlaceholder({ activeTab }: TabPlaceholderProps) {
-  if (activeTab === "communications") {
-    return (
-      <div className={styles.tableCard} style={{ padding: "48px 24px", textAlign: "center", color: "#6b7280" }}>
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" style={{ width: "32px", height: "32px", margin: "0 auto 12px auto", color: "#9ca3af", display: "block" }}>
-          <path strokeLinecap="round" strokeLinejoin="round" d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0" />
-        </svg>
-        <div style={{ fontWeight: 600, fontSize: "1rem", color: "#111827", marginBottom: "4px" }}>Merchant Communications</div>
-        <div style={{ fontSize: "0.85rem", color: "#6b7280" }}>No broadcast messages sent yet.</div>
-      </div>
-    );
-  }
 
   if (activeTab === "domains") {
     return (

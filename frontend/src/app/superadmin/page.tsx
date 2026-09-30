@@ -16,6 +16,7 @@ import { DemoRequestDetailModal } from "./components/crm/DemoRequestDetailModal"
 import TabPlaceholder from "./components/common/TabPlaceholder";
 import BillingTab from "./components/BillingTab";
 import AnalyticsTab from "./components/AnalyticsTab";
+import CommunicationsTab from "./components/CommunicationsTab";
 import SettingsTab from "./components/settings/SettingsTab";
 import CreateStoreModal from "./components/modals/CreateStoreModal";
 import EditStoreModal from "./components/modals/EditStoreModal";
@@ -883,6 +884,13 @@ export default function SuperAdminPage() {
 
         {activeTab === "analytics" && (
           <AnalyticsTab
+            token={localStorage.getItem("superAdminToken") || ""}
+            onShowToast={triggerToast}
+          />
+        )}
+
+        {activeTab === "communications" && (
+          <CommunicationsTab
             token={localStorage.getItem("superAdminToken") || ""}
             onShowToast={triggerToast}
           />
