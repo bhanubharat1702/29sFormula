@@ -16,36 +16,34 @@ export const ActionBar: React.FC<ActionBarProps> = ({
   searchQuery,
   setSearchQuery
 }) => {
-  if (activeTab !== "dashboard" && activeTab !== "stores" && activeTab !== "demo-requests") return null;
+  if (activeTab !== "dashboard" && activeTab !== "stores") return null;
 
   return (
     <div className={styles.actionBar}>
       <div style={{ fontWeight: 700, fontSize: "1.1rem", color: "#0c0a09" }}>
-        {activeTab === "demo-requests" ? "Incoming Merchant Demo Requests" : "Provisioned Merchant Stores"}
+        Provisioned Merchant Stores
       </div>
 
-      {(activeTab === "dashboard" || activeTab === "stores") && (
-        <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
-          <select
-            value={storeStatusFilter}
-            onChange={(e) => setStoreStatusFilter(e.target.value)}
-            className={styles.input}
-            style={{ width: "auto", padding: "6px 12px", fontSize: "0.84rem" }}
-          >
-            <option value="all">Status: All</option>
-            <option value="active">Active Only</option>
-            <option value="suspended">Suspended Only</option>
-          </select>
+      <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
+        <select
+          value={storeStatusFilter}
+          onChange={(e) => setStoreStatusFilter(e.target.value)}
+          className={styles.input}
+          style={{ width: "auto", padding: "6px 12px", fontSize: "0.84rem" }}
+        >
+          <option value="all">Status: All</option>
+          <option value="active">Active Only</option>
+          <option value="suspended">Suspended Only</option>
+        </select>
 
-          <input
-            type="text"
-            placeholder="Search stores by name, subdomain, email..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className={styles.searchInput}
-          />
-        </div>
-      )}
+        <input
+          type="text"
+          placeholder="Search stores by name, subdomain, email..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className={styles.searchInput}
+        />
+      </div>
     </div>
   );
 };

@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import styles from "./page.module.css";
-import { StoreItem, DemoRequestItem, Stats, AdminUser, FeatureFlag, ConfirmModalData } from "./components/types";
+import { StoreItem, DemoRequestItem, CrmAnalytics, Stats, AdminUser, FeatureFlag, ConfirmModalData } from "./components/types";
 import { LoginView } from "./components/LoginView";
 import { Sidebar } from "./components/Sidebar";
 import { TopHeader } from "./components/TopHeader";
@@ -10,6 +10,9 @@ import { StatsGrid } from "./components/StatsGrid";
 import { ActionBar } from "./components/ActionBar";
 import { StoresTable } from "./components/StoresTable";
 import { DemoRequestsTable } from "./components/DemoRequestsTable";
+import { DemoRequestsCrmHeader } from "./components/DemoRequestsCrmHeader";
+import { DemoRequestsKanban } from "./components/DemoRequestsKanban";
+import { DemoRequestDetailModal } from "./components/DemoRequestDetailModal";
 import TabPlaceholder from "./components/TabPlaceholder";
 import SettingsTab from "./components/SettingsTab";
 import CreateStoreModal from "./components/CreateStoreModal";
@@ -70,6 +73,13 @@ export default function SuperAdminPage() {
 
   // Detail Modal
   const [selectedDetailStore, setSelectedDetailStore] = useState<StoreItem | null>(null);
+
+  // CRM State
+  const [crmViewMode, setCrmViewMode] = useState<"kanban" | "table">("kanban");
+  const [selectedLead, setSelectedLead] = useState<DemoRequestItem | null>(null);
+  const [crmAnalytics, setCrmAnalytics] = useState<CrmAnalytics | null>(null);
+  const [selectedStageFilter, setSelectedStageFilter] = useState("all");
+  const [selectedPriorityFilter, setSelectedPriorityFilter] = useState("all");
 
   // Settings sub-navigation
   const [activeSettingsSection, setActiveSettingsSection] = useState<
@@ -286,6 +296,274 @@ export default function SuperAdminPage() {
       setLoading(false);
     }
   };
+
+  const fetchCrmAnalytics = async () => {
+    const token = localStorage.getItem("superAdminToken");
+    try {
+      const res = await fetch("http://localhost:5001/api/superadmin/demo-requests/analytics", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setCrmAnalytics(data);
+      }
+    } catch (err) {
+      console.error("Failed to fetch CRM analytics:", err);
+    }
+  };
+
+  useEffect(() => {
+    if (isAuthenticated && activeTab === "demo-requests") {
+      fetchCrmAnalytics();
+    }
+  }, [isAuthenticated, activeTab]);
+
+  const handleUpdateLeadStage = async (id: string, stage: string, notes?: string) => {
+    const token = localStorage.getItem("superAdminToken");
+    try {
+      const res = await fetch(`http://localhost:5001/api/superadmin/demo-requests/${id}/stage`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ stage, notes }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        triggerToast(`Lead stage updated to ${stage}`);
+        fetchData();
+        fetchCrmAnalytics();
+        if (selectedLead && selectedLead._id === id) {
+          setSelectedLead(data.request);
+        }
+      }
+    } catch (err) {
+      console.error("Failed to update lead stage:", err);
+    }
+  };
+
+  const handleAssignLeadOwner = async (id: string, ownerName: string, ownerEmail: string, ownerId: string) => {
+    const token = localStorage.getItem("superAdminToken");
+    try {
+      const res = await fetch(`http://localhost:5001/api/superadmin/demo-requests/${id}/assign`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ ownerName, ownerEmail, ownerId }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        triggerToast(`Lead assigned to ${ownerName}`);
+        fetchData();
+        if (selectedLead && selectedLead._id === id) {
+          setSelectedLead(data.request);
+        }
+      }
+    } catch (err) {
+      console.error("Failed to assign owner:", err);
+    }
+  };
+
+  const handleUpdateLeadPriority = async (id: string, priority: "Low" | "Medium" | "High" | "Urgent") => {
+    const token = localStorage.getItem("superAdminToken");
+    try {
+      const res = await fetch(`http://localhost:5001/api/superadmin/demo-requests/${id}/priority`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ priority }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        triggerToast(`Priority set to ${priority}`);
+        fetchData();
+        if (selectedLead && selectedLead._id === id) {
+          setSelectedLead(data.request);
+        }
+      }
+    } catch (err) {
+      console.error("Failed to update priority:", err);
+    }
+  };
+
+  const handleAddLeadNote = async (id: string, noteText: string, followUpReminder?: string) => {
+    const token = localStorage.getItem("superAdminToken");
+    try {
+      const res = await fetch(`http://localhost:5001/api/superadmin/demo-requests/${id}/notes`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ noteText, followUpReminder }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        triggerToast("Note added to lead timeline");
+        fetchData();
+        if (selectedLead && selectedLead._id === id) {
+          setSelectedLead(data.request);
+        }
+      }
+    } catch (err) {
+      console.error("Failed to add note:", err);
+    }
+  };
+
+  const handleScheduleDemo = async (id: string, date: string, meetingUrl: string, notes?: string) => {
+    const token = localStorage.getItem("superAdminToken");
+    try {
+      const res = await fetch(`http://localhost:5001/api/superadmin/demo-requests/${id}/schedule-demo`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ date, meetingUrl, notes }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        triggerToast("Demo scheduled & meeting link logged!");
+        fetchData();
+        fetchCrmAnalytics();
+        if (selectedLead && selectedLead._id === id) {
+          setSelectedLead(data.request);
+        }
+      }
+    } catch (err) {
+      console.error("Failed to schedule demo:", err);
+    }
+  };
+
+  const handleSendLeadEmail = async (id: string, templateType: string, customSubject?: string, customBody?: string) => {
+    const token = localStorage.getItem("superAdminToken");
+    try {
+      const res = await fetch(`http://localhost:5001/api/superadmin/demo-requests/${id}/send-email`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ templateType, customSubject, customBody }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        triggerToast("Email template logged & sent!");
+        fetchData();
+        if (selectedLead && selectedLead._id === id) {
+          setSelectedLead(data.request);
+        }
+      }
+    } catch (err) {
+      console.error("Failed to send email:", err);
+    }
+  };
+
+  const handleMarkLeadLost = async (id: string, lossReason: string, lossNotes?: string) => {
+    const token = localStorage.getItem("superAdminToken");
+    try {
+      const res = await fetch(`http://localhost:5001/api/superadmin/demo-requests/${id}/mark-lost`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ lossReason, lossNotes }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        triggerToast(`Lead marked as Lost (${lossReason})`);
+        fetchData();
+        fetchCrmAnalytics();
+        if (selectedLead && selectedLead._id === id) {
+          setSelectedLead(data.request);
+        }
+      }
+    } catch (err) {
+      console.error("Failed to mark lost:", err);
+    }
+  };
+
+  const handleToggleLeadSpam = async (id: string) => {
+    const token = localStorage.getItem("superAdminToken");
+    try {
+      const res = await fetch(`http://localhost:5001/api/superadmin/demo-requests/${id}/mark-spam`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (res.ok) {
+        const data = await res.json();
+        triggerToast(data.message);
+        fetchData();
+        if (selectedLead && selectedLead._id === id) {
+          setSelectedLead(data.request);
+        }
+      }
+    } catch (err) {
+      console.error("Failed to toggle spam:", err);
+    }
+  };
+
+  const handleDeleteLead = (id: string) => {
+    setConfirmModal({
+      isOpen: true,
+      title: "Delete Lead Request",
+      message: "Are you sure you want to permanently delete this lead request from CRM?",
+      actionLabel: "Delete Lead",
+      isDanger: true,
+      onConfirm: async () => {
+        const token = localStorage.getItem("superAdminToken");
+        try {
+          const res = await fetch(`http://localhost:5001/api/superadmin/demo-requests/${id}`, {
+            method: "DELETE",
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          if (res.ok) {
+            triggerToast("Lead deleted successfully.");
+            if (selectedLead && selectedLead._id === id) {
+              setSelectedLead(null);
+            }
+            fetchData();
+            fetchCrmAnalytics();
+          }
+        } catch (err) {
+          console.error("Failed to delete lead:", err);
+        } finally {
+          setConfirmModal(null);
+        }
+      },
+    });
+  };
+
+  const handleExportCrmCsv = () => {
+    const token = localStorage.getItem("superAdminToken");
+    window.open(`http://localhost:5001/api/superadmin/demo-requests/export?token=${token}`, "_blank");
+  };
+
+  const filteredDemoRequests = demoRequests.filter((d) => {
+    if (selectedStageFilter !== "all") {
+      const stage = d.pipelineStage || (d.status === "Approved" ? "Won" : d.status === "Rejected" ? "Lost" : d.status === "Contacted" ? "Contacted" : "New");
+      if (stage !== selectedStageFilter) return false;
+    }
+    if (selectedPriorityFilter !== "all") {
+      if ((d.priority || "Medium") !== selectedPriorityFilter) return false;
+    }
+    if (searchQuery) {
+      const q = searchQuery.toLowerCase();
+      const matchStore = (d.storeName || "").toLowerCase().includes(q);
+      const matchOwner = (d.ownerName || "").toLowerCase().includes(q);
+      const matchEmail = (d.email || "").toLowerCase().includes(q);
+      const matchPhone = (d.phone || "").toLowerCase().includes(q);
+      const matchWebsite = (d.currentWebsite || "").toLowerCase().includes(q);
+      if (!matchStore && !matchOwner && !matchEmail && !matchPhone && !matchWebsite) return false;
+    }
+    return true;
+  });
 
   const handleCreateStore = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -553,12 +831,46 @@ export default function SuperAdminPage() {
           onSelectStore={(store) => setSelectedDetailStore(store)}
         />
 
-        <DemoRequestsTable
-          activeTab={activeTab}
-          loading={loading}
-          demoRequests={demoRequests}
-          onProvisionFromDemo={handleProvisionFromDemo}
-        />
+        {activeTab === "demo-requests" && (
+          <div>
+            <DemoRequestsCrmHeader
+              analytics={crmAnalytics}
+              viewMode={crmViewMode}
+              setViewMode={setCrmViewMode}
+              searchQuery={searchQuery}
+              setSearchQuery={setSearchQuery}
+              selectedStageFilter={selectedStageFilter}
+              setSelectedStageFilter={setSelectedStageFilter}
+              selectedPriorityFilter={selectedPriorityFilter}
+              setSelectedPriorityFilter={setSelectedPriorityFilter}
+              onExportCsv={handleExportCrmCsv}
+              onOpenCreateLeadModal={() => {
+                setSelectedDemoId(null);
+                setFormError("");
+                setIsModalOpen(true);
+              }}
+            />
+
+            {crmViewMode === "kanban" ? (
+              <DemoRequestsKanban
+                demoRequests={filteredDemoRequests}
+                onSelectLead={(demo) => setSelectedLead(demo)}
+                onUpdateStage={handleUpdateLeadStage}
+                onConvert={handleProvisionFromDemo}
+              />
+            ) : (
+              <DemoRequestsTable
+                activeTab={activeTab}
+                loading={loading}
+                demoRequests={filteredDemoRequests}
+                onSelectLead={(demo) => setSelectedLead(demo)}
+                onProvisionFromDemo={handleProvisionFromDemo}
+                onUpdateStage={handleUpdateLeadStage}
+                onDeleteLead={handleDeleteLead}
+              />
+            )}
+          </div>
+        )}
 
         <TabPlaceholder activeTab={activeTab} />
 
@@ -765,6 +1077,25 @@ export default function SuperAdminPage() {
           handleToggleStatus(store);
           setSelectedDetailStore((prev) => (prev ? { ...prev, isActive: !prev.isActive } : null));
         }}
+      />
+
+      <DemoRequestDetailModal
+        demo={selectedLead}
+        admins={admins}
+        onClose={() => setSelectedLead(null)}
+        onUpdateStage={handleUpdateLeadStage}
+        onAssignOwner={handleAssignLeadOwner}
+        onUpdatePriority={handleUpdateLeadPriority}
+        onAddNote={handleAddLeadNote}
+        onScheduleDemo={handleScheduleDemo}
+        onSendEmail={handleSendLeadEmail}
+        onConvert={(demo) => {
+          setSelectedLead(null);
+          handleProvisionFromDemo(demo);
+        }}
+        onMarkLost={handleMarkLeadLost}
+        onToggleSpam={handleToggleLeadSpam}
+        onDelete={handleDeleteLead}
       />
 
       <ToastNotification message={toastMessage} />

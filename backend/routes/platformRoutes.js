@@ -6,13 +6,52 @@ const router = express.Router();
 // POST /api/platform/demo-request - Merchant demo request from landing page
 router.post("/api/platform/demo-request", async (req, res) => {
   try {
-    const { storeName, ownerName, email, phone, subdomain, businessType, message } = req.body;
+    const {
+      storeName,
+      ownerName,
+      email,
+      phone,
+      subdomain,
+      businessType,
+      currentWebsite,
+      monthlyOrders,
+      message,
+      preferredTime,
+      utmSource
+    } = req.body;
 
     if (!storeName || !ownerName || !email || !phone) {
       return res.status(400).json({ error: "Store Name, Owner Name, Email, and Phone are required." });
     }
 
     const cleanEmail = email.trim().toLowerCase();
+    const cleanWebsite = (currentWebsite || "").trim();
+
+    // Check duplicate lead detection by email or website domain within existing requests
+    const existingLead = await DemoRequest.findOne({
+      $or: [
+        { email: cleanEmail },
+        ...(cleanWebsite ? [{ currentWebsite: cleanWebsite }] : [])
+      ]
+    });
+    const isDuplicate = !!existingLead;
+
+    // Calculate lead score based on order volume, website, and info completeness
+    let leadScore = 40;
+    if (monthlyOrders === "2000+") leadScore += 50;
+    else if (monthlyOrders === "500-2000") leadScore += 35;
+    else if (monthlyOrders === "50-500") leadScore += 20;
+    else if (monthlyOrders === "< 50") leadScore += 5;
+
+    if (cleanWebsite) leadScore += 10;
+    if (message && message.length > 20) leadScore += 5;
+    if (leadScore > 100) leadScore = 100;
+
+    // Set priority based on score
+    let priority = "Medium";
+    if (leadScore >= 80) priority = "Urgent";
+    else if (leadScore >= 65) priority = "High";
+    else if (leadScore < 45) priority = "Low";
 
     const newRequest = await DemoRequest.create({
       storeName: storeName.trim(),
@@ -21,7 +60,24 @@ router.post("/api/platform/demo-request", async (req, res) => {
       phone: phone.trim(),
       subdomain: subdomain ? subdomain.toLowerCase().trim() : "",
       businessType: businessType || "Retail",
-      message: message || ""
+      currentWebsite: cleanWebsite,
+      monthlyOrders: monthlyOrders || "< 50",
+      message: message || "",
+      preferredTime: preferredTime || "Morning (9 AM - 12 PM)",
+      utmSource: utmSource || "Direct / Landing Page",
+      status: "New",
+      pipelineStage: "New",
+      leadScore,
+      priority,
+      isDuplicate,
+      timeline: [
+        {
+          action: "Lead Submitted",
+          details: `Demo request submitted via ${utmSource || "Landing Page"}${isDuplicate ? " (Flagged as Duplicate)" : ""}`,
+          performedBy: "Prospect Lead",
+          timestamp: new Date()
+        }
+      ]
     });
 
     res.status(201).json({

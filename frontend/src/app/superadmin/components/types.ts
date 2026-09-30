@@ -29,6 +29,21 @@ export interface StoreItem {
   provisionedBy?: string;
 }
 
+export interface TimelineItem {
+  _id?: string;
+  action: string;
+  details?: string;
+  performedBy?: string;
+  timestamp: string;
+}
+
+export interface NoteItem {
+  _id?: string;
+  text: string;
+  author: string;
+  createdAt: string;
+}
+
 export interface DemoRequestItem {
   _id: string;
   storeName: string;
@@ -38,9 +53,53 @@ export interface DemoRequestItem {
   subdomain?: string;
   businessType?: string;
   plan?: string;
+  currentWebsite?: string;
+  monthlyOrders?: "< 50" | "50-500" | "500-2000" | "2000+" | "";
   message?: string;
-  status: "Pending" | "Contacted" | "Approved" | "Rejected";
+  preferredTime?: string;
+  utmSource?: string;
+  status: string;
+  pipelineStage: "New" | "Contacted" | "Demo Scheduled" | "Demo Done" | "Trial Started" | "Won" | "Lost";
+  leadScore?: number;
+  priority?: "Low" | "Medium" | "High" | "Urgent";
+  assignedOwner?: {
+    id?: string;
+    name?: string;
+    email?: string;
+  };
+  scheduledDemo?: {
+    date?: string;
+    meetingUrl?: string;
+    notes?: string;
+  };
+  lossReason?: string;
+  lossNotes?: string;
+  isSpam?: boolean;
+  isDuplicate?: boolean;
+  slaBreached?: boolean;
+  followUpReminder?: string;
+  notes?: string;
+  notesHistory?: NoteItem[];
+  timeline?: TimelineItem[];
+  convertedStoreId?: string;
+  convertedAt?: string;
+  lastContactedAt?: string;
   createdAt: string;
+  updatedAt?: string;
+}
+
+export interface CrmAnalytics {
+  totalLeads: number;
+  wonCount: number;
+  lostCount: number;
+  pendingCount: number;
+  demoScheduledCount: number;
+  slaBreachesCount: number;
+  conversionRate: number;
+  avgTimeToConvertDays: number;
+  leadsBySource: Record<string, number>;
+  lostReasons: Record<string, number>;
+  funnelMetrics: Record<string, number>;
 }
 
 export interface Stats {
