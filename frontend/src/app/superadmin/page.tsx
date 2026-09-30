@@ -45,6 +45,12 @@ export default function SuperAdminPage() {
   const [stats, setStats] = useState<Stats | null>(null);
   const [storeStatusFilter, setStoreStatusFilter] = useState("all");
 
+  // Store Pagination State (Issue 8)
+  const [storePage, setStorePage] = useState(1);
+  const [storeLimit, setStoreLimit] = useState(10);
+  const [totalStoresCount, setTotalStoresCount] = useState(0);
+  const [totalPagesCount, setTotalPagesCount] = useState(1);
+
   // Create Modal
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedDemoId, setSelectedDemoId] = useState<string | null>(null);
@@ -272,8 +278,9 @@ export default function SuperAdminPage() {
     }
     const headers = { Authorization: `Bearer ${token}` };
     try {
+      const storesUrl = `http://localhost:5001/api/superadmin/stores?page=${storePage}&limit=${storeLimit}&status=${storeStatusFilter}&search=${encodeURIComponent(searchQuery)}`;
       const [storesRes, statsRes, demoRes] = await Promise.all([
-        fetch("http://localhost:5001/api/superadmin/stores", { headers }),
+        fetch(storesUrl, { headers }),
         fetch("http://localhost:5001/api/superadmin/stats", { headers }),
         fetch("http://localhost:5001/api/superadmin/demo-requests", { headers }),
       ]);
@@ -287,7 +294,15 @@ export default function SuperAdminPage() {
 
       if (storesRes.ok) {
         const storesData = await storesRes.json();
-        setStores(storesData);
+        if (Array.isArray(storesData)) {
+          setStores(storesData);
+          setTotalStoresCount(storesData.length);
+          setTotalPagesCount(1);
+        } else if (storesData.stores) {
+          setStores(storesData.stores);
+          setTotalStoresCount(storesData.total || storesData.stores.length);
+          setTotalPagesCount(storesData.totalPages || 1);
+        }
       }
       if (statsRes.ok) {
         const statsData = await statsRes.json();
@@ -303,6 +318,12 @@ export default function SuperAdminPage() {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      fetchData();
+    }
+  }, [isAuthenticated, storePage, storeLimit, storeStatusFilter]);
 
   const fetchCrmAnalytics = async () => {
     const token = localStorage.getItem("superAdminToken");
@@ -850,6 +871,15 @@ export default function SuperAdminPage() {
               onToggleStatus={handleToggleStatus}
               onDeleteStore={handleDeleteStore}
               onSelectStore={(store) => setSelectedDetailStore(store)}
+              currentPage={storePage}
+              totalPages={totalPagesCount}
+              totalStores={totalStoresCount}
+              pageSize={storeLimit}
+              onPageChange={(page) => setStorePage(page)}
+              onPageSizeChange={(size) => {
+                setStoreLimit(size);
+                setStorePage(1);
+              }}
             />
           </>
         )}

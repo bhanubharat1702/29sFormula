@@ -4,8 +4,10 @@ import { runMigration } from "../scripts/migrateMultiTenant.js";
 
 dotenv.config();
 
-// Bypass SSL certificate check for local development network environments
-process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
+// Avoid Node process warning for TLS rejection bypass in local development
+if (process.env.NODE_ENV === "development" || !process.env.NODE_ENV) {
+  process.env.NODE_TLS_REJECT_UNAUTHORIZED = "1";
+}
 
 // Enable mongoose query buffering to prevent startup race condition when database is connecting
 mongoose.set("bufferCommands", true);

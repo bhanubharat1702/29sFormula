@@ -51,8 +51,8 @@ export default function DashboardTab({
             flexWrap: "wrap",
             gap: "12px",
             padding: "16px 20px",
-            background: "rgba(234, 179, 8, 0.08)",
-            border: "1px solid rgba(234, 179, 8, 0.25)",
+            background: "#fefce8",
+            border: "1px solid #fde047",
             borderRadius: "12px",
             alignItems: "center",
             justifyContent: "space-between",
@@ -65,7 +65,7 @@ export default function DashboardTab({
                 height: "36px",
                 borderRadius: "50%",
                 background: "#eab308",
-                color: "#1e1e2d",
+                color: "#ffffff",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
@@ -76,10 +76,10 @@ export default function DashboardTab({
               ⚡
             </div>
             <div>
-              <div style={{ fontWeight: 600, fontSize: "14px", color: "#fef08a" }}>
+              <div style={{ fontWeight: 700, fontSize: "14px", color: "#854d0e" }}>
                 Action Required
               </div>
-              <div style={{ fontSize: "13px", color: "#cbd5e1" }}>
+              <div style={{ fontSize: "13px", color: "#a16207" }}>
                 {pendingDemo > 0 && `${pendingDemo} pending sales demo lead(s) awaiting response. `}
                 {pendingDomains > 0 && `${pendingDomains} custom domain DNS setup(s) pending verification.`}
               </div>
@@ -91,8 +91,8 @@ export default function DashboardTab({
                 onClick={() => setActiveTab("demo-requests")}
                 style={{
                   padding: "8px 14px",
-                  background: "#eab308",
-                  color: "#0f172a",
+                  background: "#ca8a04",
+                  color: "#ffffff",
                   border: "none",
                   borderRadius: "6px",
                   fontWeight: 600,
@@ -108,9 +108,9 @@ export default function DashboardTab({
                 onClick={() => setActiveTab("domains")}
                 style={{
                   padding: "8px 14px",
-                  background: "rgba(255,255,255,0.1)",
-                  color: "#fff",
-                  border: "1px solid rgba(255,255,255,0.2)",
+                  background: "#ffffff",
+                  color: "#854d0e",
+                  border: "1px solid #fde047",
                   borderRadius: "6px",
                   fontWeight: 600,
                   fontSize: "12px",
@@ -135,19 +135,20 @@ export default function DashboardTab({
         {/* MRR Card */}
         <div
           style={{
-            background: "linear-gradient(135deg, rgba(99, 102, 241, 0.12) 0%, rgba(79, 70, 229, 0.05) 100%)",
-            border: "1px solid rgba(99, 102, 241, 0.25)",
+            background: "#ffffff",
+            border: "1px solid #e0e7ff",
             borderRadius: "14px",
             padding: "20px",
+            boxShadow: "0 1px 3px rgba(0, 0, 0, 0.05)",
           }}
         >
-          <div style={{ fontSize: "12px", color: "#a5b4fc", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.5px" }}>
+          <div style={{ fontSize: "12px", color: "#4338ca", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.5px" }}>
             Monthly Recurring Revenue (MRR)
           </div>
-          <div style={{ fontSize: "28px", fontWeight: 700, color: "#fff", marginTop: "8px" }}>
+          <div style={{ fontSize: "28px", fontWeight: 800, color: "#111827", marginTop: "8px" }}>
             ${mrr.toLocaleString()}
           </div>
-          <div style={{ fontSize: "12px", color: "#818cf8", marginTop: "4px" }}>
+          <div style={{ fontSize: "12px", color: "#6366f1", marginTop: "4px", fontWeight: 500 }}>
             Annualized (ARR): <strong>${arr.toLocaleString()}</strong>
           </div>
         </div>
@@ -155,22 +156,23 @@ export default function DashboardTab({
         {/* Active Merchants Card */}
         <div
           style={{
-            background: "linear-gradient(135deg, rgba(16, 185, 129, 0.12) 0%, rgba(5, 150, 105, 0.05) 100%)",
-            border: "1px solid rgba(16, 185, 129, 0.25)",
+            background: "#ffffff",
+            border: "1px solid #bbf7d0",
             borderRadius: "14px",
             padding: "20px",
+            boxShadow: "0 1px 3px rgba(0, 0, 0, 0.05)",
           }}
         >
-          <div style={{ fontSize: "12px", color: "#6ee7b7", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.5px" }}>
+          <div style={{ fontSize: "12px", color: "#15803d", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.5px" }}>
             Active Merchants
           </div>
-          <div style={{ fontSize: "28px", fontWeight: 700, color: "#fff", marginTop: "8px" }}>
+          <div style={{ fontSize: "28px", fontWeight: 800, color: "#111827", marginTop: "8px" }}>
             {activeStores}{" "}
-            <span style={{ fontSize: "14px", color: "#94a3b8", fontWeight: 400 }}>
+            <span style={{ fontSize: "14px", color: "#6b7280", fontWeight: 400 }}>
               / {totalStores} Total
             </span>
           </div>
-          <div style={{ fontSize: "12px", color: "#34d399", marginTop: "4px" }}>
+          <div style={{ fontSize: "12px", color: "#16a34a", marginTop: "4px", fontWeight: 500 }}>
             Active Rate: {totalStores > 0 ? Math.round((activeStores / totalStores) * 100) : 100}%
           </div>
         </div>
@@ -178,19 +180,20 @@ export default function DashboardTab({
         {/* Platform Orders Card */}
         <div
           style={{
-            background: "linear-gradient(135deg, rgba(59, 130, 246, 0.12) 0%, rgba(37, 99, 235, 0.05) 100%)",
-            border: "1px solid rgba(59, 130, 246, 0.25)",
+            background: "#ffffff",
+            border: "1px solid #bfdbfe",
             borderRadius: "14px",
             padding: "20px",
+            boxShadow: "0 1px 3px rgba(0, 0, 0, 0.05)",
           }}
         >
-          <div style={{ fontSize: "12px", color: "#93c5fd", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.5px" }}>
+          <div style={{ fontSize: "12px", color: "#1d4ed8", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.5px" }}>
             Platform Orders
           </div>
-          <div style={{ fontSize: "28px", fontWeight: 700, color: "#fff", marginTop: "8px" }}>
+          <div style={{ fontSize: "28px", fontWeight: 800, color: "#111827", marginTop: "8px" }}>
             {totalOrders.toLocaleString()}
           </div>
-          <div style={{ fontSize: "12px", color: "#60a5fa", marginTop: "4px" }}>
+          <div style={{ fontSize: "12px", color: "#2563eb", marginTop: "4px", fontWeight: 500 }}>
             GMV Volume: <strong>${totalRevenue.toLocaleString()}</strong>
           </div>
         </div>
@@ -198,20 +201,21 @@ export default function DashboardTab({
         {/* System Status Card */}
         <div
           style={{
-            background: "linear-gradient(135deg, rgba(168, 85, 247, 0.12) 0%, rgba(147, 51, 234, 0.05) 100%)",
-            border: "1px solid rgba(168, 85, 247, 0.25)",
+            background: "#ffffff",
+            border: "1px solid #e9d5ff",
             borderRadius: "14px",
             padding: "20px",
+            boxShadow: "0 1px 3px rgba(0, 0, 0, 0.05)",
           }}
         >
-          <div style={{ fontSize: "12px", color: "#c084fc", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.5px" }}>
+          <div style={{ fontSize: "12px", color: "#7e22ce", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.5px" }}>
             Platform Infrastructure
           </div>
-          <div style={{ fontSize: "22px", fontWeight: 700, color: "#4ade80", marginTop: "8px", display: "flex", alignItems: "center", gap: "8px" }}>
-            <span style={{ width: "10px", height: "10px", borderRadius: "50%", background: "#4ade80", display: "inline-block" }}></span>
+          <div style={{ fontSize: "22px", fontWeight: 800, color: "#16a34a", marginTop: "8px", display: "flex", alignItems: "center", gap: "8px" }}>
+            <span style={{ width: "10px", height: "10px", borderRadius: "50%", background: "#16a34a", display: "inline-block" }}></span>
             {systemHealth.api}
           </div>
-          <div style={{ fontSize: "12px", color: "#cbd5e1", marginTop: "4px" }}>
+          <div style={{ fontSize: "12px", color: "#6b7280", marginTop: "4px" }}>
             Database: {systemHealth.database} • Storage: {systemHealth.storage}
           </div>
         </div>
@@ -220,8 +224,8 @@ export default function DashboardTab({
       {/* 3. Quick Actions */}
       <div
         style={{
-          background: "rgba(30, 41, 59, 0.6)",
-          border: "1px solid rgba(255, 255, 255, 0.08)",
+          background: "#ffffff",
+          border: "1px solid #e5e7eb",
           borderRadius: "14px",
           padding: "16px 20px",
           display: "flex",
@@ -229,9 +233,10 @@ export default function DashboardTab({
           justifyContent: "space-between",
           flexWrap: "wrap",
           gap: "12px",
+          boxShadow: "0 1px 3px rgba(0, 0, 0, 0.05)",
         }}
       >
-        <div style={{ fontSize: "14px", fontWeight: 600, color: "#f8fafc" }}>
+        <div style={{ fontSize: "14px", fontWeight: 700, color: "#111827" }}>
           🚀 Quick Shortcuts
         </div>
         <div style={{ display: "flex", flexWrap: "wrap", gap: "10px" }}>
@@ -239,8 +244,8 @@ export default function DashboardTab({
             onClick={onOpenCreateModal}
             style={{
               padding: "8px 16px",
-              background: "#6366f1",
-              color: "#fff",
+              background: "#2563eb",
+              color: "#ffffff",
               border: "none",
               borderRadius: "8px",
               fontWeight: 600,
@@ -254,11 +259,11 @@ export default function DashboardTab({
             onClick={() => setActiveTab("communications")}
             style={{
               padding: "8px 16px",
-              background: "rgba(255,255,255,0.06)",
-              color: "#e2e8f0",
-              border: "1px solid rgba(255,255,255,0.12)",
+              background: "#f9fafb",
+              color: "#374151",
+              border: "1px solid #d1d5db",
               borderRadius: "8px",
-              fontWeight: 500,
+              fontWeight: 600,
               fontSize: "13px",
               cursor: "pointer",
             }}
@@ -269,11 +274,11 @@ export default function DashboardTab({
             onClick={() => setActiveTab("billing")}
             style={{
               padding: "8px 16px",
-              background: "rgba(255,255,255,0.06)",
-              color: "#e2e8f0",
-              border: "1px solid rgba(255,255,255,0.12)",
+              background: "#f9fafb",
+              color: "#374151",
+              border: "1px solid #d1d5db",
               borderRadius: "8px",
-              fontWeight: 500,
+              fontWeight: 600,
               fontSize: "13px",
               cursor: "pointer",
             }}
@@ -284,11 +289,11 @@ export default function DashboardTab({
             onClick={() => setActiveTab("audit-log")}
             style={{
               padding: "8px 16px",
-              background: "rgba(255,255,255,0.06)",
-              color: "#e2e8f0",
-              border: "1px solid rgba(255,255,255,0.12)",
+              background: "#f9fafb",
+              color: "#374151",
+              border: "1px solid #d1d5db",
               borderRadius: "8px",
-              fontWeight: 500,
+              fontWeight: 600,
               fontSize: "13px",
               cursor: "pointer",
             }}
@@ -309,21 +314,22 @@ export default function DashboardTab({
         {/* Left Column: Recent Merchants */}
         <div
           style={{
-            background: "rgba(30, 41, 59, 0.6)",
-            border: "1px solid rgba(255, 255, 255, 0.08)",
+            background: "#ffffff",
+            border: "1px solid #e5e7eb",
             borderRadius: "14px",
             padding: "20px",
             display: "flex",
             flexDirection: "column",
             gap: "16px",
+            boxShadow: "0 1px 3px rgba(0, 0, 0, 0.05)",
           }}
         >
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
             <div>
-              <div style={{ fontSize: "16px", fontWeight: 700, color: "#fff" }}>
+              <div style={{ fontSize: "16px", fontWeight: 700, color: "#111827" }}>
                 Recent Merchant Stores
               </div>
-              <div style={{ fontSize: "12px", color: "#94a3b8" }}>
+              <div style={{ fontSize: "12px", color: "#6b7280" }}>
                 Latest active stores registered on platform
               </div>
             </div>
@@ -331,9 +337,9 @@ export default function DashboardTab({
               onClick={() => setActiveTab("stores")}
               style={{
                 padding: "6px 12px",
-                background: "rgba(99, 102, 241, 0.15)",
-                color: "#818cf8",
-                border: "1px solid rgba(99, 102, 241, 0.3)",
+                background: "#eff6ff",
+                color: "#2563eb",
+                border: "1px solid #bfdbfe",
                 borderRadius: "6px",
                 fontSize: "12px",
                 fontWeight: 600,
@@ -347,11 +353,11 @@ export default function DashboardTab({
           <div style={{ overflowX: "auto" }}>
             <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "13px" }}>
               <thead>
-                <tr style={{ borderBottom: "1px solid rgba(255,255,255,0.1)", textAlign: "left" }}>
-                  <th style={{ padding: "10px", color: "#94a3b8", fontWeight: 600 }}>Store</th>
-                  <th style={{ padding: "10px", color: "#94a3b8", fontWeight: 600 }}>Plan</th>
-                  <th style={{ padding: "10px", color: "#94a3b8", fontWeight: 600 }}>Status</th>
-                  <th style={{ padding: "10px", color: "#94a3b8", fontWeight: 600, textAlign: "right" }}>Action</th>
+                <tr style={{ borderBottom: "1px solid #e5e7eb", textAlign: "left", background: "#f9fafb" }}>
+                  <th style={{ padding: "10px", color: "#4b5563", fontWeight: 600 }}>Store</th>
+                  <th style={{ padding: "10px", color: "#4b5563", fontWeight: 600 }}>Plan</th>
+                  <th style={{ padding: "10px", color: "#4b5563", fontWeight: 600 }}>Status</th>
+                  <th style={{ padding: "10px", color: "#4b5563", fontWeight: 600, textAlign: "right" }}>Action</th>
                 </tr>
               </thead>
               <tbody>
@@ -359,12 +365,12 @@ export default function DashboardTab({
                   <tr
                     key={store._id}
                     style={{
-                      borderBottom: "1px solid rgba(255,255,255,0.05)",
+                      borderBottom: "1px solid #f3f4f6",
                     }}
                   >
                     <td style={{ padding: "12px 10px" }}>
-                      <div style={{ fontWeight: 600, color: "#f8fafc" }}>{store.name}</div>
-                      <div style={{ fontSize: "11px", color: "#64748b" }}>{store.subdomain}.yourdomain.com</div>
+                      <div style={{ fontWeight: 600, color: "#111827" }}>{store.name}</div>
+                      <div style={{ fontSize: "11px", color: "#6b7280" }}>{store.subdomain}.localhost:3000</div>
                     </td>
                     <td style={{ padding: "12px 10px" }}>
                       <span
@@ -376,16 +382,23 @@ export default function DashboardTab({
                           textTransform: "uppercase",
                           background:
                             store.plan === "enterprise"
-                              ? "rgba(168, 85, 247, 0.2)"
+                              ? "#faf5ff"
                               : store.plan === "starter"
-                              ? "rgba(59, 130, 246, 0.2)"
-                              : "rgba(99, 102, 241, 0.2)",
+                              ? "#eff6ff"
+                              : "#f0fdf4",
                           color:
                             store.plan === "enterprise"
-                              ? "#c084fc"
+                              ? "#7e22ce"
                               : store.plan === "starter"
-                              ? "#60a5fa"
-                              : "#818cf8",
+                              ? "#1d4ed8"
+                              : "#15803d",
+                          border: `1px solid ${
+                            store.plan === "enterprise"
+                              ? "#e9d5ff"
+                              : store.plan === "starter"
+                              ? "#bfdbfe"
+                              : "#bbf7d0"
+                          }`
                         }}
                       >
                         {store.plan || "Pro"}
@@ -398,8 +411,9 @@ export default function DashboardTab({
                           borderRadius: "4px",
                           fontSize: "11px",
                           fontWeight: 600,
-                          background: store.isActive !== false ? "rgba(16, 185, 129, 0.15)" : "rgba(239, 68, 68, 0.15)",
-                          color: store.isActive !== false ? "#34d399" : "#f87171",
+                          background: store.isActive !== false ? "#f0fdf4" : "#fef2f2",
+                          color: store.isActive !== false ? "#16a34a" : "#dc2626",
+                          border: `1px solid ${store.isActive !== false ? "#bbf7d0" : "#fecaca"}`
                         }}
                       >
                         {store.isActive !== false ? "Active" : "Suspended"}
@@ -410,9 +424,9 @@ export default function DashboardTab({
                         onClick={() => onSelectStore(store)}
                         style={{
                           padding: "4px 10px",
-                          background: "rgba(255,255,255,0.08)",
-                          color: "#cbd5e1",
-                          border: "1px solid rgba(255,255,255,0.12)",
+                          background: "#f9fafb",
+                          color: "#374151",
+                          border: "1px solid #d1d5db",
                           borderRadius: "4px",
                           fontSize: "12px",
                           cursor: "pointer",
@@ -431,42 +445,42 @@ export default function DashboardTab({
           <div
             style={{
               paddingTop: "12px",
-              borderTop: "1px solid rgba(255,255,255,0.08)",
+              borderTop: "1px solid #e5e7eb",
               display: "flex",
               justifyContent: "space-between",
               fontSize: "12px",
-              color: "#94a3b8",
+              color: "#6b7280",
             }}
           >
             <span>Plan Distribution:</span>
-            <span style={{ color: "#e2e8f0" }}>
+            <span style={{ color: "#111827", fontWeight: 500 }}>
               Starter: <strong>{planCounts.starter || 0}</strong> • Pro: <strong>{planCounts.pro || 0}</strong> • Enterprise: <strong>{planCounts.enterprise || 0}</strong>
               {(planCounts.custom ?? 0) > 0 && (
                 <> • Custom: <strong>{planCounts.custom}</strong></>
               )}
             </span>
-
           </div>
         </div>
 
         {/* Right Column: Live Audit Activity Feed */}
         <div
           style={{
-            background: "rgba(30, 41, 59, 0.6)",
-            border: "1px solid rgba(255, 255, 255, 0.08)",
+            background: "#ffffff",
+            border: "1px solid #e5e7eb",
             borderRadius: "14px",
             padding: "20px",
             display: "flex",
             flexDirection: "column",
             gap: "16px",
+            boxShadow: "0 1px 3px rgba(0, 0, 0, 0.05)",
           }}
         >
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
             <div>
-              <div style={{ fontSize: "16px", fontWeight: 700, color: "#fff" }}>
+              <div style={{ fontSize: "16px", fontWeight: 700, color: "#111827" }}>
                 Live Security & Audit Feed
               </div>
-              <div style={{ fontSize: "12px", color: "#94a3b8" }}>
+              <div style={{ fontSize: "12px", color: "#6b7280" }}>
                 Recent administrative compliance activities
               </div>
             </div>
@@ -474,9 +488,9 @@ export default function DashboardTab({
               onClick={() => setActiveTab("audit-log")}
               style={{
                 padding: "6px 12px",
-                background: "rgba(99, 102, 241, 0.15)",
-                color: "#818cf8",
-                border: "1px solid rgba(99, 102, 241, 0.3)",
+                background: "#eff6ff",
+                color: "#2563eb",
+                border: "1px solid #bfdbfe",
                 borderRadius: "6px",
                 fontSize: "12px",
                 fontWeight: 600,
@@ -494,8 +508,8 @@ export default function DashboardTab({
                   key={log._id || idx}
                   style={{
                     padding: "12px 14px",
-                    background: "rgba(15, 23, 42, 0.4)",
-                    border: "1px solid rgba(255,255,255,0.05)",
+                    background: "#f9fafb",
+                    border: "1px solid #e5e7eb",
                     borderRadius: "8px",
                     display: "flex",
                     flexDirection: "column",
@@ -503,14 +517,14 @@ export default function DashboardTab({
                   }}
                 >
                   <div style={{ display: "flex", justifyContent: "space-between", fontSize: "12px" }}>
-                    <span style={{ fontWeight: 600, color: "#f8fafc" }}>
+                    <span style={{ fontWeight: 600, color: "#111827" }}>
                       {log.adminUser || log.adminEmail || "Super Admin"}
                     </span>
-                    <span style={{ color: "#64748b" }}>
+                    <span style={{ color: "#6b7280" }}>
                       {log.timestamp ? new Date(log.timestamp).toLocaleTimeString() : "Just now"}
                     </span>
                   </div>
-                  <div style={{ fontSize: "13px", color: "#cbd5e1" }}>
+                  <div style={{ fontSize: "13px", color: "#374151" }}>
                     {log.action} {log.target ? `• ${log.target}` : ""}
                   </div>
                 </div>
@@ -520,9 +534,10 @@ export default function DashboardTab({
                 style={{
                   padding: "24px",
                   textAlign: "center",
-                  color: "#64748b",
+                  color: "#6b7280",
                   fontSize: "13px",
-                  background: "rgba(15, 23, 42, 0.3)",
+                  background: "#f9fafb",
+                  border: "1px dashed #d1d5db",
                   borderRadius: "8px",
                 }}
               >
