@@ -135,6 +135,56 @@ export const seedCommunicationDefaults = async () => {
           textContent: "Hello {{owner_name}}, thank you for your interest in {{store_name}}. We cannot fulfill your request at this time.",
           variables: ["store_name", "owner_name"],
           isTransactional: false
+        },
+        {
+          key: "invoice",
+          name: "Platform Billing Invoice Receipt",
+          category: "invoice",
+          subject: "Invoice {{invoice_number}} for {{store_name}}",
+          htmlContent: `
+            <div style="font-family: Arial, sans-serif; padding: 20px; color: #1f2937;">
+              <h2 style="color: #4f46e5;">Invoice Receipt 📄</h2>
+              <p>Dear {{owner_name}},</p>
+              <p>Invoice <strong>{{invoice_number}}</strong> of <strong>\${{amount}} {{currency}}</strong> for <strong>{{store_name}}</strong> has been generated.</p>
+              <p>Billing Cycle: {{billing_cycle}} | Status: {{status}}</p>
+            </div>
+          `,
+          textContent: "Dear {{owner_name}}, Invoice {{invoice_number}} of \${{amount}} {{currency}} for {{store_name}} has been generated.",
+          variables: ["invoice_number", "store_name", "owner_name", "amount", "currency", "billing_cycle", "status"],
+          isTransactional: true
+        },
+        {
+          key: "plan_changed",
+          name: "Subscription Plan Change Notification",
+          category: "plan_changed",
+          subject: "Subscription Plan Updated for {{store_name}}",
+          htmlContent: `
+            <div style="font-family: Arial, sans-serif; padding: 20px; color: #1f2937;">
+              <h2 style="color: #10b981;">Subscription Plan Updated 🚀</h2>
+              <p>Hello {{owner_name}},</p>
+              <p>Your subscription plan for <strong>{{store_name}}</strong> was changed to <strong>{{plan}}</strong>.</p>
+              <p>Prorated calculation: <strong>\${{prorated_amount}} {{currency}}</strong>.</p>
+            </div>
+          `,
+          textContent: "Hello {{owner_name}}, your plan for {{store_name}} was changed to {{plan}}. Prorated amount: \${{prorated_amount}} {{currency}}.",
+          variables: ["store_name", "owner_name", "plan", "prorated_amount", "currency"],
+          isTransactional: true
+        },
+        {
+          key: "refund_processed",
+          name: "Invoice Refund Confirmation",
+          category: "refund_processed",
+          subject: "Refund Processed for {{store_name}} (Invoice {{invoice_number}})",
+          htmlContent: `
+            <div style="font-family: Arial, sans-serif; padding: 20px; color: #1f2937;">
+              <h2 style="color: #059669;">Refund Confirmation 💸</h2>
+              <p>Dear {{owner_name}},</p>
+              <p>A refund of <strong>\${{amount}} {{currency}}</strong> has been processed for Invoice <strong>{{invoice_number}}</strong> (Store: {{store_name}}).</p>
+            </div>
+          `,
+          textContent: "Dear {{owner_name}}, a refund of \${{amount}} {{currency}} has been processed for Invoice {{invoice_number}}.",
+          variables: ["invoice_number", "store_name", "owner_name", "amount", "currency"],
+          isTransactional: true
         }
       ]);
     }
