@@ -1,8 +1,8 @@
 "use client";
 
 import React from "react";
-import styles from "../page.module.css";
-import { AdminUser } from "./types";
+import styles from "../../page.module.css";
+import { AdminUser } from "../types";
 
 interface InviteAdminModalProps {
   isOpen: boolean;

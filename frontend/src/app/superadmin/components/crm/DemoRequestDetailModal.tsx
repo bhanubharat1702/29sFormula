@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import styles from "../page.module.css";
-import { DemoRequestItem, AdminUser } from "./types";
+import styles from "../../page.module.css";
+import { DemoRequestItem, AdminUser } from "../types";
 
 interface DemoRequestDetailModalProps {
   demo: DemoRequestItem | null;

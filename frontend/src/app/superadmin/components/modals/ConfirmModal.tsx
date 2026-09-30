@@ -1,8 +1,8 @@
 "use client";
 
 import React from "react";
-import styles from "../page.module.css";
-import { ConfirmModalData } from "./types";
+import styles from "../../page.module.css";
+import { ConfirmModalData } from "../types";
 
 interface ConfirmModalProps {
   confirmModal: ConfirmModalData | null;

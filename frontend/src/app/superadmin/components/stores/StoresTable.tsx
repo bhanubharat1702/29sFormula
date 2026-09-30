@@ -1,6 +1,6 @@
 import React from "react";
-import styles from "../page.module.css";
-import { StoreItem } from "./types";
+import styles from "../../page.module.css";
+import { StoreItem } from "../types";
 
 interface StoresTableProps {
   activeTab: string;

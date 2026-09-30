@@ -1,6 +1,6 @@
 import React from "react";
-import styles from "../page.module.css";
-import { CrmAnalytics } from "./types";
+import styles from "../../page.module.css";
+import { CrmAnalytics } from "../types";
 
 interface DemoRequestsCrmHeaderProps {
   analytics: CrmAnalytics | null;

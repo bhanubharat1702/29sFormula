@@ -4,6 +4,7 @@ import statsRouter from "./superadmin/stats.js";
 import storesRouter from "./superadmin/stores.js";
 import demoCrmRouter from "./superadmin/demoCrm.js";
 import tenantsRouter from "./superadmin/tenants.js";
+import billingRouter from "./superadmin/billing.js";
 
 const router = express.Router();
 
@@ -13,5 +14,7 @@ router.use(statsRouter);
 router.use(storesRouter);
 router.use(demoCrmRouter);
 router.use(tenantsRouter);
+router.use(billingRouter);
 
 export default router;
+

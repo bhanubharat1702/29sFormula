@@ -3,24 +3,25 @@
 import { useState, useEffect, useRef } from "react";
 import styles from "./page.module.css";
 import { StoreItem, DemoRequestItem, CrmAnalytics, Stats, AdminUser, FeatureFlag, ConfirmModalData } from "./components/types";
-import { LoginView } from "./components/LoginView";
-import { Sidebar } from "./components/Sidebar";
-import { TopHeader } from "./components/TopHeader";
-import { StatsGrid } from "./components/StatsGrid";
-import { ActionBar } from "./components/ActionBar";
-import { StoresTable } from "./components/StoresTable";
-import { DemoRequestsTable } from "./components/DemoRequestsTable";
-import { DemoRequestsCrmHeader } from "./components/DemoRequestsCrmHeader";
-import { DemoRequestsKanban } from "./components/DemoRequestsKanban";
-import { DemoRequestDetailModal } from "./components/DemoRequestDetailModal";
-import TabPlaceholder from "./components/TabPlaceholder";
-import SettingsTab from "./components/SettingsTab";
-import CreateStoreModal from "./components/CreateStoreModal";
-import EditStoreModal from "./components/EditStoreModal";
-import { MerchantDetailsModal } from "./components/MerchantDetailsModal";
-import InviteAdminModal from "./components/InviteAdminModal";
-import ConfirmModal from "./components/ConfirmModal";
-import ToastNotification from "./components/ToastNotification";
+import { LoginView } from "./components/layout/LoginView";
+import { Sidebar } from "./components/layout/Sidebar";
+import { TopHeader } from "./components/layout/TopHeader";
+import { StatsGrid } from "./components/layout/StatsGrid";
+import { ActionBar } from "./components/layout/ActionBar";
+import { StoresTable } from "./components/stores/StoresTable";
+import { DemoRequestsTable } from "./components/crm/DemoRequestsTable";
+import { DemoRequestsCrmHeader } from "./components/crm/DemoRequestsCrmHeader";
+import { DemoRequestsKanban } from "./components/crm/DemoRequestsKanban";
+import { DemoRequestDetailModal } from "./components/crm/DemoRequestDetailModal";
+import TabPlaceholder from "./components/common/TabPlaceholder";
+import BillingTab from "./components/BillingTab";
+import SettingsTab from "./components/settings/SettingsTab";
+import CreateStoreModal from "./components/modals/CreateStoreModal";
+import EditStoreModal from "./components/modals/EditStoreModal";
+import { MerchantDetailsModal } from "./components/modals/MerchantDetailsModal";
+import InviteAdminModal from "./components/modals/InviteAdminModal";
+import ConfirmModal from "./components/modals/ConfirmModal";
+import ToastNotification from "./components/common/ToastNotification";
 
 export default function SuperAdminPage() {
   // Auth state
@@ -870,6 +871,13 @@ export default function SuperAdminPage() {
               />
             )}
           </div>
+        )}
+
+        {activeTab === "billing" && (
+          <BillingTab
+            token={localStorage.getItem("superAdminToken") || ""}
+            onShowToast={triggerToast}
+          />
         )}
 
         <TabPlaceholder activeTab={activeTab} />

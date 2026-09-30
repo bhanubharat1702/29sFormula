@@ -1,25 +1,13 @@
 "use client";
 
 import React from "react";
-import styles from "../page.module.css";
+import styles from "../../page.module.css";
 
 interface TabPlaceholderProps {
   activeTab: string;
 }
 
 export default function TabPlaceholder({ activeTab }: TabPlaceholderProps) {
-  if (activeTab === "billing") {
-    return (
-      <div className={styles.tableCard} style={{ padding: "48px 24px", textAlign: "center", color: "#6b7280" }}>
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" style={{ width: "32px", height: "32px", margin: "0 auto 12px auto", color: "#9ca3af", display: "block" }}>
-          <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 0 0 2.25-2.25V6.75a2.25 2.25 0 0 0-2.25-2.25h-15a2.25 2.25 0 0 0-2.25 2.25v10.5a2.25 2.25 0 0 0 2.25 2.25Z" />
-        </svg>
-        <div style={{ fontWeight: 600, fontSize: "1rem", color: "#111827", marginBottom: "4px" }}>Billing & Subscriptions</div>
-        <div style={{ fontSize: "0.85rem", color: "#6b7280" }}>No billing records configured yet.</div>
-      </div>
-    );
-  }
-
   if (activeTab === "analytics") {
     return (
       <div className={styles.tableCard} style={{ padding: "48px 24px", textAlign: "center", color: "#6b7280" }}>

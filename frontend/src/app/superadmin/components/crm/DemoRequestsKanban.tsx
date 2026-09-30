@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import styles from "../page.module.css";
-import { DemoRequestItem } from "./types";
+import styles from "../../page.module.css";
+import { DemoRequestItem } from "../types";
 
 interface DemoRequestsKanbanProps {
   demoRequests: DemoRequestItem[];
