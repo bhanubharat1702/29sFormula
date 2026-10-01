@@ -376,45 +376,51 @@ export default function BillingTab({ token, onShowToast, onUnauthorized }: Billi
   }
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
-      {/* Sub Navigation */}
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: "8px",
-          borderBottom: "1px solid #e5e7eb",
-          paddingBottom: "12px",
-          overflowX: "auto"
-        }}
-      >
-        {[
-          { id: "overview", label: "Overview" },
-          { id: "plans", label: "Plans & Pricing" },
-          { id: "subscriptions", label: "Subscriptions" },
-          { id: "invoices", label: "Invoices & GST" },
-          { id: "payments", label: "Payments & Dunning" },
-          { id: "coupons", label: "Coupons & Credits" },
-          { id: "tax-currency", label: "Tax & Multi-Currency" }
-        ].map((tab) => (
-          <button
-            key={tab.id}
-            onClick={() => setSubTab(tab.id as any)}
-            style={{
-              padding: "8px 16px",
-              borderRadius: "6px",
-              fontWeight: 600,
-              fontSize: "0.85rem",
-              cursor: "pointer",
-              border: "none",
-              backgroundColor: subTab === tab.id ? "#111827" : "transparent",
-              color: subTab === tab.id ? "#ffffff" : "#4b5563",
-              transition: "all 0.15s ease"
-            }}
-          >
-            {tab.label}
-          </button>
-        ))}
+    <div className={styles.settingsSectionCard}>
+      {/* Breadcrumb Header */}
+      <div className={styles.settingsHorizontalHeader}>
+        <button className={styles.settingsBreadcrumbBack}>
+          <span style={{ color: "#6b7280", fontWeight: 400 }}>Billing & Subscriptions</span>
+        </button>
+        <span style={{ color: "#9ca3af", margin: "0 2px" }}>&rsaquo;</span>
+        <span style={{ color: "#000000", fontWeight: 400 }}>
+          {
+            (
+              {
+                "overview": "Overview",
+                "plans": "Plans & Pricing",
+                "subscriptions": "Subscriptions",
+                "invoices": "Invoices & GST",
+                "payments": "Payments & Dunning",
+                "coupons": "Coupons & Credits",
+                "tax-currency": "Tax & Multi-Currency"
+              } as Record<string, string>
+            )[subTab]
+          }
+        </span>
+      </div>
+
+      {/* Horizontal Sub-Nav Tabs */}
+      <div className={styles.settingsSubNavContainer} style={{ marginBottom: "20px" }}>
+        <div className={styles.settingsHorizontalTabs}>
+          {[
+            { id: "overview", label: "Overview" },
+            { id: "plans", label: "Plans & Pricing" },
+            { id: "subscriptions", label: "Subscriptions" },
+            { id: "invoices", label: "Invoices & GST" },
+            { id: "payments", label: "Payments & Dunning" },
+            { id: "coupons", label: "Coupons & Credits" },
+            { id: "tax-currency", label: "Tax & Multi-Currency" }
+          ].map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => setSubTab(tab.id as any)}
+              className={`${styles.settingsHorizontalTab} ${subTab === tab.id ? styles.settingsHorizontalTabActive : ""}`}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
       </div>
 
       {subTab === "overview" && <BillingOverview overview={overview} />}

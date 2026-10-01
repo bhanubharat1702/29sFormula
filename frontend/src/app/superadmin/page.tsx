@@ -39,6 +39,8 @@ export default function SuperAdminPage() {
 
   // Navigation & Data
   const [activeTab, setActiveTab] = useState("dashboard");
+  const [isOpenMobileMenu, setIsOpenMobileMenu] = useState(false);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [stores, setStores] = useState<StoreItem[]>([]);
   const [demoRequests, setDemoRequests] = useState<DemoRequestItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -837,7 +839,7 @@ export default function SuperAdminPage() {
   }
 
   return (
-    <div className={styles.adminPageWrapper}>
+    <div className={`${styles.adminPageWrapper} ${isSidebarCollapsed ? styles.adminPageCollapsed : ""}`}>
       <Sidebar
         platformName={platformName}
         activeTab={activeTab}
@@ -845,17 +847,13 @@ export default function SuperAdminPage() {
         storesCount={stores.length}
         demoRequestsCount={demoRequests.length}
         onLogout={handleLogout}
+        isOpenMobileMenu={isOpenMobileMenu}
+        onCloseMobileMenu={() => setIsOpenMobileMenu(false)}
+        isCollapsed={isSidebarCollapsed}
+        onToggleCollapse={() => setIsSidebarCollapsed(prev => !prev)}
       />
 
       <main className={styles.mainContent}>
-        <TopHeader
-          activeTab={activeTab}
-          onOpenCreateModal={() => {
-            setSelectedDemoId(null);
-            setFormError("");
-            setIsModalOpen(true);
-          }}
-        />
 
         {activeTab === "dashboard" && (
           <DashboardTab

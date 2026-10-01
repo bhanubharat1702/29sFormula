@@ -337,37 +337,57 @@ export default function DomainsTab({ token, stores, onShowToast, onUnauthorized 
   const failedDomainsCount = domains.filter(d => d.dnsStatus === "failed" || d.isBlocked).length;
 
   return (
-    <div className={styles.tabContentContainer}>
+    <div className={styles.settingsSectionCard}>
+      {/* Breadcrumb Header */}
+      <div className={styles.settingsHorizontalHeader}>
+        <button className={styles.settingsBreadcrumbBack}>
+          <span style={{ color: "#6b7280", fontWeight: 400 }}>Custom Domains</span>
+        </button>
+        <span style={{ color: "#9ca3af", margin: "0 2px" }}>&rsaquo;</span>
+        <span style={{ color: "#000000", fontWeight: 400 }}>
+          {
+            (
+              {
+                "domains": "All Domains",
+                "reserved": "Reserved Subdomains",
+                "settings": "Domain Settings & Limits"
+              } as Record<string, string>
+            )[activeSubTab]
+          }
+        </span>
+      </div>
+
       {/* Upper Navigation Tabs & Quick Action */}
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px" }}>
-        <div style={{ display: "flex", gap: "10px" }}>
-          <button
-            className={`${styles.btnSecondary} ${activeSubTab === "domains" ? styles.btnPrimary : ""}`}
-            onClick={() => setActiveSubTab("domains")}
-          >
-            🌐 All Domains ({domains.length})
-          </button>
-          <button
-            className={`${styles.btnSecondary} ${activeSubTab === "reserved" ? styles.btnPrimary : ""}`}
-            onClick={() => setActiveSubTab("reserved")}
-          >
-            🔒 Reserved Subdomains ({reservedList.length})
-          </button>
-          <button
-            className={`${styles.btnSecondary} ${activeSubTab === "settings" ? styles.btnPrimary : ""}`}
-            onClick={() => setActiveSubTab("settings")}
-          >
-            ⚙️ Domain Settings & Limits
-          </button>
+        <div className={styles.settingsHorizontalTabs}>
+          {[
+            { id: "domains", label: `All Domains (${domains.length})` },
+            { id: "reserved", label: `Reserved Subdomains (${reservedList.length})` },
+            { id: "settings", label: "Domain Settings & Limits" }
+          ].map((tab) => (
+            <button
+              key={tab.id}
+              className={`${styles.settingsHorizontalTab} ${activeSubTab === tab.id ? styles.settingsHorizontalTabActive : ""}`}
+              onClick={() => setActiveSubTab(tab.id as any)}
+            >
+              {tab.label}
+            </button>
+          ))}
         </div>
 
         {activeSubTab === "domains" && (
           <div style={{ display: "flex", gap: "10px" }}>
-            <button className={styles.btnSecondary} onClick={handleBulkReverify} title="Bulk re-verify all pending DNS entries">
-              🔄 Bulk Re-Verify DNS
+            <button className={styles.btnSecondary} onClick={handleBulkReverify} title="Bulk re-verify all pending DNS entries" style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}>
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.8} stroke="currentColor" style={{ width: "15px", height: "15px" }}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99" />
+              </svg>
+              Bulk Re-Verify DNS
             </button>
-            <button className={styles.btnPrimary} onClick={() => { setAddError(""); setIsAddModalOpen(true); }}>
-              + Add Custom Domain
+            <button className={styles.btnPrimary} onClick={() => { setAddError(""); setIsAddModalOpen(true); }} style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}>
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" style={{ width: "14px", height: "14px" }}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+              </svg>
+              Add Custom Domain
             </button>
           </div>
         )}
@@ -377,53 +397,71 @@ export default function DomainsTab({ token, stores, onShowToast, onUnauthorized 
         <>
           {/* Summary Stat Cards */}
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: "16px", marginBottom: "20px" }}>
-            <div className={styles.statCard}>
-              <span className={styles.statLabel}>Total Platform Domains</span>
-              <span className={styles.statValue}>{domains.length}</span>
-              <span className={styles.statSub}>Subdomains + Custom CNAMEs</span>
+            <div className={styles.settingsSectionCard} style={{ padding: "16px 20px" }}>
+              <span className={styles.settingsSub} style={{ fontSize: "12px", textTransform: "uppercase", fontWeight: 700, letterSpacing: "0.04em", display: "block" }}>
+                Total Platform Domains
+              </span>
+              <div style={{ fontSize: "1.75rem", fontWeight: 800, color: "#0c0a09", marginTop: "4px" }}>
+                {domains.length}
+              </div>
+              <span style={{ fontSize: "12px", color: "#6b7280" }}>Subdomains + Custom CNAMEs</span>
             </div>
-            <div className={styles.statCard}>
-              <span className={styles.statLabel}>Active & Verified</span>
-              <span className={styles.statValue} style={{ color: "#10b981" }}>{activeDomainsCount}</span>
-              <span className={styles.statSub}>SSL Issued & Live</span>
+            <div className={styles.settingsSectionCard} style={{ padding: "16px 20px" }}>
+              <span className={styles.settingsSub} style={{ fontSize: "12px", textTransform: "uppercase", fontWeight: 700, letterSpacing: "0.04em", display: "block" }}>
+                Active & Verified
+              </span>
+              <div style={{ fontSize: "1.75rem", fontWeight: 800, color: "#16a34a", marginTop: "4px" }}>
+                {activeDomainsCount}
+              </div>
+              <span style={{ fontSize: "12px", color: "#6b7280" }}>SSL Issued & Live</span>
             </div>
-            <div className={styles.statCard}>
-              <span className={styles.statLabel}>Pending DNS Verification</span>
-              <span className={styles.statValue} style={{ color: "#f59e0b" }}>{pendingDomainsCount}</span>
-              <span className={styles.statSub}>Awaiting merchant CNAME</span>
+            <div className={styles.settingsSectionCard} style={{ padding: "16px 20px" }}>
+              <span className={styles.settingsSub} style={{ fontSize: "12px", textTransform: "uppercase", fontWeight: 700, letterSpacing: "0.04em", display: "block" }}>
+                Pending DNS Verification
+              </span>
+              <div style={{ fontSize: "1.75rem", fontWeight: 800, color: "#d97706", marginTop: "4px" }}>
+                {pendingDomainsCount}
+              </div>
+              <span style={{ fontSize: "12px", color: "#6b7280" }}>Awaiting merchant CNAME</span>
             </div>
-            <div className={styles.statCard}>
-              <span className={styles.statLabel}>Blocked / Failed</span>
-              <span className={styles.statValue} style={{ color: "#ef4444" }}>{failedDomainsCount}</span>
-              <span className={styles.statSub}>DNS or Security Issues</span>
+            <div className={styles.settingsSectionCard} style={{ padding: "16px 20px" }}>
+              <span className={styles.settingsSub} style={{ fontSize: "12px", textTransform: "uppercase", fontWeight: 700, letterSpacing: "0.04em", display: "block" }}>
+                Blocked / Failed
+              </span>
+              <div style={{ fontSize: "1.75rem", fontWeight: 800, color: "#dc2626", marginTop: "4px" }}>
+                {failedDomainsCount}
+              </div>
+              <span style={{ fontSize: "12px", color: "#6b7280" }}>DNS or Security Issues</span>
             </div>
           </div>
 
           {/* Search & Filter Bar */}
-          <div style={{ display: "flex", gap: "12px", marginBottom: "16px", flexWrap: "wrap", alignItems: "center" }}>
-            <input
-              type="text"
-              placeholder="Search domain, store name, owner email..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className={styles.formInput}
-              style={{ maxWidth: "320px" }}
-            />
+          <div style={{ padding: "0 0 16px 0", display: "flex", gap: "12px", flexWrap: "wrap", alignItems: "center" }}>
+            <div style={{ flex: 1, minWidth: "240px" }}>
+              <input
+                type="text"
+                placeholder="Search domain, store name, owner email..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className={styles.settingsInput}
+                style={{ width: "100%", margin: 0 }}
+              />
+            </div>
 
-            <select value={typeFilter} onChange={(e) => setTypeFilter(e.target.value)} className={styles.formInput} style={{ width: "160px" }}>
+            <select value={typeFilter} onChange={(e) => setTypeFilter(e.target.value)} className={styles.settingsSelect} style={{ width: "160px" }}>
               <option value="all">All Types</option>
               <option value="custom">Custom CNAME</option>
               <option value="subdomain">Subdomain</option>
             </select>
 
-            <select value={dnsFilter} onChange={(e) => setDnsFilter(e.target.value)} className={styles.formInput} style={{ width: "180px" }}>
+            <select value={dnsFilter} onChange={(e) => setDnsFilter(e.target.value)} className={styles.settingsSelect} style={{ width: "180px" }}>
               <option value="all">All DNS Statuses</option>
               <option value="dns_verified">DNS Verified</option>
               <option value="pending">Pending</option>
               <option value="failed">Failed / Blocked</option>
             </select>
 
-            <select value={sslFilter} onChange={(e) => setSslFilter(e.target.value)} className={styles.formInput} style={{ width: "180px" }}>
+            <select value={sslFilter} onChange={(e) => setSslFilter(e.target.value)} className={styles.settingsSelect} style={{ width: "180px" }}>
               <option value="all">All SSL Statuses</option>
               <option value="active">SSL Active</option>
               <option value="pending">SSL Pending</option>

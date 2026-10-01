@@ -39,7 +39,7 @@ export const StoresTable: React.FC<StoresTableProps> = ({
   const endItem = Math.min(currentPage * pageSize, totalStores || filteredStores.length);
 
   return (
-    <div className={styles.tableCard}>
+    <div className={styles.settingsSectionCard} style={{ padding: 0, overflow: "hidden" }}>
       <table className={styles.table}>
         <thead>
           <tr>

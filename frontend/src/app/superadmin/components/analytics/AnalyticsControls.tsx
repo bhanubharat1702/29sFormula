@@ -29,47 +29,53 @@ export default function AnalyticsControls({
   onOpenScheduleModal
 }: AnalyticsControlsProps) {
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+    <div className={styles.settingsSectionCard}>
+      {/* Breadcrumb Header */}
+      <div className={styles.settingsHorizontalHeader}>
+        <button className={styles.settingsBreadcrumbBack}>
+          <span style={{ color: "#6b7280", fontWeight: 400 }}>Analytics</span>
+        </button>
+        <span style={{ color: "#9ca3af", margin: "0 2px" }}>&rsaquo;</span>
+        <span style={{ color: "#000000", fontWeight: 400 }}>
+          {
+            (
+              {
+                "revenue": "Revenue BI (MRR/ARR)",
+                "growth": "Growth & Conversions",
+                "retention": "Retention & Cohorts",
+                "merchant_success": "Merchant GMV",
+                "funnel": "Funnel BI",
+                "usage": "Usage & Quotas",
+                "performance": "Store Performance",
+                "geography": "Geography & Map"
+              } as Record<string, string>
+            )[reportGroup] || "Overview"
+          }
+        </span>
+      </div>
+
       {/* ── Report Group Sub-Navigation ── */}
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: "8px",
-          borderBottom: "1px solid #e5e7eb",
-          paddingBottom: "12px",
-          overflowX: "auto"
-        }}
-      >
-        {[
-          { id: "revenue", label: "💰 Revenue BI (MRR/ARR)" },
-          { id: "growth", label: "📈 Growth & Conversions" },
-          { id: "retention", label: "🔄 Retention & Cohorts" },
-          { id: "merchant_success", label: "🛒 Merchant GMV" },
-          { id: "funnel", label: "🔻 Funnel BI" },
-          { id: "usage", label: "⚡ Usage & Quotas" },
-          { id: "performance", label: "⏱️ Store Performance" },
-          { id: "geography", label: "🌍 Geography & Map" }
-        ].map((tab) => (
-          <button
-            key={tab.id}
-            onClick={() => setReportGroup(tab.id)}
-            style={{
-              padding: "8px 14px",
-              borderRadius: "6px",
-              fontWeight: 600,
-              fontSize: "0.85rem",
-              cursor: "pointer",
-              border: "none",
-              backgroundColor: reportGroup === tab.id ? "#111827" : "transparent",
-              color: reportGroup === tab.id ? "#ffffff" : "#4b5563",
-              transition: "all 0.15s ease",
-              whiteSpace: "nowrap"
-            }}
-          >
-            {tab.label}
-          </button>
-        ))}
+      <div className={styles.settingsSubNavContainer} style={{ marginBottom: "16px" }}>
+        <div className={styles.settingsHorizontalTabs}>
+          {[
+            { id: "revenue", label: "Revenue BI (MRR/ARR)" },
+            { id: "growth", label: "Growth & Conversions" },
+            { id: "retention", label: "Retention & Cohorts" },
+            { id: "merchant_success", label: "Merchant GMV" },
+            { id: "funnel", label: "Funnel BI" },
+            { id: "usage", label: "Usage & Quotas" },
+            { id: "performance", label: "Store Performance" },
+            { id: "geography", label: "Geography & Map" }
+          ].map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => setReportGroup(tab.id)}
+              className={`${styles.settingsHorizontalTab} ${reportGroup === tab.id ? styles.settingsHorizontalTabActive : ""}`}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* ── Filter Bar & Actions ── */}

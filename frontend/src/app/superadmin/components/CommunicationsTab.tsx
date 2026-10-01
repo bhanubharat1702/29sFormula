@@ -522,70 +522,56 @@ export default function CommunicationsTab({ token, onShowToast, onUnauthorized }
   };
 
   return (
-    <div>
-      {/* Top Header */}
-      <div style={{ marginBottom: "20px" }}>
-        <h2 style={{ fontSize: "1.5rem", fontWeight: 700, color: "#111827" }}>
-          Merchant Communications Hub
-        </h2>
-        <p style={{ fontSize: "0.875rem", color: "#6b7280" }}>
-          Manage email templates, announcements, in-app bell alerts, automated workflows, delivery logs, channels, and support tickets.
-        </p>
+    <div className={styles.settingsSectionCard}>
+      {/* Breadcrumb Header */}
+      <div className={styles.settingsHorizontalHeader}>
+        <button className={styles.settingsBreadcrumbBack}>
+          <span style={{ color: "#6b7280", fontWeight: 400 }}>Communications</span>
+        </button>
+        <span style={{ color: "#9ca3af", margin: "0 2px" }}>&rsaquo;</span>
+        <span style={{ color: "#000000", fontWeight: 400 }}>
+          {
+            (
+              {
+                "templates": "Email Templates",
+                "broadcasts": "Broadcasts",
+                "in-app": "In-App Notices",
+                "automations": "Automations",
+                "delivery-logs": "Delivery Logs",
+                "channels": "Channels Config",
+                "support-inbox": "Support Inbox",
+                "unsubscribes": "Opt-Outs"
+              } as Record<string, string>
+            )[subTab]
+          }
+        </span>
       </div>
 
       {/* Overview Stats */}
       <CommunicationsOverview stats={overviewStats} />
 
       {/* Sub-Navigation Tabs */}
-      <div className={styles.subNav} style={{ marginBottom: "20px", display: "flex", flexWrap: "wrap", gap: "8px" }}>
-        <button
-          className={`${styles.subNavItem} ${subTab === "templates" ? styles.subNavItemActive : ""}`}
-          onClick={() => setSubTab("templates")}
-        >
-          Email Templates ({templates.length})
-        </button>
-        <button
-          className={`${styles.subNavItem} ${subTab === "broadcasts" ? styles.subNavItemActive : ""}`}
-          onClick={() => setSubTab("broadcasts")}
-        >
-          Broadcasts ({broadcasts.length})
-        </button>
-        <button
-          className={`${styles.subNavItem} ${subTab === "in-app" ? styles.subNavItemActive : ""}`}
-          onClick={() => setSubTab("in-app")}
-        >
-          In-App Notices ({notices.length})
-        </button>
-        <button
-          className={`${styles.subNavItem} ${subTab === "automations" ? styles.subNavItemActive : ""}`}
-          onClick={() => setSubTab("automations")}
-        >
-          Automations ({automations.length})
-        </button>
-        <button
-          className={`${styles.subNavItem} ${subTab === "delivery-logs" ? styles.subNavItemActive : ""}`}
-          onClick={() => setSubTab("delivery-logs")}
-        >
-          Delivery Logs
-        </button>
-        <button
-          className={`${styles.subNavItem} ${subTab === "channels" ? styles.subNavItemActive : ""}`}
-          onClick={() => setSubTab("channels")}
-        >
-          Channels Config
-        </button>
-        <button
-          className={`${styles.subNavItem} ${subTab === "support-inbox" ? styles.subNavItemActive : ""}`}
-          onClick={() => setSubTab("support-inbox")}
-        >
-          Support Inbox ({tickets.length})
-        </button>
-        <button
-          className={`${styles.subNavItem} ${subTab === "unsubscribes" ? styles.subNavItemActive : ""}`}
-          onClick={() => setSubTab("unsubscribes")}
-        >
-          Opt-Outs ({unsubscribes.length})
-        </button>
+      <div className={styles.settingsSubNavContainer} style={{ marginBottom: "20px" }}>
+        <div className={styles.settingsHorizontalTabs}>
+          {[
+            { id: "templates", label: `Email Templates (${templates.length})` },
+            { id: "broadcasts", label: `Broadcasts (${broadcasts.length})` },
+            { id: "in-app", label: `In-App Notices (${notices.length})` },
+            { id: "automations", label: `Automations (${automations.length})` },
+            { id: "delivery-logs", label: "Delivery Logs" },
+            { id: "channels", label: "Channels Config" },
+            { id: "support-inbox", label: `Support Inbox (${tickets.length})` },
+            { id: "unsubscribes", label: `Opt-Outs (${unsubscribes.length})` }
+          ].map((item) => (
+            <button
+              key={item.id}
+              className={`${styles.settingsHorizontalTab} ${subTab === item.id ? styles.settingsHorizontalTabActive : ""}`}
+              onClick={() => setSubTab(item.id as any)}
+            >
+              {item.label}
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* Active Sub-Tab View */}
