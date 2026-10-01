@@ -24,9 +24,10 @@ import { PlanModal, ManageSubModal, CouponModal } from "./billing/BillingModals"
 interface BillingTabProps {
   token: string;
   onShowToast: (msg: string) => void;
+  onUnauthorized?: () => void;
 }
 
-export default function BillingTab({ token, onShowToast }: BillingTabProps) {
+export default function BillingTab({ token, onShowToast, onUnauthorized }: BillingTabProps) {
   const [subTab, setSubTab] = useState<
     "overview" | "plans" | "subscriptions" | "invoices" | "payments" | "coupons" | "tax-currency"
   >("overview");
@@ -87,6 +88,10 @@ export default function BillingTab({ token, onShowToast }: BillingTabProps) {
   const fetchOverview = async () => {
     try {
       const res = await fetch("/api/superadmin/billing/overview", { headers: getAuthHeaders() });
+      if (res.status === 401 || res.status === 403) {
+        onUnauthorized?.();
+        return;
+      }
       if (res.ok) setOverview(await res.json());
     } catch (e) {
       console.error(e);

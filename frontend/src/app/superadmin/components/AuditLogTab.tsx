@@ -9,9 +9,10 @@ import { AuditLogDiffModal } from "./audit/AuditLogDiffModal";
 interface AuditLogTabProps {
   token: string;
   onShowToast: (msg: string) => void;
+  onUnauthorized?: () => void;
 }
 
-export default function AuditLogTab({ token, onShowToast }: AuditLogTabProps) {
+export default function AuditLogTab({ token, onShowToast, onUnauthorized }: AuditLogTabProps) {
   const [logs, setLogs] = useState<AuditLogItem[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [suspiciousCount, setSuspiciousCount] = useState<number>(0);
@@ -31,6 +32,10 @@ export default function AuditLogTab({ token, onShowToast }: AuditLogTabProps) {
       const res = await fetch(url, {
         headers: { Authorization: `Bearer ${token}` }
       });
+      if (res.status === 401 || res.status === 403) {
+        onUnauthorized?.();
+        return;
+      }
       if (res.ok) {
         const data = await res.json();
         setLogs(data.logs || []);

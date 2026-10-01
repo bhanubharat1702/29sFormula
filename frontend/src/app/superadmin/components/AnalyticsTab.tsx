@@ -10,9 +10,10 @@ import { ScheduleReportModal, SavedReportsList } from "./analytics/AnalyticsModa
 interface AnalyticsTabProps {
   token: string;
   onShowToast: (msg: string) => void;
+  onUnauthorized?: () => void;
 }
 
-export default function AnalyticsTab({ token, onShowToast }: AnalyticsTabProps) {
+export default function AnalyticsTab({ token, onShowToast, onUnauthorized }: AnalyticsTabProps) {
   const [reportGroup, setReportGroup] = useState<
     "revenue" | "growth" | "retention" | "merchant_success" | "funnel" | "usage" | "performance" | "geography"
   >("revenue");
@@ -39,23 +40,22 @@ export default function AnalyticsTab({ token, onShowToast }: AnalyticsTabProps) 
     try {
       const path = `/api/superadmin/analytics?group=${reportGroup}&dateRange=${dateRange}&plan=${selectedPlan}&country=${selectedCountry}`;
       let res = await fetch(path, { headers: getAuthHeaders() });
+      if (res.status === 401 || res.status === 403) {
+        onUnauthorized?.();
+        return;
+      }
       if (!res.ok) {
         res = await fetch(`http://localhost:5001${path}`, { headers: getAuthHeaders() });
+      }
+      if (res.status === 401 || res.status === 403) {
+        onUnauthorized?.();
+        return;
       }
       if (res.ok) {
         setAnalyticsData(await res.json());
       }
     } catch (e) {
       console.error("Fetch Analytics Error:", e);
-      try {
-        const path = `/api/superadmin/analytics?group=${reportGroup}&dateRange=${dateRange}&plan=${selectedPlan}&country=${selectedCountry}`;
-        const fallbackRes = await fetch(`http://localhost:5001${path}`, { headers: getAuthHeaders() });
-        if (fallbackRes.ok) {
-          setAnalyticsData(await fallbackRes.json());
-        }
-      } catch (err) {
-        console.error("Fallback Analytics Fetch Error:", err);
-      }
     } finally {
       setLoading(false);
     }
@@ -64,8 +64,16 @@ export default function AnalyticsTab({ token, onShowToast }: AnalyticsTabProps) 
   const fetchSavedReports = async () => {
     try {
       let res = await fetch("/api/superadmin/analytics/reports", { headers: getAuthHeaders() });
+      if (res.status === 401 || res.status === 403) {
+        onUnauthorized?.();
+        return;
+      }
       if (!res.ok) {
         res = await fetch("http://localhost:5001/api/superadmin/analytics/reports", { headers: getAuthHeaders() });
+      }
+      if (res.status === 401 || res.status === 403) {
+        onUnauthorized?.();
+        return;
       }
       if (res.ok) setSavedReports(await res.json());
     } catch (e) {

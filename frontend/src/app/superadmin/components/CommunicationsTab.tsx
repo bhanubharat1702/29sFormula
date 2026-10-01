@@ -35,9 +35,10 @@ import {
 interface CommunicationsTabProps {
   token: string;
   onShowToast: (msg: string) => void;
+  onUnauthorized?: () => void;
 }
 
-export default function CommunicationsTab({ token, onShowToast }: CommunicationsTabProps) {
+export default function CommunicationsTab({ token, onShowToast, onUnauthorized }: CommunicationsTabProps) {
   const [subTab, setSubTab] = useState<
     "templates" | "broadcasts" | "in-app" | "automations" | "delivery-logs" | "channels" | "support-inbox" | "unsubscribes"
   >("templates");

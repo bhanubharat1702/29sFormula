@@ -28,6 +28,7 @@ import { MerchantDetailsModal } from "./components/modals/MerchantDetailsModal";
 import InviteAdminModal from "./components/modals/InviteAdminModal";
 import ConfirmModal from "./components/modals/ConfirmModal";
 import ToastNotification from "./components/common/ToastNotification";
+import { isTokenExpired } from "./utils/auth";
 
 export default function SuperAdminPage() {
   // Auth state
@@ -196,14 +197,31 @@ export default function SuperAdminPage() {
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);
 
+  const handleUnauthorized = (reason = "Your session has expired. Please log in again.") => {
+    localStorage.removeItem("superAdminToken");
+    localStorage.removeItem("superAdminData");
+    setIsAuthenticated(false);
+    if (reason) setLoginError(reason);
+    setLoading(false);
+  };
+
   useEffect(() => {
     const token = localStorage.getItem("superAdminToken");
-    if (token) {
+    if (token && !isTokenExpired(token)) {
       setIsAuthenticated(true);
       fetchData();
     } else {
-      setLoading(false);
+      handleUnauthorized(token ? "Your session has expired. Please log in again." : "");
     }
+
+    const interval = setInterval(() => {
+      const activeToken = localStorage.getItem("superAdminToken");
+      if (activeToken && isTokenExpired(activeToken)) {
+        handleUnauthorized("Your session has expired. Please log in again.");
+      }
+    }, 5000);
+
+    return () => clearInterval(interval);
   }, []);
 
   const checkTabScroll = () => {
@@ -930,6 +948,7 @@ export default function SuperAdminPage() {
           <BillingTab
             token={localStorage.getItem("superAdminToken") || ""}
             onShowToast={triggerToast}
+            onUnauthorized={handleUnauthorized}
           />
         )}
 
@@ -937,6 +956,7 @@ export default function SuperAdminPage() {
           <AnalyticsTab
             token={localStorage.getItem("superAdminToken") || ""}
             onShowToast={triggerToast}
+            onUnauthorized={handleUnauthorized}
           />
         )}
 
@@ -944,6 +964,7 @@ export default function SuperAdminPage() {
           <CommunicationsTab
             token={localStorage.getItem("superAdminToken") || ""}
             onShowToast={triggerToast}
+            onUnauthorized={handleUnauthorized}
           />
         )}
 
@@ -952,6 +973,7 @@ export default function SuperAdminPage() {
             token={localStorage.getItem("superAdminToken") || ""}
             stores={stores}
             onShowToast={triggerToast}
+            onUnauthorized={handleUnauthorized}
           />
         )}
 
@@ -959,6 +981,7 @@ export default function SuperAdminPage() {
           <AuditLogTab
             token={localStorage.getItem("superAdminToken") || ""}
             onShowToast={triggerToast}
+            onUnauthorized={handleUnauthorized}
           />
         )}
 

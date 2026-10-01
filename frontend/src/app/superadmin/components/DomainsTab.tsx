@@ -16,9 +16,10 @@ interface DomainsTabProps {
   token: string;
   stores: StoreItem[];
   onShowToast: (msg: string) => void;
+  onUnauthorized?: () => void;
 }
 
-export default function DomainsTab({ token, stores, onShowToast }: DomainsTabProps) {
+export default function DomainsTab({ token, stores, onShowToast, onUnauthorized }: DomainsTabProps) {
   const [activeSubTab, setActiveSubTab] = useState<"domains" | "reserved" | "settings">("domains");
   const [domains, setDomains] = useState<DomainRecord[]>([]);
   const [settings, setSettings] = useState<DomainSettings | null>(null);
@@ -58,6 +59,10 @@ export default function DomainsTab({ token, stores, onShowToast }: DomainsTabPro
       const res = await fetch("http://localhost:5001/api/superadmin/domains", {
         headers: { Authorization: `Bearer ${token}` }
       });
+      if (res.status === 401 || res.status === 403) {
+        onUnauthorized?.();
+        return;
+      }
       if (res.ok) {
         const data = await res.json();
         setDomains(data.domains || []);
