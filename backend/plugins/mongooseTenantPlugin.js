@@ -18,14 +18,28 @@ export const mongooseTenantPlugin = (schema) => {
       return;
     }
 
-    const storeId = getTenantStoreIdFromContext();
-    if (!storeId) {
+    const options = this.getOptions ? this.getOptions() : {};
+    if (options && options.skipTenantFilter) {
       if (typeof next === "function") next();
       return;
     }
 
-    const options = this.getOptions ? this.getOptions() : {};
-    if (options && options.skipTenantFilter) {
+    const storeId = getTenantStoreIdFromContext();
+    if (!storeId) {
+      // STRICT TENANT VALIDATION:
+      // Fail closed to prevent cross-tenant data leak when tenant context is missing.
+      // Filter by impossible storeId so 0 records are returned/modified.
+      const impossibleId = new mongoose.Types.ObjectId("000000000000000000000000");
+      const filter = this.getFilter ? this.getFilter() : null;
+      if (filter) {
+        if (filter.storeId === undefined) {
+          this.where({ storeId: impossibleId });
+        } else {
+          filter.storeId = impossibleId;
+        }
+      } else {
+        this.where({ storeId: impossibleId });
+      }
       if (typeof next === "function") next();
       return;
     }
@@ -37,6 +51,8 @@ export const mongooseTenantPlugin = (schema) => {
       } else {
         filter.storeId = storeId;
       }
+    } else {
+      this.where({ storeId });
     }
 
     if (typeof next === "function") next();
@@ -69,17 +85,13 @@ export const mongooseTenantPlugin = (schema) => {
       return;
     }
 
-    const storeId = getTenantStoreIdFromContext();
-    if (!storeId) {
-      if (typeof next === "function") next();
-      return;
-    }
-
     const options = this.options || {};
     if (options.skipTenantFilter) {
       if (typeof next === "function") next();
       return;
     }
+
+    const storeId = getTenantStoreIdFromContext() || new mongoose.Types.ObjectId("000000000000000000000000");
 
     const pipeline = this.pipeline();
     if (pipeline.length > 0 && pipeline[0].$match) {
@@ -90,12 +102,16 @@ export const mongooseTenantPlugin = (schema) => {
     if (typeof next === "function") next();
   });
 
-  // Pre-save document hook: automatically assign storeId on creation
+  // Pre-save document hook: automatically assign storeId on creation & validate context
   schema.pre("save", function (next) {
     if (!isTenantBypassed()) {
       const storeId = getTenantStoreIdFromContext();
       if (storeId && !this.storeId) {
         this.storeId = storeId;
+      } else if (!storeId && !this.storeId) {
+        const err = new Error("Tenant Isolation Error: Cannot save document without storeId context.");
+        if (typeof next === "function") return next(err);
+        throw err;
       }
     }
     if (typeof next === "function") next();
@@ -115,6 +131,13 @@ export const mongooseTenantPlugin = (schema) => {
             doc.storeId = storeId;
           }
         });
+      } else if (!storeId && Array.isArray(actualDocs)) {
+        const hasMissingStoreId = actualDocs.some(doc => doc && !doc.storeId);
+        if (hasMissingStoreId) {
+          const err = new Error("Tenant Isolation Error: Cannot insert documents without storeId context.");
+          if (typeof next === "function") return next(err);
+          throw err;
+        }
       }
     }
     if (typeof next === "function") next();

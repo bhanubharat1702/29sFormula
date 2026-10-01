@@ -12,7 +12,7 @@ const productSchema = new mongoose.Schema({
   onlineOrder: { type: String, default: "" },
   
   // Denormalized computed values for fast storefront query rendering
-  storeId: { type: mongoose.Schema.Types.ObjectId, ref: "Store", index: true },
+  storeId: { type: mongoose.Schema.Types.ObjectId, ref: "Store", required: true, index: true },
   price: { type: Number },
   strikePrice: { type: Number },
   makingPrice: { type: Number, default: 0 },

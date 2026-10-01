@@ -143,9 +143,7 @@ export const tenantResolver = async (req, res, next) => {
       next();
     });
   } catch (err) {
-    console.error("Tenant Resolution Error:", err);
-    return runWithTenant(null, () => {
-      next();
-    });
+    console.error("Tenant Resolution Critical Failure:", err);
+    return res.status(500).json({ error: "Internal server error during tenant context resolution." });
   }
 };
