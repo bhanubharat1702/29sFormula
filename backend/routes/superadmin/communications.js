@@ -20,6 +20,7 @@ import {
   toggleAutomation,
   updateAutomation,
   triggerTestAutomation,
+  runAutomationWorkerManualHandler,
   getDeliveryLogs,
   resendDeliveryLog,
   getChannelConfig,
@@ -66,6 +67,7 @@ router.get("/api/superadmin/communications/automations", verifySuperAdminToken, 
 router.put("/api/superadmin/communications/automations/:key/toggle", verifySuperAdminToken, toggleAutomation);
 router.put("/api/superadmin/communications/automations/:key", verifySuperAdminToken, updateAutomation);
 router.post("/api/superadmin/communications/automations/:key/trigger-test", verifySuperAdminToken, triggerTestAutomation);
+router.post("/api/superadmin/communications/automations/run-worker", verifySuperAdminToken, runAutomationWorkerManualHandler);
 
 // Delivery Logs
 router.get("/api/superadmin/communications/delivery-logs", verifySuperAdminToken, getDeliveryLogs);

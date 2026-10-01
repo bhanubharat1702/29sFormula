@@ -185,6 +185,72 @@ export const seedCommunicationDefaults = async () => {
           textContent: "Dear {{owner_name}}, a refund of \${{amount}} {{currency}} has been processed for Invoice {{invoice_number}}.",
           variables: ["invoice_number", "store_name", "owner_name", "amount", "currency"],
           isTransactional: true
+        },
+        {
+          key: "domain_verified",
+          name: "Custom Domain DNS Verified",
+          category: "domain verified",
+          subject: "Domain Verified: {{custom_domain}} is now live for {{store_name}}!",
+          htmlContent: `
+            <div style="font-family: Arial, sans-serif; padding: 20px; color: #1f2937;">
+              <h2 style="color: #10b981;">Domain Active & SSL Secured 🔒</h2>
+              <p>Hello {{owner_name}},</p>
+              <p>Your custom domain <strong>{{custom_domain}}</strong> for <strong>{{store_name}}</strong> has passed DNS verification and SSL provisioning.</p>
+            </div>
+          `,
+          textContent: "Hello {{owner_name}}, your custom domain {{custom_domain}} for {{store_name}} is live!",
+          variables: ["store_name", "owner_name", "custom_domain"],
+          isTransactional: true
+        }
+      ]);
+    }
+
+    const automationCount = await AutomationRule.countDocuments();
+    if (automationCount === 0) {
+      await AutomationRule.insertMany([
+        {
+          key: "trial_ending_3d",
+          name: "Send Warning When Trial Ends in 3 Days",
+          trigger: "trial_ending_3d",
+          action: "send_email",
+          emailTemplateKey: "trial_ending",
+          channel: "both",
+          enabled: true,
+          triggerDelayDays: 3,
+          totalTriggered: 0
+        },
+        {
+          key: "payment_failed_alert",
+          name: "Alert Merchant on Subscription Payment Failure",
+          trigger: "payment_failed",
+          action: "send_email",
+          emailTemplateKey: "payment_failed",
+          channel: "email",
+          enabled: true,
+          triggerDelayDays: 0,
+          totalTriggered: 0
+        },
+        {
+          key: "invoice_overdue_notice",
+          name: "Send Reminders for Overdue Invoices",
+          trigger: "invoice_overdue",
+          action: "send_email",
+          emailTemplateKey: "invoice",
+          channel: "email",
+          enabled: true,
+          triggerDelayDays: 1,
+          totalTriggered: 0
+        },
+        {
+          key: "inactive_merchant_reengage",
+          name: "Re-engage Inactive Merchants (14 Days Inactive)",
+          trigger: "inactive_14d",
+          action: "send_email",
+          emailTemplateKey: "follow_up",
+          channel: "email",
+          enabled: true,
+          triggerDelayDays: 14,
+          totalTriggered: 0
         }
       ]);
     }
@@ -622,6 +688,19 @@ export const triggerTestAutomation = async (req, res) => {
     });
 
     res.json({ message: `Test trigger executed for '${rule.name}'`, rule });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+export const runAutomationWorkerManualHandler = async (req, res) => {
+  try {
+    const { runAutomationWorker } = await import("../../services/automationWorker.js");
+    const result = await runAutomationWorker();
+    res.json({
+      message: `Background Automation Worker executed! Processed matching automation rules, trial dates, and scheduled broadcasts.`,
+      result
+    });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
