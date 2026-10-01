@@ -141,7 +141,8 @@ const settingsSchema = new mongoose.Schema({
   lifestyleButtonSize: { type: String, default: "md" },
   lifestyleButtonColor: { type: String, default: "#ffffff" },
   lifestyleButtonTextColor: { type: String, default: "#000000" },
-  lifestyleImage: { type: String, default: "https://images.unsplash.com/photo-1615655096345-61a54750068d?auto=format&fit=crop&w=1800&q=80" },
+  lifestyleBgColor: { type: String, default: "#000000" },
+  lifestyleImage: { type: String, default: "" },
 
   mobileLifestyleText: { type: String, default: "" },
   mobileLifestyleTextFontType: { type: String, default: "Outfit" },

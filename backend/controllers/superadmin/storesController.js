@@ -370,6 +370,8 @@ export const createStoreHandler = async (req, res) => {
           mobileVideoButtonTextColor: "#000000",
           lifestyleText: "Uncompromising Quality, Curated for You.",
           lifestyleTextFontColor: "#ffffff",
+          mobileLifestyleTextFontColor: "#ffffff",
+          lifestyleBgColor: "#000000",
           lifestyleButtonColor: "#ffffff",
           lifestyleButtonTextColor: "#000000",
           mobileLifestyleButtonColor: "#ffffff",

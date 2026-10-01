@@ -78,6 +78,22 @@ const cleanLegacySettings = async (settings) => {
     settings.mobileVideoButtonTextColor = "#000000";
     isDirty = true;
   }
+  if (!settings.lifestyleTextFontColor || settings.lifestyleTextFontColor === "") {
+    settings.lifestyleTextFontColor = "#ffffff";
+    isDirty = true;
+  }
+  if (!settings.mobileLifestyleTextFontColor || settings.mobileLifestyleTextFontColor === "") {
+    settings.mobileLifestyleTextFontColor = "#ffffff";
+    isDirty = true;
+  }
+  if (settings.lifestyleImage && settings.lifestyleImage.includes("photo-1615655096345")) {
+    settings.lifestyleImage = "";
+    isDirty = true;
+  }
+  if (!settings.lifestyleBgColor || settings.lifestyleBgColor === "") {
+    settings.lifestyleBgColor = "#000000";
+    isDirty = true;
+  }
   if (!settings.lifestyleButtonColor || settings.lifestyleButtonColor === "") {
     settings.lifestyleButtonColor = "#ffffff";
     isDirty = true;
@@ -298,6 +314,7 @@ router.post("/api/settings", async (req, res) => {
     if (req.body.lifestyleButtonSize !== undefined) settings.lifestyleButtonSize = req.body.lifestyleButtonSize;
     if (req.body.lifestyleButtonColor !== undefined) settings.lifestyleButtonColor = req.body.lifestyleButtonColor;
     if (req.body.lifestyleButtonTextColor !== undefined) settings.lifestyleButtonTextColor = req.body.lifestyleButtonTextColor;
+    if (req.body.lifestyleBgColor !== undefined) settings.lifestyleBgColor = req.body.lifestyleBgColor;
     if (lifestyleImage !== undefined) settings.lifestyleImage = lifestyleImage;
 
     if (req.body.mobileLifestyleText !== undefined) settings.mobileLifestyleText = req.body.mobileLifestyleText;

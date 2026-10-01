@@ -254,7 +254,8 @@ export default function Home() {
   const [videoBgImage, setVideoBgImage] = useState<string>("");
 
   const [lifestyleText, setLifestyleText] = useState<string>("Uncompromising Quality, Curated for You.");
-  const [lifestyleImage, setLifestyleImage] = useState<string>("https://images.unsplash.com/photo-1615655096345-61a54750068d?auto=format&fit=crop&w=1800&q=80");
+  const [lifestyleImage, setLifestyleImage] = useState<string>("");
+  const [lifestyleBgColor, setLifestyleBgColor] = useState<string>("#000000");
   const [lifestyleTextFontType, setLifestyleTextFontType] = useState<string>("Outfit");
   const [lifestyleTextFontColor, setLifestyleTextFontColor] = useState<string>("#ffffff");
   const [lifestyleTextFontSize, setLifestyleTextFontSize] = useState<string>("2.5rem");
@@ -572,6 +573,7 @@ export default function Home() {
             setLifestyleImage(data.lifestyleImage);
             localStorage.setItem("settings_lifestyleImage", data.lifestyleImage);
           }
+          if (data.lifestyleBgColor !== undefined) setLifestyleBgColor(data.lifestyleBgColor);
           if (data.lifestyleTextFontType !== undefined) setLifestyleTextFontType(data.lifestyleTextFontType);
           if (data.lifestyleTextFontColor !== undefined) setLifestyleTextFontColor(data.lifestyleTextFontColor);
           if (data.lifestyleTextFontSize !== undefined) setLifestyleTextFontSize(data.lifestyleTextFontSize);
@@ -1036,7 +1038,8 @@ export default function Home() {
           <section
             className={styles.lifestyleBanner}
             style={{
-              backgroundImage: `url(${lifestyleImage})`,
+              backgroundImage: lifestyleImage ? `url(${lifestyleImage})` : "none",
+              backgroundColor: lifestyleBgColor || "#000000",
               display: "flex",
               flexDirection: "column",
               alignItems: "center",

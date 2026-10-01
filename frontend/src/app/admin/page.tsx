@@ -401,6 +401,7 @@ export default function AdminDashboard() {
   const [isLifestyleCustomizerModalOpen, setIsLifestyleCustomizerModalOpen] = useState(false);
   const [lifestyleTextFontType, setLifestyleTextFontType] = useState<string>("Outfit");
   const [lifestyleTextFontColor, setLifestyleTextFontColor] = useState<string>("#ffffff");
+  const [lifestyleBgColor, setLifestyleBgColor] = useState<string>("#000000");
   const [lifestyleTextFontSize, setLifestyleTextFontSize] = useState<string>("2.5rem");
   const [lifestyleTextFontAlignment, setLifestyleTextFontAlignment] = useState<string>("center");
   const [lifestyleTextFontWeight, setLifestyleTextFontWeight] = useState<string>("700");
@@ -613,7 +614,7 @@ export default function AdminDashboard() {
       mobileVideoButtonTextColor: data.mobileVideoButtonTextColor !== undefined ? data.mobileVideoButtonTextColor : (data.videoButtonTextColor || "#000000"),
       showMobileVideoButton: data.showMobileVideoButton !== undefined ? data.showMobileVideoButton : true,
       lifestyleText: data.lifestyleText || "",
-      lifestyleImage: data.lifestyleImage || "https://images.unsplash.com/photo-1615655096345-61a54750068d?auto=format&fit=crop&w=1800&q=80",
+      lifestyleImage: data.lifestyleImage || "",
       lifestyleTextFontType: data.lifestyleTextFontType || "Outfit",
       lifestyleTextFontColor: data.lifestyleTextFontColor || "#ffffff",
       lifestyleTextFontSize: data.lifestyleTextFontSize || "2.5rem",
