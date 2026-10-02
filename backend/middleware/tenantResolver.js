@@ -22,7 +22,7 @@ export const invalidateTenantCache = (identifier = null) => {
  */
 const extractCandidateHosts = (req) => {
   const candidates = [];
-  
+
   if (req.headers["x-store-domain"]) {
     candidates.push(req.headers["x-store-domain"]);
   }
@@ -31,14 +31,14 @@ const extractCandidateHosts = (req) => {
     try {
       const url = new URL(req.headers["origin"]);
       if (url.host) candidates.push(url.host);
-    } catch (e) {}
+    } catch (e) { }
   }
 
   if (req.headers["referer"]) {
     try {
       const url = new URL(req.headers["referer"]);
       if (url.host) candidates.push(url.host);
-    } catch (e) {}
+    } catch (e) { }
   }
 
   if (req.headers["host"]) {
@@ -63,7 +63,7 @@ export const tenantResolver = async (req, res, next) => {
           if (decoded && decoded.storeId) {
             storeId = decoded.storeId;
           }
-        } catch (e) {}
+        } catch (e) { }
       }
     }
 
@@ -83,7 +83,7 @@ export const tenantResolver = async (req, res, next) => {
 
       for (const hostStr of candidateHosts) {
         const cleanHost = hostStr.split(":")[0].toLowerCase();
-        
+
         // Skip generic localhost/ip without subdomain
         if (!cleanHost || cleanHost === "localhost" || cleanHost === "127.0.0.1") {
           continue;
@@ -96,10 +96,17 @@ export const tenantResolver = async (req, res, next) => {
 
         // Subdomain is first part before dot (e.g. "demo" from "demo.localhost")
         const subdomainPart = cleanHost.split(".")[0];
-        
+
+        // Custom domains are stored as the canonical apex host (e.g. "brand.com"),
+        // while merchants frequently serve them from the "www." host. Match both.
+        const hostNoWww = cleanHost.startsWith("www.") ? cleanHost.slice(4) : cleanHost;
+
         store = await Store.findOne({
           $or: [
             { customDomain: cleanHost },
+            { customDomain: hostNoWww },
+            { "domains.domain": cleanHost },
+            { "domains.domain": hostNoWww },
             { subdomain: subdomainPart }
           ],
           isActive: true

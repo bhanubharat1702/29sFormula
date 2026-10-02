@@ -11,7 +11,7 @@ import Customer from "../../models/Customer.js";
 import Discount from "../../models/Discount.js";
 import ReturnRequest from "../../models/ReturnRequest.js";
 import Review from "../../models/Review.js";
-import { DomainItem, RESERVED_SUBDOMAINS } from "../../models/Domain.js";
+import { DomainItem, DomainSettings, ReservedSubdomain, RESERVED_SUBDOMAINS } from "../../models/Domain.js";
 import { DeliveryLog, InAppNotification } from "../../models/Communication.js";
 import { BillingInvoice } from "../../models/Billing.js";
 import { recordAuditLog } from "../../services/auditLogService.js";
@@ -21,6 +21,11 @@ import { invalidateSettingsCache } from "../../utils/cache.js";
 import { invalidateTenantCache } from "../../middleware/tenantResolver.js";
 
 const getJwtSecret = () => process.env.JWT_SECRET || "ecommerce_secret_jwt_key_2026";
+
+// Single source of truth for the platform's own domain, used when provisioning
+// the free <subdomain>.<platform> record. Must match DomainSettings.platformOwnDomain
+// and the DEFAULT_PLATFORM_DOMAIN used by the merchant domain controller.
+const DEFAULT_PLATFORM_DOMAIN = "29sformula.com";
 
 /**
  * Health Score calculation utility (0-100)
@@ -216,8 +221,9 @@ export const createStoreHandler = async (req, res) => {
   const cleanEmail = ownerEmail.toLowerCase().trim();
   const finalPassword = password || "MerchantPass123!";
 
-  // Check reserved subdomains
-  if (RESERVED_SUBDOMAINS.includes(cleanSubdomain)) {
+  // Check reserved subdomains (static list + dynamic DB-managed list)
+  const reservedInDb = await ReservedSubdomain.findOne({ subdomain: cleanSubdomain }).lean().catch(() => null);
+  if (RESERVED_SUBDOMAINS.includes(cleanSubdomain) || reservedInDb) {
     return res.status(400).json({ error: `Subdomain '${cleanSubdomain}' is a reserved system keyword.` });
   }
 
@@ -238,7 +244,7 @@ export const createStoreHandler = async (req, res) => {
   } catch (sessionErr) {
     useTransaction = false;
     if (session) {
-      try { session.endSession(); } catch {}
+      try { session.endSession(); } catch { }
       session = null;
     }
   }
@@ -288,9 +294,14 @@ export const createStoreHandler = async (req, res) => {
     const calculatedMrr = planPrices[plan.toLowerCase()] || 79;
     const cleanCustomDomain = customDomain ? customDomain.toLowerCase().trim() : "";
 
+    // Use the super-admin configured platform domain so the provisioned
+    // subdomain record matches what the tenant resolver actually serves.
+    const domainSettings = await DomainSettings.findOne().lean().catch(() => null);
+    const platformDomain = (domainSettings && domainSettings.platformOwnDomain) || DEFAULT_PLATFORM_DOMAIN;
+
     const domainsList = [
       {
-        domain: `${cleanSubdomain}.yourplatform.com`,
+        domain: `${cleanSubdomain}.${platformDomain}`,
         type: "subdomain",
         isPrimary: !cleanCustomDomain,
         dnsStatus: "dns_verified",
@@ -506,7 +517,7 @@ export const createStoreHandler = async (req, res) => {
       try {
         await session.abortTransaction();
         session.endSession();
-      } catch {}
+      } catch { }
     } else {
       try {
         if (createdSettingsId) await Settings.findByIdAndDelete(createdSettingsId);
@@ -554,8 +565,38 @@ export const updateStoreHandler = async (req, res) => {
       store.name = name;
       store.businessName = name;
     }
-    if (subdomain !== undefined) store.subdomain = subdomain.toLowerCase().trim();
-    if (customDomain !== undefined) store.customDomain = customDomain.toLowerCase().trim();
+    if (subdomain !== undefined) {
+      const cleanSub = subdomain.toLowerCase().trim();
+      if (cleanSub && cleanSub !== store.subdomain) {
+        const reservedInDb = await ReservedSubdomain.findOne({ subdomain: cleanSub }).lean().catch(() => null);
+        if (RESERVED_SUBDOMAINS.includes(cleanSub) || reservedInDb) {
+          return res.status(400).json({ error: `Subdomain '${cleanSub}' is a reserved system keyword.` });
+        }
+        const taken = await Store.findOne({ subdomain: cleanSub, _id: { $ne: store._id } }).lean();
+        if (taken) {
+          return res.status(400).json({ error: `Subdomain '${cleanSub}' is already taken.` });
+        }
+      }
+      store.subdomain = cleanSub;
+    }
+    if (customDomain !== undefined) {
+      const cleanCustom = customDomain.toLowerCase().trim();
+      store.customDomain = cleanCustom;
+      // Keep the canonical domains[] array reconciled with the scalar customDomain
+      const list = store.domains || [];
+      const exists = list.some(d => d.type === 'custom' && d.domain === cleanCustom);
+      if (cleanCustom && !exists) {
+        list.push({
+          domain: cleanCustom,
+          type: 'custom',
+          isPrimary: list.filter(d => d.type === 'custom').length === 0,
+          dnsStatus: 'pending',
+          sslStatus: 'pending'
+        });
+      }
+      list.forEach(d => { if (d.type === 'custom') d.isPrimary = (d.domain === cleanCustom); });
+      store.domains = list;
+    }
     if (businessLogo !== undefined) store.businessLogo = businessLogo.trim();
     if (ownerName !== undefined) store.ownerName = ownerName.trim();
     if (ownerEmail !== undefined) store.ownerEmail = ownerEmail.toLowerCase().trim();
@@ -700,6 +741,11 @@ export const impersonateStoreHandler = async (req, res) => {
         id: targetUser._id,
         email: targetUser.email,
         role: "owner",
+        isOwner: true,
+        // Support staff impersonating a tenant must have admin capability on the
+        // merchant dashboard APIs; without isAdmin the isAdmin middleware
+        // rejects every request with HTTP 403.
+        isAdmin: true,
         storeId: store._id,
         subdomain: store.subdomain,
         isImpersonated: true,

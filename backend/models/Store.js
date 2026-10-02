@@ -32,15 +32,15 @@ const domainItemSchema = new mongoose.Schema({
   domain: { type: String, required: true, lowercase: true, trim: true },
   type: { type: String, enum: ['subdomain', 'custom'], default: 'custom' },
   isPrimary: { type: Boolean, default: false },
-  dnsStatus: { 
-    type: String, 
-    enum: ['pending', 'dns_verified', 'ssl_issued', 'active', 'failed'], 
-    default: 'pending' 
+  dnsStatus: {
+    type: String,
+    enum: ['pending', 'dns_verified', 'ssl_issued', 'active', 'failed'],
+    default: 'pending'
   },
-  sslStatus: { 
-    type: String, 
-    enum: ['pending', 'issuing', 'active', 'expiring_soon', 'expired', 'failed'], 
-    default: 'pending' 
+  sslStatus: {
+    type: String,
+    enum: ['pending', 'issuing', 'active', 'expiring_soon', 'expired', 'failed'],
+    default: 'pending'
   },
   verificationToken: { type: String, default: '' },
   targetCname: { type: String, default: 'stores.yourplatform.com' },
@@ -100,31 +100,35 @@ const StoreSchema = new mongoose.Schema({
     index: true
   },
   // Denormalized for fast lookups without User populate
-  ownerName:  { type: String, default: '' },
+  ownerName: { type: String, default: '' },
   ownerEmail: { type: String, default: '', lowercase: true, trim: true },
   ownerPhone: { type: String, default: '' },
-  supportEmail:{ type: String, default: '', lowercase: true, trim: true },
-  supportPhone:{ type: String, default: '' },
+  supportEmail: { type: String, default: '', lowercase: true, trim: true },
+  supportPhone: { type: String, default: '' },
 
   // ── Business Details ─────────────────────────────────────────
   businessType: {
     type: String,
-    enum: ['retail', 'fashion', 'food', 'electronics', 'services', 'beauty', 'other'],
+    enum: [
+      'retail', 'fashion', 'beauty', 'electronics', 'food', 'health',
+      'home', 'jewelry', 'sports', 'kids', 'automotive', 'books',
+      'art', 'services', 'digital', 'other'
+    ],
     default: 'retail'
   },
-  country:  { type: String, default: 'India' },
+  country: { type: String, default: 'India' },
   currency: { type: String, default: 'INR' },
   timezone: { type: String, default: 'Asia/Kolkata' },
   address1: { type: String, default: '' },
   address2: { type: String, default: '' },
-  city:     { type: String, default: '' },
-  state:    { type: String, default: '' },
-  postalCode:{ type: String, default: '' },
+  city: { type: String, default: '' },
+  state: { type: String, default: '' },
+  postalCode: { type: String, default: '' },
 
   // ── Plan & Subscription ──────────────────────────────────────
   plan: {
     type: String,
-    enum: ['starter', 'pro', 'enterprise'],
+    enum: ['starter', 'growth', 'pro', 'enterprise'],
     default: 'starter'
   },
   status: {
@@ -133,11 +137,11 @@ const StoreSchema = new mongoose.Schema({
     default: 'trial'
   },
   scheduledDeletionAt: { type: Date, default: null },
-  trialDays:   { type: Number, default: 14 },
-  trialEndsAt: { type: Date,   default: null },
-  mrr:         { type: Number, default: 0 },
+  trialDays: { type: Number, default: 14 },
+  trialEndsAt: { type: Date, default: null },
+  mrr: { type: Number, default: 0 },
   healthScore: { type: Number, default: 95 },
-  lastActiveAt:{ type: Date,   default: Date.now },
+  lastActiveAt: { type: Date, default: Date.now },
 
 
   // ── Billing Sub-document ─────────────────────────────────────
@@ -153,19 +157,19 @@ const StoreSchema = new mongoose.Schema({
   // ── Limit Overrides (Custom Quotas) ──────────────────────────
   limitOverrides: {
     maxProducts: { type: Number, default: null },
-    maxOrders:   { type: Number, default: null },
-    maxStaff:    { type: Number, default: null },
-    maxStorageMB:{ type: Number, default: null }
+    maxOrders: { type: Number, default: null },
+    maxStaff: { type: Number, default: null },
+    maxStorageMB: { type: Number, default: null }
   },
 
   // ── Feature Flags Overrides ──────────────────────────────────
   featureFlags: {
-    customDomain:      { type: Boolean, default: true },
+    customDomain: { type: Boolean, default: true },
     advancedAnalytics: { type: Boolean, default: true },
-    aiTools:           { type: Boolean, default: true },
-    loyaltyProgram:    { type: Boolean, default: false },
-    multiCurrency:     { type: Boolean, default: false },
-    betaCheckout:      { type: Boolean, default: false }
+    aiTools: { type: Boolean, default: true },
+    loyaltyProgram: { type: Boolean, default: false },
+    multiCurrency: { type: Boolean, default: false },
+    betaCheckout: { type: Boolean, default: false }
   },
 
   // ── Domains list ─────────────────────────────────────────────
@@ -199,7 +203,7 @@ const StoreSchema = new mongoose.Schema({
   },
 
   // ── Soft Delete Grace Period ─────────────────────────────────
-  deletedAt:     { type: Date, default: null },
+  deletedAt: { type: Date, default: null },
   deletedReason: { type: String, default: '' },
 
   // ── Theme (legacy) ───────────────────────────────────────────

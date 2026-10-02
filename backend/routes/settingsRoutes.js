@@ -232,7 +232,7 @@ router.post("/api/settings/payment/test-connection", optionalAuth, async (req, r
       const envMode = mode || credentials?.mode || settings?.phonepeMode || "uat";
       const baseUrl = envMode === "production" ? "https://api.phonepe.com/apis/hermes" : "https://api-preprod.phonepe.com/apis/pg-sandbox";
       const endpoint = `${baseUrl}/pg/v1/status/${merchantId}/TEST_VERIFY_CONN_${Date.now()}`;
-      
+
       const stringToHash = `/pg/v1/status/${merchantId}/TEST_VERIFY_CONN_${Date.now()}` + saltKey;
       const sha256 = crypto.createHash("sha256").update(stringToHash).digest("hex");
       const checksum = `${sha256}###${saltIndex}`;
@@ -362,17 +362,17 @@ router.get("/api/settings", optionalAuth, async (req, res) => {
 
 router.post("/api/settings", optionalAuth, async (req, res) => {
   try {
-    const { 
-      tickerText, 
+    const {
+      tickerText,
       tickerSpeed,
       tickerBgColor,
       tickerTextColor,
-      announcementText, 
-      heroTitle, 
-      heroManifesto, 
-      videoTitle, 
-      videoSubtitle, 
-      videoUrl, 
+      announcementText,
+      heroTitle,
+      heroManifesto,
+      videoTitle,
+      videoSubtitle,
+      videoUrl,
       videoFallbackColor,
       lifestyleText,
       lifestyleImage,
@@ -394,7 +394,7 @@ router.post("/api/settings", optionalAuth, async (req, res) => {
       facebookLink,
       contactLink
     } = req.body;
-    
+
     let storeId = await getTenantStoreIdAsync(req);
     if (!storeId) {
       const activeStore = await Store.findOne({ status: "active" }).lean() || await Store.findOne().lean();
@@ -466,7 +466,7 @@ router.post("/api/settings", optionalAuth, async (req, res) => {
     if (req.body.mobileHeroButtonColor !== undefined) settings.mobileHeroButtonColor = req.body.mobileHeroButtonColor;
     if (req.body.mobileHeroButtonTextColor !== undefined) settings.mobileHeroButtonTextColor = req.body.mobileHeroButtonTextColor;
     if (req.body.showMobileHeroButton !== undefined) settings.showMobileHeroButton = req.body.showMobileHeroButton;
-                        
+
     // Product Preview Page settings
     if (req.body.showProductReviews !== undefined) settings.showProductReviews = req.body.showProductReviews;
     if (req.body.showProductExploreMore !== undefined) settings.showProductExploreMore = req.body.showProductExploreMore;
@@ -693,12 +693,35 @@ router.post("/api/settings", optionalAuth, async (req, res) => {
       if (req.body.ownerEmail !== undefined) storeUpdates.ownerEmail = req.body.ownerEmail;
       if (req.body.supportPhone !== undefined) storeUpdates.supportPhone = req.body.supportPhone;
       if (req.body.supportEmail !== undefined) storeUpdates.supportEmail = req.body.supportEmail;
-      if (req.body.customDomain !== undefined) storeUpdates.customDomain = req.body.customDomain.trim().toLowerCase();
       if (req.body.storeAddress1 !== undefined) storeUpdates.address1 = req.body.storeAddress1;
       if (req.body.storeAddress2 !== undefined) storeUpdates.address2 = req.body.storeAddress2;
       if (req.body.storeCity !== undefined) storeUpdates.city = req.body.storeCity;
       if (req.body.storeState !== undefined) storeUpdates.state = req.body.storeState;
       if (req.body.storePostalCode !== undefined) storeUpdates.postalCode = req.body.storePostalCode;
+
+      // Domain management is owned by the merchant domain APIs. If a customDomain
+      // is still supplied through the generic settings save, reconcile the scalar
+      // Store.customDomain with the canonical domains[] array to avoid drift.
+      if (req.body.customDomain !== undefined) {
+        const cleanDomain = (req.body.customDomain || "").trim().toLowerCase();
+        const storeDoc = await Store.findById(settings.storeId);
+        if (storeDoc) {
+          const hasCustom = (storeDoc.domains || []).some(d => d.type === 'custom' && d.domain === cleanDomain);
+          if (cleanDomain && !hasCustom) {
+            storeDoc.domains = storeDoc.domains || [];
+            storeDoc.domains.push({
+              domain: cleanDomain,
+              type: 'custom',
+              isPrimary: !storeDoc.customDomain,
+              dnsStatus: 'pending',
+              sslStatus: 'pending'
+            });
+          }
+          storeDoc.customDomain = cleanDomain;
+          await storeDoc.save();
+          invalidateTenantCache(storeDoc._id);
+        }
+      }
 
       if (Object.keys(storeUpdates).length > 0) {
         await Store.findByIdAndUpdate(settings.storeId, storeUpdates);

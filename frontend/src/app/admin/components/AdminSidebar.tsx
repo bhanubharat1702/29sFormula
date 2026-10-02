@@ -570,37 +570,6 @@ export default function AdminSidebar({
                   </div>
                 </div>
 
-                {/* Account & Security */}
-                <div
-                  onClick={() => {
-                    setActiveTab("settings");
-                    if (setSettingsSubTab) setSettingsSubTab("account");
-                    if (isMobileMenuOpen && setIsMobileMenuOpen) setIsMobileMenuOpen(false);
-                  }}
-                  className={styles.subMenuItem}
-                >
-                  {activeTab === "settings" && settingsSubTab === "account" ? (
-                    <svg style={{ display: "block", minWidth: "28px", width: "28px", height: "36px", marginRight: "8px", color: "#d1d5db" }} viewBox="0 0 28 36" fill="none" stroke="currentColor" strokeWidth="2">
-                      <path d="M 12 0 L 12 14 A 4 4 0 0 0 16 18 L 24 18" strokeLinecap="round" strokeLinejoin="round" />
-                      <path d="M 20 14 L 24 18 L 20 22" strokeLinecap="round" strokeLinejoin="round" />
-                    </svg>
-                  ) : activeTab === "settings" && (settingsSubTab === "domain" || settingsSubTab === "payments" || settingsSubTab === "shipping" || settingsSubTab === "notifications" || settingsSubTab === "policies" || settingsSubTab === "integrations" || settingsSubTab === "trust") ? (
-                    <svg style={{ display: "block", minWidth: "28px", width: "28px", height: "36px", marginRight: "8px", color: "#d1d5db" }} viewBox="0 0 28 36" fill="none" stroke="currentColor" strokeWidth="2">
-                      <path d="M 12 0 L 12 36" strokeLinecap="round" strokeLinejoin="round" />
-                    </svg>
-                  ) : (
-                    <div style={{ minWidth: "28px", width: "28px", height: "36px", marginRight: "8px" }} />
-                  )}
-                  <div className={`${styles.subMenuItemCapsule} ${activeTab === "settings" && settingsSubTab === "account" ? styles.subMenuItemCapsuleActive : ""}`} style={{ display: "flex", alignItems: "center", width: "100%", justifyContent: "space-between" }}>
-                    <div style={{ display: "flex", alignItems: "center" }}>
-                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" style={{ width: "13px", height: "13px", marginRight: "6px" }}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z" />
-                      </svg>
-                      Account & Security
-                    </div>
-                  </div>
-                </div>
-
                 {/* Item 2: Domain & Subdomain */}
                 <div
                   onClick={() => {

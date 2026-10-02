@@ -32,7 +32,7 @@ export const seedDomainDefaults = async () => {
         reason: "System core endpoint protection",
         addedBy: "System Seeder"
       }));
-      await ReservedSubdomain.insertMany(defaultList, { ordered: false }).catch(() => {});
+      await ReservedSubdomain.insertMany(defaultList, { ordered: false }).catch(() => { });
     } else {
       const bulkOps = RESERVED_SUBDOMAINS.map(s => ({
         updateOne: {
@@ -47,7 +47,7 @@ export const seedDomainDefaults = async () => {
           upsert: true
         }
       }));
-      await ReservedSubdomain.bulkWrite(bulkOps).catch(() => {});
+      await ReservedSubdomain.bulkWrite(bulkOps).catch(() => { });
     }
   } catch (err) {
     console.error("Failed to seed domain defaults:", err);
@@ -63,6 +63,22 @@ export const getPlanDomainLimit = (planName, settings) => {
   if (key === 'pro') return 5;
   if (key === 'growth') return 2;
   return 0;
+};
+
+// Count distinct custom domains for a store, reconciling the legacy `customDomain`
+// scalar with the canonical `domains[]` array. De-duplicates so a domain that
+// exists in BOTH places is never counted twice (the previous drift bug).
+export const countCustomDomains = (store) => {
+  const set = new Set();
+  (store?.domains || []).forEach(d => {
+    if (d && d.type === 'custom' && d.domain) {
+      set.add(String(d.domain).toLowerCase().trim());
+    }
+  });
+  if (store?.customDomain) {
+    set.add(String(store.customDomain).toLowerCase().trim());
+  }
+  return set.size;
 };
 
 // GET /api/superadmin/domains — List all domains across the platform
@@ -174,7 +190,7 @@ export const getDomains = async (req, res) => {
     }
     if (search && search.trim()) {
       const q = search.trim().toLowerCase();
-      allDomains = allDomains.filter(d => 
+      allDomains = allDomains.filter(d =>
         d.domain.toLowerCase().includes(q) ||
         d.storeName.toLowerCase().includes(q) ||
         d.subdomain.toLowerCase().includes(q) ||
@@ -231,11 +247,11 @@ export const addDomain = async (req, res) => {
     }
 
     const maxDomainsAllowed = getPlanDomainLimit(store.plan, settings);
-    const existingCustomCount = (store.domains || []).filter(d => d.type === 'custom').length + (store.customDomain ? 1 : 0);
+    const existingCustomCount = countCustomDomains(store);
 
     if (existingCustomCount >= maxDomainsAllowed) {
-      return res.status(400).json({ 
-        error: `Plan limit reached! ${store.plan.toUpperCase()} plan allows max ${maxDomainsAllowed} custom domain(s). Please upgrade plan to add more.` 
+      return res.status(400).json({
+        error: `Plan limit reached! ${store.plan.toUpperCase()} plan allows max ${maxDomainsAllowed} custom domain(s). Please upgrade plan to add more.`
       });
     }
 

@@ -23,6 +23,7 @@ import reviewRoutes from "./routes/reviewRoutes.js";
 import discountRoutes from "./routes/discountRoutes.js";
 import superAdminRoutes from "./routes/superAdminRoutes.js";
 import platformRoutes from "./routes/platformRoutes.js";
+import merchantDomainRoutes from "./routes/merchantDomainRoutes.js";
 
 import { tenantResolver } from "./middleware/tenantResolver.js";
 
@@ -54,6 +55,7 @@ app.use("/", reviewRoutes);
 app.use("/", discountRoutes);
 app.use("/", superAdminRoutes);
 app.use("/", platformRoutes);
+app.use("/", merchantDomainRoutes);
 
 // Global Error Handler Middleware with Sentry Exception Capture
 app.use((err, req, res, next) => {

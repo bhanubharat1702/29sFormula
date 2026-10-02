@@ -1,6 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { COUNTRIES, BUSINESS_CATEGORIES, CURRENCIES, TIMEZONES } from '../../../constants/storeOptions';
 import styles from '../../../page.module.css';
+import { getAuthHeaders } from '../../../hooks/useDashboardData';
 
 export interface ChangedField {
   field: string;
@@ -458,15 +459,18 @@ export function GeneralSubTab(props: any) {
         </div>
       </div>
 
+      {/* Account Security / Change Password */}
+      <ChangePasswordCard />
+
       <SettingsSubTabFooter handleSaveSettings={handleSaveAndResetSnapshot} getChanges={getChanges} />
     </div>
   );
 }
 
 /* ==========================================
- * TAB 2: ACCOUNT & SECURITY SUBTAB
+ * SHARED CHANGE PASSWORD CARD
  * ========================================== */
-export function AccountSecuritySubTab(props: any) {
+export function ChangePasswordCard() {
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -491,9 +495,14 @@ export function AccountSecuritySubTab(props: any) {
 
     setIsUpdatingPassword(true);
     try {
-      const res = await fetch("/api/admin/change-password", {
+      const authHeaders = getAuthHeaders();
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:5001';
+      const res = await fetch(`${apiUrl}/api/admin/change-password`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          ...authHeaders
+        },
         body: JSON.stringify({ currentPassword, newPassword })
       });
       const data = await res.json();
@@ -512,69 +521,50 @@ export function AccountSecuritySubTab(props: any) {
   };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-      {/* Change Password Card */}
-      <div style={cardStyle}>
-        <div style={cardHeaderStyle}>
-          <h3 style={cardTitleStyle}>Change Account Password</h3>
-          <p style={cardSubTitleStyle}>Update your administrator password for security.</p>
-        </div>
-
-        {passwordMsg && (
-          <div style={{
-            padding: '10px 14px',
-            borderRadius: '6px',
-            fontSize: '0.83rem',
-            backgroundColor: passwordMsg.type === 'success' ? '#ecfdf5' : '#fef2f2',
-            color: passwordMsg.type === 'success' ? '#047857' : '#dc2626',
-            border: `1px solid ${passwordMsg.type === 'success' ? '#a7f3d0' : '#fecaca'}`
-          }}>
-            {passwordMsg.text}
-          </div>
-        )}
-
-        <form onSubmit={handlePasswordChange} style={{ display: 'flex', flexDirection: 'column', gap: '14px', maxWidth: '480px' }}>
-          <div>
-            <label style={labelStyle}>Current Password</label>
-            <input type="password" value={currentPassword} onChange={(e) => setCurrentPassword(e.target.value)} required style={inputStyle} />
-          </div>
-          <div>
-            <label style={labelStyle}>New Password</label>
-            <input type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} required style={inputStyle} />
-          </div>
-          <div>
-            <label style={labelStyle}>Confirm New Password</label>
-            <input type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} required style={inputStyle} />
-          </div>
-
-          <div style={{ display: 'flex', justifyContent: 'flex-start', marginTop: '6px' }}>
-            <button
-              type="submit"
-              disabled={isUpdatingPassword}
-              className={styles.btnActionAccent}
-              style={{ padding: '8px 18px', fontSize: '0.85rem' }}
-            >
-              {isUpdatingPassword ? "Updating..." : "Update Password"}
-            </button>
-          </div>
-        </form>
+    <div style={cardStyle}>
+      <div style={cardHeaderStyle}>
+        <h3 style={cardTitleStyle}>Change Account Password</h3>
+        <p style={cardSubTitleStyle}>Update your administrator password for security.</p>
       </div>
 
-      {/* Active Sessions Card */}
-      <div style={cardStyle}>
-        <div style={cardHeaderStyle}>
-          <h3 style={cardTitleStyle}>Active Sessions & Security</h3>
-          <p style={cardSubTitleStyle}>Manage device access and session status.</p>
+      {passwordMsg && (
+        <div style={{
+          padding: '10px 14px',
+          borderRadius: '6px',
+          fontSize: '0.83rem',
+          backgroundColor: passwordMsg.type === 'success' ? '#ecfdf5' : '#fef2f2',
+          color: passwordMsg.type === 'success' ? '#047857' : '#dc2626',
+          border: `1px solid ${passwordMsg.type === 'success' ? '#a7f3d0' : '#fecaca'}`
+        }}>
+          {passwordMsg.text}
+        </div>
+      )}
+
+      <form onSubmit={handlePasswordChange} style={{ display: 'flex', flexDirection: 'column', gap: '14px', maxWidth: '480px' }}>
+        <div>
+          <label style={labelStyle}>Current Password</label>
+          <input type="password" value={currentPassword} onChange={(e) => setCurrentPassword(e.target.value)} required style={inputStyle} />
+        </div>
+        <div>
+          <label style={labelStyle}>New Password</label>
+          <input type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} required style={inputStyle} />
+        </div>
+        <div>
+          <label style={labelStyle}>Confirm New Password</label>
+          <input type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} required style={inputStyle} />
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 14px', background: '#f9fafb', border: '1px solid #e5e7eb', borderRadius: '8px' }}>
-          <div>
-            <span style={{ fontSize: '0.85rem', fontWeight: 600, color: '#111827', display: 'block' }}>Current Session</span>
-            <span style={{ fontSize: '0.78rem', color: '#6b7280' }}>Active Web Browser (Admin Panel)</span>
-          </div>
-          <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#059669', background: '#ecfdf5', padding: '4px 10px', borderRadius: '9999px', border: '1px solid #a7f3d0' }}>ONLINE</span>
+        <div style={{ display: 'flex', justifyContent: 'flex-start', marginTop: '6px' }}>
+          <button
+            type="submit"
+            disabled={isUpdatingPassword}
+            className={styles.btnActionAccent}
+            style={{ padding: '8px 18px', fontSize: '0.85rem' }}
+          >
+            {isUpdatingPassword ? "Updating..." : "Update Password"}
+          </button>
         </div>
-      </div>
+      </form>
     </div>
   );
 }
@@ -582,47 +572,455 @@ export function AccountSecuritySubTab(props: any) {
 /* ==========================================
  * TAB 3: DOMAIN SUBTAB
  * ========================================== */
-export function DomainSubTab(props: any) {
-  const { storeSubdomain, storeCustomDomain, setStoreCustomDomain, handleSaveSettings } = props;
-  const initialRef = useRef({ storeCustomDomain });
+/* Shared button / badge styles for the domain manager */
+const primaryBtn: React.CSSProperties = {
+  padding: '9px 16px', fontSize: '0.83rem', fontWeight: 600, borderRadius: '8px',
+  border: '1px solid #0c0a09', backgroundColor: '#0c0a09', color: '#fff', cursor: 'pointer', whiteSpace: 'nowrap'
+};
+const secondaryBtn: React.CSSProperties = {
+  padding: '7px 12px', fontSize: '0.78rem', fontWeight: 600, borderRadius: '6px',
+  border: '1px solid #d1d5db', backgroundColor: '#fff', color: '#374151', cursor: 'pointer', whiteSpace: 'nowrap'
+};
+const badgeBase: React.CSSProperties = {
+  fontSize: '0.7rem', fontWeight: 700, padding: '3px 8px', borderRadius: '999px', whiteSpace: 'nowrap'
+};
 
-  const getChanges = (): ChangedField[] => {
-    const changes: ChangedField[] = [];
-    if (storeCustomDomain !== initialRef.current.storeCustomDomain) {
-      changes.push({ field: "Custom Domain", from: initialRef.current.storeCustomDomain || "(none)", to: storeCustomDomain || "(none)" });
+const planLabel = (p?: string) => {
+  const map: Record<string, string> = { starter: 'Starter', growth: 'Growth', pro: 'Pro', enterprise: 'Enterprise' };
+  return map[(p || 'starter').toLowerCase()] || (p || 'Starter');
+};
+
+const dnsStatusMeta = (status: string) => {
+  const map: Record<string, { label: string; color: string; bg: string; border: string }> = {
+    pending: { label: 'Pending DNS', color: '#b45309', bg: '#fffbeb', border: '#fde68a' },
+    dns_verified: { label: 'DNS Verified', color: '#0369a1', bg: '#eff6ff', border: '#bfdbfe' },
+    ssl_issued: { label: 'SSL Issued', color: '#6d28d9', bg: '#f5f3ff', border: '#ddd6fe' },
+    active: { label: 'Active', color: '#047857', bg: '#ecfdf5', border: '#a7f3d0' },
+    failed: { label: 'Failed', color: '#b91c1c', bg: '#fef2f2', border: '#fecaca' }
+  };
+  return map[status] || map.pending;
+};
+
+const sslStatusMeta = (status: string) => {
+  const map: Record<string, { label: string; color: string; bg: string; border: string }> = {
+    pending: { label: 'Pending', color: '#b45309', bg: '#fffbeb', border: '#fde68a' },
+    issuing: { label: 'Issuing', color: '#0369a1', bg: '#eff6ff', border: '#bfdbfe' },
+    active: { label: 'Active', color: '#047857', bg: '#ecfdf5', border: '#a7f3d0' },
+    expiring_soon: { label: 'Expiring Soon', color: '#b45309', bg: '#fffbeb', border: '#fde68a' },
+    expired: { label: 'Expired', color: '#b91c1c', bg: '#fef2f2', border: '#fecaca' },
+    failed: { label: 'Failed', color: '#b91c1c', bg: '#fef2f2', border: '#fecaca' }
+  };
+  return map[status] || map.pending;
+};
+
+function DnsRecordRow({ label, type, host, value }: { label: string; type: string; host: string; value: string }) {
+  const [copied, setCopied] = useState(false);
+  const copy = () => {
+    if (typeof navigator !== 'undefined' && navigator.clipboard) {
+      navigator.clipboard.writeText(value).then(() => {
+        setCopied(true);
+        setTimeout(() => setCopied(false), 1500);
+      }).catch(() => { });
     }
-    return changes;
+  };
+  return (
+    <div style={{ display: 'grid', gridTemplateColumns: '110px 70px 1fr auto', gap: '10px', alignItems: 'center', padding: '9px 12px', borderRadius: '8px', backgroundColor: '#f8fafc', border: '1px solid #e2e8f0', fontSize: '0.78rem' }}>
+      <span style={{ fontWeight: 600, color: '#475569' }}>{label}</span>
+      <span style={{ fontWeight: 700, color: '#0f172a' }}>{type}</span>
+      <span style={{ color: '#334155', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={`${host} → ${value}`}>
+        {host} <span style={{ color: '#94a3b8' }}>→</span> {value}
+      </span>
+      <button type="button" onClick={copy} style={secondaryBtn}>{copied ? 'Copied' : 'Copy'}</button>
+    </div>
+  );
+}
+
+export function DomainSubTab() {
+  const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:5001';
+
+  interface DomainItem {
+    id: string;
+    domain: string;
+    type: string;
+    isPrimary: boolean;
+    dnsStatus: string;
+    sslStatus: string;
+    verificationToken: string;
+    targetCname: string;
+    targetA: string;
+    dnsFailureReason?: string;
+    isBlocked?: boolean;
+    blockReason?: string;
+    sslExpiresAt?: string | null;
+    createdAt?: string | null;
+  }
+
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [notice, setNotice] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  const [platformSubdomain, setPlatformSubdomain] = useState<{ label: string; fullDomain: string; status: string } | null>(null);
+  const [customDomains, setCustomDomains] = useState<DomainItem[]>([]);
+  const [entitlement, setEntitlement] = useState<any>(null);
+  const [settings, setSettings] = useState<any>({ platformOwnDomain: '29sformula.com', cnameTargetHost: 'store.29sformula.com' });
+  const [newDomain, setNewDomain] = useState('');
+  const [addPending, setAddPending] = useState(false);
+  const [rechecking, setRechecking] = useState<string | null>(null);
+  const [dnsInstructions, setDnsInstructions] = useState<any>(null);
+  const [editingSubdomain, setEditingSubdomain] = useState(false);
+  const [subdomainDraft, setSubdomainDraft] = useState('');
+  const [subdomainCheck, setSubdomainCheck] = useState<any>(null);
+  const [checkingSubdomain, setCheckingSubdomain] = useState(false);
+  const [savingSubdomain, setSavingSubdomain] = useState(false);
+
+  const loadDomains = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await fetch(`${API_BASE}/api/merchant/domains`, { headers: getAuthHeaders(), cache: 'no-store' });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || `Failed to load domains (HTTP ${res.status})`);
+      setPlatformSubdomain(data.platformSubdomain || null);
+      setCustomDomains(Array.isArray(data.customDomains) ? data.customDomains : []);
+      setEntitlement(data.entitlement || null);
+      if (data.settings) setSettings(data.settings);
+      setSubdomainDraft(
+        (data.platformSubdomain && (data.platformSubdomain.label || data.platformSubdomain.suggestedSubdomain)) || ''
+      );
+    } catch (err: any) {
+      setError(err.message || 'Failed to load domain settings.');
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleSaveAndResetSnapshot = async () => {
-    await handleSaveSettings();
-    initialRef.current = { storeCustomDomain };
+  React.useEffect(() => { loadDomains(); /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, []);
+
+  const buildLocalDns = (d: DomainItem) => ({
+    domain: d.domain,
+    cnameRecord: { host: d.domain, type: 'CNAME', value: d.targetCname },
+    aRecord: { host: '@', type: 'A', value: d.targetA },
+    txtRecord: { host: `_platform-challenge.${d.domain}`, type: 'TXT', value: d.verificationToken || '(generated on add)' }
+  });
+
+  const handleAddDomain = async () => {
+    const domain = newDomain.trim();
+    if (!domain) return;
+    setAddPending(true);
+    setNotice(null);
+    try {
+      const res = await fetch(`${API_BASE}/api/merchant/domains`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
+        body: JSON.stringify({ domain })
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || 'Failed to add domain.');
+      setNewDomain('');
+      setDnsInstructions(data.dnsInstructions || null);
+      setNotice({ type: 'success', text: data.message || 'Domain added. Configure DNS to verify.' });
+      await loadDomains();
+    } catch (err: any) {
+      setNotice({ type: 'error', text: err.message });
+    } finally {
+      setAddPending(false);
+    }
   };
+
+  const handleRecheck = async (domain: string) => {
+    setRechecking(domain);
+    setNotice(null);
+    try {
+      const res = await fetch(`${API_BASE}/api/merchant/domains/recheck`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
+        body: JSON.stringify({ domain })
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || 'Failed to recheck domain.');
+      setNotice({ type: (data.verified || data.awaitingApproval) ? 'success' : 'error', text: data.message });
+      if (data.dnsInstructions) setDnsInstructions(data.dnsInstructions);
+      await loadDomains();
+    } catch (err: any) {
+      setNotice({ type: 'error', text: err.message });
+    } finally {
+      setRechecking(null);
+    }
+  };
+
+  const handleSetPrimary = async (domain: string) => {
+    setNotice(null);
+    try {
+      const res = await fetch(`${API_BASE}/api/merchant/domains/set-primary`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
+        body: JSON.stringify({ domain })
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || 'Failed to set primary domain.');
+      setNotice({ type: 'success', text: data.message });
+      await loadDomains();
+    } catch (err: any) {
+      setNotice({ type: 'error', text: err.message });
+    }
+  };
+
+  const handleRemove = async (domain: string) => {
+    if (typeof window !== 'undefined' && !window.confirm(`Disconnect custom domain "${domain}"? Your store will fall back to the platform subdomain.`)) return;
+    setNotice(null);
+    try {
+      const res = await fetch(`${API_BASE}/api/merchant/domains`, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
+        body: JSON.stringify({ domain })
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || 'Failed to remove domain.');
+      setDnsInstructions(null);
+      setNotice({ type: 'success', text: data.message });
+      await loadDomains();
+    } catch (err: any) {
+      setNotice({ type: 'error', text: err.message });
+    }
+  };
+
+  const handleCheckSubdomain = async () => {
+    const label = subdomainDraft.trim();
+    if (!label) return;
+    setCheckingSubdomain(true);
+    try {
+      const res = await fetch(`${API_BASE}/api/merchant/domains/availability?subdomain=${encodeURIComponent(label)}`, { headers: getAuthHeaders() });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || 'Failed to check availability.');
+      setSubdomainCheck(data);
+    } catch (err: any) {
+      setSubdomainCheck({ available: false, reason: err.message });
+    } finally {
+      setCheckingSubdomain(false);
+    }
+  };
+
+  const handleSaveSubdomain = async () => {
+    const label = subdomainDraft.trim();
+    if (!label) return;
+    setSavingSubdomain(true);
+    setNotice(null);
+    try {
+      const res = await fetch(`${API_BASE}/api/merchant/domains/subdomain`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
+        body: JSON.stringify({ subdomain: label })
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || 'Failed to update subdomain.');
+      setNotice({ type: 'success', text: data.message });
+      setEditingSubdomain(false);
+      setSubdomainCheck(null);
+      await loadDomains();
+    } catch (err: any) {
+      setNotice({ type: 'error', text: err.message });
+    } finally {
+      setSavingSubdomain(false);
+    }
+  };
+
+  const platformDomain = settings?.platformOwnDomain || '29sformula.com';
+  const fullSubdomain = platformSubdomain?.fullDomain
+    || (platformSubdomain?.label ? `${platformSubdomain.label}.${platformDomain}` : '');
+  const subdomainStatus = platformSubdomain?.status || 'active';
+  const subdomainStatusMeta = subdomainStatus === 'active'
+    ? { label: 'ACTIVE', color: '#047857', background: '#ecfdf5', border: '1px solid #a7f3d0' }
+    : { label: 'NOT SET', color: '#b45309', background: '#fffbeb', border: '1px solid #fcd34d' };
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-      <div style={cardStyle}>
-        <div style={cardHeaderStyle}>
-          <h3 style={cardTitleStyle}>Store Domain & Subdomain</h3>
-          <p style={cardSubTitleStyle}>Your storefront public web address configurations.</p>
+      {notice && (
+        <div style={{
+          padding: '10px 14px', borderRadius: '8px', fontSize: '0.82rem',
+          border: `1px solid ${notice.type === 'success' ? '#a7f3d0' : '#fecaca'}`,
+          backgroundColor: notice.type === 'success' ? '#ecfdf5' : '#fef2f2',
+          color: notice.type === 'success' ? '#065f46' : '#991b1b'
+        }}>
+          {notice.text}
         </div>
+      )}
 
-        <div>
-          <label style={labelStyle}>Free Platform Subdomain</label>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <input type="text" disabled value={`${storeSubdomain || 'yourstore'}.29sformula.com`} style={{ ...inputStyle, backgroundColor: '#f3f4f6', color: '#6b7280' }} />
-            <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#059669', background: '#ecfdf5', padding: '6px 12px', borderRadius: '6px', border: '1px solid #a7f3d0', whiteSpace: 'nowrap' }}>ACTIVE</span>
+      {loading ? (
+        <div style={{ ...cardStyle, alignItems: 'center', color: '#6b7280', fontSize: '0.85rem' }}>Loading domain settings…</div>
+      ) : error ? (
+        <div style={{ ...cardStyle, borderColor: '#fecaca' }}>
+          <span style={{ color: '#b91c1c', fontSize: '0.85rem' }}>{error}</span>
+          <button onClick={loadDomains} style={{ ...secondaryBtn, alignSelf: 'flex-start' }}>Retry</button>
+        </div>
+      ) : (
+        <>
+          {/* Free Platform Subdomain */}
+          <div style={cardStyle}>
+            <div style={cardHeaderStyle}>
+              <h3 style={cardTitleStyle}>Store Domain & Subdomain</h3>
+              <p style={cardSubTitleStyle}>Your storefront public web address configurations.</p>
+            </div>
+
+            <div>
+              <label style={labelStyle}>Free Platform Subdomain</label>
+              {!editingSubdomain ? (
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <input type="text" disabled value={fullSubdomain} placeholder="Not assigned yet" style={{ ...inputStyle, backgroundColor: '#f3f4f6', color: '#6b7280' }} />
+                  <span style={{ ...badgeBase, ...subdomainStatusMeta, padding: '6px 12px', borderRadius: '6px' }}>{subdomainStatusMeta.label}</span>
+                  <button onClick={() => setEditingSubdomain(true)} style={secondaryBtn}>Change</button>
+                </div>
+              ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                    <div style={{ display: 'flex', alignItems: 'stretch', flex: '1 1 260px' }}>
+                      <input
+                        value={subdomainDraft}
+                        onChange={(e) => { setSubdomainDraft(e.target.value); setSubdomainCheck(null); }}
+                        placeholder="your-brand"
+                        style={{ ...inputStyle, borderTopRightRadius: 0, borderBottomRightRadius: 0 }}
+                      />
+                      <span style={{ display: 'flex', alignItems: 'center', padding: '0 12px', border: '1px solid #d1d5db', borderLeft: 'none', borderRadius: '0 8px 8px 0', backgroundColor: '#f9fafb', fontSize: '0.84rem', color: '#374151', whiteSpace: 'nowrap' }}>
+                        .{platformDomain}
+                      </span>
+                    </div>
+                    <button onClick={handleCheckSubdomain} disabled={checkingSubdomain || !subdomainDraft.trim()} style={secondaryBtn}>
+                      {checkingSubdomain ? 'Checking…' : 'Check availability'}
+                    </button>
+                    <button onClick={handleSaveSubdomain} disabled={savingSubdomain || !subdomainDraft.trim()} style={primaryBtn}>
+                      {savingSubdomain ? 'Saving…' : 'Save'}
+                    </button>
+                    <button onClick={() => { setEditingSubdomain(false); setSubdomainDraft(platformSubdomain?.label || ''); setSubdomainCheck(null); }} style={secondaryBtn}>
+                      Cancel
+                    </button>
+                  </div>
+                  {subdomainCheck && (
+                    <span style={{ fontSize: '0.78rem', fontWeight: 600, color: subdomainCheck.available ? '#047857' : '#b91c1c' }}>
+                      {subdomainCheck.available
+                        ? `✓ '${subdomainCheck.subdomain}' is available.`
+                        : `✕ ${subdomainCheck.reason || 'This subdomain is not available.'}`}
+                    </span>
+                  )}
+                </div>
+              )}
+              <span style={{ fontSize: '0.78rem', color: '#6b7280', marginTop: '6px', display: 'block' }}>
+                Auto-derived from your brand name. Availability is verified against all existing stores and reserved keywords before assignment.
+              </span>
+            </div>
           </div>
-        </div>
 
-        <div>
-          <label style={labelStyle}>Custom Brand Domain</label>
-          <input type="text" value={storeCustomDomain || ''} onChange={(e) => setStoreCustomDomain && setStoreCustomDomain(e.target.value)} placeholder="e.g. www.mybrand.com" style={inputStyle} />
-          <span style={{ fontSize: '0.78rem', color: '#6b7280', marginTop: '4px', display: 'block' }}>Enter your registered domain. Point your CNAME record to <code>store.29sformula.com</code>.</span>
-        </div>
-      </div>
+          {/* Custom Brand Domain */}
+          <div style={cardStyle}>
+            <div style={cardHeaderStyle}>
+              <h3 style={cardTitleStyle}>Custom Brand Domain</h3>
+              <p style={cardSubTitleStyle}>Connect your own registered domain to your storefront.</p>
+            </div>
 
-      <SettingsSubTabFooter handleSaveSettings={handleSaveAndResetSnapshot} getChanges={getChanges} />
+            {entitlement && (entitlement.entitled ? (
+              <div style={{ padding: '10px 14px', borderRadius: '8px', border: '1px solid #a7f3d0', backgroundColor: '#ecfdf5', fontSize: '0.82rem', color: '#065f46' }}>
+                <strong>{planLabel(entitlement.plan)} plan</strong> includes custom brand domains — {entitlement.used} of {entitlement.limit} used ({entitlement.remaining} remaining).
+              </div>
+            ) : (
+              <div style={{ padding: '14px', borderRadius: '8px', border: '1px solid #fecaca', backgroundColor: '#fef2f2', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                <span style={{ fontSize: '0.85rem', color: '#991b1b', fontWeight: 600 }}>🔒 Custom Brand Domain is a paid feature</span>
+                <span style={{ fontSize: '0.8rem', color: '#b91c1c' }}>
+                  Your {planLabel(entitlement.plan)} plan does not include a custom brand domain. Upgrade to the {planLabel(entitlement.minPlanWithCustomDomain)} plan to connect your own domain.
+                </span>
+                <button
+                  onClick={() => setNotice({ type: 'success', text: 'Redirecting to plan upgrades… Please contact support to upgrade your plan.' })}
+                  style={{ ...primaryBtn, alignSelf: 'flex-start' }}
+                >
+                  Upgrade Plan
+                </button>
+              </div>
+            ))}
+
+            {entitlement?.entitled && (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                <label style={labelStyle}>Connect a Custom Domain</label>
+                <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                  <input
+                    type="text"
+                    value={newDomain}
+                    onChange={(e) => setNewDomain(e.target.value)}
+                    placeholder="e.g. shop.mybrand.com"
+                    style={{ ...inputStyle, flex: '1 1 260px' }}
+                    disabled={!entitlement.canAdd}
+                  />
+                  <button
+                    onClick={handleAddDomain}
+                    disabled={addPending || !entitlement.canAdd || !newDomain.trim()}
+                    style={{ ...primaryBtn, opacity: (addPending || !entitlement.canAdd || !newDomain.trim()) ? 0.55 : 1 }}
+                  >
+                    {addPending ? 'Adding…' : 'Connect Domain'}
+                  </button>
+                </div>
+                {!entitlement.canAdd && (
+                  <span style={{ fontSize: '0.76rem', color: '#b45309' }}>Plan limit reached. Remove a domain or upgrade your plan to add more.</span>
+                )}
+              </div>
+            )}
+
+            {/* DNS instructions panel */}
+            {dnsInstructions && (
+              <div style={{ padding: '14px', borderRadius: '10px', border: '1px solid #bae6fd', backgroundColor: '#f0f9ff', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '10px' }}>
+                  <strong style={{ fontSize: '0.88rem', color: '#0c4a6e' }}>DNS Setup for {dnsInstructions.domain}</strong>
+                  <button onClick={() => setDnsInstructions(null)} style={secondaryBtn}>Dismiss</button>
+                </div>
+                <span style={{ fontSize: '0.78rem', color: '#075985' }}>
+                  Add the following records at your domain registrar, then click “Re-check DNS” after propagation (usually 5–60 minutes).
+                </span>
+                <DnsRecordRow label="CNAME" type="CNAME" host={dnsInstructions.cnameRecord.host} value={dnsInstructions.cnameRecord.value} />
+                <DnsRecordRow label="A Record (apex)" type="A" host={dnsInstructions.aRecord.host} value={dnsInstructions.aRecord.value} />
+                <DnsRecordRow label="Ownership TXT" type="TXT" host={dnsInstructions.txtRecord.host} value={dnsInstructions.txtRecord.value} />
+              </div>
+            )}
+
+            {/* Connected domains list */}
+            {customDomains.length === 0 ? (
+              <div style={{ padding: '18px', borderRadius: '8px', border: '1px dashed #d1d5db', textAlign: 'center', color: '#9ca3af', fontSize: '0.82rem' }}>
+                No custom domains connected yet.
+              </div>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                {customDomains.map((d) => {
+                  const dm = dnsStatusMeta(d.dnsStatus);
+                  const sm = sslStatusMeta(d.sslStatus);
+                  const isLegacy = typeof d.id === 'string' && d.id.endsWith('_legacy');
+                  return (
+                    <div key={d.id} style={{ padding: '12px 14px', borderRadius: '10px', border: '1px solid #e5e7eb', backgroundColor: '#fff', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          <span style={{ fontWeight: 600, color: '#111827', fontSize: '0.9rem' }}>{d.domain}</span>
+                          {d.isPrimary && (
+                            <span style={{ ...badgeBase, color: '#6d28d9', backgroundColor: '#f5f3ff', border: '1px solid #ddd6fe' }}>Primary</span>
+                          )}
+                        </div>
+                        <div style={{ display: 'flex', gap: '6px', alignItems: 'center', flexWrap: 'wrap' }}>
+                          <span style={{ ...badgeBase, color: dm.color, backgroundColor: dm.bg, border: `1px solid ${dm.border}` }}>{dm.label}</span>
+                          <span style={{ ...badgeBase, color: sm.color, backgroundColor: sm.bg, border: `1px solid ${sm.border}` }}>SSL: {sm.label}</span>
+                        </div>
+                      </div>
+                      {d.isBlocked ? (
+                        <span style={{ fontSize: '0.76rem', color: '#b91c1c' }}>Blocked: {d.blockReason || 'Please contact support.'}</span>
+                      ) : d.dnsFailureReason ? (
+                        <span style={{ fontSize: '0.76rem', color: '#b45309' }}>{d.dnsFailureReason}</span>
+                      ) : null}
+                      <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                        <button onClick={() => handleRecheck(d.domain)} disabled={rechecking === d.domain || isLegacy} title={isLegacy ? 'Legacy domain — re-add it to enable live DNS checks.' : undefined} style={{ ...secondaryBtn, opacity: isLegacy ? 0.55 : 1 }}>
+                          {rechecking === d.domain ? 'Checking…' : 'Re-check DNS'}
+                        </button>
+                        <button onClick={() => setDnsInstructions(buildLocalDns(d))} style={secondaryBtn}>View DNS Records</button>
+                        {!d.isPrimary && !isLegacy && <button onClick={() => handleSetPrimary(d.domain)} style={secondaryBtn}>Make Primary</button>}
+                        <button onClick={() => handleRemove(d.domain)} style={{ ...secondaryBtn, color: '#b91c1c', borderColor: '#fecaca' }}>Remove</button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        </>
+      )}
     </div>
   );
 }
@@ -1904,8 +2302,7 @@ export default function SettingsTab(props: SettingsTabProps) {
     <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 16px 24px 16px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
       <div>
         {settingsSubTab === "general" && <GeneralSubTab {...props} />}
-        {settingsSubTab === "account" && <AccountSecuritySubTab {...props} />}
-        {settingsSubTab === "domain" && <DomainSubTab {...props} />}
+        {settingsSubTab === "domain" && <DomainSubTab />}
         {settingsSubTab === "payments" && <PaymentsSubTab {...props} />}
         {settingsSubTab === "shipping" && <ShippingSubTab {...props} />}
         {settingsSubTab === "notifications" && <NotificationsSubTab {...props} />}

@@ -6,6 +6,7 @@ import Customer from "../models/Customer.js";
 import Review from "../models/Review.js";
 import { verifyToken, isAdmin } from "../middleware/authMiddleware.js";
 import { getTenantStoreId } from "../utils/tenantHelper.js";
+import { runWithoutTenant } from "../utils/tenantContext.js";
 
 const router = express.Router();
 
@@ -355,19 +356,90 @@ router.post("/api/admin/change-password", async (req, res) => {
     const User = (await import("../models/User.js")).default;
     const bcrypt = (await import("bcryptjs")).default;
 
-    const user = await User.findById(req.user.id);
+    let user;
+    await runWithoutTenant(async () => {
+      if (req.user?.id && mongoose.Types.ObjectId.isValid(req.user.id)) {
+        user = await User.findById(req.user.id).setOptions({ skipTenantFilter: true });
+      }
+      if (!user && req.user?.id) {
+        user = await User.findOne({ _id: String(req.user.id) }).setOptions({ skipTenantFilter: true });
+      }
+      if (!user && req.user?.email) {
+        const cleanEmail = String(req.user.email).trim();
+        user = await User.findOne({ email: new RegExp(`^${cleanEmail}$`, "i") }).setOptions({ skipTenantFilter: true });
+      }
+    });
+
+    // Special handling if logged in via system admin shortcut (email: admin or id: admin_system_id)
+    const isSystemAdminToken = req.user?.id === "admin_system_id" || (req.user?.email && req.user.email.toLowerCase() === (process.env.ADMIN_EMAIL || "gopibhanubharat@gmail.com").toLowerCase());
+
     if (!user) {
-      return res.status(404).json({ error: "Admin user account not found." });
+      if (!isSystemAdminToken) {
+        return res.status(404).json({ error: "User account not found. Please log in again." });
+      }
+      // If user does not exist in DB yet (e.g. system admin shortcut)
+      const defaultPass = "admin";
+      const trimmedCurrentPass = String(currentPassword).trim();
+      if (trimmedCurrentPass !== defaultPass && currentPassword !== defaultPass) {
+        return res.status(400).json({ error: "Current password is incorrect." });
+      }
+      const adminEmail = req.user?.email || process.env.ADMIN_EMAIL || "gopibhanubharat@gmail.com";
+      const salt = await bcrypt.genSalt(10);
+      const hashedPassword = await bcrypt.hash(newPassword, salt);
+      user = new User({
+        name: "System Admin",
+        email: adminEmail.toLowerCase(),
+        password: hashedPassword,
+        isAdmin: true,
+        role: "admin"
+      });
+      await runWithoutTenant(async () => {
+        await user.save();
+      });
+      return res.json({ message: "Password updated successfully." });
     }
 
-    const isMatch = await bcrypt.compare(currentPassword, user.password);
+    const trimmedCurrentPass = String(currentPassword).trim();
+    const trimmedNewPass = String(newPassword).trim();
+
+    // Verify current password against database user
+    let isMatch = false;
+    if (user.password) {
+      try {
+        isMatch = await bcrypt.compare(currentPassword, user.password);
+      } catch (e) {
+        isMatch = false;
+      }
+      if (!isMatch) {
+        try {
+          isMatch = await bcrypt.compare(trimmedCurrentPass, user.password);
+        } catch (e) {
+          isMatch = false;
+        }
+      }
+      if (!isMatch && (user.password === currentPassword || user.password === trimmedCurrentPass || user.password === String(currentPassword) || user.password === String(trimmedCurrentPass))) {
+        isMatch = true;
+      }
+    }
+    // Also allow 'admin' if system admin shortcut is active
+    if (!isMatch && isSystemAdminToken && (trimmedCurrentPass === "admin" || currentPassword === "admin")) {
+      isMatch = true;
+    }
+
     if (!isMatch) {
+      console.warn(`Change Password failed for user email=${user.email}: currentPassword provided does not match DB hash.`);
       return res.status(400).json({ error: "Current password is incorrect." });
     }
 
-    const salt = await bcrypt.genSalt(10);
-    user.password = await bcrypt.hash(newPassword, salt);
-    await user.save();
+    const salt = await bcrypt.genSalt(12);
+    user.password = await bcrypt.hash(trimmedNewPass, salt);
+    if (user.mustChangePassword) {
+      user.mustChangePassword = false;
+    }
+    
+    await runWithoutTenant(async () => {
+      await user.save();
+    });
 
     res.json({ message: "Password updated successfully." });
   } catch (error) {

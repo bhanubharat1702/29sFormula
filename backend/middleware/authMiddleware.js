@@ -31,7 +31,7 @@ const resolveUserStoreId = async (user) => {
  */
 export const verifyToken = async (req, res, next) => {
   const authHeader = req.headers.authorization || req.headers.Authorization;
-  
+
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
     return res.status(401).json({ error: "Access denied. Authorization token missing." });
   }
@@ -61,7 +61,18 @@ export const isAdmin = (req, res, next) => {
     return res.status(401).json({ error: "Authentication required." });
   }
 
-  const userIsAdmin = req.user.isAdmin || req.user.role === "admin" || (process.env.ADMIN_EMAIL && req.user.email?.toLowerCase() === process.env.ADMIN_EMAIL.toLowerCase());
+  // Merchant store owners carry full admin privileges for their own tenant.
+  // Their tokens are issued with role "owner" / isOwner and (for newly
+  // provisioned owners) isAdmin; impersonation tokens only carry role "owner",
+  // so owner/isOwner must be accepted here. Regular storefront customers are
+  // role "user" and remain blocked with 403.
+  const userIsAdmin = Boolean(
+    req.user.isAdmin ||
+    req.user.isOwner ||
+    req.user.role === "admin" ||
+    req.user.role === "owner" ||
+    (process.env.ADMIN_EMAIL && req.user.email?.toLowerCase() === process.env.ADMIN_EMAIL.toLowerCase())
+  );
 
   if (!userIsAdmin) {
     return res.status(403).json({ error: "Access denied. Admin privileges required." });
