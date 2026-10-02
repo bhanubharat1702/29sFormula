@@ -3130,15 +3130,7 @@ export default function AdminDashboard() {
       {/* 2. Main Page Content Wrapper */}
       <div className={styles.mainWrapper}>
 
-        {/* Top bar with search input */}
-        <header className={styles.topNavbar} style={{ borderBottom: '1px solid #e5e7eb', backgroundColor: '#ffffff' }}>
-          <div onClick={() => setIsSearchOpen(true)} style={{ cursor: 'pointer', backgroundColor: '#f9fafb', border: '1px solid #e5e7eb', borderRadius: '30px', transition: 'all 0.2s', padding: '8px 12px 8px 16px', marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '8px' }} onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#f3f4f6'} onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#f9fafb'}>
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="#6b7280" style={{ width: '18px', height: '18px' }}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.602 10.602Z" />
-            </svg>
-            <span style={{ backgroundColor: '#ffffff', border: '1px solid #e5e7eb', borderRadius: '4px', padding: '2px 6px', fontSize: '11px', fontWeight: 600, color: '#6b7280', letterSpacing: '0.05em', boxShadow: '0 1px 2px rgba(0,0,0,0.05)' }}>⌘K</span>
-          </div>
-        </header>
+
 
         {/* GoJim Style Global Search Overlay */}
         <div
