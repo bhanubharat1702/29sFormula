@@ -194,6 +194,14 @@ export const MerchantDetailsModal: React.FC<MerchantDetailsModalProps> = ({
                 </strong>
               </div>
               <div>
+                <span style={{ color: "#6b7280" }}>Support Email: </span>
+                <strong style={{ color: "#111827" }}>{store.supportEmail || "Not specified"}</strong>
+              </div>
+              <div>
+                <span style={{ color: "#6b7280" }}>Support Phone: </span>
+                <strong style={{ color: "#111827" }}>{store.supportPhone || "Not specified"}</strong>
+              </div>
+              <div>
                 <span style={{ color: "#6b7280" }}>Timezone: </span>
                 <strong style={{ color: "#111827" }}>{store.timezone || "Asia/Kolkata"}</strong>
               </div>

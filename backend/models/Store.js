@@ -103,6 +103,8 @@ const StoreSchema = new mongoose.Schema({
   ownerName:  { type: String, default: '' },
   ownerEmail: { type: String, default: '', lowercase: true, trim: true },
   ownerPhone: { type: String, default: '' },
+  supportEmail:{ type: String, default: '', lowercase: true, trim: true },
+  supportPhone:{ type: String, default: '' },
 
   // ── Business Details ─────────────────────────────────────────
   businessType: {

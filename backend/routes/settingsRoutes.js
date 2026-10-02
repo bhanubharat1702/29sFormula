@@ -5,6 +5,7 @@ import { setCachedSettingsForStore, invalidateSettingsCache } from "../utils/cac
 import { invalidateTenantCache } from "../middleware/tenantResolver.js";
 import { redisCache } from "../middleware/cacheMiddleware.js";
 import { getTenantStoreId } from "../utils/tenantHelper.js";
+import { optionalAuth } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
@@ -117,9 +118,14 @@ const cleanLegacySettings = async (settings) => {
   return settings;
 };
 
-router.get("/api/settings", async (req, res) => {
+router.get("/api/settings", optionalAuth, async (req, res) => {
   try {
-    const storeId = getTenantStoreId(req);
+    let storeId = getTenantStoreId(req);
+    if (!storeId) {
+      const activeStore = await Store.findOne({ status: "active" }).lean() || await Store.findOne().lean();
+      if (activeStore) storeId = activeStore._id;
+    }
+
     const filter = storeId ? { storeId } : {};
 
     let settings = await Settings.findOne(filter);
@@ -134,14 +140,49 @@ router.get("/api/settings", async (req, res) => {
     } else {
       await cleanLegacySettings(settings);
     }
-    res.json(settings);
+
+    const responseObj = settings.toObject ? settings.toObject() : { ...settings };
+    const targetStoreId = storeId || settings.storeId;
+
+    if (targetStoreId) {
+      const store = await Store.findById(targetStoreId).lean();
+      if (store) {
+        responseObj.storeDetails = {
+          name: store.name || "",
+          subdomain: store.subdomain || "",
+          customDomain: store.customDomain || "",
+          businessName: store.businessName || store.name || "",
+          businessType: store.businessType || "retail",
+          country: store.country || "India",
+          currency: store.currency || "INR",
+          timezone: store.timezone || "Asia/Kolkata",
+          ownerName: store.ownerName || "",
+          ownerEmail: store.ownerEmail || "",
+          ownerPhone: store.ownerPhone || "",
+          supportEmail: store.supportEmail || "",
+          supportPhone: store.supportPhone || "",
+          domains: store.domains || [],
+          plan: store.plan || "starter",
+          status: store.status || "active"
+        };
+
+        // Fallback root properties from Store model if missing or empty on Settings
+        if (!responseObj.ownerEmail) responseObj.ownerEmail = store.ownerEmail || "";
+        if (!responseObj.ownerPhone) responseObj.ownerPhone = store.ownerPhone || "";
+        if (!responseObj.supportEmail) responseObj.supportEmail = store.supportEmail || "";
+        if (!responseObj.supportPhone) responseObj.supportPhone = store.supportPhone || "";
+        if (!responseObj.businessName) responseObj.businessName = store.businessName || store.name || "";
+      }
+    }
+
+    res.json(responseObj);
   } catch (error) {
     console.error("Fetch Settings Error:", error);
     res.status(500).json({ error: "Failed to fetch settings" });
   }
 });
 
-router.post("/api/settings", async (req, res) => {
+router.post("/api/settings", optionalAuth, async (req, res) => {
   try {
     const { 
       tickerText, 
@@ -176,12 +217,18 @@ router.post("/api/settings", async (req, res) => {
       contactLink
     } = req.body;
     
-    const storeId = getTenantStoreId(req);
+    let storeId = getTenantStoreId(req);
+    if (!storeId) {
+      const activeStore = await Store.findOne({ status: "active" }).lean() || await Store.findOne().lean();
+      if (activeStore) storeId = activeStore._id;
+    }
     const filter = storeId ? { storeId } : {};
 
     let settings = await Settings.findOne(filter);
     if (!settings) {
       settings = new Settings({ storeId: storeId || undefined });
+    } else if (storeId && !settings.storeId) {
+      settings.storeId = storeId;
     }
 
     const oldVideoUrl = settings.videoUrl;
@@ -333,6 +380,10 @@ router.post("/api/settings", async (req, res) => {
     if (req.body.primaryColor !== undefined) settings.primaryColor = req.body.primaryColor;
     if (req.body.brandLogoType !== undefined) settings.brandLogoType = req.body.brandLogoType;
     if (req.body.brandLogoValue !== undefined) settings.brandLogoValue = req.body.brandLogoValue;
+    if (req.body.ownerEmail !== undefined) settings.ownerEmail = req.body.ownerEmail;
+    if (req.body.ownerPhone !== undefined) settings.ownerPhone = req.body.ownerPhone;
+    if (req.body.supportEmail !== undefined) settings.supportEmail = req.body.supportEmail;
+    if (req.body.supportPhone !== undefined) settings.supportPhone = req.body.supportPhone;
     if (showTicker !== undefined) settings.showTicker = showTicker;
     if (req.body.showTrustMarquee !== undefined) settings.showTrustMarquee = req.body.showTrustMarquee;
     if (req.body.trustMarqueeDirection !== undefined) settings.trustMarqueeDirection = req.body.trustMarqueeDirection;
@@ -353,15 +404,84 @@ router.post("/api/settings", async (req, res) => {
     if (instagramLink !== undefined) settings.instagramLink = instagramLink;
     if (facebookLink !== undefined) settings.facebookLink = facebookLink;
     if (contactLink !== undefined) settings.contactLink = contactLink;
+    if (req.body.twitterLink !== undefined) settings.twitterLink = req.body.twitterLink;
+    if (req.body.youtubeLink !== undefined) settings.youtubeLink = req.body.youtubeLink;
+
+    // Account & Address
+    if (req.body.storeAddress1 !== undefined) settings.storeAddress1 = req.body.storeAddress1;
+    if (req.body.storeAddress2 !== undefined) settings.storeAddress2 = req.body.storeAddress2;
+    if (req.body.storeCity !== undefined) settings.storeCity = req.body.storeCity;
+    if (req.body.storeState !== undefined) settings.storeState = req.body.storeState;
+    if (req.body.storePostalCode !== undefined) settings.storePostalCode = req.body.storePostalCode;
+    if (req.body.storeLanguage !== undefined) settings.storeLanguage = req.body.storeLanguage;
+
+    // Payments & Checkout
+    if (req.body.razorpayKeyId !== undefined) settings.razorpayKeyId = req.body.razorpayKeyId;
+    if (req.body.razorpayKeySecret !== undefined) settings.razorpayKeySecret = req.body.razorpayKeySecret;
+    if (req.body.razorpayMode !== undefined) settings.razorpayMode = req.body.razorpayMode;
+    if (req.body.codEnabled !== undefined) settings.codEnabled = req.body.codEnabled;
+    if (req.body.codExtraFee !== undefined) settings.codExtraFee = req.body.codExtraFee;
+    if (req.body.minOrderAmount !== undefined) settings.minOrderAmount = req.body.minOrderAmount;
+    if (req.body.maxItemQuantity !== undefined) settings.maxItemQuantity = req.body.maxItemQuantity;
+    if (req.body.customerAccounts !== undefined) settings.customerAccounts = req.body.customerAccounts;
+    if (req.body.taxInclusive !== undefined) settings.taxInclusive = req.body.taxInclusive;
+    if (req.body.taxRate !== undefined) settings.taxRate = req.body.taxRate;
+    if (req.body.taxNumber !== undefined) settings.taxNumber = req.body.taxNumber;
+
+    // Shipping
+    if (req.body.freeShippingThreshold !== undefined) settings.freeShippingThreshold = req.body.freeShippingThreshold;
+    if (req.body.standardShippingRate !== undefined) settings.standardShippingRate = req.body.standardShippingRate;
+    if (req.body.expressShippingRate !== undefined) settings.expressShippingRate = req.body.expressShippingRate;
+    if (req.body.estimatedDelivery !== undefined) settings.estimatedDelivery = req.body.estimatedDelivery;
+    if (req.body.processingTime !== undefined) settings.processingTime = req.body.processingTime;
+
+    // Email & Notifications
+    if (req.body.brevoApiKey !== undefined) settings.brevoApiKey = req.body.brevoApiKey;
+    if (req.body.senderEmail !== undefined) settings.senderEmail = req.body.senderEmail;
+    if (req.body.senderName !== undefined) settings.senderName = req.body.senderName;
+    if (req.body.adminNotifyEmail !== undefined) settings.adminNotifyEmail = req.body.adminNotifyEmail;
+    if (req.body.notifyOrderConfirm !== undefined) settings.notifyOrderConfirm = req.body.notifyOrderConfirm;
+    if (req.body.notifyOrderShipped !== undefined) settings.notifyOrderShipped = req.body.notifyOrderShipped;
+    if (req.body.notifyOrderDelivered !== undefined) settings.notifyOrderDelivered = req.body.notifyOrderDelivered;
+    if (req.body.notifyOrderRefund !== undefined) settings.notifyOrderRefund = req.body.notifyOrderRefund;
+
+    // Integrations & Cloudinary / OAuth / SEO
+    if (req.body.googleClientSecret !== undefined) settings.googleClientSecret = req.body.googleClientSecret;
+    if (req.body.cloudinaryCloudName !== undefined) settings.cloudinaryCloudName = req.body.cloudinaryCloudName;
+    if (req.body.cloudinaryApiKey !== undefined) settings.cloudinaryApiKey = req.body.cloudinaryApiKey;
+    if (req.body.cloudinaryApiSecret !== undefined) settings.cloudinaryApiSecret = req.body.cloudinaryApiSecret;
+
+    if (req.body.metaTitle !== undefined) settings.metaTitle = req.body.metaTitle;
+    if (req.body.metaDescription !== undefined) settings.metaDescription = req.body.metaDescription;
+    if (req.body.favicon !== undefined) settings.favicon = req.body.favicon;
+    if (req.body.googleAnalyticsId !== undefined) settings.googleAnalyticsId = req.body.googleAnalyticsId;
+    if (req.body.facebookPixelId !== undefined) settings.facebookPixelId = req.body.facebookPixelId;
+
+    if (req.body.privacyPolicyText !== undefined) settings.privacyPolicyText = req.body.privacyPolicyText;
+    if (req.body.termsOfServiceText !== undefined) settings.termsOfServiceText = req.body.termsOfServiceText;
 
     await settings.save();
 
-    // Sync brand name back to Store model so Super Admin reflects changes made by merchant
-    if (req.body.brandLogoValue !== undefined && settings.storeId) {
-      await Store.findByIdAndUpdate(settings.storeId, {
-        name: req.body.brandLogoValue.trim(),
-        businessName: req.body.brandLogoValue.trim()
-      });
+    // Sync store details back to Store model
+    if (settings.storeId) {
+      const storeUpdates = {};
+      if (req.body.businessName !== undefined && req.body.businessName.trim()) {
+        storeUpdates.businessName = req.body.businessName.trim();
+        storeUpdates.name = req.body.businessName.trim();
+      }
+      if (req.body.currency !== undefined) storeUpdates.currency = req.body.currency;
+      if (req.body.timezone !== undefined) storeUpdates.timezone = req.body.timezone;
+      if (req.body.country !== undefined) storeUpdates.country = req.body.country;
+      if (req.body.businessType !== undefined) storeUpdates.businessType = req.body.businessType;
+      if (req.body.ownerPhone !== undefined) storeUpdates.ownerPhone = req.body.ownerPhone;
+      if (req.body.ownerEmail !== undefined) storeUpdates.ownerEmail = req.body.ownerEmail;
+      if (req.body.supportPhone !== undefined) storeUpdates.supportPhone = req.body.supportPhone;
+      if (req.body.supportEmail !== undefined) storeUpdates.supportEmail = req.body.supportEmail;
+      if (req.body.customDomain !== undefined) storeUpdates.customDomain = req.body.customDomain.trim().toLowerCase();
+
+      if (Object.keys(storeUpdates).length > 0) {
+        await Store.findByIdAndUpdate(settings.storeId, storeUpdates);
+      }
     }
 
     // Invalidate in-memory and Redis cache for this store so changes reflect instantly
@@ -376,7 +496,38 @@ router.post("/api/settings", async (req, res) => {
       await deleteFromCloudinary(oldVideoUrl);
     }
 
-    res.json(settings);
+    const responseObj = settings.toObject ? settings.toObject() : { ...settings };
+    const targetStoreId = storeId || settings.storeId;
+    if (targetStoreId) {
+      const updatedStore = await Store.findById(targetStoreId).lean();
+      if (updatedStore) {
+        responseObj.storeDetails = {
+          name: updatedStore.name || "",
+          subdomain: updatedStore.subdomain || "",
+          customDomain: updatedStore.customDomain || "",
+          businessName: updatedStore.businessName || updatedStore.name || "",
+          businessType: updatedStore.businessType || "retail",
+          country: updatedStore.country || "India",
+          currency: updatedStore.currency || "INR",
+          timezone: updatedStore.timezone || "Asia/Kolkata",
+          ownerName: updatedStore.ownerName || "",
+          ownerEmail: updatedStore.ownerEmail || "",
+          ownerPhone: updatedStore.ownerPhone || "",
+          supportEmail: updatedStore.supportEmail || "",
+          supportPhone: updatedStore.supportPhone || "",
+          domains: updatedStore.domains || [],
+          plan: updatedStore.plan || "starter",
+          status: updatedStore.status || "active"
+        };
+        if (!responseObj.ownerEmail) responseObj.ownerEmail = updatedStore.ownerEmail || "";
+        if (!responseObj.ownerPhone) responseObj.ownerPhone = updatedStore.ownerPhone || "";
+        if (!responseObj.supportEmail) responseObj.supportEmail = updatedStore.supportEmail || "";
+        if (!responseObj.supportPhone) responseObj.supportPhone = updatedStore.supportPhone || "";
+        if (!responseObj.businessName) responseObj.businessName = updatedStore.businessName || updatedStore.name || "";
+      }
+    }
+
+    res.json(responseObj);
   } catch (error) {
     res.status(500).json({ error: "Failed to save page settings" });
   }

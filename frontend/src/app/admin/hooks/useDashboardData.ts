@@ -4,10 +4,19 @@ import { DashboardStats } from '../types';
 export const getAuthHeaders = (): Record<string, string> => {
   if (typeof window === "undefined") return {};
   
+  const headers: Record<string, string> = {};
+
+  const storeId = localStorage.getItem("merchantStoreId") || localStorage.getItem("storeId");
+  if (storeId) {
+    headers["x-store-id"] = storeId;
+    headers["x-tenant-id"] = storeId;
+  }
+
   // 1. Explicit admin token
   const adminToken = localStorage.getItem("adminToken");
   if (adminToken) {
-    return { Authorization: `Bearer ${adminToken}` };
+    headers["Authorization"] = `Bearer ${adminToken}`;
+    return headers;
   }
 
   // 2. User session if user is admin
@@ -16,12 +25,16 @@ export const getAuthHeaders = (): Record<string, string> => {
     try {
       const session = JSON.parse(sessionStr);
       if (session?.token && (session.isAdmin || session.role === "admin")) {
-        return { Authorization: `Bearer ${session.token}` };
+        headers["Authorization"] = `Bearer ${session.token}`;
+        if (!headers["x-store-id"] && session.storeId) {
+          headers["x-store-id"] = session.storeId;
+          headers["x-tenant-id"] = session.storeId;
+        }
       }
     } catch (e) {}
   }
 
-  return {};
+  return headers;
 };
 
 export const ensureAdminToken = async (forceRefresh = false): Promise<Record<string, string>> => {

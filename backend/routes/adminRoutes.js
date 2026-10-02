@@ -341,4 +341,39 @@ router.put("/api/admin/reviews/:id", async (req, res) => {
   }
 });
 
+// Admin change password route
+router.post("/api/admin/change-password", async (req, res) => {
+  try {
+    const { currentPassword, newPassword } = req.body;
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({ error: "Both current password and new password are required." });
+    }
+    if (newPassword.length < 6) {
+      return res.status(400).json({ error: "New password must be at least 6 characters long." });
+    }
+
+    const User = (await import("../models/User.js")).default;
+    const bcrypt = (await import("bcryptjs")).default;
+
+    const user = await User.findById(req.user.id);
+    if (!user) {
+      return res.status(404).json({ error: "Admin user account not found." });
+    }
+
+    const isMatch = await bcrypt.compare(currentPassword, user.password);
+    if (!isMatch) {
+      return res.status(400).json({ error: "Current password is incorrect." });
+    }
+
+    const salt = await bcrypt.genSalt(10);
+    user.password = await bcrypt.hash(newPassword, salt);
+    await user.save();
+
+    res.json({ message: "Password updated successfully." });
+  } catch (error) {
+    console.error("Change Password Error:", error);
+    res.status(500).json({ error: "Failed to change password." });
+  }
+});
+
 export default router;

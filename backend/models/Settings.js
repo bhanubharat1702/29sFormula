@@ -186,44 +186,65 @@ const settingsSchema = new mongoose.Schema({
     type: [{ question: String, answer: String }],
     default: []
   },
+  // Account & Store Address
+  storeAddress1: { type: String, default: "" },
+  storeAddress2: { type: String, default: "" },
+  storeCity: { type: String, default: "" },
+  storeState: { type: String, default: "" },
+  storePostalCode: { type: String, default: "" },
+  storeLanguage: { type: String, default: "en" },
+
+  // Payments & Checkout
+  razorpayKeyId: { type: String, default: "" },
+  razorpayKeySecret: { type: String, default: "" },
+  razorpayMode: { type: String, default: "test" },
+  codEnabled: { type: Boolean, default: true },
+  codExtraFee: { type: Number, default: 0 },
+  minOrderAmount: { type: Number, default: 0 },
+  maxItemQuantity: { type: Number, default: 0 },
+  customerAccounts: { type: String, default: "optional" },
+  taxInclusive: { type: Boolean, default: false },
+  taxRate: { type: Number, default: 0 },
+  taxNumber: { type: String, default: "" },
+
+  // Shipping
+  freeShippingThreshold: { type: Number, default: 0 },
+  standardShippingRate: { type: Number, default: 0 },
+  expressShippingRate: { type: Number, default: 0 },
+  estimatedDelivery: { type: String, default: "4-7 business days" },
+  processingTime: { type: String, default: "1-2 business days" },
+
+  // Notifications & Email
+  brevoApiKey: { type: String, default: "" },
+  senderEmail: { type: String, default: "" },
+  senderName: { type: String, default: "" },
+  adminNotifyEmail: { type: String, default: "" },
+  notifyOrderConfirm: { type: Boolean, default: true },
+  notifyOrderShipped: { type: Boolean, default: true },
+  notifyOrderDelivered: { type: Boolean, default: true },
+  notifyOrderRefund: { type: Boolean, default: true },
+
+  // Integrations & Secrets
   googleClientId: { type: String, default: "523936375845-75tjhav8ce01o9mdk325iggb1glgpi21.apps.googleusercontent.com" },
-  // Product Preview Page Settings
-  showProductReviews: { type: Boolean, default: true },
-  showProductExploreMore: { type: Boolean, default: true },
-  showProductFaq: { type: Boolean, default: true },
-  usageGuideText: { 
-    type: String, 
-    default: "Handcrafted with precision. Refer to our USAGE GUIDE for additional details." 
-  },
-  exploreMoreTitle: { 
-    type: String, 
-    default: "Don't Stop. Explore More." 
-  },
-  deliverySubtext: {
-    type: String,
-    default: "TAXES INCLUDED. SHIPPING CALCULATED AT CHECKOUT."
-  },
-  contactUsText: { 
-    type: String, 
-    default: "Need help? Email us at support@yourstore.com and our support team will get back to you within 24 hours."
-  },
-  returnPolicyText: {
-    type: String,
-    default: "We offer a 7-day hassle-free return policy. If you're not fully satisfied with your purchase, contact our support team for a full refund."
-  },
-  
-  supportText: { type: String, default: "For support inquiries, please contact us." },
-  careersText: { type: String, default: "Join our team! Check out our open positions." },
-  tradeEnquiryText: { type: String, default: "For trade and wholesale inquiries, contact our B2B team." },
-  aboutUsText: { type: String, default: "We deliver quality products with exceptional customer service." },
-  
-  instagramLink: { type: String, default: "#" },
-  facebookLink: { type: String, default: "#" },
-  contactLink: { type: String, default: "#" },
-  shippingPolicyText: {
-    type: String,
-    default: "We offer free shipping across India. Orders are typically processed within 1-2 business days and delivered within 4-7 business days."
-  },
+  googleClientSecret: { type: String, default: "" },
+  cloudinaryCloudName: { type: String, default: "" },
+  cloudinaryApiKey: { type: String, default: "" },
+  cloudinaryApiSecret: { type: String, default: "" },
+
+  // SEO & Analytics
+  metaTitle: { type: String, default: "" },
+  metaDescription: { type: String, default: "" },
+  favicon: { type: String, default: "" },
+  googleAnalyticsId: { type: String, default: "" },
+  facebookPixelId: { type: String, default: "" },
+
+  // Social
+  twitterLink: { type: String, default: "#" },
+  youtubeLink: { type: String, default: "#" },
+
+  // Policies
+  privacyPolicyText: { type: String, default: "" },
+  termsOfServiceText: { type: String, default: "" },
 }, { timestamps: true });
 
 const Settings = mongoose.models.Settings || mongoose.model("Settings", settingsSchema);

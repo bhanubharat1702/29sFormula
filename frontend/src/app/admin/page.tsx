@@ -11,6 +11,7 @@ import OnlineStoreTab from "./components/tabs/OnlineStoreTab";
 import CustomersTab from "./components/tabs/CustomersTab";
 import MarketingTab from "./components/tabs/MarketingTab";
 import DiscountsTab from "./components/tabs/DiscountsTab";
+import SettingsTab from "./components/tabs/settings/SettingsTab";
 import { FaqItem, DashboardStats, Product } from "./types";
 import { fontCategories, getFontFamilyStack } from "./constants/fonts";
 import { useAdminAuth } from "./hooks/useAdminAuth";
@@ -35,12 +36,27 @@ export default function AdminDashboard() {
 
   // Layout State
   const [timelineFilter, setTimelineFilter] = useState<string>("year");
-  const [activeTab, setActiveTab] = useState<"home" | "orders" | "products" | "customers" | "marketing" | "discounts" | "online-store">("home");
+  const [activeTab, setActiveTab] = useState<"home" | "orders" | "products" | "customers" | "marketing" | "discounts" | "online-store" | "settings">("home");
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState<boolean>(false);
   const [productsDropdownOpen, setProductsDropdownOpen] = useState<boolean>(false);
   const [ordersDropdownOpen, setOrdersDropdownOpen] = useState<boolean>(false);
   const [onlineStoreDropdownOpen, setOnlineStoreDropdownOpen] = useState<boolean>(false);
+  const [settingsDropdownOpen, setSettingsDropdownOpen] = useState<boolean>(false);
   const [activeSubTab, setActiveSubTab] = useState<"all" | "categories" | "cancelled" | "completed" | "returns">("all");
+  const [settingsSubTab, setSettingsSubTab] = useState<string>("general");
+
+  // Merchant Store Profile States
+  const [storeBusinessName, setStoreBusinessName] = useState<string>("");
+  const [storeBusinessType, setStoreBusinessType] = useState<string>("retail");
+  const [storeCurrency, setStoreCurrency] = useState<string>("INR");
+  const [storeTimezone, setStoreTimezone] = useState<string>("Asia/Kolkata");
+  const [storeCountry, setStoreCountry] = useState<string>("India");
+  const [storeOwnerPhone, setStoreOwnerPhone] = useState<string>("");
+  const [storeOwnerEmail, setStoreOwnerEmail] = useState<string>("");
+  const [storeSupportEmail, setStoreSupportEmail] = useState<string>("");
+  const [storeSupportPhone, setStoreSupportPhone] = useState<string>("");
+  const [storeSubdomain, setStoreSubdomain] = useState<string>("");
+  const [storeCustomDomain, setStoreCustomDomain] = useState<string>("");
 
   // Scroll detection state for mobile header
   const [isHeaderVisible, setIsHeaderVisible] = useState(true);
@@ -132,6 +148,11 @@ export default function AdminDashboard() {
   useEffect(() => {
     if (!authorized) return;
 
+    if (!fetchedTabs.current.has("settings")) {
+      fetchedTabs.current.add("settings");
+      fetchSettings();
+    }
+
     if (activeTab === "home") {
       fetchDashboardStats(timelineFilter);
     }
@@ -148,7 +169,7 @@ export default function AdminDashboard() {
       fetchedTabs.current.add("customers");
       fetchCustomers();
     }
-    if (activeTab === "online-store" && !fetchedTabs.current.has("online-store")) {
+    if ((activeTab === "online-store" || activeTab === "settings") && !fetchedTabs.current.has("online-store")) {
       fetchedTabs.current.add("online-store");
       fetchSettings();
       fetchAdminReviews();
@@ -438,6 +459,58 @@ export default function AdminDashboard() {
   const [returnPolicyText, setReturnPolicyText] = useState<string>("We offer a 7-day hassle-free return policy. If you're not fully satisfied with your purchase, contact our support team for a full refund.");
   const [shippingPolicyText, setShippingPolicyText] = useState<string>("We offer free shipping across India. Orders are typically processed within 1-2 business days and delivered within 4-7 business days.");
   const [googleClientId, setGoogleClientId] = useState<string>("523936375845-75tjhav8ce01o9mdk325iggb1glgpi21.apps.googleusercontent.com");
+  const [googleClientSecret, setGoogleClientSecret] = useState<string>("");
+
+  // Address fields
+  const [storeAddress1, setStoreAddress1] = useState<string>("");
+  const [storeAddress2, setStoreAddress2] = useState<string>("");
+  const [storeCity, setStoreCity] = useState<string>("");
+  const [storeState, setStoreState] = useState<string>("");
+  const [storePostalCode, setStorePostalCode] = useState<string>("");
+  const [storeLanguage, setStoreLanguage] = useState<string>("en");
+
+  // Payments & Checkout
+  const [razorpayKeyId, setRazorpayKeyId] = useState<string>("");
+  const [razorpayKeySecret, setRazorpayKeySecret] = useState<string>("");
+  const [razorpayMode, setRazorpayMode] = useState<string>("test");
+  const [codEnabled, setCodEnabled] = useState<boolean>(true);
+  const [codExtraFee, setCodExtraFee] = useState<number>(0);
+  const [minOrderAmount, setMinOrderAmount] = useState<number>(0);
+  const [maxItemQuantity, setMaxItemQuantity] = useState<number>(0);
+  const [customerAccounts, setCustomerAccounts] = useState<string>("optional");
+  const [taxInclusive, setTaxInclusive] = useState<boolean>(false);
+  const [taxRate, setTaxRate] = useState<number>(0);
+  const [taxNumber, setTaxNumber] = useState<string>("");
+
+  // Shipping
+  const [freeShippingThreshold, setFreeShippingThreshold] = useState<number>(0);
+  const [standardShippingRate, setStandardShippingRate] = useState<number>(0);
+  const [expressShippingRate, setExpressShippingRate] = useState<number>(0);
+  const [estimatedDelivery, setEstimatedDelivery] = useState<string>("4-7 business days");
+  const [processingTime, setProcessingTime] = useState<string>("1-2 business days");
+
+  // Notifications
+  const [brevoApiKey, setBrevoApiKey] = useState<string>("");
+  const [senderEmail, setSenderEmail] = useState<string>("");
+  const [senderName, setSenderName] = useState<string>("");
+  const [adminNotifyEmail, setAdminNotifyEmail] = useState<string>("");
+  const [notifyOrderConfirm, setNotifyOrderConfirm] = useState<boolean>(true);
+  const [notifyOrderShipped, setNotifyOrderShipped] = useState<boolean>(true);
+  const [notifyOrderDelivered, setNotifyOrderDelivered] = useState<boolean>(true);
+  const [notifyOrderRefund, setNotifyOrderRefund] = useState<boolean>(true);
+
+  // Cloudinary & SEO
+  const [cloudinaryCloudName, setCloudinaryCloudName] = useState<string>("");
+  const [cloudinaryApiKey, setCloudinaryApiKey] = useState<string>("");
+  const [cloudinaryApiSecret, setCloudinaryApiSecret] = useState<string>("");
+  const [metaTitle, setMetaTitle] = useState<string>("");
+  const [metaDescription, setMetaDescription] = useState<string>("");
+  const [googleAnalyticsId, setGoogleAnalyticsId] = useState<string>("");
+  const [facebookPixelId, setFacebookPixelId] = useState<string>("");
+  const [twitterLink, setTwitterLink] = useState<string>("#");
+  const [youtubeLink, setYoutubeLink] = useState<string>("#");
+  const [privacyPolicyText, setPrivacyPolicyText] = useState<string>("");
+  const [termsOfServiceText, setTermsOfServiceText] = useState<string>("");
 
   // Dynamic Product Preview Page CMS Settings
   const [showProductReviews, setShowProductReviews] = useState<boolean>(true);
@@ -967,7 +1040,10 @@ export default function AdminDashboard() {
 
   const fetchSettings = async () => {
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:5001'}/api/settings`, { cache: "no-store" });
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:5001'}/api/settings`, { 
+        cache: "no-store",
+        headers: getAuthHeaders()
+      });
       if (!res.ok) throw new Error("Failed to fetch settings catalog");
       const data = await res.json();
       if (data) {
@@ -1134,6 +1210,37 @@ export default function AdminDashboard() {
         if (data.returnPolicyText !== undefined) setReturnPolicyText(data.returnPolicyText);
         if (data.shippingPolicyText !== undefined) setShippingPolicyText(data.shippingPolicyText);
 
+        if (data.storeDetails) {
+          setStoreBusinessName(data.storeDetails.businessName || data.businessName || "");
+          setStoreBusinessType(data.storeDetails.businessType || data.businessType || "retail");
+          setStoreCurrency(data.storeDetails.currency || data.currency || "INR");
+          setStoreTimezone(data.storeDetails.timezone || data.timezone || "Asia/Kolkata");
+          setStoreCountry(data.storeDetails.country || data.country || "India");
+          setStoreOwnerPhone(data.storeDetails.ownerPhone || data.ownerPhone || "");
+          setStoreOwnerEmail(data.storeDetails.ownerEmail || data.ownerEmail || "");
+          setStoreSupportEmail(data.storeDetails.supportEmail || data.supportEmail || "");
+          setStoreSupportPhone(data.storeDetails.supportPhone || data.supportPhone || "");
+          setStoreSubdomain(data.storeDetails.subdomain || "");
+          setStoreCustomDomain(data.storeDetails.customDomain || "");
+        } else {
+          if (data.businessName !== undefined) setStoreBusinessName(data.businessName);
+          if (data.businessType !== undefined) setStoreBusinessType(data.businessType);
+          if (data.currency !== undefined) setStoreCurrency(data.currency);
+          if (data.timezone !== undefined) setStoreTimezone(data.timezone);
+          if (data.country !== undefined) setStoreCountry(data.country);
+          if (data.ownerPhone !== undefined) setStoreOwnerPhone(data.ownerPhone);
+          if (data.ownerEmail !== undefined) setStoreOwnerEmail(data.ownerEmail);
+          if (data.supportEmail !== undefined) setStoreSupportEmail(data.supportEmail);
+          if (data.supportPhone !== undefined) setStoreSupportPhone(data.supportPhone);
+        }
+
+        if (typeof window !== "undefined") {
+          if (data.brandLogoType) localStorage.setItem("settings_brandLogoType", data.brandLogoType);
+          if (data.brandLogoValue) localStorage.setItem("settings_brandLogoValue", data.brandLogoValue);
+          const bName = data.storeDetails?.businessName || data.businessName;
+          if (bName) localStorage.setItem("settings_storeBusinessName", bName);
+        }
+
         const loadedFaqs = data.faqs || [];
         setFaqs(loadedFaqs);
 
@@ -1269,7 +1376,7 @@ export default function AdminDashboard() {
     }
   };
 
-  const handleNavigationTrigger = (target: "home" | "orders" | "products" | "customers" | "marketing" | "discounts" | "online-store" | "logout" | "storefront") => {
+  const handleNavigationTrigger = (target: "home" | "orders" | "products" | "customers" | "marketing" | "discounts" | "online-store" | "settings" | "logout" | "storefront") => {
     if (activeTab === "online-store" && hasUnsavedChanges && target !== "online-store") {
       setPendingTabChange(target);
       setShowUnsavedModal(true);
@@ -1285,12 +1392,14 @@ export default function AdminDashboard() {
       setProductsDropdownOpen(false);
       setOrdersDropdownOpen(false);
       setOnlineStoreDropdownOpen(false);
+      setSettingsDropdownOpen(false);
       fetchOrders();
     } else if (target === "products") {
       setActiveTab("products");
       setProductsDropdownOpen(true);
       setOrdersDropdownOpen(false);
       setOnlineStoreDropdownOpen(false);
+      setSettingsDropdownOpen(false);
       setActiveSubTab("all");
       setSelectedCategoryView(null);
     } else if (target === "orders") {
@@ -1298,6 +1407,7 @@ export default function AdminDashboard() {
       setProductsDropdownOpen(false);
       setOrdersDropdownOpen(true);
       setOnlineStoreDropdownOpen(false);
+      setSettingsDropdownOpen(false);
       setActiveSubTab("all");
       fetchOrders();
     } else if (target === "customers") {
@@ -1305,24 +1415,34 @@ export default function AdminDashboard() {
       setProductsDropdownOpen(false);
       setOrdersDropdownOpen(false);
       setOnlineStoreDropdownOpen(false);
+      setSettingsDropdownOpen(false);
       fetchOrders();
     } else if (target === "marketing") {
       setActiveTab("marketing");
       setProductsDropdownOpen(false);
       setOrdersDropdownOpen(false);
       setOnlineStoreDropdownOpen(false);
+      setSettingsDropdownOpen(false);
     } else if (target === "discounts") {
       setActiveTab("discounts");
       setProductsDropdownOpen(false);
       setOrdersDropdownOpen(false);
       setOnlineStoreDropdownOpen(false);
+      setSettingsDropdownOpen(false);
       fetchDiscounts();
     } else if (target === "online-store") {
       setActiveTab("online-store");
       setProductsDropdownOpen(false);
       setOrdersDropdownOpen(false);
       setOnlineStoreDropdownOpen(true);
+      setSettingsDropdownOpen(false);
       fetchAdminReviews();
+    } else if (target === "settings") {
+      setActiveTab("settings");
+      setProductsDropdownOpen(false);
+      setOrdersDropdownOpen(false);
+      setOnlineStoreDropdownOpen(false);
+      setSettingsDropdownOpen(true);
     } else if (target === "logout") {
       localStorage.removeItem("adminSession");
       localStorage.removeItem("lastActivityTime");
@@ -1499,12 +1619,22 @@ export default function AdminDashboard() {
         shippingPolicyText,
         faqs,
         googleClientId,
+        businessName: storeBusinessName,
+        businessType: storeBusinessType,
+        currency: storeCurrency,
+        timezone: storeTimezone,
+        country: storeCountry,
+        ownerPhone: storeOwnerPhone,
+        ownerEmail: storeOwnerEmail,
+        supportEmail: storeSupportEmail,
+        supportPhone: storeSupportPhone,
+        customDomain: storeCustomDomain,
         ...overrideSettings
       };
 
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:5001'}/api/settings`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", ...getAuthHeaders() },
         body: JSON.stringify(payload)
       });
       if (!res.ok) throw new Error("Failed to save layout adjustments");
@@ -1670,14 +1800,16 @@ export default function AdminDashboard() {
     setPendingTabChange(null);
   };
 
-  const handleSaveSettings = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSaveSettings = async (e?: any) => {
+    if (e && typeof e.preventDefault === 'function') {
+      e.preventDefault();
+    }
     try {
       setLoadingSettings(true);
       setError(null);
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:5001'}/api/settings`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", ...getAuthHeaders() },
         body: JSON.stringify({
           tickerText,
           tickerSpeed,
@@ -1839,13 +1971,29 @@ export default function AdminDashboard() {
           returnPolicyText,
           shippingPolicyText,
           faqs,
-          googleClientId
+          googleClientId,
+          businessName: storeBusinessName,
+          businessType: storeBusinessType,
+          currency: storeCurrency,
+          timezone: storeTimezone,
+          country: storeCountry,
+          ownerPhone: storeOwnerPhone,
+          ownerEmail: storeOwnerEmail,
+          supportEmail: storeSupportEmail,
+          supportPhone: storeSupportPhone,
+          customDomain: storeCustomDomain
         })
       });
       if (!res.ok) throw new Error("Failed to save layout adjustments");
 
       const data = await res.json();
       setOriginalSettings(normalizeSettingsSnapshot(data));
+
+      if (typeof window !== "undefined") {
+        if (brandLogoType) localStorage.setItem("settings_brandLogoType", brandLogoType);
+        if (brandLogoValue) localStorage.setItem("settings_brandLogoValue", brandLogoValue);
+        if (storeBusinessName) localStorage.setItem("settings_storeBusinessName", storeBusinessName);
+      }
 
       setSuccessMessage("Homepage layout customized successfully!");
       setTimeout(() => setSuccessMessage(null), 3000);
@@ -2336,35 +2484,50 @@ export default function AdminDashboard() {
     }
   };
 
-  const handleBrandLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const [logoProgress, setLogoProgress] = useState<number | null>(null);
+
+  const handleBrandLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
     setUploadingLogo(true);
+    setLogoProgress(0);
     const formData = new FormData();
     formData.append("file", file);
 
-    try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:5001'}/api/upload`, {
-        method: "POST",
-        body: formData
-      });
-
-      if (!res.ok) {
-        const errorData = await res.json();
-        throw new Error(errorData.error || "Upload failed");
+    const xhr = new XMLHttpRequest();
+    xhr.open("POST", `${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:5001'}/api/upload`);
+    xhr.upload.onprogress = (event) => {
+      if (event.lengthComputable) {
+        const percentage = Math.round((event.loaded / event.total) * 100);
+        setLogoProgress(percentage);
       }
-
-      const data = await res.json();
-      setBrandLogoValue(data.url);
-    } catch (err: any) {
-      setCustomAlert({
-        title: "Upload Failed",
-        message: "Failed to upload brand logo: " + err.message
-      });
-    } finally {
+    };
+    xhr.onload = () => {
       setUploadingLogo(false);
-    }
+      setLogoProgress(null);
+      if (xhr.status === 200) {
+        try {
+          const data = JSON.parse(xhr.responseText);
+          setBrandLogoValue(data.url);
+        } catch (err) {
+          setCustomAlert({ title: "Parse Error", message: "Failed to parse upload server response." });
+        }
+      } else {
+        let errMsg = "Upload failed";
+        try {
+          const data = JSON.parse(xhr.responseText);
+          errMsg = data.error || errMsg;
+        } catch (e) { }
+        setCustomAlert({ title: "Logo Upload Failed", message: errMsg });
+      }
+    };
+    xhr.onerror = () => {
+      setUploadingLogo(false);
+      setLogoProgress(null);
+      setCustomAlert({ title: "Network Error", message: "Network request failed. Please check connection to server." });
+    };
+    xhr.send(formData);
   };
 
   const handleResetToDefaults = () => {
@@ -2910,12 +3073,11 @@ export default function AdminDashboard() {
           transition: 'all 0.3s ease'
         }}
       >
-        <span className={styles.brandName} style={{ opacity: isMobileMenuOpen ? 0 : 1, transition: 'opacity 0.3s', display: 'flex', alignItems: 'center' }}>
-          {brandLogoType === "image" && brandLogoValue ? (
+        <span className={styles.brandName} style={{ opacity: isMobileMenuOpen ? 0 : 1, transition: 'opacity 0.3s', display: 'flex', alignItems: 'center', gap: '8px' }}>
+          {brandLogoValue && brandLogoValue.startsWith("http") && (
             <img src={brandLogoValue} alt="Brand Logo" style={{ maxHeight: "24px", maxWidth: "120px", objectFit: "contain" }} />
-          ) : (
-            brandLogoValue || "MY STORE"
           )}
+          <span>{storeBusinessName || (brandLogoValue && !brandLogoValue.startsWith("http") ? brandLogoValue : "MY STORE")}</span>
         </span>
         <button className={styles.hamburgerBtn} onClick={() => {
           if (!isMobileMenuOpen) {
@@ -2944,13 +3106,17 @@ export default function AdminDashboard() {
         activeTab={activeTab}
         activeSubTab={activeSubTab}
         customizeSubTab={customizeSubTab}
+        settingsSubTab={settingsSubTab}
         setCustomizeSubTab={setCustomizeSubTab}
+        setSettingsSubTab={setSettingsSubTab}
         ordersDropdownOpen={ordersDropdownOpen}
         productsDropdownOpen={productsDropdownOpen}
         onlineStoreDropdownOpen={onlineStoreDropdownOpen}
+        settingsDropdownOpen={settingsDropdownOpen}
         setOrdersDropdownOpen={setOrdersDropdownOpen}
         setProductsDropdownOpen={setProductsDropdownOpen}
         setOnlineStoreDropdownOpen={setOnlineStoreDropdownOpen}
+        setSettingsDropdownOpen={setSettingsDropdownOpen}
         setActiveTab={setActiveTab}
         setActiveSubTab={setActiveSubTab}
         setSelectedCategoryView={setSelectedCategoryView}
@@ -2958,6 +3124,7 @@ export default function AdminDashboard() {
         setIsMobileMenuOpen={setIsMobileMenuOpen}
         brandLogoType={brandLogoType}
         brandLogoValue={brandLogoValue}
+        storeBusinessName={storeBusinessName}
       />
 
       {/* 2. Main Page Content Wrapper */}
@@ -3421,8 +3588,170 @@ export default function AdminDashboard() {
             setNewDiscountMinOrder={setNewDiscountMinOrder}
             discountsList={discountsList}
             setDeleteDiscountConfirmId={setDeleteDiscountConfirmId}
-
           />
+          {activeTab === "settings" && (
+            <SettingsTab
+              settingsSubTab={settingsSubTab}
+              setSettingsSubTab={setSettingsSubTab}
+              handleSaveSettings={handleSaveSettings}
+              storeBusinessName={storeBusinessName}
+              setStoreBusinessName={setStoreBusinessName}
+              storeBusinessType={storeBusinessType}
+              setStoreBusinessType={setStoreBusinessType}
+              storeCurrency={storeCurrency}
+              setStoreCurrency={setStoreCurrency}
+              storeTimezone={storeTimezone}
+              setStoreTimezone={setStoreTimezone}
+              storeCountry={storeCountry}
+              setStoreCountry={setStoreCountry}
+              storeOwnerPhone={storeOwnerPhone}
+              setStoreOwnerPhone={setStoreOwnerPhone}
+              storeOwnerEmail={storeOwnerEmail}
+              setStoreOwnerEmail={setStoreOwnerEmail}
+              storeSupportPhone={storeSupportPhone}
+              setStoreSupportPhone={setStoreSupportPhone}
+              storeSupportEmail={storeSupportEmail}
+              setStoreSupportEmail={setStoreSupportEmail}
+              storeSubdomain={storeSubdomain}
+              storeCustomDomain={storeCustomDomain}
+              setStoreCustomDomain={setStoreCustomDomain}
+              supportText={supportText}
+              setSupportText={setSupportText}
+              showTicker={showTicker}
+              setShowTicker={setShowTicker}
+              tickerText={tickerText}
+              setTickerText={setTickerText}
+              tickerBgColor={tickerBgColor}
+              setTickerBgColor={setTickerBgColor}
+              tickerTextColor={tickerTextColor}
+              setTickerTextColor={setTickerTextColor}
+              showAnnouncement={showAnnouncement}
+              setShowAnnouncement={setShowAnnouncement}
+              announcementText={announcementText}
+              setAnnouncementText={setAnnouncementText}
+              brandLogoType={brandLogoType}
+              setBrandLogoType={setBrandLogoType}
+              brandLogoValue={brandLogoValue}
+              setBrandLogoValue={setBrandLogoValue}
+              uploadingLogo={uploadingLogo}
+              logoProgress={logoProgress}
+              handleBrandLogoUpload={handleBrandLogoUpload}
+              deliverySubtext={deliverySubtext}
+              setDeliverySubtext={setDeliverySubtext}
+              shippingPolicyText={shippingPolicyText}
+              setShippingPolicyText={setShippingPolicyText}
+              returnPolicyText={returnPolicyText}
+              setReturnPolicyText={setReturnPolicyText}
+              contactUsText={contactUsText}
+              setContactUsText={setContactUsText}
+              aboutUsText={aboutUsText}
+              setAboutUsText={setAboutUsText}
+              careersText={careersText}
+              setCareersText={setCareersText}
+              tradeEnquiryText={tradeEnquiryText}
+              setTradeEnquiryText={setTradeEnquiryText}
+              instagramLink={instagramLink}
+              setInstagramLink={setInstagramLink}
+              facebookLink={facebookLink}
+              setFacebookLink={setFacebookLink}
+              contactLink={contactLink}
+              setContactLink={setContactLink}
+              googleClientId={googleClientId}
+              setGoogleClientId={setGoogleClientId}
+              showTrustMarquee={showTrustMarquee}
+              setShowTrustMarquee={setShowTrustMarquee}
+              trustMarqueeDirection={trustMarqueeDirection}
+              setTrustMarqueeDirection={setTrustMarqueeDirection}
+              trustMarqueeSpeed={trustMarqueeSpeed}
+              setTrustMarqueeSpeed={setTrustMarqueeSpeed}
+              trustMarqueeItems={trustMarqueeItems}
+              setTrustMarqueeItems={setTrustMarqueeItems}
+              storeAddress1={storeAddress1}
+              setStoreAddress1={setStoreAddress1}
+              storeAddress2={storeAddress2}
+              setStoreAddress2={setStoreAddress2}
+              storeCity={storeCity}
+              setStoreCity={setStoreCity}
+              storeState={storeState}
+              setStoreState={setStoreState}
+              storePostalCode={storePostalCode}
+              setStorePostalCode={setStorePostalCode}
+              storeLanguage={storeLanguage}
+              setStoreLanguage={setStoreLanguage}
+              razorpayKeyId={razorpayKeyId}
+              setRazorpayKeyId={setRazorpayKeyId}
+              razorpayKeySecret={razorpayKeySecret}
+              setRazorpayKeySecret={setRazorpayKeySecret}
+              razorpayMode={razorpayMode}
+              setRazorpayMode={setRazorpayMode}
+              codEnabled={codEnabled}
+              setCodEnabled={setCodEnabled}
+              codExtraFee={codExtraFee}
+              setCodExtraFee={setCodExtraFee}
+              minOrderAmount={minOrderAmount}
+              setMinOrderAmount={setMinOrderAmount}
+              maxItemQuantity={maxItemQuantity}
+              setMaxItemQuantity={setMaxItemQuantity}
+              customerAccounts={customerAccounts}
+              setCustomerAccounts={setCustomerAccounts}
+              taxInclusive={taxInclusive}
+              setTaxInclusive={setTaxInclusive}
+              taxRate={taxRate}
+              setTaxRate={setTaxRate}
+              taxNumber={taxNumber}
+              setTaxNumber={setTaxNumber}
+              freeShippingThreshold={freeShippingThreshold}
+              setFreeShippingThreshold={setFreeShippingThreshold}
+              standardShippingRate={standardShippingRate}
+              setStandardShippingRate={setStandardShippingRate}
+              expressShippingRate={expressShippingRate}
+              setExpressShippingRate={setExpressShippingRate}
+              estimatedDelivery={estimatedDelivery}
+              setEstimatedDelivery={setEstimatedDelivery}
+              processingTime={processingTime}
+              setProcessingTime={setProcessingTime}
+              brevoApiKey={brevoApiKey}
+              setBrevoApiKey={setBrevoApiKey}
+              senderEmail={senderEmail}
+              setSenderEmail={setSenderEmail}
+              senderName={senderName}
+              setSenderName={setSenderName}
+              adminNotifyEmail={adminNotifyEmail}
+              setAdminNotifyEmail={setAdminNotifyEmail}
+              notifyOrderConfirm={notifyOrderConfirm}
+              setNotifyOrderConfirm={setNotifyOrderConfirm}
+              notifyOrderShipped={notifyOrderShipped}
+              setNotifyOrderShipped={setNotifyOrderShipped}
+              notifyOrderDelivered={notifyOrderDelivered}
+              setNotifyOrderDelivered={setNotifyOrderDelivered}
+              notifyOrderRefund={notifyOrderRefund}
+              setNotifyOrderRefund={setNotifyOrderRefund}
+              googleClientSecret={googleClientSecret}
+              setGoogleClientSecret={setGoogleClientSecret}
+              cloudinaryCloudName={cloudinaryCloudName}
+              setCloudinaryCloudName={setCloudinaryCloudName}
+              cloudinaryApiKey={cloudinaryApiKey}
+              setCloudinaryApiKey={setCloudinaryApiKey}
+              cloudinaryApiSecret={cloudinaryApiSecret}
+              setCloudinaryApiSecret={setCloudinaryApiSecret}
+              metaTitle={metaTitle}
+              setMetaTitle={setMetaTitle}
+              metaDescription={metaDescription}
+              setMetaDescription={setMetaDescription}
+              googleAnalyticsId={googleAnalyticsId}
+              setGoogleAnalyticsId={setGoogleAnalyticsId}
+              facebookPixelId={facebookPixelId}
+              setFacebookPixelId={setFacebookPixelId}
+              twitterLink={twitterLink}
+              setTwitterLink={setTwitterLink}
+              youtubeLink={youtubeLink}
+              setYoutubeLink={setYoutubeLink}
+              privacyPolicyText={privacyPolicyText}
+              setPrivacyPolicyText={setPrivacyPolicyText}
+              termsOfServiceText={termsOfServiceText}
+              setTermsOfServiceText={setTermsOfServiceText}
+            />
+          )}
         </div>
       </div>
       {deleteDiscountConfirmId && (

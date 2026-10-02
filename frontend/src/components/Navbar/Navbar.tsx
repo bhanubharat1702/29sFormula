@@ -18,6 +18,7 @@ export default function Navbar({ onCartClick }: NavbarProps) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState<boolean>(false);
   const [brandLogoType, setBrandLogoType] = useState<string>("text");
   const [brandLogoValue, setBrandLogoValue] = useState<string>("");
+  const [storeBusinessName, setStoreBusinessName] = useState<string>("");
   const [imageError, setImageError] = useState<boolean>(false);
   const pathname = usePathname();
   // Cart count comes directly from global CartContext — no more DOM event listening
@@ -49,8 +50,10 @@ export default function Navbar({ onCartClick }: NavbarProps) {
     // Load cached logo & settings for instant render
     const cachedLogoType = localStorage.getItem("settings_brandLogoType");
     const cachedLogoValue = localStorage.getItem("settings_brandLogoValue");
+    const cachedStoreName = localStorage.getItem("settings_storeBusinessName");
     if (cachedLogoType) setBrandLogoType(cachedLogoType);
     if (cachedLogoValue) setBrandLogoValue(cachedLogoValue);
+    if (cachedStoreName) setStoreBusinessName(cachedStoreName);
 
     // Fetch latest settings in background
     fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:5001'}/api/settings`)
@@ -65,7 +68,11 @@ export default function Navbar({ onCartClick }: NavbarProps) {
             setBrandLogoValue(data.brandLogoValue);
             localStorage.setItem("settings_brandLogoValue", data.brandLogoValue);
           }
-
+          const sName = data.storeDetails?.businessName || data.businessName || "";
+          if (sName) {
+            setStoreBusinessName(sName);
+            localStorage.setItem("settings_storeBusinessName", sName);
+          }
         }
       })
       .catch(err => console.warn("Error fetching logo settings:", err));
@@ -176,16 +183,15 @@ export default function Navbar({ onCartClick }: NavbarProps) {
   return (
     <header className={styles.header}>
       <div className={styles.navLeft}>
-        <Link href="/" aria-label="Home" className={styles.logo}>
-          {brandLogoType === "image" ? (
+        <Link href="/" aria-label="Home" className={styles.logo} style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          {brandLogoValue && brandLogoValue.startsWith('http') && (
             <img
               src={brandLogoValue}
               alt="Brand Logo"
-              style={{ maxHeight: "35px", objectFit: "contain", display: "block" }}
+              style={{ maxHeight: "32px", objectFit: "contain", display: "block" }}
             />
-          ) : (
-            brandLogoValue || "MY STORE"
           )}
+          <span>{storeBusinessName || (brandLogoValue && !brandLogoValue.startsWith('http') ? brandLogoValue : "MY STORE")}</span>
         </Link>
         <nav className={styles.navLinks}>
           <Link href="/" className={`${styles.navLink} ${pathname === "/" ? styles.activeLink : ""}`}>HOME</Link>

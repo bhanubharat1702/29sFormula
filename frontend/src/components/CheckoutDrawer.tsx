@@ -97,6 +97,7 @@ export default function CheckoutDrawer({ isOpen, onClose, cartItems, primaryColo
   const [isReturningCustomer, setIsReturningCustomer] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [brandLogoValue, setBrandLogoValue] = useState<string>("");
+  const [storeBusinessName, setStoreBusinessName] = useState<string>("");
   const [isSearching, setIsSearching] = useState(false);
   const [searchError, setSearchError] = useState<string | null>(null);
   const [searchSuccess, setSearchSuccess] = useState<string | null>(null);
@@ -345,8 +346,10 @@ export default function CheckoutDrawer({ isOpen, onClose, cartItems, primaryColo
       fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:5001'}/api/settings`, { cache: 'no-store' })
         .then(res => res.json())
         .then(data => {
-          if (data && data.brandLogoValue) {
-            setBrandLogoValue(data.brandLogoValue);
+          if (data) {
+            if (data.brandLogoValue) setBrandLogoValue(data.brandLogoValue);
+            const sName = data.storeDetails?.businessName || data.businessName || "";
+            if (sName) setStoreBusinessName(sName);
           }
         })
         .catch(err => console.error("Error querying settings for checkout drawer:", err));
@@ -579,7 +582,8 @@ export default function CheckoutDrawer({ isOpen, onClose, cartItems, primaryColo
           key: "rzp_test_TQPDhHLa4xiz9t", // Test API Key
           amount: initData.amount,
           currency: initData.currency,
-          name: brandLogoValue || "",
+          name: storeBusinessName || (brandLogoValue && !brandLogoValue.startsWith("http") ? brandLogoValue : "MY STORE"),
+          image: brandLogoValue && brandLogoValue.startsWith("http") ? brandLogoValue : undefined,
           description: "E-Commerce Checkout",
           order_id: initData.order_id,
           handler: async function (response: any) {

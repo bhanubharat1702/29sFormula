@@ -22,6 +22,7 @@ export default function LoginPageClient({ initialColor }: { initialColor: string
   const [sessionExpired, setSessionExpired] = useState<boolean>(false);
   const [brandLogoType, setBrandLogoType] = useState<string>("text");
   const [brandLogoValue, setBrandLogoValue] = useState<string>("");
+  const [storeBusinessName, setStoreBusinessName] = useState<string>("");
   const [googleClientId, setGoogleClientId] = useState<string>(
     process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "523936375845-75tjhav8ce01o9mdk325iggb1glgpi21.apps.googleusercontent.com"
   );
@@ -35,6 +36,8 @@ export default function LoginPageClient({ initialColor }: { initialColor: string
           if (data.brandLogoType) setBrandLogoType(data.brandLogoType);
           if (data.brandLogoValue) setBrandLogoValue(data.brandLogoValue);
           if (data.googleClientId) setGoogleClientId(data.googleClientId);
+          const sName = data.storeDetails?.businessName || data.businessName || "";
+          if (sName) setStoreBusinessName(sName);
           if (typeof document !== "undefined") document.documentElement.style.setProperty("--primary-brand-color", data.primaryColor);
         }
       })
@@ -340,11 +343,13 @@ export default function LoginPageClient({ initialColor }: { initialColor: string
     }
   };
 
+  const displayName = storeBusinessName || (brandLogoValue && !brandLogoValue.startsWith("http") ? brandLogoValue : "MY STORE");
+
   return (
     <div suppressHydrationWarning className={styles.loginContainer} style={{ backgroundColor: primaryColor }}>
       {/* Background branding texture */}
       {brandLogoType === "text" && (
-        <div className={styles.brandBgPattern}>{brandLogoValue}</div>
+        <div className={styles.brandBgPattern}>{displayName}</div>
       )}
 
       <div className={styles.loginCard}>
@@ -355,10 +360,15 @@ export default function LoginPageClient({ initialColor }: { initialColor: string
 
         {/* Branding header */}
         <div className={styles.loginHeader}>
-          {brandLogoType === "image" && brandLogoValue ? (
-            <img src={brandLogoValue} alt="Brand Logo" style={{ maxHeight: "60px", maxWidth: "200px", objectFit: "contain", margin: "0 auto 10px auto" }} />
+          {brandLogoValue && brandLogoValue.startsWith("http") ? (
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', marginBottom: '10px' }}>
+              <img src={brandLogoValue} alt="Brand Logo" style={{ maxHeight: "60px", maxWidth: "200px", objectFit: "contain" }} />
+              {storeBusinessName && (
+                <h1 className={styles.logoText} style={{ margin: 0, fontSize: '1.4rem' }}>{storeBusinessName}</h1>
+              )}
+            </div>
           ) : (
-            <h1 className={styles.logoText}>{brandLogoValue}</h1>
+            <h1 className={styles.logoText}>{displayName}</h1>
           )}
           <p className={styles.subtitle}>
             {resetStep === 'login' && "Sign in to your account"}
@@ -671,7 +681,7 @@ export default function LoginPageClient({ initialColor }: { initialColor: string
             </div>
 
             <div className={styles.registerPrompt}>
-              <span>New to {brandLogoType === "text" ? (brandLogoValue) : "our store"}?</span>
+              <span>New to {displayName}?</span>
               <Link href="/register" className={styles.signUpLink}>
                 Create an account
               </Link>

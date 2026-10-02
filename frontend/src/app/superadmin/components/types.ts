@@ -8,6 +8,8 @@ export interface StoreItem {
   ownerName?: string;
   ownerEmail?: string;
   ownerPhone?: string;
+  supportEmail?: string;
+  supportPhone?: string;
   businessName?: string;
   businessType?: string;
   country?: string;

@@ -127,7 +127,7 @@ export const tenantResolver = async (req, res, next) => {
       if (domainStoreCache.has("default")) {
         store = domainStoreCache.get("default");
       } else {
-        store = await Store.findOne({ subdomain: "default" }).lean();
+        store = await Store.findOne({ subdomain: "default" }).lean() || await Store.findOne({ status: "active" }).lean() || await Store.findOne().lean();
         if (store) domainStoreCache.set("default", store);
       }
     }

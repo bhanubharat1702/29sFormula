@@ -19,6 +19,7 @@ export default function Footer() {
   const [shippingPolicyText, setShippingPolicyText] = useState<string>("");
   const [brandLogoType, setBrandLogoType] = useState<string>("text");
   const [brandLogoValue, setBrandLogoValue] = useState<string>("");
+  const [storeBusinessName, setStoreBusinessName] = useState<string>("");
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => { setMounted(true); }, []);
@@ -39,6 +40,8 @@ export default function Footer() {
         if (data.shippingPolicyText) setShippingPolicyText(data.shippingPolicyText);
         if (data.brandLogoType) setBrandLogoType(data.brandLogoType);
         if (data.brandLogoValue) setBrandLogoValue(data.brandLogoValue);
+        const sName = data.storeDetails?.businessName || data.businessName || "";
+        if (sName) setStoreBusinessName(sName);
       })
       .catch(err => console.warn("Failed to load policies for footer:", err));
   }, []);
@@ -78,6 +81,8 @@ export default function Footer() {
     }
     return url;
   };
+
+  const displayName = storeBusinessName || (brandLogoValue && !brandLogoValue.startsWith("http") ? brandLogoValue : "MY STORE");
 
   return (
     <>
@@ -159,19 +164,26 @@ export default function Footer() {
       {/* 12. Sub-Footer / Copyright Section */}
       <section className={styles.subFooterSection}>
         <div className={styles.subFooterLogo}>
-          {brandLogoType === "image" && brandLogoValue ? (
-            <img src={brandLogoValue} alt="Brand Logo" style={{ maxHeight: "120px", maxWidth: "90%", objectFit: "contain" }} />
+          {brandLogoValue && brandLogoValue.startsWith("http") ? (
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '16px', flexWrap: 'wrap' }}>
+              <img src={brandLogoValue} alt="Brand Logo" style={{ maxHeight: "90px", maxWidth: "80%", objectFit: "contain" }} />
+              {storeBusinessName && (
+                <span style={{ fontSize: '1.8rem', fontWeight: 700, color: '#ffffff', letterSpacing: '0.05em' }}>
+                  {storeBusinessName}
+                </span>
+              )}
+            </div>
           ) : (
             <span style={{
-              fontSize: `min(25vw, calc(140vw / ${Math.max(1, (brandLogoValue || "MY STORE").length)}))`
+              fontSize: `min(25vw, calc(140vw / ${Math.max(1, displayName.length)}))`
             }}>
-              {brandLogoValue || "MY STORE"}
+              {displayName}
             </span>
           )}
         </div>
         <div className={styles.subFooterDivider}></div>
         <div className={styles.subFooterCopyright}>
-          <p>© {new Date().getFullYear()} {brandLogoValue || "MY STORE"}, ALL RIGHTS RESERVED</p>
+          <p>© {new Date().getFullYear()} {displayName}, ALL RIGHTS RESERVED</p>
         </div>
       </section>
       {mounted && createPortal(

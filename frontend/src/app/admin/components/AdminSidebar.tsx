@@ -7,13 +7,17 @@ interface AdminSidebarProps {
   activeTab: string;
   activeSubTab: string;
   customizeSubTab: string;
+  settingsSubTab?: string;
   setCustomizeSubTab: (val: any) => void;
+  setSettingsSubTab?: (val: any) => void;
   ordersDropdownOpen: boolean;
   productsDropdownOpen: boolean;
   onlineStoreDropdownOpen: boolean;
+  settingsDropdownOpen?: boolean;
   setOrdersDropdownOpen: (val: boolean) => void;
   setProductsDropdownOpen: (val: boolean) => void;
   setOnlineStoreDropdownOpen: (val: boolean) => void;
+  setSettingsDropdownOpen?: (val: boolean) => void;
   setActiveTab: (val: any) => void;
   setActiveSubTab: (val: any) => void;
   setSelectedCategoryView: (val: string | null) => void;
@@ -28,21 +32,26 @@ export default function AdminSidebar({
   activeTab,
   activeSubTab,
   customizeSubTab,
+  settingsSubTab = "general",
   setCustomizeSubTab,
+  setSettingsSubTab,
   ordersDropdownOpen,
   productsDropdownOpen,
   onlineStoreDropdownOpen,
+  settingsDropdownOpen = false,
   setOrdersDropdownOpen,
   setProductsDropdownOpen,
   setOnlineStoreDropdownOpen,
+  setSettingsDropdownOpen,
   setActiveTab,
   setActiveSubTab,
   setSelectedCategoryView,
   handleNavigationTrigger,
   setIsMobileMenuOpen,
   brandLogoType,
-  brandLogoValue
-}: AdminSidebarProps) {
+  brandLogoValue,
+  storeBusinessName
+}: AdminSidebarProps & { storeBusinessName?: string }) {
   return (
     <aside className={`${styles.sidebar} ${isMobileMenuOpen ? styles.sidebarOpen : ''}`}>
       <div className={styles.sidebarTop}>
@@ -54,13 +63,12 @@ export default function AdminSidebar({
                   <path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2Zm0 3a1.5 1.5 0 1 1-1.5 1.5A1.5 1.5 0 0 1 12 5Zm-4 2.5a1.5 1.5 0 1 1-1.5 1.5A1.5 1.5 0 0 1 8 7.5Zm-2.5 4a1.5 1.5 0 1 1 1.5 1.5A1.5 1.5 0 0 1 5.5 11.5Zm2.5 4a1.5 1.5 0 1 1 1.5 1.5A1.5 1.5 0 0 1 8 15.5Zm4 2.5a1.5 1.5 0 1 1 1.5-1.5A1.5 1.5 0 0 1 12 18Zm4-2.5a1.5 1.5 0 1 1 1.5-1.5A1.5 1.5 0 0 1 16 15.5Zm2.5-4a1.5 1.5 0 1 1-1.5-1.5A1.5 1.5 0 0 1 18.5 11.5Zm-2.5-4a1.5 1.5 0 1 1-1.5-1.5A1.5 1.5 0 0 1 16 7.5Z"/>
                 </svg>
               </div>
-              <div className={styles.brandNameDropdown}>
+              <div className={styles.brandNameDropdown} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                {brandLogoValue && brandLogoValue.startsWith('http') && (
+                  <img src={brandLogoValue} alt="Brand Logo" style={{ maxHeight: "22px", maxWidth: "40px", objectFit: "contain" }} />
+                )}
                 <span className={styles.brandNameTitle}>
-                  {brandLogoType === "image" && brandLogoValue ? (
-                    <img src={brandLogoValue} alt="Brand Logo" style={{ maxHeight: "24px", maxWidth: "120px", objectFit: "contain" }} />
-                  ) : (
-                    brandLogoValue || "My Store"
-                  )}
+                  {storeBusinessName || (brandLogoValue && !brandLogoValue.startsWith('http') ? brandLogoValue : "My Store")}
                 </span>
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" style={{ width: "14px", height: "14px", color: "#6b7280" }}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
@@ -74,14 +82,6 @@ export default function AdminSidebar({
                 <path strokeLinecap="round" strokeLinejoin="round" d="M19 5v14" />
               </svg>
             </button>
-          </div>
-
-          <div className={styles.sidebarSearchWrapper}>
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className={styles.sidebarSearchIcon}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
-            </svg>
-            <input type="text" placeholder="Search..." className={styles.sidebarSearchInput} />
-            <kbd className={styles.sidebarKbdBadge}>⌘1</kbd>
           </div>
         </div>
 
@@ -509,6 +509,309 @@ export default function AdminSidebar({
               </div>
             </div>
           )}
+
+          <div>
+            <div
+              onClick={() => {
+                if (!isMobileMenuOpen) {
+                  handleNavigationTrigger("settings");
+                } else {
+                  setOrdersDropdownOpen(false);
+                  setProductsDropdownOpen(false);
+                  setOnlineStoreDropdownOpen(false);
+                }
+                if (setSettingsDropdownOpen) setSettingsDropdownOpen(!settingsDropdownOpen);
+              }}
+              className={`${styles.menuItem} ${activeTab === "settings" ? styles.menuItemActive : ""}`}
+            >
+              <div className={styles.menuItemLeft}>
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className={styles.menuIcon}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+                <span>Settings</span>
+              </div>
+            </div>
+
+            {((settingsDropdownOpen) || (!isMobileMenuOpen && activeTab === "settings")) && (
+              <div className={styles.subMenuContainer}>
+                {/* Item 1: General & Identity */}
+                <div
+                  onClick={() => {
+                    setActiveTab("settings");
+                    if (setSettingsSubTab) setSettingsSubTab("general");
+                    if (isMobileMenuOpen && setIsMobileMenuOpen) setIsMobileMenuOpen(false);
+                  }}
+                  className={styles.subMenuItem}
+                >
+                  {activeTab === "settings" && settingsSubTab === "general" ? (
+                    <svg style={{ display: "block", minWidth: "28px", width: "28px", height: "36px", marginRight: "8px", color: "#d1d5db" }} viewBox="0 0 28 36" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M 12 0 L 12 14 A 4 4 0 0 0 16 18 L 24 18" strokeLinecap="round" strokeLinejoin="round" />
+                      <path d="M 20 14 L 24 18 L 20 22" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  ) : activeTab === "settings" && (settingsSubTab === "domain" || settingsSubTab === "payments" || settingsSubTab === "shipping" || settingsSubTab === "policies" || settingsSubTab === "integrations" || settingsSubTab === "trust") ? (
+                    <svg style={{ display: "block", minWidth: "28px", width: "28px", height: "36px", marginRight: "8px", color: "#d1d5db" }} viewBox="0 0 28 36" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M 12 0 L 12 36" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  ) : (
+                    <div style={{ minWidth: "28px", width: "28px", height: "36px", marginRight: "8px" }} />
+                  )}
+                  <div className={`${styles.subMenuItemCapsule} ${activeTab === "settings" && settingsSubTab === "general" ? styles.subMenuItemCapsuleActive : ""}`} style={{ display: "flex", alignItems: "center", width: "100%", justifyContent: "space-between" }}>
+                    <div style={{ display: "flex", alignItems: "center" }}>
+                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" style={{ width: "13px", height: "13px", marginRight: "6px" }}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 6a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0zm0 0h10.5m-10.5 0H3.75m9.75 6a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0zm0 0h7.5m-7.5 0H3.75m12 6a2.25 2.25 0 1 1-4.5 0 2.25 2.25 0 0 1 4.5 0zm0 0h4.5m-4.5 0H3.75" />
+                      </svg>
+                      General
+                    </div>
+                  </div>
+                </div>
+
+                {/* Account & Security */}
+                <div
+                  onClick={() => {
+                    setActiveTab("settings");
+                    if (setSettingsSubTab) setSettingsSubTab("account");
+                    if (isMobileMenuOpen && setIsMobileMenuOpen) setIsMobileMenuOpen(false);
+                  }}
+                  className={styles.subMenuItem}
+                >
+                  {activeTab === "settings" && settingsSubTab === "account" ? (
+                    <svg style={{ display: "block", minWidth: "28px", width: "28px", height: "36px", marginRight: "8px", color: "#d1d5db" }} viewBox="0 0 28 36" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M 12 0 L 12 14 A 4 4 0 0 0 16 18 L 24 18" strokeLinecap="round" strokeLinejoin="round" />
+                      <path d="M 20 14 L 24 18 L 20 22" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  ) : activeTab === "settings" && (settingsSubTab === "domain" || settingsSubTab === "payments" || settingsSubTab === "shipping" || settingsSubTab === "notifications" || settingsSubTab === "policies" || settingsSubTab === "integrations" || settingsSubTab === "trust") ? (
+                    <svg style={{ display: "block", minWidth: "28px", width: "28px", height: "36px", marginRight: "8px", color: "#d1d5db" }} viewBox="0 0 28 36" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M 12 0 L 12 36" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  ) : (
+                    <div style={{ minWidth: "28px", width: "28px", height: "36px", marginRight: "8px" }} />
+                  )}
+                  <div className={`${styles.subMenuItemCapsule} ${activeTab === "settings" && settingsSubTab === "account" ? styles.subMenuItemCapsuleActive : ""}`} style={{ display: "flex", alignItems: "center", width: "100%", justifyContent: "space-between" }}>
+                    <div style={{ display: "flex", alignItems: "center" }}>
+                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" style={{ width: "13px", height: "13px", marginRight: "6px" }}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z" />
+                      </svg>
+                      Account & Security
+                    </div>
+                  </div>
+                </div>
+
+                {/* Item 2: Domain & Subdomain */}
+                <div
+                  onClick={() => {
+                    setActiveTab("settings");
+                    if (setSettingsSubTab) setSettingsSubTab("domain");
+                    if (isMobileMenuOpen && setIsMobileMenuOpen) setIsMobileMenuOpen(false);
+                  }}
+                  className={styles.subMenuItem}
+                >
+                  {activeTab === "settings" && settingsSubTab === "domain" ? (
+                    <svg style={{ display: "block", minWidth: "28px", width: "28px", height: "36px", marginRight: "8px", color: "#d1d5db" }} viewBox="0 0 28 36" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M 12 0 L 12 14 A 4 4 0 0 0 16 18 L 24 18" strokeLinecap="round" strokeLinejoin="round" />
+                      <path d="M 20 14 L 24 18 L 20 22" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  ) : activeTab === "settings" && (settingsSubTab === "payments" || settingsSubTab === "shipping" || settingsSubTab === "policies" || settingsSubTab === "integrations" || settingsSubTab === "trust") ? (
+                    <svg style={{ display: "block", minWidth: "28px", width: "28px", height: "36px", marginRight: "8px", color: "#d1d5db" }} viewBox="0 0 28 36" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M 12 0 L 12 36" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  ) : (
+                    <div style={{ minWidth: "28px", width: "28px", height: "36px", marginRight: "8px" }} />
+                  )}
+                  <div className={`${styles.subMenuItemCapsule} ${activeTab === "settings" && settingsSubTab === "domain" ? styles.subMenuItemCapsuleActive : ""}`} style={{ display: "flex", alignItems: "center", width: "100%", justifyContent: "space-between" }}>
+                    <div style={{ display: "flex", alignItems: "center" }}>
+                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" style={{ width: "13px", height: "13px", marginRight: "6px" }}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 21a9.004 9.004 0 0 0 8.716-6.747M12 21a9.004 9.004 0 0 1-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 0 1 7.843 4.582M12 3a8.997 8.997 0 0 0-7.843 4.582m15.686 0A11.953 11.953 0 0 1 12 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0 1 21 12c0 .778-.099 1.533-.284 2.253m-17.432 0A8.959 8.959 0 0 1 3 12c0-.778.099-1.533.284-2.253" />
+                      </svg>
+                      Domain & Subdomain
+                    </div>
+                  </div>
+                </div>
+
+                {/* Item 3: Payments & Checkout */}
+                <div
+                  onClick={() => {
+                    setActiveTab("settings");
+                    if (setSettingsSubTab) setSettingsSubTab("payments");
+                    if (isMobileMenuOpen && setIsMobileMenuOpen) setIsMobileMenuOpen(false);
+                  }}
+                  className={styles.subMenuItem}
+                >
+                  {activeTab === "settings" && settingsSubTab === "payments" ? (
+                    <svg style={{ display: "block", minWidth: "28px", width: "28px", height: "36px", marginRight: "8px", color: "#d1d5db" }} viewBox="0 0 28 36" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M 12 0 L 12 14 A 4 4 0 0 0 16 18 L 24 18" strokeLinecap="round" strokeLinejoin="round" />
+                      <path d="M 20 14 L 24 18 L 20 22" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  ) : activeTab === "settings" && (settingsSubTab === "shipping" || settingsSubTab === "policies" || settingsSubTab === "integrations" || settingsSubTab === "trust") ? (
+                    <svg style={{ display: "block", minWidth: "28px", width: "28px", height: "36px", marginRight: "8px", color: "#d1d5db" }} viewBox="0 0 28 36" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M 12 0 L 12 36" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  ) : (
+                    <div style={{ minWidth: "28px", width: "28px", height: "36px", marginRight: "8px" }} />
+                  )}
+                  <div className={`${styles.subMenuItemCapsule} ${activeTab === "settings" && settingsSubTab === "payments" ? styles.subMenuItemCapsuleActive : ""}`} style={{ display: "flex", alignItems: "center", width: "100%", justifyContent: "space-between" }}>
+                    <div style={{ display: "flex", alignItems: "center" }}>
+                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" style={{ width: "13px", height: "13px", marginRight: "6px" }}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 0 0 2.25-2.25V6.75A2.25 2.25 0 0 0 19.5 4.5h-15A2.25 2.25 0 0 0 2.25 6.75v10.5A2.25 2.25 0 0 0 4.5 19.5Z" />
+                      </svg>
+                      Payments & Checkout
+                    </div>
+                  </div>
+                </div>
+
+                {/* Item 4: Shipping & Delivery */}
+                <div
+                  onClick={() => {
+                    setActiveTab("settings");
+                    if (setSettingsSubTab) setSettingsSubTab("shipping");
+                    if (isMobileMenuOpen && setIsMobileMenuOpen) setIsMobileMenuOpen(false);
+                  }}
+                  className={styles.subMenuItem}
+                >
+                  {activeTab === "settings" && settingsSubTab === "shipping" ? (
+                    <svg style={{ display: "block", minWidth: "28px", width: "28px", height: "36px", marginRight: "8px", color: "#d1d5db" }} viewBox="0 0 28 36" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M 12 0 L 12 14 A 4 4 0 0 0 16 18 L 24 18" strokeLinecap="round" strokeLinejoin="round" />
+                      <path d="M 20 14 L 24 18 L 20 22" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  ) : activeTab === "settings" && (settingsSubTab === "policies" || settingsSubTab === "integrations" || settingsSubTab === "trust") ? (
+                    <svg style={{ display: "block", minWidth: "28px", width: "28px", height: "36px", marginRight: "8px", color: "#d1d5db" }} viewBox="0 0 28 36" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M 12 0 L 12 36" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  ) : (
+                    <div style={{ minWidth: "28px", width: "28px", height: "36px", marginRight: "8px" }} />
+                  )}
+                  <div className={`${styles.subMenuItemCapsule} ${activeTab === "settings" && settingsSubTab === "shipping" ? styles.subMenuItemCapsuleActive : ""}`} style={{ display: "flex", alignItems: "center", width: "100%", justifyContent: "space-between" }}>
+                    <div style={{ display: "flex", alignItems: "center" }}>
+                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" style={{ width: "13px", height: "13px", marginRight: "6px" }}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 18.75a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 0 1-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m3 0h1.125c.621 0 1.129-.504 1.09-1.124a17.902 17.902 0 0 0-3.213-9.193 2.056 2.056 0 0 0-1.58-.86H14.25M16.5 18.75h-2.25m0-11.177v-.958c0-.568-.422-1.048-.987-1.106a48.554 48.554 0 0 0-10.026 0 1.106 1.106 0 0 0-.987 1.106v7.635m12-6.677v6.677m0 4.5v-4.5" />
+                      </svg>
+                      Shipping & Delivery
+                    </div>
+                  </div>
+                </div>
+
+                {/* Item 4.5: Notifications & Email */}
+                <div
+                  onClick={() => {
+                    setActiveTab("settings");
+                    if (setSettingsSubTab) setSettingsSubTab("notifications");
+                    if (isMobileMenuOpen && setIsMobileMenuOpen) setIsMobileMenuOpen(false);
+                  }}
+                  className={styles.subMenuItem}
+                >
+                  {activeTab === "settings" && settingsSubTab === "notifications" ? (
+                    <svg style={{ display: "block", minWidth: "28px", width: "28px", height: "36px", marginRight: "8px", color: "#d1d5db" }} viewBox="0 0 28 36" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M 12 0 L 12 14 A 4 4 0 0 0 16 18 L 24 18" strokeLinecap="round" strokeLinejoin="round" />
+                      <path d="M 20 14 L 24 18 L 20 22" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  ) : activeTab === "settings" && (settingsSubTab === "policies" || settingsSubTab === "integrations" || settingsSubTab === "trust") ? (
+                    <svg style={{ display: "block", minWidth: "28px", width: "28px", height: "36px", marginRight: "8px", color: "#d1d5db" }} viewBox="0 0 28 36" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M 12 0 L 12 36" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  ) : (
+                    <div style={{ minWidth: "28px", width: "28px", height: "36px", marginRight: "8px" }} />
+                  )}
+                  <div className={`${styles.subMenuItemCapsule} ${activeTab === "settings" && settingsSubTab === "notifications" ? styles.subMenuItemCapsuleActive : ""}`} style={{ display: "flex", alignItems: "center", width: "100%", justifyContent: "space-between" }}>
+                    <div style={{ display: "flex", alignItems: "center" }}>
+                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" style={{ width: "13px", height: "13px", marginRight: "6px" }}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0" />
+                      </svg>
+                      Notifications & Email
+                    </div>
+                  </div>
+                </div>
+
+                {/* Item 5: Policies & Legal */}
+                <div
+                  onClick={() => {
+                    setActiveTab("settings");
+                    if (setSettingsSubTab) setSettingsSubTab("policies");
+                    if (isMobileMenuOpen && setIsMobileMenuOpen) setIsMobileMenuOpen(false);
+                  }}
+                  className={styles.subMenuItem}
+                >
+                  {activeTab === "settings" && settingsSubTab === "policies" ? (
+                    <svg style={{ display: "block", minWidth: "28px", width: "28px", height: "36px", marginRight: "8px", color: "#d1d5db" }} viewBox="0 0 28 36" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M 12 0 L 12 14 A 4 4 0 0 0 16 18 L 24 18" strokeLinecap="round" strokeLinejoin="round" />
+                      <path d="M 20 14 L 24 18 L 20 22" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  ) : activeTab === "settings" && (settingsSubTab === "integrations" || settingsSubTab === "trust") ? (
+                    <svg style={{ display: "block", minWidth: "28px", width: "28px", height: "36px", marginRight: "8px", color: "#d1d5db" }} viewBox="0 0 28 36" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M 12 0 L 12 36" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  ) : (
+                    <div style={{ minWidth: "28px", width: "28px", height: "36px", marginRight: "8px" }} />
+                  )}
+                  <div className={`${styles.subMenuItemCapsule} ${activeTab === "settings" && settingsSubTab === "policies" ? styles.subMenuItemCapsuleActive : ""}`} style={{ display: "flex", alignItems: "center", width: "100%", justifyContent: "space-between" }}>
+                    <div style={{ display: "flex", alignItems: "center" }}>
+                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" style={{ width: "13px", height: "13px", marginRight: "6px" }}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
+                      </svg>
+                      Policies & Legal
+                    </div>
+                  </div>
+                </div>
+
+                {/* Item 6: Social & Integrations */}
+                <div
+                  onClick={() => {
+                    setActiveTab("settings");
+                    if (setSettingsSubTab) setSettingsSubTab("integrations");
+                    if (isMobileMenuOpen && setIsMobileMenuOpen) setIsMobileMenuOpen(false);
+                  }}
+                  className={styles.subMenuItem}
+                >
+                  {activeTab === "settings" && settingsSubTab === "integrations" ? (
+                    <svg style={{ display: "block", minWidth: "28px", width: "28px", height: "36px", marginRight: "8px", color: "#d1d5db" }} viewBox="0 0 28 36" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M 12 0 L 12 14 A 4 4 0 0 0 16 18 L 24 18" strokeLinecap="round" strokeLinejoin="round" />
+                      <path d="M 20 14 L 24 18 L 20 22" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  ) : activeTab === "settings" && settingsSubTab === "trust" ? (
+                    <svg style={{ display: "block", minWidth: "28px", width: "28px", height: "36px", marginRight: "8px", color: "#d1d5db" }} viewBox="0 0 28 36" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M 12 0 L 12 36" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  ) : (
+                    <div style={{ minWidth: "28px", width: "28px", height: "36px", marginRight: "8px" }} />
+                  )}
+                  <div className={`${styles.subMenuItemCapsule} ${activeTab === "settings" && settingsSubTab === "integrations" ? styles.subMenuItemCapsuleActive : ""}`} style={{ display: "flex", alignItems: "center", width: "100%", justifyContent: "space-between" }}>
+                    <div style={{ display: "flex", alignItems: "center" }}>
+                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" style={{ width: "13px", height: "13px", marginRight: "6px" }}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M13.19 8.688a4.5 4.5 0 0 1 1.242 7.244l-4.5 4.5a4.5 4.5 0 0 1-6.364-6.364l1.757-1.757m13.35-.622 1.757-1.757a4.5 4.5 0 0 0-6.364-6.364l-4.5 4.5a4.5 4.5 0 0 0 1.242 7.244" />
+                      </svg>
+                      Social & Integrations
+                    </div>
+                  </div>
+                </div>
+
+                {/* Item 7: Trust & Badges */}
+                <div
+                  onClick={() => {
+                    setActiveTab("settings");
+                    if (setSettingsSubTab) setSettingsSubTab("trust");
+                    if (isMobileMenuOpen && setIsMobileMenuOpen) setIsMobileMenuOpen(false);
+                  }}
+                  className={styles.subMenuItem}
+                >
+                  {activeTab === "settings" && settingsSubTab === "trust" ? (
+                    <svg style={{ display: "block", minWidth: "28px", width: "28px", height: "36px", marginRight: "8px", color: "#d1d5db" }} viewBox="0 0 28 36" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M 12 0 L 12 14 A 4 4 0 0 0 16 18 L 24 18" strokeLinecap="round" strokeLinejoin="round" />
+                      <path d="M 20 14 L 24 18 L 20 22" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  ) : (
+                    <div style={{ minWidth: "28px", width: "28px", height: "36px", marginRight: "8px" }} />
+                  )}
+                  <div className={`${styles.subMenuItemCapsule} ${activeTab === "settings" && settingsSubTab === "trust" ? styles.subMenuItemCapsuleActive : ""}`} style={{ display: "flex", alignItems: "center", width: "100%", justifyContent: "space-between" }}>
+                    <div style={{ display: "flex", alignItems: "center" }}>
+                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" style={{ width: "13px", height: "13px", marginRight: "6px" }}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12c0 1.268-.63 2.39-1.593 3.068a3.745 3.745 0 0 1-1.043 3.296 3.745 3.745 0 0 1-3.296 1.043A3.745 3.745 0 0 1 12 21c-1.268 0-2.39-.63-3.068-1.593a3.746 3.746 0 0 1-3.296-1.043 3.745 3.745 0 0 1-1.043-3.296A3.745 3.745 0 0 1 3 12c0-1.268.63-2.39 1.593-3.068a3.745 3.745 0 0 1 1.043-3.296 3.746 3.746 0 0 1 3.296-1.043A3.746 3.746 0 0 1 12 3c1.268 0 2.39.63 3.068 1.593a3.746 3.746 0 0 1 3.296 1.043 3.746 3.746 0 0 1 1.043 3.296A3.745 3.745 0 0 1 21 12Z" />
+                      </svg>
+                      Trust & Badges
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
         </nav>
       </div>
 
