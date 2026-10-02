@@ -469,10 +469,30 @@ export default function AdminDashboard() {
   const [storePostalCode, setStorePostalCode] = useState<string>("");
   const [storeLanguage, setStoreLanguage] = useState<string>("en");
 
-  // Payments & Checkout
+  // Payments & Checkout - Multi Gateway State
+  const [activePaymentGateway, setActivePaymentGateway] = useState<string>("razorpay");
   const [razorpayKeyId, setRazorpayKeyId] = useState<string>("");
   const [razorpayKeySecret, setRazorpayKeySecret] = useState<string>("");
   const [razorpayMode, setRazorpayMode] = useState<string>("test");
+
+  const [stripePublishableKey, setStripePublishableKey] = useState<string>("");
+  const [stripeSecretKey, setStripeSecretKey] = useState<string>("");
+  const [stripeMode, setStripeMode] = useState<string>("test");
+
+  const [paypalClientId, setPaypalClientId] = useState<string>("");
+  const [paypalClientSecret, setPaypalClientSecret] = useState<string>("");
+  const [paypalMode, setPaypalMode] = useState<string>("sandbox");
+
+  const [phonepeMerchantId, setPhonepeMerchantId] = useState<string>("");
+  const [phonepeSaltKey, setPhonepeSaltKey] = useState<string>("");
+  const [phonepeSaltIndex, setPhonepeSaltIndex] = useState<string>("1");
+  const [phonepeMode, setPhonepeMode] = useState<string>("uat");
+
+  const [paytmMerchantId, setPaytmMerchantId] = useState<string>("");
+  const [paytmMerchantKey, setPaytmMerchantKey] = useState<string>("");
+  const [paytmWebsite, setPaytmWebsite] = useState<string>("WEBSTAGING");
+  const [paytmMode, setPaytmMode] = useState<string>("staging");
+
   const [codEnabled, setCodEnabled] = useState<boolean>(true);
   const [codExtraFee, setCodExtraFee] = useState<number>(0);
   const [minOrderAmount, setMinOrderAmount] = useState<number>(0);
@@ -742,7 +762,12 @@ export default function AdminDashboard() {
       contactUsText: data.contactUsText !== undefined ? data.contactUsText : "Need help? Email us at support@yourstore.com and our support team will get back to you within 24 hours.",
       returnPolicyText: data.returnPolicyText !== undefined ? data.returnPolicyText : "We offer a 7-day hassle-free return policy. If you're not fully satisfied with your purchase, contact our support team for a full refund.",
       shippingPolicyText: data.shippingPolicyText !== undefined ? data.shippingPolicyText : "We offer free shipping across India. Orders are typically processed within 1-2 business days and delivered within 4-7 business days.",
-      faqs: data.faqs || []
+      faqs: data.faqs || [],
+      storeAddress1: data.storeDetails?.address1 || data.storeAddress1 || "",
+      storeAddress2: data.storeDetails?.address2 || data.storeAddress2 || "",
+      storeCity: data.storeDetails?.city || data.storeCity || "",
+      storeState: data.storeDetails?.state || data.storeState || "",
+      storePostalCode: data.storeDetails?.postalCode || data.storePostalCode || ""
     };
   };
 
@@ -1040,7 +1065,7 @@ export default function AdminDashboard() {
 
   const fetchSettings = async () => {
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:5001'}/api/settings`, { 
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:5001'}/api/settings`, {
         cache: "no-store",
         headers: getAuthHeaders()
       });
@@ -1210,6 +1235,29 @@ export default function AdminDashboard() {
         if (data.returnPolicyText !== undefined) setReturnPolicyText(data.returnPolicyText);
         if (data.shippingPolicyText !== undefined) setShippingPolicyText(data.shippingPolicyText);
 
+        if (data.activePaymentGateway !== undefined) setActivePaymentGateway(data.activePaymentGateway);
+        if (data.razorpayKeyId !== undefined) setRazorpayKeyId(data.razorpayKeyId);
+        if (data.razorpayKeySecret !== undefined) setRazorpayKeySecret(data.razorpayKeySecret);
+        if (data.razorpayMode !== undefined) setRazorpayMode(data.razorpayMode);
+
+        if (data.stripePublishableKey !== undefined) setStripePublishableKey(data.stripePublishableKey);
+        if (data.stripeSecretKey !== undefined) setStripeSecretKey(data.stripeSecretKey);
+        if (data.stripeMode !== undefined) setStripeMode(data.stripeMode);
+
+        if (data.paypalClientId !== undefined) setPaypalClientId(data.paypalClientId);
+        if (data.paypalClientSecret !== undefined) setPaypalClientSecret(data.paypalClientSecret);
+        if (data.paypalMode !== undefined) setPaypalMode(data.paypalMode);
+
+        if (data.phonepeMerchantId !== undefined) setPhonepeMerchantId(data.phonepeMerchantId);
+        if (data.phonepeSaltKey !== undefined) setPhonepeSaltKey(data.phonepeSaltKey);
+        if (data.phonepeSaltIndex !== undefined) setPhonepeSaltIndex(data.phonepeSaltIndex);
+        if (data.phonepeMode !== undefined) setPhonepeMode(data.phonepeMode);
+
+        if (data.paytmMerchantId !== undefined) setPaytmMerchantId(data.paytmMerchantId);
+        if (data.paytmMerchantKey !== undefined) setPaytmMerchantKey(data.paytmMerchantKey);
+        if (data.paytmWebsite !== undefined) setPaytmWebsite(data.paytmWebsite);
+        if (data.paytmMode !== undefined) setPaytmMode(data.paytmMode);
+
         if (data.storeDetails) {
           setStoreBusinessName(data.storeDetails.businessName || data.businessName || "");
           setStoreBusinessType(data.storeDetails.businessType || data.businessType || "retail");
@@ -1222,6 +1270,11 @@ export default function AdminDashboard() {
           setStoreSupportPhone(data.storeDetails.supportPhone || data.supportPhone || "");
           setStoreSubdomain(data.storeDetails.subdomain || "");
           setStoreCustomDomain(data.storeDetails.customDomain || "");
+          setStoreAddress1(data.storeDetails.address1 || data.storeAddress1 || "");
+          setStoreAddress2(data.storeDetails.address2 || data.storeAddress2 || "");
+          setStoreCity(data.storeDetails.city || data.storeCity || "");
+          setStoreState(data.storeDetails.state || data.storeState || "");
+          setStorePostalCode(data.storeDetails.postalCode || data.storePostalCode || "");
         } else {
           if (data.businessName !== undefined) setStoreBusinessName(data.businessName);
           if (data.businessType !== undefined) setStoreBusinessType(data.businessType);
@@ -1232,6 +1285,11 @@ export default function AdminDashboard() {
           if (data.ownerEmail !== undefined) setStoreOwnerEmail(data.ownerEmail);
           if (data.supportEmail !== undefined) setStoreSupportEmail(data.supportEmail);
           if (data.supportPhone !== undefined) setStoreSupportPhone(data.supportPhone);
+          if (data.storeAddress1 !== undefined) setStoreAddress1(data.storeAddress1);
+          if (data.storeAddress2 !== undefined) setStoreAddress2(data.storeAddress2);
+          if (data.storeCity !== undefined) setStoreCity(data.storeCity);
+          if (data.storeState !== undefined) setStoreState(data.storeState);
+          if (data.storePostalCode !== undefined) setStorePostalCode(data.storePostalCode);
         }
 
         if (typeof window !== "undefined") {
@@ -1629,6 +1687,11 @@ export default function AdminDashboard() {
         supportEmail: storeSupportEmail,
         supportPhone: storeSupportPhone,
         customDomain: storeCustomDomain,
+        storeAddress1,
+        storeAddress2,
+        storeCity,
+        storeState,
+        storePostalCode,
         ...overrideSettings
       };
 
@@ -1972,6 +2035,32 @@ export default function AdminDashboard() {
           shippingPolicyText,
           faqs,
           googleClientId,
+          activePaymentGateway,
+          razorpayKeyId,
+          razorpayKeySecret,
+          razorpayMode,
+          stripePublishableKey,
+          stripeSecretKey,
+          stripeMode,
+          paypalClientId,
+          paypalClientSecret,
+          paypalMode,
+          phonepeMerchantId,
+          phonepeSaltKey,
+          phonepeSaltIndex,
+          phonepeMode,
+          paytmMerchantId,
+          paytmMerchantKey,
+          paytmWebsite,
+          paytmMode,
+          codEnabled,
+          codExtraFee,
+          minOrderAmount,
+          maxItemQuantity,
+          customerAccounts,
+          taxInclusive,
+          taxRate,
+          taxNumber,
           businessName: storeBusinessName,
           businessType: storeBusinessType,
           currency: storeCurrency,
@@ -1981,7 +2070,12 @@ export default function AdminDashboard() {
           ownerEmail: storeOwnerEmail,
           supportEmail: storeSupportEmail,
           supportPhone: storeSupportPhone,
-          customDomain: storeCustomDomain
+          customDomain: storeCustomDomain,
+          storeAddress1,
+          storeAddress2,
+          storeCity,
+          storeState,
+          storePostalCode
         })
       });
       if (!res.ok) throw new Error("Failed to save layout adjustments");
@@ -3074,10 +3168,12 @@ export default function AdminDashboard() {
         }}
       >
         <span className={styles.brandName} style={{ opacity: isMobileMenuOpen ? 0 : 1, transition: 'opacity 0.3s', display: 'flex', alignItems: 'center', gap: '8px' }}>
-          {brandLogoValue && brandLogoValue.startsWith("http") && (
+          {(brandLogoType === "image" || (brandLogoValue && (brandLogoValue.startsWith("http") || brandLogoValue.startsWith("/") || brandLogoValue.startsWith("data:")))) && brandLogoValue ? (
             <img src={brandLogoValue} alt="Brand Logo" style={{ maxHeight: "24px", maxWidth: "120px", objectFit: "contain" }} />
+          ) : null}
+          {(!(brandLogoType === "image" || (brandLogoValue && (brandLogoValue.startsWith("http") || brandLogoValue.startsWith("/") || brandLogoValue.startsWith("data:")))) || storeBusinessName) && (
+            <span>{storeBusinessName || (brandLogoValue && !brandLogoValue.startsWith("http") ? brandLogoValue : "MY STORE")}</span>
           )}
-          <span>{storeBusinessName || (brandLogoValue && !brandLogoValue.startsWith("http") ? brandLogoValue : "MY STORE")}</span>
         </span>
         <button className={styles.hamburgerBtn} onClick={() => {
           if (!isMobileMenuOpen) {
@@ -3670,12 +3766,42 @@ export default function AdminDashboard() {
               setStorePostalCode={setStorePostalCode}
               storeLanguage={storeLanguage}
               setStoreLanguage={setStoreLanguage}
+              activePaymentGateway={activePaymentGateway}
+              setActivePaymentGateway={setActivePaymentGateway}
               razorpayKeyId={razorpayKeyId}
               setRazorpayKeyId={setRazorpayKeyId}
               razorpayKeySecret={razorpayKeySecret}
               setRazorpayKeySecret={setRazorpayKeySecret}
               razorpayMode={razorpayMode}
               setRazorpayMode={setRazorpayMode}
+              stripePublishableKey={stripePublishableKey}
+              setStripePublishableKey={setStripePublishableKey}
+              stripeSecretKey={stripeSecretKey}
+              setStripeSecretKey={setStripeSecretKey}
+              stripeMode={stripeMode}
+              setStripeMode={setStripeMode}
+              paypalClientId={paypalClientId}
+              setPaypalClientId={setPaypalClientId}
+              paypalClientSecret={paypalClientSecret}
+              setPaypalClientSecret={setPaypalClientSecret}
+              paypalMode={paypalMode}
+              setPaypalMode={setPaypalMode}
+              phonepeMerchantId={phonepeMerchantId}
+              setPhonepeMerchantId={setPhonepeMerchantId}
+              phonepeSaltKey={phonepeSaltKey}
+              setPhonepeSaltKey={setPhonepeSaltKey}
+              phonepeSaltIndex={phonepeSaltIndex}
+              setPhonepeSaltIndex={setPhonepeSaltIndex}
+              phonepeMode={phonepeMode}
+              setPhonepeMode={setPhonepeMode}
+              paytmMerchantId={paytmMerchantId}
+              setPaytmMerchantId={setPaytmMerchantId}
+              paytmMerchantKey={paytmMerchantKey}
+              setPaytmMerchantKey={setPaytmMerchantKey}
+              paytmWebsite={paytmWebsite}
+              setPaytmWebsite={setPaytmWebsite}
+              paytmMode={paytmMode}
+              setPaytmMode={setPaytmMode}
               codEnabled={codEnabled}
               setCodEnabled={setCodEnabled}
               codExtraFee={codExtraFee}

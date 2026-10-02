@@ -1,12 +1,35 @@
 import jwt from "jsonwebtoken";
+import mongoose from "mongoose";
+import Store from "../models/Store.js";
 import { setTenantStoreId } from "../utils/tenantContext.js";
 
 const getJwtSecret = () => process.env.JWT_SECRET || "ecommerce_secret_jwt_key_2026";
 
 /**
+ * Helper to resolve store ID for authenticated user if storeId is not in token payload
+ */
+const resolveUserStoreId = async (user) => {
+  if (!user) return null;
+  if (user.storeId && mongoose.Types.ObjectId.isValid(user.storeId)) return user.storeId;
+  const userId = user.id || user._id;
+  const userEmail = user.email ? user.email.toLowerCase() : null;
+  const conditions = [];
+  if (userId && mongoose.Types.ObjectId.isValid(userId)) conditions.push({ ownerId: userId });
+  if (userEmail) conditions.push({ ownerEmail: userEmail });
+  if (conditions.length > 0) {
+    const store = await Store.findOne({ $or: conditions }).lean();
+    if (store) {
+      user.storeId = store._id;
+      return store._id;
+    }
+  }
+  return null;
+};
+
+/**
  * Middleware to verify JWT token from Authorization header (Bearer token)
  */
-export const verifyToken = (req, res, next) => {
+export const verifyToken = async (req, res, next) => {
   const authHeader = req.headers.authorization || req.headers.Authorization;
   
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
@@ -18,9 +41,10 @@ export const verifyToken = (req, res, next) => {
   try {
     const decoded = jwt.verify(token, getJwtSecret());
     req.user = decoded;
-    if (decoded.storeId) {
-      req.storeId = decoded.storeId;
-      setTenantStoreId(decoded.storeId);
+    const storeId = await resolveUserStoreId(req.user);
+    if (storeId) {
+      req.storeId = storeId;
+      setTenantStoreId(storeId);
     }
     next();
   } catch (error) {
@@ -49,16 +73,17 @@ export const isAdmin = (req, res, next) => {
 /**
  * Optional authentication middleware - populates req.user if token present, but does not block
  */
-export const optionalAuth = (req, res, next) => {
+export const optionalAuth = async (req, res, next) => {
   const authHeader = req.headers.authorization || req.headers.Authorization;
   if (authHeader && authHeader.startsWith("Bearer ")) {
     const token = authHeader.split(" ")[1];
     try {
       const decoded = jwt.verify(token, getJwtSecret());
       req.user = decoded;
-      if (decoded.storeId) {
-        req.storeId = decoded.storeId;
-        setTenantStoreId(decoded.storeId);
+      const storeId = await resolveUserStoreId(req.user);
+      if (storeId) {
+        req.storeId = storeId;
+        setTenantStoreId(storeId);
       }
     } catch (err) {
       // Ignore token errors for optional auth

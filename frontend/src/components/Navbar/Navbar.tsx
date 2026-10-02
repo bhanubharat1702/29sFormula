@@ -180,18 +180,23 @@ export default function Navbar({ onCartClick }: NavbarProps) {
     };
   }, [isMobileMenuOpen]);
 
+  const isImageLogo = brandLogoType === "image" || (brandLogoValue && (brandLogoValue.startsWith('http') || brandLogoValue.startsWith('/') || brandLogoValue.startsWith('data:')));
+  const displayBrandName = storeBusinessName || (brandLogoType === "text" && brandLogoValue && !brandLogoValue.startsWith('http') ? brandLogoValue : "");
+
   return (
     <header className={styles.header}>
       <div className={styles.navLeft}>
         <Link href="/" aria-label="Home" className={styles.logo} style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          {brandLogoValue && brandLogoValue.startsWith('http') && (
+          {isImageLogo && brandLogoValue ? (
             <img
               src={brandLogoValue}
               alt="Brand Logo"
               style={{ maxHeight: "32px", objectFit: "contain", display: "block" }}
             />
+          ) : null}
+          {(!isImageLogo || displayBrandName) && (
+            <span>{displayBrandName || "MY STORE"}</span>
           )}
-          <span>{storeBusinessName || (brandLogoValue && !brandLogoValue.startsWith('http') ? brandLogoValue : "MY STORE")}</span>
         </Link>
         <nav className={styles.navLinks}>
           <Link href="/" className={`${styles.navLink} ${pathname === "/" ? styles.activeLink : ""}`}>HOME</Link>

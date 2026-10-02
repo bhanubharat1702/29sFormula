@@ -115,6 +115,11 @@ const StoreSchema = new mongoose.Schema({
   country:  { type: String, default: 'India' },
   currency: { type: String, default: 'INR' },
   timezone: { type: String, default: 'Asia/Kolkata' },
+  address1: { type: String, default: '' },
+  address2: { type: String, default: '' },
+  city:     { type: String, default: '' },
+  state:    { type: String, default: '' },
+  postalCode:{ type: String, default: '' },
 
   // ── Plan & Subscription ──────────────────────────────────────
   plan: {

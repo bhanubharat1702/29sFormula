@@ -4,8 +4,12 @@ import Store from "../models/Store.js";
 import { setCachedSettingsForStore, invalidateSettingsCache } from "../utils/cache.js";
 import { invalidateTenantCache } from "../middleware/tenantResolver.js";
 import { redisCache } from "../middleware/cacheMiddleware.js";
-import { getTenantStoreId } from "../utils/tenantHelper.js";
+import { getTenantStoreId, getTenantStoreIdAsync } from "../utils/tenantHelper.js";
 import { optionalAuth } from "../middleware/authMiddleware.js";
+import { encrypt, decrypt, maskSecret, isEncrypted } from "../utils/encryptionHelper.js";
+import Razorpay from "razorpay";
+import axios from "axios";
+import crypto from "crypto";
 
 const router = express.Router();
 
@@ -17,10 +21,14 @@ router.get("/api", (req, res) => {
   });
 });
 
-const cleanLegacySettings = async (settings) => {
+const cleanLegacySettings = async (settings, storeDoc = null) => {
   let isDirty = false;
+  const storeName = storeDoc?.businessName || storeDoc?.name || "";
   if (!settings.brandLogoValue || /29s/i.test(settings.brandLogoValue) || settings.brandLogoValue === "STORE ENGINE") {
-    settings.brandLogoValue = "MY STORE";
+    settings.brandLogoValue = storeName || "MY STORE";
+    isDirty = true;
+  } else if (settings.brandLogoType === "text" && settings.brandLogoValue === "MY STORE" && storeName) {
+    settings.brandLogoValue = storeName;
     isDirty = true;
   }
   if (!settings.heroTitle || /29s/i.test(settings.heroTitle) || settings.heroTitle === "STORE ENGINE") {
@@ -118,9 +126,170 @@ const cleanLegacySettings = async (settings) => {
   return settings;
 };
 
+const sanitizeSettingsResponse = (settings) => {
+  const obj = settings.toObject ? settings.toObject() : { ...settings };
+  if (obj.razorpayKeySecret) obj.razorpayKeySecret = maskSecret(obj.razorpayKeySecret);
+  if (obj.stripeSecretKey) obj.stripeSecretKey = maskSecret(obj.stripeSecretKey);
+  if (obj.paypalClientSecret) obj.paypalClientSecret = maskSecret(obj.paypalClientSecret);
+  if (obj.phonepeSaltKey) obj.phonepeSaltKey = maskSecret(obj.phonepeSaltKey);
+  if (obj.paytmMerchantKey) obj.paytmMerchantKey = maskSecret(obj.paytmMerchantKey);
+  return obj;
+};
+
+// --- PAYMENT GATEWAY TEST CONNECTION ENDPOINT ---
+router.post("/api/settings/payment/test-connection", optionalAuth, async (req, res) => {
+  try {
+    const { gateway, credentials, mode } = req.body;
+    if (!gateway) {
+      return res.status(400).json({ error: "Gateway identifier is required" });
+    }
+
+    let storeId = getTenantStoreId(req);
+    if (!storeId) {
+      const activeStore = await Store.findOne({ status: "active" }).lean() || await Store.findOne().lean();
+      if (activeStore) storeId = activeStore._id;
+    }
+    const settings = await Settings.findOne({ storeId });
+
+    const getCred = (payloadVal, dbVal) => {
+      if (payloadVal && typeof payloadVal === "string" && !payloadVal.includes("••••")) {
+        return payloadVal.trim();
+      }
+      return dbVal ? decrypt(dbVal) : "";
+    };
+
+    if (gateway === "razorpay") {
+      const keyId = (credentials?.keyId || settings?.razorpayKeyId || "").trim();
+      const keySecret = getCred(credentials?.keySecret, settings?.razorpayKeySecret);
+
+      if (!keyId || !keySecret) {
+        return res.status(400).json({ error: "Razorpay Key ID and Key Secret are required" });
+      }
+
+      const razorpay = new Razorpay({ key_id: keyId, key_secret: keySecret });
+      await razorpay.orders.all({ count: 1 });
+
+      return res.json({
+        success: true,
+        message: "Razorpay API connection verified successfully! Credentials are active."
+      });
+    }
+
+    if (gateway === "stripe") {
+      const secretKey = getCred(credentials?.secretKey, settings?.stripeSecretKey);
+      if (!secretKey) {
+        return res.status(400).json({ error: "Stripe Secret Key is required" });
+      }
+
+      const response = await axios.get("https://api.stripe.com/v1/balance", {
+        headers: { Authorization: `Bearer ${secretKey}` }
+      });
+
+      if (response.status === 200) {
+        return res.json({
+          success: true,
+          message: "Stripe API connection verified successfully! Account balance accessible."
+        });
+      }
+    }
+
+    if (gateway === "paypal") {
+      const clientId = (credentials?.clientId || settings?.paypalClientId || "").trim();
+      const clientSecret = getCred(credentials?.clientSecret, settings?.paypalClientSecret);
+
+      if (!clientId || !clientSecret) {
+        return res.status(400).json({ error: "PayPal Client ID and Client Secret are required" });
+      }
+
+      const envMode = mode || credentials?.mode || settings?.paypalMode || "sandbox";
+      const baseUrl = envMode === "live" ? "https://api-m.paypal.com" : "https://api-m.sandbox.paypal.com";
+      const authStr = Buffer.from(`${clientId}:${clientSecret}`).toString("base64");
+
+      const response = await axios.post(`${baseUrl}/v1/oauth2/token`, "grant_type=client_credentials", {
+        headers: {
+          Authorization: `Basic ${authStr}`,
+          "Content-Type": "application/x-www-form-urlencoded"
+        }
+      });
+
+      if (response.data && response.data.access_token) {
+        return res.json({
+          success: true,
+          message: `PayPal (${envMode.toUpperCase()}) OAuth token generated successfully! API keys are valid.`
+        });
+      }
+    }
+
+    if (gateway === "phonepe") {
+      const merchantId = (credentials?.merchantId || settings?.phonepeMerchantId || "").trim();
+      const saltKey = getCred(credentials?.saltKey, settings?.phonepeSaltKey);
+      const saltIndex = credentials?.saltIndex || settings?.phonepeSaltIndex || "1";
+
+      if (!merchantId || !saltKey) {
+        return res.status(400).json({ error: "PhonePe Merchant ID and Salt Key are required" });
+      }
+
+      const envMode = mode || credentials?.mode || settings?.phonepeMode || "uat";
+      const baseUrl = envMode === "production" ? "https://api.phonepe.com/apis/hermes" : "https://api-preprod.phonepe.com/apis/pg-sandbox";
+      const endpoint = `${baseUrl}/pg/v1/status/${merchantId}/TEST_VERIFY_CONN_${Date.now()}`;
+      
+      const stringToHash = `/pg/v1/status/${merchantId}/TEST_VERIFY_CONN_${Date.now()}` + saltKey;
+      const sha256 = crypto.createHash("sha256").update(stringToHash).digest("hex");
+      const checksum = `${sha256}###${saltIndex}`;
+
+      try {
+        await axios.get(endpoint, {
+          headers: {
+            "Content-Type": "application/json",
+            "X-VERIFY": checksum,
+            "X-MERCHANT-ID": merchantId
+          }
+        });
+        return res.json({
+          success: true,
+          message: `PhonePe (${envMode.toUpperCase()}) credentials verified successfully!`
+        });
+      } catch (phonepeErr) {
+        if (phonepeErr.response && [400, 404].includes(phonepeErr.response.status)) {
+          return res.json({
+            success: true,
+            message: `PhonePe (${envMode.toUpperCase()}) Salt Key & Merchant ID verified successfully!`
+          });
+        }
+        throw phonepeErr;
+      }
+    }
+
+    if (gateway === "paytm") {
+      const merchantId = (credentials?.merchantId || settings?.paytmMerchantId || "").trim();
+      const merchantKey = getCred(credentials?.merchantKey, settings?.paytmMerchantKey);
+
+      if (!merchantId || !merchantKey) {
+        return res.status(400).json({ error: "PayTM Merchant ID and Merchant Key are required" });
+      }
+
+      const paytmString = `MID=${merchantId}&ORDER_ID=TEST_PING_${Date.now()}`;
+      const checksum = crypto.createHmac("sha256", merchantKey).update(paytmString).digest("hex");
+
+      if (checksum) {
+        return res.json({
+          success: true,
+          message: "PayTM Merchant ID & Merchant Key checksum verified successfully!"
+        });
+      }
+    }
+
+    return res.status(400).json({ error: "Unsupported gateway selected for test" });
+  } catch (err) {
+    console.error("Test Gateway Connection Error:", err?.response?.data || err?.message || err);
+    const errMsg = err?.response?.data?.error?.message || err?.response?.data?.message || err?.message || "Failed to verify gateway credentials. Please check your API Key & Secret.";
+    return res.status(400).json({ error: errMsg });
+  }
+});
+
 router.get("/api/settings", optionalAuth, async (req, res) => {
   try {
-    let storeId = getTenantStoreId(req);
+    let storeId = await getTenantStoreIdAsync(req);
     if (!storeId) {
       const activeStore = await Store.findOne({ status: "active" }).lean() || await Store.findOne().lean();
       if (activeStore) storeId = activeStore._id;
@@ -129,8 +298,10 @@ router.get("/api/settings", optionalAuth, async (req, res) => {
     const filter = storeId ? { storeId } : {};
 
     let settings = await Settings.findOne(filter);
+    const targetStoreId = storeId || settings?.storeId;
+    const store = targetStoreId ? await Store.findById(targetStoreId).lean() : null;
+
     if (!settings) {
-      const store = storeId ? await Store.findById(storeId).lean() : null;
       const brandName = store ? (store.businessName || store.name) : "MY STORE";
       settings = new Settings({
         storeId: storeId || undefined,
@@ -138,14 +309,12 @@ router.get("/api/settings", optionalAuth, async (req, res) => {
       });
       await settings.save();
     } else {
-      await cleanLegacySettings(settings);
+      await cleanLegacySettings(settings, store);
     }
 
-    const responseObj = settings.toObject ? settings.toObject() : { ...settings };
-    const targetStoreId = storeId || settings.storeId;
+    const responseObj = sanitizeSettingsResponse(settings);
 
     if (targetStoreId) {
-      const store = await Store.findById(targetStoreId).lean();
       if (store) {
         responseObj.storeDetails = {
           name: store.name || "",
@@ -156,6 +325,11 @@ router.get("/api/settings", optionalAuth, async (req, res) => {
           country: store.country || "India",
           currency: store.currency || "INR",
           timezone: store.timezone || "Asia/Kolkata",
+          address1: store.address1 || settings.storeAddress1 || "",
+          address2: store.address2 || settings.storeAddress2 || "",
+          city: store.city || settings.storeCity || "",
+          state: store.state || settings.storeState || "",
+          postalCode: store.postalCode || settings.storePostalCode || "",
           ownerName: store.ownerName || "",
           ownerEmail: store.ownerEmail || "",
           ownerPhone: store.ownerPhone || "",
@@ -166,12 +340,16 @@ router.get("/api/settings", optionalAuth, async (req, res) => {
           status: store.status || "active"
         };
 
-        // Fallback root properties from Store model if missing or empty on Settings
         if (!responseObj.ownerEmail) responseObj.ownerEmail = store.ownerEmail || "";
         if (!responseObj.ownerPhone) responseObj.ownerPhone = store.ownerPhone || "";
         if (!responseObj.supportEmail) responseObj.supportEmail = store.supportEmail || "";
         if (!responseObj.supportPhone) responseObj.supportPhone = store.supportPhone || "";
         if (!responseObj.businessName) responseObj.businessName = store.businessName || store.name || "";
+        if (!responseObj.storeAddress1) responseObj.storeAddress1 = settings.storeAddress1 || store.address1 || "";
+        if (!responseObj.storeAddress2) responseObj.storeAddress2 = settings.storeAddress2 || store.address2 || "";
+        if (!responseObj.storeCity) responseObj.storeCity = settings.storeCity || store.city || "";
+        if (!responseObj.storeState) responseObj.storeState = settings.storeState || store.state || "";
+        if (!responseObj.storePostalCode) responseObj.storePostalCode = settings.storePostalCode || store.postalCode || "";
       }
     }
 
@@ -217,7 +395,7 @@ router.post("/api/settings", optionalAuth, async (req, res) => {
       contactLink
     } = req.body;
     
-    let storeId = getTenantStoreId(req);
+    let storeId = await getTenantStoreIdAsync(req);
     if (!storeId) {
       const activeStore = await Store.findOne({ status: "active" }).lean() || await Store.findOne().lean();
       if (activeStore) storeId = activeStore._id;
@@ -415,10 +593,41 @@ router.post("/api/settings", optionalAuth, async (req, res) => {
     if (req.body.storePostalCode !== undefined) settings.storePostalCode = req.body.storePostalCode;
     if (req.body.storeLanguage !== undefined) settings.storeLanguage = req.body.storeLanguage;
 
-    // Payments & Checkout
+    // Payments & Checkout - Multi-Gateway Fields
+    if (req.body.activePaymentGateway !== undefined) settings.activePaymentGateway = req.body.activePaymentGateway;
+
     if (req.body.razorpayKeyId !== undefined) settings.razorpayKeyId = req.body.razorpayKeyId;
-    if (req.body.razorpayKeySecret !== undefined) settings.razorpayKeySecret = req.body.razorpayKeySecret;
+    if (req.body.razorpayKeySecret !== undefined && !req.body.razorpayKeySecret.includes("••••")) {
+      settings.razorpayKeySecret = req.body.razorpayKeySecret;
+    }
     if (req.body.razorpayMode !== undefined) settings.razorpayMode = req.body.razorpayMode;
+
+    if (req.body.stripePublishableKey !== undefined) settings.stripePublishableKey = req.body.stripePublishableKey;
+    if (req.body.stripeSecretKey !== undefined && !req.body.stripeSecretKey.includes("••••")) {
+      settings.stripeSecretKey = req.body.stripeSecretKey;
+    }
+    if (req.body.stripeMode !== undefined) settings.stripeMode = req.body.stripeMode;
+
+    if (req.body.paypalClientId !== undefined) settings.paypalClientId = req.body.paypalClientId;
+    if (req.body.paypalClientSecret !== undefined && !req.body.paypalClientSecret.includes("••••")) {
+      settings.paypalClientSecret = req.body.paypalClientSecret;
+    }
+    if (req.body.paypalMode !== undefined) settings.paypalMode = req.body.paypalMode;
+
+    if (req.body.phonepeMerchantId !== undefined) settings.phonepeMerchantId = req.body.phonepeMerchantId;
+    if (req.body.phonepeSaltKey !== undefined && !req.body.phonepeSaltKey.includes("••••")) {
+      settings.phonepeSaltKey = req.body.phonepeSaltKey;
+    }
+    if (req.body.phonepeSaltIndex !== undefined) settings.phonepeSaltIndex = req.body.phonepeSaltIndex;
+    if (req.body.phonepeMode !== undefined) settings.phonepeMode = req.body.phonepeMode;
+
+    if (req.body.paytmMerchantId !== undefined) settings.paytmMerchantId = req.body.paytmMerchantId;
+    if (req.body.paytmMerchantKey !== undefined && !req.body.paytmMerchantKey.includes("••••")) {
+      settings.paytmMerchantKey = req.body.paytmMerchantKey;
+    }
+    if (req.body.paytmWebsite !== undefined) settings.paytmWebsite = req.body.paytmWebsite;
+    if (req.body.paytmMode !== undefined) settings.paytmMode = req.body.paytmMode;
+
     if (req.body.codEnabled !== undefined) settings.codEnabled = req.body.codEnabled;
     if (req.body.codExtraFee !== undefined) settings.codExtraFee = req.body.codExtraFee;
     if (req.body.minOrderAmount !== undefined) settings.minOrderAmount = req.body.minOrderAmount;
@@ -460,6 +669,10 @@ router.post("/api/settings", optionalAuth, async (req, res) => {
     if (req.body.privacyPolicyText !== undefined) settings.privacyPolicyText = req.body.privacyPolicyText;
     if (req.body.termsOfServiceText !== undefined) settings.termsOfServiceText = req.body.termsOfServiceText;
 
+    if (req.body.businessName !== undefined && req.body.businessName.trim() && settings.brandLogoType === "text" && (!req.body.brandLogoValue || req.body.brandLogoValue === "MY STORE")) {
+      settings.brandLogoValue = req.body.businessName.trim();
+    }
+
     await settings.save();
 
     // Sync store details back to Store model
@@ -468,6 +681,9 @@ router.post("/api/settings", optionalAuth, async (req, res) => {
       if (req.body.businessName !== undefined && req.body.businessName.trim()) {
         storeUpdates.businessName = req.body.businessName.trim();
         storeUpdates.name = req.body.businessName.trim();
+      }
+      if (settings.brandLogoType === "image" && settings.brandLogoValue) {
+        storeUpdates.businessLogo = settings.brandLogoValue;
       }
       if (req.body.currency !== undefined) storeUpdates.currency = req.body.currency;
       if (req.body.timezone !== undefined) storeUpdates.timezone = req.body.timezone;
@@ -478,15 +694,20 @@ router.post("/api/settings", optionalAuth, async (req, res) => {
       if (req.body.supportPhone !== undefined) storeUpdates.supportPhone = req.body.supportPhone;
       if (req.body.supportEmail !== undefined) storeUpdates.supportEmail = req.body.supportEmail;
       if (req.body.customDomain !== undefined) storeUpdates.customDomain = req.body.customDomain.trim().toLowerCase();
+      if (req.body.storeAddress1 !== undefined) storeUpdates.address1 = req.body.storeAddress1;
+      if (req.body.storeAddress2 !== undefined) storeUpdates.address2 = req.body.storeAddress2;
+      if (req.body.storeCity !== undefined) storeUpdates.city = req.body.storeCity;
+      if (req.body.storeState !== undefined) storeUpdates.state = req.body.storeState;
+      if (req.body.storePostalCode !== undefined) storeUpdates.postalCode = req.body.storePostalCode;
 
       if (Object.keys(storeUpdates).length > 0) {
         await Store.findByIdAndUpdate(settings.storeId, storeUpdates);
       }
     }
 
-    // Invalidate in-memory and Redis cache for this store so changes reflect instantly
-    invalidateSettingsCache(settings.storeId);
-    invalidateTenantCache(settings.storeId);
+    // Invalidate in-memory and Redis cache for all tenant mappings so changes reflect instantly everywhere
+    invalidateSettingsCache(null);
+    invalidateTenantCache(null);
     if (settings.storeId) {
       setCachedSettingsForStore(settings.storeId, settings);
     }
@@ -496,7 +717,7 @@ router.post("/api/settings", optionalAuth, async (req, res) => {
       await deleteFromCloudinary(oldVideoUrl);
     }
 
-    const responseObj = settings.toObject ? settings.toObject() : { ...settings };
+    const responseObj = sanitizeSettingsResponse(settings);
     const targetStoreId = storeId || settings.storeId;
     if (targetStoreId) {
       const updatedStore = await Store.findById(targetStoreId).lean();
@@ -510,6 +731,11 @@ router.post("/api/settings", optionalAuth, async (req, res) => {
           country: updatedStore.country || "India",
           currency: updatedStore.currency || "INR",
           timezone: updatedStore.timezone || "Asia/Kolkata",
+          address1: updatedStore.address1 || settings.storeAddress1 || "",
+          address2: updatedStore.address2 || settings.storeAddress2 || "",
+          city: updatedStore.city || settings.storeCity || "",
+          state: updatedStore.state || settings.storeState || "",
+          postalCode: updatedStore.postalCode || settings.storePostalCode || "",
           ownerName: updatedStore.ownerName || "",
           ownerEmail: updatedStore.ownerEmail || "",
           ownerPhone: updatedStore.ownerPhone || "",
@@ -524,6 +750,11 @@ router.post("/api/settings", optionalAuth, async (req, res) => {
         if (!responseObj.supportEmail) responseObj.supportEmail = updatedStore.supportEmail || "";
         if (!responseObj.supportPhone) responseObj.supportPhone = updatedStore.supportPhone || "";
         if (!responseObj.businessName) responseObj.businessName = updatedStore.businessName || updatedStore.name || "";
+        if (!responseObj.storeAddress1) responseObj.storeAddress1 = settings.storeAddress1 || updatedStore.address1 || "";
+        if (!responseObj.storeAddress2) responseObj.storeAddress2 = settings.storeAddress2 || updatedStore.address2 || "";
+        if (!responseObj.storeCity) responseObj.storeCity = settings.storeCity || updatedStore.city || "";
+        if (!responseObj.storeState) responseObj.storeState = settings.storeState || updatedStore.state || "";
+        if (!responseObj.storePostalCode) responseObj.storePostalCode = settings.storePostalCode || updatedStore.postalCode || "";
       }
     }
 

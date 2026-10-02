@@ -52,6 +52,9 @@ export default function AdminSidebar({
   brandLogoValue,
   storeBusinessName
 }: AdminSidebarProps & { storeBusinessName?: string }) {
+  const isImageLogo = brandLogoType === "image" || (brandLogoValue && (brandLogoValue.startsWith('http') || brandLogoValue.startsWith('/') || brandLogoValue.startsWith('data:')));
+  const displayBrandName = storeBusinessName || (brandLogoType === "text" && brandLogoValue && !brandLogoValue.startsWith('http') ? brandLogoValue : "");
+
   return (
     <aside className={`${styles.sidebar} ${isMobileMenuOpen ? styles.sidebarOpen : ''}`}>
       <div className={styles.sidebarTop}>
@@ -59,16 +62,17 @@ export default function AdminSidebar({
           <div className={styles.brandRow}>
             <div className={styles.brandLeft}>
               <div className={styles.brandLogoCircle}>
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" style={{ width: "18px", height: "18px", color: "#ffffff" }}>
-                  <path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2Zm0 3a1.5 1.5 0 1 1-1.5 1.5A1.5 1.5 0 0 1 12 5Zm-4 2.5a1.5 1.5 0 1 1-1.5 1.5A1.5 1.5 0 0 1 8 7.5Zm-2.5 4a1.5 1.5 0 1 1 1.5 1.5A1.5 1.5 0 0 1 5.5 11.5Zm2.5 4a1.5 1.5 0 1 1 1.5 1.5A1.5 1.5 0 0 1 8 15.5Zm4 2.5a1.5 1.5 0 1 1 1.5-1.5A1.5 1.5 0 0 1 12 18Zm4-2.5a1.5 1.5 0 1 1 1.5-1.5A1.5 1.5 0 0 1 16 15.5Zm2.5-4a1.5 1.5 0 1 1-1.5-1.5A1.5 1.5 0 0 1 18.5 11.5Zm-2.5-4a1.5 1.5 0 1 1-1.5-1.5A1.5 1.5 0 0 1 16 7.5Z"/>
-                </svg>
+                {isImageLogo && brandLogoValue ? (
+                  <img src={brandLogoValue} alt="Brand Logo" style={{ maxHeight: "20px", maxWidth: "32px", objectFit: "contain" }} />
+                ) : (
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" style={{ width: "18px", height: "18px", color: "#ffffff" }}>
+                    <path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2Zm0 3a1.5 1.5 0 1 1-1.5 1.5A1.5 1.5 0 0 1 12 5Zm-4 2.5a1.5 1.5 0 1 1-1.5 1.5A1.5 1.5 0 0 1 8 7.5Zm-2.5 4a1.5 1.5 0 1 1 1.5 1.5A1.5 1.5 0 0 1 5.5 11.5Zm2.5 4a1.5 1.5 0 1 1 1.5 1.5A1.5 1.5 0 0 1 8 15.5Zm4 2.5a1.5 1.5 0 1 1 1.5-1.5A1.5 1.5 0 0 1 12 18Zm4-2.5a1.5 1.5 0 1 1 1.5-1.5A1.5 1.5 0 0 1 16 15.5Zm2.5-4a1.5 1.5 0 1 1-1.5-1.5A1.5 1.5 0 0 1 18.5 11.5Zm-2.5-4a1.5 1.5 0 1 1-1.5-1.5A1.5 1.5 0 0 1 16 7.5Z"/>
+                  </svg>
+                )}
               </div>
               <div className={styles.brandNameDropdown} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                {brandLogoValue && brandLogoValue.startsWith('http') && (
-                  <img src={brandLogoValue} alt="Brand Logo" style={{ maxHeight: "22px", maxWidth: "40px", objectFit: "contain" }} />
-                )}
                 <span className={styles.brandNameTitle}>
-                  {storeBusinessName || (brandLogoValue && !brandLogoValue.startsWith('http') ? brandLogoValue : "My Store")}
+                  {displayBrandName || (isImageLogo ? "My Store" : "My Store")}
                 </span>
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" style={{ width: "14px", height: "14px", color: "#6b7280" }}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />

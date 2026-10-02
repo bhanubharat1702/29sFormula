@@ -1,11 +1,12 @@
 import mongoose from "mongoose";
+import { encrypt, isEncrypted } from "../utils/encryptionHelper.js";
 
 // Define Settings Schema
 const settingsSchema = new mongoose.Schema({
   storeId: { type: mongoose.Schema.Types.ObjectId, ref: "Store", index: true },
-  tickerText: { 
-    type: String, 
-    default: "7-DAY EASY RETURNS & EXCHANGES | FREE SHIPPING ACROSS INDIA | 7-DAY EASY RETURNS & EXCHANGES | FREE SHIPPING ACROSS INDIA | 7-DAY EASY RETURNS & EXCHANGES | FREE SHIPPING ACROSS INDIA | " 
+  tickerText: {
+    type: String,
+    default: "7-DAY EASY RETURNS & EXCHANGES | FREE SHIPPING ACROSS INDIA | 7-DAY EASY RETURNS & EXCHANGES | FREE SHIPPING ACROSS INDIA | 7-DAY EASY RETURNS & EXCHANGES | FREE SHIPPING ACROSS INDIA | "
   },
   tickerSpeed: {
     type: Number,
@@ -19,9 +20,9 @@ const settingsSchema = new mongoose.Schema({
     type: String,
     default: "#000000"
   },
-  announcementText: { 
-    type: String, 
-    default: "EVERY ORDER IS PREPARED WITH CARE. DUE TO SEASONAL DEMAND, PROCESSING MAY TAKE UP TO 5-7 DAYS BEFORE DISPATCH." 
+  announcementText: {
+    type: String,
+    default: "EVERY ORDER IS PREPARED WITH CARE. DUE TO SEASONAL DEMAND, PROCESSING MAY TAKE UP TO 5-7 DAYS BEFORE DISPATCH."
   },
   heroTitle: { type: String, default: "WELCOME TO OUR STORE" },
   heroTitleFontType: { type: String, default: "Outfit" },
@@ -29,9 +30,9 @@ const settingsSchema = new mongoose.Schema({
   heroTitleFontSize: { type: String, default: "4.5rem" },
   heroTitleFontAlignment: { type: String, default: "center" },
   heroTitleFontWeight: { type: String, default: "700" },
-  heroManifesto: { 
-    type: String, 
-    default: "PREMIUM QUALITY YOU CAN TRUST. EVERY PRODUCT IS CRAFTED WITH CARE AND DELIVERED WITH PASSION." 
+  heroManifesto: {
+    type: String,
+    default: "PREMIUM QUALITY YOU CAN TRUST. EVERY PRODUCT IS CRAFTED WITH CARE AND DELIVERED WITH PASSION."
   },
   heroBgType: { type: String, default: "color" },
   heroBgColor: { type: String, default: "#121212" },
@@ -194,10 +195,35 @@ const settingsSchema = new mongoose.Schema({
   storePostalCode: { type: String, default: "" },
   storeLanguage: { type: String, default: "en" },
 
-  // Payments & Checkout
+  // Payments & Checkout - Multi-Gateway Configuration
+  activePaymentGateway: { type: String, default: "razorpay" }, // 'razorpay', 'stripe', 'paypal', 'phonepe', 'paytm'
+
+  // Razorpay
   razorpayKeyId: { type: String, default: "" },
   razorpayKeySecret: { type: String, default: "" },
   razorpayMode: { type: String, default: "test" },
+
+  // Stripe
+  stripePublishableKey: { type: String, default: "" },
+  stripeSecretKey: { type: String, default: "" },
+  stripeMode: { type: String, default: "test" },
+
+  // PayPal
+  paypalClientId: { type: String, default: "" },
+  paypalClientSecret: { type: String, default: "" },
+  paypalMode: { type: String, default: "sandbox" },
+
+  // PhonePe
+  phonepeMerchantId: { type: String, default: "" },
+  phonepeSaltKey: { type: String, default: "" },
+  phonepeSaltIndex: { type: String, default: "1" },
+  phonepeMode: { type: String, default: "uat" },
+
+  // PayTM
+  paytmMerchantId: { type: String, default: "" },
+  paytmMerchantKey: { type: String, default: "" },
+  paytmWebsite: { type: String, default: "WEBSTAGING" },
+  paytmMode: { type: String, default: "staging" },
   codEnabled: { type: Boolean, default: true },
   codExtraFee: { type: Number, default: 0 },
   minOrderAmount: { type: Number, default: 0 },
@@ -206,6 +232,12 @@ const settingsSchema = new mongoose.Schema({
   taxInclusive: { type: Boolean, default: false },
   taxRate: { type: Number, default: 0 },
   taxNumber: { type: String, default: "" },
+
+  // Contact Info
+  ownerEmail: { type: String, default: "" },
+  ownerPhone: { type: String, default: "" },
+  supportEmail: { type: String, default: "" },
+  supportPhone: { type: String, default: "" },
 
   // Shipping
   freeShippingThreshold: { type: Number, default: 0 },
@@ -244,8 +276,25 @@ const settingsSchema = new mongoose.Schema({
 
   // Policies
   privacyPolicyText: { type: String, default: "" },
-  termsOfServiceText: { type: String, default: "" },
+  termsOfServiceText: { type: String, default: "" }
 }, { timestamps: true });
+
+// Pre-save hook to encrypt sensitive gateway keys securely before persisting to Database
+settingsSchema.pre("save", function () {
+  const secretFields = [
+    "razorpayKeySecret",
+    "stripeSecretKey",
+    "paypalClientSecret",
+    "phonepeSaltKey",
+    "paytmMerchantKey"
+  ];
+
+  secretFields.forEach((field) => {
+    if (this.isModified(field) && this[field] && typeof this[field] === "string" && !isEncrypted(this[field])) {
+      this[field] = encrypt(this[field]);
+    }
+  });
+});
 
 const Settings = mongoose.models.Settings || mongoose.model("Settings", settingsSchema);
 

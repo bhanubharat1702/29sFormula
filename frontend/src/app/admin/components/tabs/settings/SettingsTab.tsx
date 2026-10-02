@@ -159,56 +159,76 @@ export function SettingsSubTabFooter({ handleSaveSettings, getChanges }: Setting
       </div>
 
       {showModal && (
-        <div className={styles.modalOverlay}>
+        <div className={styles.modalOverlay} onClick={(e) => { if (e.target === e.currentTarget) setShowModal(false); }}>
           <div className={styles.modalBox}>
-            <div style={{ marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '12px' }}>
-              <div style={{
-                width: '38px',
-                height: '38px',
-                borderRadius: '8px',
-                backgroundColor: '#f3f4f6',
-                color: '#0c0a09',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                flexShrink: 0
-              }}>
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.8} stroke="#0c0a09" style={{ width: '20px', height: '20px' }}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
+            <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '4px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+                <div className={styles.confirmIconBadge}>
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" style={{ width: '22px', height: '22px' }}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                  </svg>
+                </div>
+                <div>
+                  <h3 className={styles.modalTitle}>Review & Confirm Changes</h3>
+                  <p className={styles.modalSubtitle}>Review the modified store settings before applying.</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowModal(false)}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  color: '#71717a',
+                  cursor: 'pointer',
+                  padding: '4px',
+                  borderRadius: '6px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  transition: 'all 0.15s ease'
+                }}
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" style={{ width: '18px', height: '18px' }}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" />
                 </svg>
-              </div>
-              <div>
-                <h3 className={styles.modalTitle} style={{ fontSize: '1.15rem' }}>
-                  Review & Confirm Changes
-                </h3>
-                <p className={styles.modalSubtitle} style={{ marginBottom: 0 }}>
-                  These settings will update your merchant store configuration.
-                </p>
-              </div>
+              </button>
             </div>
 
-            <div style={{
-              maxHeight: '200px',
-              overflowY: 'auto',
-              border: '1px solid #e5e7eb',
-              borderRadius: '8px',
-              padding: '12px',
-              backgroundColor: '#f9fafb',
-              marginBottom: '20px',
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '8px'
-            }}>
-              {changes.map((ch, idx) => (
-                <div key={idx} style={{ fontSize: '0.83rem', color: '#1f2937', borderBottom: idx < changes.length - 1 ? '1px solid #e5e7eb' : 'none', paddingBottom: idx < changes.length - 1 ? '6px' : '0' }}>
-                  <div style={{ fontWeight: 600, color: '#0c0a09', marginBottom: '2px' }}>{ch.field}</div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.78rem', color: '#6b7280' }}>
-                    <span style={{ textDecoration: 'line-through', color: '#9ca3af' }}>{ch.from || '(empty)'}</span>
-                    <span>→</span>
-                    <span style={{ color: '#0c0a09', fontWeight: 600 }}>{ch.to || '(empty)'}</span>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '16px', marginBottom: '2px' }}>
+              <span style={{ fontSize: '0.76rem', fontWeight: 700, color: '#71717a', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                Modified Fields ({changes.length})
+              </span>
+            </div>
+
+            <div className={styles.confirmChangesBox}>
+              {changes.map((ch, idx) => {
+                const formatVal = (field: string, val: string) => {
+                  if (!val) return '(empty)';
+                  if (field.toLowerCase().includes('secret') || field.toLowerCase().includes('key') || field.toLowerCase().includes('token')) {
+                    if (val.includes('••••')) return val;
+                    if (val.length > 8) return val.slice(0, 4) + '••••' + val.slice(-4);
+                    return '••••••••';
+                  }
+                  return val;
+                };
+
+                return (
+                  <div key={idx} className={styles.confirmChangeItem}>
+                    <div style={{ fontWeight: 600, color: '#09090b', marginBottom: '6px', fontSize: '0.84rem', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <span style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: '#09090b', display: 'inline-block' }}></span>
+                      {ch.field}
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                      <span className={styles.fromValBadge}>{formatVal(ch.field, ch.from)}</span>
+                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.2} stroke="#a1a1aa" style={{ width: '14px', height: '14px', flexShrink: 0 }}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
+                      </svg>
+                      <span className={styles.toValBadge}>{formatVal(ch.field, ch.to)}</span>
+                    </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
 
             <div className={styles.modalActions}>
@@ -225,7 +245,17 @@ export function SettingsSubTabFooter({ handleSaveSettings, getChanges }: Setting
                 onClick={handleConfirmSave}
                 disabled={isSaving}
               >
-                {isSaving ? 'Applying Changes...' : 'Confirm & Apply'}
+                {isSaving ? (
+                  <>
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" style={{ width: '16px', height: '16px', animation: 'spin 1s linear infinite' }}>
+                      <circle style={{ opacity: 0.25 }} cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path style={{ opacity: 0.75 }} fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    <span>Applying...</span>
+                  </>
+                ) : (
+                  'Confirm & Apply'
+                )}
               </button>
             </div>
           </div>
@@ -281,6 +311,7 @@ export function GeneralSubTab(props: any) {
     if (storeSupportEmail !== init.storeSupportEmail) changes.push({ field: "Support Email", from: init.storeSupportEmail, to: storeSupportEmail });
     if (storeSupportPhone !== init.storeSupportPhone) changes.push({ field: "Support Phone", from: init.storeSupportPhone, to: storeSupportPhone });
     if (storeAddress1 !== init.storeAddress1) changes.push({ field: "Address Line 1", from: init.storeAddress1, to: storeAddress1 });
+    if (storeAddress2 !== init.storeAddress2) changes.push({ field: "Address Line 2", from: init.storeAddress2, to: storeAddress2 });
     if (storeCity !== init.storeCity) changes.push({ field: "City", from: init.storeCity, to: storeCity });
     if (storeState !== init.storeState) changes.push({ field: "State", from: init.storeState, to: storeState });
     if (storePostalCode !== init.storePostalCode) changes.push({ field: "Postal Code", from: init.storePostalCode, to: storePostalCode });
@@ -596,14 +627,191 @@ export function DomainSubTab(props: any) {
   );
 }
 
+const GATEWAY_GUIDE_DATA: Record<string, {
+  title: string;
+  portalUrl: string;
+  portalName: string;
+  skeletons: { label: string; example: string }[];
+  steps: string[];
+}> = {
+  razorpay: {
+    title: "Razorpay Merchant Setup & Credential Guide",
+    portalUrl: "https://dashboard.razorpay.com/signup",
+    portalName: "Razorpay Dashboard",
+    skeletons: [
+      { label: "Key ID (Test Mode)", example: "rzp_test_1234567890abcd" },
+      { label: "Key ID (Live Mode)", example: "rzp_live_1234567890abcd" },
+      { label: "Key Secret", example: "a1b2c3d4e5f6g7h8i9j0k1l2 (24 alphanumeric chars)" }
+    ],
+    steps: [
+      "Create a Razorpay Account: Register at dashboard.razorpay.com/signup.",
+      "Complete Account Verification: Submit your business profile and KYC documents for Live payments.",
+      "Navigate to API Keys: In Razorpay Dashboard, go to Account & Settings -> API Keys (under Payment Methods).",
+      "Generate Keys: Click 'Generate Test Key' for testing or 'Generate Live Key' for real payments.",
+      "Copy Credentials: Copy your Key ID and Key Secret into the fields above and click '⚡ Test Connection'."
+    ]
+  },
+  stripe: {
+    title: "Stripe Merchant Setup & Credential Guide",
+    portalUrl: "https://dashboard.stripe.com/register",
+    portalName: "Stripe Dashboard",
+    skeletons: [
+      { label: "Publishable Key (Test)", example: "pk_test_51...XXXXXXXXXXXXXXXXXXXXXXXX" },
+      { label: "Publishable Key (Live)", example: "pk_live_51...XXXXXXXXXXXXXXXXXXXXXXXX" },
+      { label: "Secret Key (Test)", example: "sk_test_51...XXXXXXXXXXXXXXXXXXXXXXXX" }
+    ],
+    steps: [
+      "Register Stripe Account: Sign up for a business account at dashboard.stripe.com/register.",
+      "Activate Account: Complete tax registration and add your bank payout account.",
+      "Access API Keys: Turn on 'Developers' mode (top-right) and navigate to Developers -> API Keys.",
+      "Copy Keys: Copy your Publishable Key (pk_test_... or pk_live_...) and click 'Reveal secret key' to copy Secret Key.",
+      "Paste & Verify: Paste both keys above and test the API connection."
+    ]
+  },
+  paypal: {
+    title: "PayPal Express Merchant Setup & Credential Guide",
+    portalUrl: "https://developer.paypal.com/dashboard/applications",
+    portalName: "PayPal Developer Portal",
+    skeletons: [
+      { label: "Client ID Format", example: "AXYz1234567890_ABCDEFGHIJKLMNOPQRSTUVWXYZ12345" },
+      { label: "Client Secret Format", example: "EKLm9876543210_ZYXWVUTSRQPONMLKJIHGFEDCBA54321" }
+    ],
+    steps: [
+      "Create PayPal Business Account: Register or upgrade your account at paypal.com/bizsignup.",
+      "Log into Developer Portal: Open developer.paypal.com and log in with your business credentials.",
+      "Create REST API App: Go to Dashboard -> Apps & Credentials -> Toggle Sandbox or Live -> Click 'Create App'.",
+      "Copy Client Credentials: Copy the Client ID and click 'Show' to view and copy the Client Secret.",
+      "Save Credentials: Enter credentials into the fields above and verify connection."
+    ]
+  },
+  phonepe: {
+    title: "PhonePe PG Merchant Setup & Credential Guide",
+    portalUrl: "https://business.phonepe.com",
+    portalName: "PhonePe Business Portal",
+    skeletons: [
+      { label: "Merchant ID (MID - Test)", example: "PGTESTPAYUAT" },
+      { label: "Merchant ID (MID - Live)", example: "M123456789012345" },
+      { label: "Salt Key Format", example: "099eb0cd-02fe-4e5b-b052-1234567890ab" },
+      { label: "Salt Index", example: "1" }
+    ],
+    steps: [
+      "Register PhonePe Business: Onboard your business account at business.phonepe.com.",
+      "Submit Verification Docs: Upload GSTIN, PAN, and Bank Account details for PhonePe PG setup.",
+      "Retrieve API Credentials: Go to PhonePe Dashboard -> Developer Settings -> API Credentials.",
+      "Copy MID & Salt Key: Note your Merchant ID (MID), Salt Key, and Salt Index (usually '1').",
+      "Configure Store: Select UAT or Production mode above, enter credentials, and test connection."
+    ]
+  },
+  paytm: {
+    title: "PayTM Business Gateway Setup & Credential Guide",
+    portalUrl: "https://dashboard.paytm.com/next/apikeys",
+    portalName: "Paytm Business Dashboard",
+    skeletons: [
+      { label: "Merchant ID (MID)", example: "DIY123456789012 (15 characters)" },
+      { label: "Merchant Key Format", example: "mK1234567890!@#$" },
+      { label: "Website Name (Test / Live)", example: "WEBSTAGING (Staging) / DEFAULT (Production)" }
+    ],
+    steps: [
+      "Sign Up for Paytm Business: Create your merchant account at dashboard.paytm.com.",
+      "Complete Merchant KYC: Upload business identity documents to activate online payments.",
+      "Access API Keys: Navigate to Developer Settings -> API Keys in Paytm Dashboard.",
+      "Copy MID & Merchant Key: Copy your Staging MID & Key for testing or Production MID & Key for live sales.",
+      "Save Credentials: Input MID, Merchant Key, and Website name above and click Test Connection."
+    ]
+  }
+};
+
+function GatewayGuideCard({ gateway }: { gateway: string }) {
+  const guide = GATEWAY_GUIDE_DATA[gateway];
+  if (!guide) return null;
+
+  return (
+    <div style={{
+      backgroundColor: '#f8fafc',
+      border: '1px solid #cbd5e1',
+      borderRadius: '8px',
+      padding: '16px 20px',
+      marginTop: '12px',
+      fontSize: '0.85rem'
+    }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+        <h4 style={{ margin: 0, fontSize: '0.92rem', fontWeight: 700, color: '#0f172a', display: 'flex', alignItems: 'center', gap: '6px' }}>
+          <span>📖</span> {guide.title}
+        </h4>
+        <a
+          href={guide.portalUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{
+            fontSize: '0.78rem',
+            fontWeight: 600,
+            color: '#2563eb',
+            textDecoration: 'none',
+            backgroundColor: '#eff6ff',
+            padding: '4px 10px',
+            borderRadius: '6px',
+            border: '1px solid #bfdbfe'
+          }}
+        >
+          Open {guide.portalName} ↗
+        </a>
+      </div>
+
+      {/* Expected Credential Format Skeletons */}
+      <div style={{ marginBottom: '14px' }}>
+        <span style={{ fontSize: '0.78rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px', color: '#475569', display: 'block', marginBottom: '6px' }}>
+          Expected Credential Skeletons & Formats:
+        </span>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '8px' }}>
+          {guide.skeletons.map((sk, idx) => (
+            <div key={idx} style={{ backgroundColor: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '6px', padding: '8px 10px' }}>
+              <div style={{ fontSize: '0.72rem', fontWeight: 600, color: '#64748b' }}>{sk.label}</div>
+              <code style={{ fontSize: '0.78rem', color: '#0f172a', fontWeight: 600, fontFamily: 'monospace', display: 'block', marginTop: '2px', wordBreak: 'break-all' }}>
+                {sk.example}
+              </code>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Step-by-Step Instructions */}
+      <div>
+        <span style={{ fontSize: '0.78rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px', color: '#475569', display: 'block', marginBottom: '6px' }}>
+          Step-by-Step Account & Credentials Setup:
+        </span>
+        <ol style={{ margin: 0, paddingLeft: '18px', display: 'flex', flexDirection: 'column', gap: '4px', color: '#334155', lineHeight: '1.45' }}>
+          {guide.steps.map((step, idx) => (
+            <li key={idx} style={{ fontSize: '0.82rem' }}>{step}</li>
+          ))}
+        </ol>
+      </div>
+    </div>
+  );
+}
+
 /* ==========================================
  * TAB 4: PAYMENTS & CHECKOUT SUBTAB
  * ========================================== */
 export function PaymentsSubTab(props: any) {
   const {
+    activePaymentGateway = 'razorpay', setActivePaymentGateway,
     razorpayKeyId, setRazorpayKeyId,
     razorpayKeySecret, setRazorpayKeySecret,
-    razorpayMode, setRazorpayMode,
+    razorpayMode = 'test', setRazorpayMode,
+    stripePublishableKey, setStripePublishableKey,
+    stripeSecretKey, setStripeSecretKey,
+    stripeMode = 'test', setStripeMode,
+    paypalClientId, setPaypalClientId,
+    paypalClientSecret, setPaypalClientSecret,
+    paypalMode = 'sandbox', setPaypalMode,
+    phonepeMerchantId, setPhonepeMerchantId,
+    phonepeSaltKey, setPhonepeSaltKey,
+    phonepeSaltIndex = '1', setPhonepeSaltIndex,
+    phonepeMode = 'uat', setPhonepeMode,
+    paytmMerchantId, setPaytmMerchantId,
+    paytmMerchantKey, setPaytmMerchantKey,
+    paytmWebsite = 'WEBSTAGING', setPaytmWebsite,
+    paytmMode = 'staging', setPaytmMode,
     codEnabled, setCodEnabled,
     codExtraFee, setCodExtraFee,
     minOrderAmount, setMinOrderAmount,
@@ -616,18 +824,40 @@ export function PaymentsSubTab(props: any) {
     handleSaveSettings
   } = props;
 
-  const [showSecret, setShowSecret] = useState(false);
+  const [showRazorpaySecret, setShowRazorpaySecret] = useState(false);
+  const [showStripeSecret, setShowStripeSecret] = useState(false);
+  const [showPaypalSecret, setShowPaypalSecret] = useState(false);
+  const [showPhonepeSecret, setShowPhonepeSecret] = useState(false);
+  const [showPaytmSecret, setShowPaytmSecret] = useState(false);
+
+  const [openGuide, setOpenGuide] = useState<string | null>(null);
+  const [testingGateway, setTestingGateway] = useState<string | null>(null);
+  const [testResult, setTestResult] = useState<{ gateway: string; success: boolean; message: string } | null>(null);
+
   const initialRef = useRef({
-    razorpayKeyId, razorpayKeySecret, razorpayMode, codEnabled, codExtraFee,
-    minOrderAmount, maxItemQuantity, customerAccounts, taxInclusive, taxRate, taxNumber, deliverySubtext
+    activePaymentGateway, razorpayKeyId, razorpayKeySecret, razorpayMode,
+    stripePublishableKey, stripeSecretKey, stripeMode,
+    paypalClientId, paypalClientSecret, paypalMode,
+    phonepeMerchantId, phonepeSaltKey, phonepeSaltIndex, phonepeMode,
+    paytmMerchantId, paytmMerchantKey, paytmWebsite, paytmMode,
+    codEnabled, codExtraFee, minOrderAmount, maxItemQuantity, customerAccounts, taxInclusive, taxRate, taxNumber, deliverySubtext
   });
+
+  const selectedGateway = activePaymentGateway || 'razorpay';
 
   const getChanges = (): ChangedField[] => {
     const changes: ChangedField[] = [];
     const init = initialRef.current;
+    if (activePaymentGateway !== init.activePaymentGateway) changes.push({ field: "Active Payment Gateway", from: init.activePaymentGateway, to: activePaymentGateway });
     if (razorpayKeyId !== init.razorpayKeyId) changes.push({ field: "Razorpay Key ID", from: init.razorpayKeyId, to: razorpayKeyId });
     if (razorpayKeySecret !== init.razorpayKeySecret) changes.push({ field: "Razorpay Key Secret", from: "********", to: "********" });
     if (razorpayMode !== init.razorpayMode) changes.push({ field: "Razorpay Mode", from: init.razorpayMode, to: razorpayMode });
+    if (stripePublishableKey !== init.stripePublishableKey) changes.push({ field: "Stripe Publishable Key", from: init.stripePublishableKey, to: stripePublishableKey });
+    if (stripeSecretKey !== init.stripeSecretKey) changes.push({ field: "Stripe Secret Key", from: "********", to: "********" });
+    if (paypalClientId !== init.paypalClientId) changes.push({ field: "PayPal Client ID", from: init.paypalClientId, to: paypalClientId });
+    if (paypalClientSecret !== init.paypalClientSecret) changes.push({ field: "PayPal Client Secret", from: "********", to: "********" });
+    if (phonepeMerchantId !== init.phonepeMerchantId) changes.push({ field: "PhonePe Merchant ID", from: init.phonepeMerchantId, to: phonepeMerchantId });
+    if (paytmMerchantId !== init.paytmMerchantId) changes.push({ field: "PayTM Merchant ID", from: init.paytmMerchantId, to: paytmMerchantId });
     if (codEnabled !== init.codEnabled) changes.push({ field: "COD Enabled", from: String(init.codEnabled), to: String(codEnabled) });
     if (codExtraFee !== init.codExtraFee) changes.push({ field: "COD Extra Fee", from: String(init.codExtraFee), to: String(codExtraFee) });
     if (minOrderAmount !== init.minOrderAmount) changes.push({ field: "Min Order Amount", from: String(init.minOrderAmount), to: String(minOrderAmount) });
@@ -636,46 +866,432 @@ export function PaymentsSubTab(props: any) {
     return changes;
   };
 
+  const handleTestConnection = async (gatewayName: string) => {
+    setTestingGateway(gatewayName);
+    setTestResult(null);
+
+    let credentials: any = {};
+    let mode = 'test';
+
+    if (gatewayName === 'razorpay') {
+      credentials = { keyId: razorpayKeyId, keySecret: razorpayKeySecret };
+      mode = razorpayMode;
+    } else if (gatewayName === 'stripe') {
+      credentials = { publishableKey: stripePublishableKey, secretKey: stripeSecretKey };
+      mode = stripeMode;
+    } else if (gatewayName === 'paypal') {
+      credentials = { clientId: paypalClientId, clientSecret: paypalClientSecret };
+      mode = paypalMode;
+    } else if (gatewayName === 'phonepe') {
+      credentials = { merchantId: phonepeMerchantId, saltKey: phonepeSaltKey, saltIndex: phonepeSaltIndex };
+      mode = phonepeMode;
+    } else if (gatewayName === 'paytm') {
+      credentials = { merchantId: paytmMerchantId, merchantKey: paytmMerchantKey, website: paytmWebsite };
+      mode = paytmMode;
+    }
+
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:5001'}/api/settings/payment/test-connection`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ gateway: gatewayName, credentials, mode })
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data?.error || 'Failed to verify gateway connection');
+      }
+
+      setTestResult({
+        gateway: gatewayName,
+        success: true,
+        message: data.message || `${gatewayName.toUpperCase()} Connection Successful!`
+      });
+    } catch (err: any) {
+      setTestResult({
+        gateway: gatewayName,
+        success: false,
+        message: err.message || 'Connection test failed. Please check credentials.'
+      });
+    } finally {
+      setTestingGateway(null);
+    }
+  };
+
   const handleSaveAndResetSnapshot = async () => {
     await handleSaveSettings();
     initialRef.current = {
-      razorpayKeyId, razorpayKeySecret, razorpayMode, codEnabled, codExtraFee,
-      minOrderAmount, maxItemQuantity, customerAccounts, taxInclusive, taxRate, taxNumber, deliverySubtext
+      activePaymentGateway, razorpayKeyId, razorpayKeySecret, razorpayMode,
+      stripePublishableKey, stripeSecretKey, stripeMode,
+      paypalClientId, paypalClientSecret, paypalMode,
+      phonepeMerchantId, phonepeSaltKey, phonepeSaltIndex, phonepeMode,
+      paytmMerchantId, paytmMerchantKey, paytmWebsite, paytmMode,
+      codEnabled, codExtraFee, minOrderAmount, maxItemQuantity, customerAccounts, taxInclusive, taxRate, taxNumber, deliverySubtext
     };
   };
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-      {/* Razorpay Gateway */}
+
+      {/* Encryption & Security Notice Header */}
+      <div style={{
+        backgroundColor: '#f8fafc',
+        border: '1px solid #e2e8f0',
+        borderRadius: '10px',
+        padding: '16px 20px',
+        display: 'flex',
+        alignItems: 'center',
+        gap: '14px'
+      }}>
+        <div style={{
+          width: '38px',
+          height: '38px',
+          borderRadius: '50%',
+          backgroundColor: '#0c0a09',
+          color: '#ffffff',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          fontSize: '18px',
+          flexShrink: 0
+        }}>
+          🔐
+        </div>
+        <div>
+          <h4 style={{ margin: 0, fontSize: '0.95rem', fontWeight: 700, color: '#0f172a' }}>
+            Multi-Gateway Enterprise Encryption Enabled
+          </h4>
+          <p style={{ margin: '2px 0 0 0', fontSize: '0.82rem', color: '#64748b' }}>
+            All payment gateway secret keys and salt keys are encrypted at rest using high-grade AES-256-GCM hardware encryption. Your store customers will automatically use the active gateway selected below.
+          </p>
+        </div>
+      </div>
+
+      {/* Select Active Primary Payment Gateway */}
       <div style={cardStyle}>
         <div style={cardHeaderStyle}>
-          <h3 style={cardTitleStyle}>Razorpay Payment Gateway</h3>
-          <p style={cardSubTitleStyle}>Configure online UPI, Cards, and Netbanking credentials.</p>
+          <h3 style={cardTitleStyle}>Primary Online Payment Gateway</h3>
+          <p style={cardSubTitleStyle}>Choose which payment provider your customers will use at checkout.</p>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
-          <div>
-            <label style={labelStyle}>Gateway Environment Mode</label>
-            <select value={razorpayMode || 'test'} onChange={(e) => setRazorpayMode && setRazorpayMode(e.target.value)} style={selectStyle}>
-              <option value="test">Test / Sandbox Mode</option>
-              <option value="live">Live / Production Mode</option>
-            </select>
-          </div>
-          <div>
-            <label style={labelStyle}>Razorpay Key ID</label>
-            <input type="text" value={razorpayKeyId || ''} onChange={(e) => setRazorpayKeyId && setRazorpayKeyId(e.target.value)} placeholder="rzp_test_..." style={inputStyle} />
-          </div>
-          <div style={{ gridColumn: '1 / -1' }}>
-            <label style={labelStyle}>Razorpay Key Secret</label>
-            <div style={{ display: 'flex', gap: '8px' }}>
-              <input type={showSecret ? "text" : "password"} value={razorpayKeySecret || ''} onChange={(e) => setRazorpayKeySecret && setRazorpayKeySecret(e.target.value)} style={inputStyle} />
-              <button type="button" className={styles.btnAction} onClick={() => setShowSecret(!showSecret)} style={{ whiteSpace: 'nowrap' }}>
-                {showSecret ? "Hide" : "Show"}
+        <div>
+          <label style={labelStyle}>Active Payment Gateway Method</label>
+          <select
+            value={selectedGateway}
+            onChange={(e) => setActivePaymentGateway && setActivePaymentGateway(e.target.value)}
+            style={{ ...selectStyle, fontWeight: 600, fontSize: '0.92rem' }}
+          >
+            <option value="razorpay">Razorpay (India & Global UPI, Credit/Debit Cards, Netbanking)</option>
+            <option value="stripe">Stripe (Global Credit/Debit Cards, Apple Pay & Google Pay)</option>
+            <option value="paypal">PayPal (Global Express Checkout & International Accounts)</option>
+            <option value="phonepe">PhonePe (Direct UPI, QR & Cards - India)</option>
+            <option value="paytm">PayTM (PayTM Wallet, UPI & Netbanking - India)</option>
+          </select>
+        </div>
+      </div>
+
+      {/* Gateway Connection Details Card */}
+      {selectedGateway === 'razorpay' && (
+        <div style={cardStyle}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div>
+              <h3 style={cardTitleStyle}>Razorpay Credentials</h3>
+              <p style={cardSubTitleStyle}>Configure UPI, Cards, and Netbanking credentials.</p>
+            </div>
+            <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+              <button
+                type="button"
+                onClick={() => setOpenGuide(openGuide === 'razorpay' ? null : 'razorpay')}
+                className={styles.btnAction}
+                style={{ padding: '8px 12px', fontSize: '0.82rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '6px', backgroundColor: openGuide === 'razorpay' ? '#eff6ff' : undefined, color: openGuide === 'razorpay' ? '#1d4ed8' : undefined }}
+              >
+                {openGuide === 'razorpay' ? '📖 Hide Guide' : '📖 Setup Guide & Skeletons'}
+              </button>
+              <button
+                type="button"
+                onClick={() => handleTestConnection('razorpay')}
+                disabled={testingGateway === 'razorpay'}
+                className={styles.btnAction}
+                style={{ padding: '8px 16px', fontSize: '0.82rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '6px' }}
+              >
+                {testingGateway === 'razorpay' ? 'Testing API...' : '⚡ Test Connection'}
               </button>
             </div>
           </div>
+
+          {openGuide === 'razorpay' && <GatewayGuideCard gateway="razorpay" />}
+
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+            <div>
+              <label style={labelStyle}>Gateway Environment Mode</label>
+              <select value={razorpayMode || 'test'} onChange={(e) => setRazorpayMode && setRazorpayMode(e.target.value)} style={selectStyle}>
+                <option value="test">Test / Sandbox Mode</option>
+                <option value="live">Live / Production Mode</option>
+              </select>
+            </div>
+            <div>
+              <label style={labelStyle}>Razorpay Key ID</label>
+              <input type="text" value={razorpayKeyId || ''} onChange={(e) => setRazorpayKeyId && setRazorpayKeyId(e.target.value)} placeholder="rzp_test_..." style={inputStyle} />
+            </div>
+            <div style={{ gridColumn: '1 / -1' }}>
+              <label style={labelStyle}>Razorpay Key Secret</label>
+              <div style={{ display: 'flex', gap: '8px' }}>
+                <input type={showRazorpaySecret ? "text" : "password"} value={razorpayKeySecret || ''} onChange={(e) => setRazorpayKeySecret && setRazorpayKeySecret(e.target.value)} style={inputStyle} />
+                <button type="button" className={styles.btnAction} onClick={() => setShowRazorpaySecret(!showRazorpaySecret)} style={{ whiteSpace: 'nowrap' }}>
+                  {showRazorpaySecret ? "Hide" : "Show"}
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
-      </div>
+      )}
+
+      {selectedGateway === 'stripe' && (
+        <div style={cardStyle}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div>
+              <h3 style={cardTitleStyle}>Stripe Credentials</h3>
+              <p style={cardSubTitleStyle}>Configure Global Credit/Debit Card payments via Stripe.</p>
+            </div>
+            <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+              <button
+                type="button"
+                onClick={() => setOpenGuide(openGuide === 'stripe' ? null : 'stripe')}
+                className={styles.btnAction}
+                style={{ padding: '8px 12px', fontSize: '0.82rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '6px', backgroundColor: openGuide === 'stripe' ? '#eff6ff' : undefined, color: openGuide === 'stripe' ? '#1d4ed8' : undefined }}
+              >
+                {openGuide === 'stripe' ? '📖 Hide Guide' : '📖 Setup Guide & Skeletons'}
+              </button>
+              <button
+                type="button"
+                onClick={() => handleTestConnection('stripe')}
+                disabled={testingGateway === 'stripe'}
+                className={styles.btnAction}
+                style={{ padding: '8px 16px', fontSize: '0.82rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '6px' }}
+              >
+                {testingGateway === 'stripe' ? 'Testing API...' : '⚡ Test Connection'}
+              </button>
+            </div>
+          </div>
+
+          {openGuide === 'stripe' && <GatewayGuideCard gateway="stripe" />}
+
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+            <div>
+              <label style={labelStyle}>Environment Mode</label>
+              <select value={stripeMode || 'test'} onChange={(e) => setStripeMode && setStripeMode(e.target.value)} style={selectStyle}>
+                <option value="test">Test / Sandbox Mode</option>
+                <option value="live">Live / Production Mode</option>
+              </select>
+            </div>
+            <div>
+              <label style={labelStyle}>Stripe Publishable Key</label>
+              <input type="text" value={stripePublishableKey || ''} onChange={(e) => setStripePublishableKey && setStripePublishableKey(e.target.value)} placeholder="pk_test_..." style={inputStyle} />
+            </div>
+            <div style={{ gridColumn: '1 / -1' }}>
+              <label style={labelStyle}>Stripe Secret Key</label>
+              <div style={{ display: 'flex', gap: '8px' }}>
+                <input type={showStripeSecret ? "text" : "password"} value={stripeSecretKey || ''} onChange={(e) => setStripeSecretKey && setStripeSecretKey(e.target.value)} placeholder="sk_test_..." style={inputStyle} />
+                <button type="button" className={styles.btnAction} onClick={() => setShowStripeSecret(!showStripeSecret)} style={{ whiteSpace: 'nowrap' }}>
+                  {showStripeSecret ? "Hide" : "Show"}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {selectedGateway === 'paypal' && (
+        <div style={cardStyle}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div>
+              <h3 style={cardTitleStyle}>PayPal Credentials</h3>
+              <p style={cardSubTitleStyle}>Configure PayPal Express Checkout & International Payments.</p>
+            </div>
+            <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+              <button
+                type="button"
+                onClick={() => setOpenGuide(openGuide === 'paypal' ? null : 'paypal')}
+                className={styles.btnAction}
+                style={{ padding: '8px 12px', fontSize: '0.82rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '6px', backgroundColor: openGuide === 'paypal' ? '#eff6ff' : undefined, color: openGuide === 'paypal' ? '#1d4ed8' : undefined }}
+              >
+                {openGuide === 'paypal' ? '📖 Hide Guide' : '📖 Setup Guide & Skeletons'}
+              </button>
+              <button
+                type="button"
+                onClick={() => handleTestConnection('paypal')}
+                disabled={testingGateway === 'paypal'}
+                className={styles.btnAction}
+                style={{ padding: '8px 16px', fontSize: '0.82rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '6px' }}
+              >
+                {testingGateway === 'paypal' ? 'Testing API...' : '⚡ Test Connection'}
+              </button>
+            </div>
+          </div>
+
+          {openGuide === 'paypal' && <GatewayGuideCard gateway="paypal" />}
+
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+            <div>
+              <label style={labelStyle}>PayPal Environment Mode</label>
+              <select value={paypalMode || 'sandbox'} onChange={(e) => setPaypalMode && setPaypalMode(e.target.value)} style={selectStyle}>
+                <option value="sandbox">Sandbox / Testing Mode</option>
+                <option value="live">Live / Production Mode</option>
+              </select>
+            </div>
+            <div>
+              <label style={labelStyle}>PayPal Client ID</label>
+              <input type="text" value={paypalClientId || ''} onChange={(e) => setPaypalClientId && setPaypalClientId(e.target.value)} placeholder="AYS..." style={inputStyle} />
+            </div>
+            <div style={{ gridColumn: '1 / -1' }}>
+              <label style={labelStyle}>PayPal Client Secret</label>
+              <div style={{ display: 'flex', gap: '8px' }}>
+                <input type={showPaypalSecret ? "text" : "password"} value={paypalClientSecret || ''} onChange={(e) => setPaypalClientSecret && setPaypalClientSecret(e.target.value)} style={inputStyle} />
+                <button type="button" className={styles.btnAction} onClick={() => setShowPaypalSecret(!showPaypalSecret)} style={{ whiteSpace: 'nowrap' }}>
+                  {showPaypalSecret ? "Hide" : "Show"}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {selectedGateway === 'phonepe' && (
+        <div style={cardStyle}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div>
+              <h3 style={cardTitleStyle}>PhonePe Gateway Credentials</h3>
+              <p style={cardSubTitleStyle}>Configure Direct UPI, QR, and Card checkout via PhonePe PG.</p>
+            </div>
+            <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+              <button
+                type="button"
+                onClick={() => setOpenGuide(openGuide === 'phonepe' ? null : 'phonepe')}
+                className={styles.btnAction}
+                style={{ padding: '8px 12px', fontSize: '0.82rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '6px', backgroundColor: openGuide === 'phonepe' ? '#eff6ff' : undefined, color: openGuide === 'phonepe' ? '#1d4ed8' : undefined }}
+              >
+                {openGuide === 'phonepe' ? '📖 Hide Guide' : '📖 Setup Guide & Skeletons'}
+              </button>
+              <button
+                type="button"
+                onClick={() => handleTestConnection('phonepe')}
+                disabled={testingGateway === 'phonepe'}
+                className={styles.btnAction}
+                style={{ padding: '8px 16px', fontSize: '0.82rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '6px' }}
+              >
+                {testingGateway === 'phonepe' ? 'Testing API...' : '⚡ Test Connection'}
+              </button>
+            </div>
+          </div>
+
+          {openGuide === 'phonepe' && <GatewayGuideCard gateway="phonepe" />}
+
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+            <div>
+              <label style={labelStyle}>PhonePe Environment</label>
+              <select value={phonepeMode || 'uat'} onChange={(e) => setPhonepeMode && setPhonepeMode(e.target.value)} style={selectStyle}>
+                <option value="uat">UAT / Sandbox Testing</option>
+                <option value="production">Production Live</option>
+              </select>
+            </div>
+            <div>
+              <label style={labelStyle}>PhonePe Merchant ID</label>
+              <input type="text" value={phonepeMerchantId || ''} onChange={(e) => setPhonepeMerchantId && setPhonepeMerchantId(e.target.value)} placeholder="PGTESTPAYUAT" style={inputStyle} />
+            </div>
+            <div>
+              <label style={labelStyle}>PhonePe Salt Key</label>
+              <div style={{ display: 'flex', gap: '8px' }}>
+                <input type={showPhonepeSecret ? "text" : "password"} value={phonepeSaltKey || ''} onChange={(e) => setPhonepeSaltKey && setPhonepeSaltKey(e.target.value)} style={inputStyle} />
+                <button type="button" className={styles.btnAction} onClick={() => setShowPhonepeSecret(!showPhonepeSecret)} style={{ whiteSpace: 'nowrap' }}>
+                  {showPhonepeSecret ? "Hide" : "Show"}
+                </button>
+              </div>
+            </div>
+            <div>
+              <label style={labelStyle}>Salt Index</label>
+              <input type="text" value={phonepeSaltIndex || '1'} onChange={(e) => setPhonepeSaltIndex && setPhonepeSaltIndex(e.target.value)} style={inputStyle} />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {selectedGateway === 'paytm' && (
+        <div style={cardStyle}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div>
+              <h3 style={cardTitleStyle}>PayTM Gateway Credentials</h3>
+              <p style={cardSubTitleStyle}>Configure PayTM Wallet, UPI, and Netbanking integrations.</p>
+            </div>
+            <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+              <button
+                type="button"
+                onClick={() => setOpenGuide(openGuide === 'paytm' ? null : 'paytm')}
+                className={styles.btnAction}
+                style={{ padding: '8px 12px', fontSize: '0.82rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '6px', backgroundColor: openGuide === 'paytm' ? '#eff6ff' : undefined, color: openGuide === 'paytm' ? '#1d4ed8' : undefined }}
+              >
+                {openGuide === 'paytm' ? '📖 Hide Guide' : '📖 Setup Guide & Skeletons'}
+              </button>
+              <button
+                type="button"
+                onClick={() => handleTestConnection('paytm')}
+                disabled={testingGateway === 'paytm'}
+                className={styles.btnAction}
+                style={{ padding: '8px 16px', fontSize: '0.82rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '6px' }}
+              >
+                {testingGateway === 'paytm' ? 'Testing API...' : '⚡ Test Connection'}
+              </button>
+            </div>
+          </div>
+
+          {openGuide === 'paytm' && <GatewayGuideCard gateway="paytm" />}
+
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+            <div>
+              <label style={labelStyle}>PayTM Environment</label>
+              <select value={paytmMode || 'staging'} onChange={(e) => setPaytmMode && setPaytmMode(e.target.value)} style={selectStyle}>
+                <option value="staging">Staging / Test Mode</option>
+                <option value="production">Production Live Mode</option>
+              </select>
+            </div>
+            <div>
+              <label style={labelStyle}>PayTM Merchant ID (MID)</label>
+              <input type="text" value={paytmMerchantId || ''} onChange={(e) => setPaytmMerchantId && setPaytmMerchantId(e.target.value)} placeholder="DIY1234..." style={inputStyle} />
+            </div>
+            <div>
+              <label style={labelStyle}>PayTM Merchant Key</label>
+              <div style={{ display: 'flex', gap: '8px' }}>
+                <input type={showPaytmSecret ? "text" : "password"} value={paytmMerchantKey || ''} onChange={(e) => setPaytmMerchantKey && setPaytmMerchantKey(e.target.value)} style={inputStyle} />
+                <button type="button" className={styles.btnAction} onClick={() => setShowPaytmSecret(!showPaytmSecret)} style={{ whiteSpace: 'nowrap' }}>
+                  {showPaytmSecret ? "Hide" : "Show"}
+                </button>
+              </div>
+            </div>
+            <div>
+              <label style={labelStyle}>PayTM Website Name</label>
+              <input type="text" value={paytmWebsite || 'WEBSTAGING'} onChange={(e) => setPaytmWebsite && setPaytmWebsite(e.target.value)} style={inputStyle} />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Test Connection Result Banner */}
+      {testResult && (
+        <div style={{
+          padding: '12px 16px',
+          borderRadius: '8px',
+          backgroundColor: testResult.success ? '#f0fdf4' : '#fef2f2',
+          border: `1px solid ${testResult.success ? '#bbf7d0' : '#fecaca'}`,
+          color: testResult.success ? '#15803d' : '#b91c1c',
+          fontSize: '0.85rem',
+          fontWeight: 600,
+          display: 'flex',
+          alignItems: 'center',
+          gap: '10px'
+        }}>
+          <span>{testResult.success ? '✓' : '⚠️'}</span>
+          <span>{testResult.message}</span>
+        </div>
+      )}
 
       {/* Cash on Delivery & Order Limits */}
       <div style={cardStyle}>

@@ -82,7 +82,8 @@ export default function Footer() {
     return url;
   };
 
-  const displayName = storeBusinessName || (brandLogoValue && !brandLogoValue.startsWith("http") ? brandLogoValue : "MY STORE");
+  const isImageLogo = brandLogoType === "image" || (brandLogoValue && (brandLogoValue.startsWith("http") || brandLogoValue.startsWith("/") || brandLogoValue.startsWith("data:")));
+  const displayName = storeBusinessName || (brandLogoType === "text" && brandLogoValue && !brandLogoValue.startsWith("http") ? brandLogoValue : "MY STORE");
 
   return (
     <>
@@ -164,7 +165,7 @@ export default function Footer() {
       {/* 12. Sub-Footer / Copyright Section */}
       <section className={styles.subFooterSection}>
         <div className={styles.subFooterLogo}>
-          {brandLogoValue && brandLogoValue.startsWith("http") ? (
+          {isImageLogo && brandLogoValue ? (
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '16px', flexWrap: 'wrap' }}>
               <img src={brandLogoValue} alt="Brand Logo" style={{ maxHeight: "90px", maxWidth: "80%", objectFit: "contain" }} />
               {storeBusinessName && (

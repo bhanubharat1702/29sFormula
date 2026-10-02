@@ -341,8 +341,26 @@ export default function CheckoutDrawer({ isOpen, onClose, cartItems, primaryColo
     }
   }, [isOpen, cartItems]);
 
+  const [activeGateway, setActiveGateway] = useState<string>("razorpay");
+  const [storeRazorpayKeyId, setStoreRazorpayKeyId] = useState<string>("");
+  const [codEnabled, setCodEnabled] = useState<boolean>(true);
+
   useEffect(() => {
     if (isOpen) {
+      fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:5001'}/api/orders/payment-config`, { cache: 'no-store' })
+        .then(res => res.json())
+        .then(config => {
+          if (config) {
+            if (config.activeGateway) {
+              setActiveGateway(config.activeGateway.toLowerCase());
+              setPaymentMethod(config.activeGateway.toLowerCase());
+            }
+            if (config.razorpayKeyId) setStoreRazorpayKeyId(config.razorpayKeyId);
+            if (config.codEnabled !== undefined) setCodEnabled(config.codEnabled);
+          }
+        })
+        .catch(err => console.error("Error querying payment config:", err));
+
       fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:5001'}/api/settings`, { cache: 'no-store' })
         .then(res => res.json())
         .then(data => {
@@ -559,106 +577,116 @@ export default function CheckoutDrawer({ isOpen, onClose, cartItems, primaryColo
     };
 
     try {
-      if (["Razorpay", "UPI", "Cards", "Net Banking"].includes(paymentMethod)) {
-        const isLoaded = await loadRazorpayScript();
-        if (!isLoaded) {
-          throw new Error("Razorpay SDK failed to load. Are you online?");
-        }
-
-        const initRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:5001'}/api/orders/razorpay-init`, {
+      if (paymentMethod !== "COD") {
+        const initRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:5001'}/api/orders/payment/init`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ cartItems: orderPayload.cartItems, discountCode: appliedCouponCode || "" })
+          body: JSON.stringify({
+            cartItems: orderPayload.cartItems,
+            discountCode: appliedCouponCode || "",
+            gateway: activeGateway
+          })
         });
 
         if (!initRes.ok) {
           const errData = await initRes.json().catch(() => null);
           throw new Error(errData?.error || "Failed to initialize payment");
         }
+
         const initData = await initRes.json();
-        if (!initData.order_id) throw new Error("Invalid payment initialization");
 
-        const options = {
-          key: "rzp_test_TQPDhHLa4xiz9t", // Test API Key
-          amount: initData.amount,
-          currency: initData.currency,
-          name: storeBusinessName || (brandLogoValue && !brandLogoValue.startsWith("http") ? brandLogoValue : "MY STORE"),
-          image: brandLogoValue && brandLogoValue.startsWith("http") ? brandLogoValue : undefined,
-          description: "E-Commerce Checkout",
-          order_id: initData.order_id,
-          handler: async function (response: any) {
-            try {
-              const verifyRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:5001'}/api/orders/razorpay-verify`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                  razorpay_payment_id: response.razorpay_payment_id,
-                  razorpay_order_id: response.razorpay_order_id,
-                  razorpay_signature: response.razorpay_signature,
-                  orderPayload
-                })
-              });
-
-              if (!verifyRes.ok) throw new Error("Payment verification failed");
-              const verifyData = await verifyRes.json();
-              if (verifyData.success && verifyData.orderId) {
-                updateUserSessionOnOrder(orderPayload);
-                setIsSubmitting(false);
-                onOrderSuccess(verifyData.orderId, { ...orderPayload, orderId: verifyData.orderId });
-              }
-            } catch (err: any) {
-              setError(err.message || "Payment verification failed.");
-              setIsSubmitting(false);
-            }
-          },
-          prefill: {
-            name: name,
-            email: email,
-            contact: phone
-          },
-          theme: {
-            color: primaryColor
-          },
-          config: {
-            display: {
-              blocks: {
-                upi: {
-                  name: "Pay via UPI",
-                  instruments: [
-                    { method: "upi" }
-                  ]
-                },
-                other: {
-                  name: "Other Payment Modes",
-                  instruments: [
-                    { method: "card" },
-                    { method: "netbanking" },
-                    { method: "wallet" }
-                  ]
-                }
-              },
-              sequence: ["block.upi", "block.other"],
-              preferences: {
-                show_default_blocks: false
-              }
-            }
-          },
-          modal: {
-            ondismiss: function () {
-              setIsSubmitting(false);
-            }
+        if (initData.gateway === "razorpay") {
+          const isLoaded = await loadRazorpayScript();
+          if (!isLoaded) {
+            throw new Error("Razorpay SDK failed to load. Are you online?");
           }
-        };
 
-        const rzp = new (window as any).Razorpay(options);
-        rzp.on("payment.failed", function (response: any) {
-          setError("Payment failed. Please try again.");
-          setIsSubmitting(false);
-        });
-        rzp.open();
-        // Do not set isSubmitting(false) here, it will be handled by the handler or error event
+          const options = {
+            key: initData.key_id || storeRazorpayKeyId || "rzp_test_TQPDhHLa4xiz9t",
+            amount: initData.amount,
+            currency: initData.currency,
+            name: storeBusinessName || (brandLogoValue && !brandLogoValue.startsWith("http") ? brandLogoValue : "MY STORE"),
+            image: (brandLogoValue && (brandLogoValue.startsWith("http") || brandLogoValue.startsWith("/") || brandLogoValue.startsWith("data:"))) ? brandLogoValue : undefined,
+            description: "E-Commerce Checkout",
+            order_id: initData.order_id,
+            handler: async function (response: any) {
+              try {
+                const verifyRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:5001'}/api/orders/payment/verify`, {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({
+                    gateway: "razorpay",
+                    razorpay_payment_id: response.razorpay_payment_id,
+                    razorpay_order_id: response.razorpay_order_id,
+                    razorpay_signature: response.razorpay_signature,
+                    orderPayload
+                  })
+                });
 
+                if (!verifyRes.ok) throw new Error("Payment verification failed");
+                const verifyData = await verifyRes.json();
+                if (verifyData.success && verifyData.orderId) {
+                  updateUserSessionOnOrder(orderPayload);
+                  setIsSubmitting(false);
+                  onOrderSuccess(verifyData.orderId, { ...orderPayload, orderId: verifyData.orderId });
+                }
+              } catch (err: any) {
+                setError(err.message || "Payment verification failed.");
+                setIsSubmitting(false);
+              }
+            },
+            prefill: {
+              name: name,
+              email: email,
+              contact: phone
+            },
+            theme: {
+              color: primaryColor
+            },
+            modal: {
+              ondismiss: function () {
+                setIsSubmitting(false);
+              }
+            }
+          };
+
+          const rzp = new (window as any).Razorpay(options);
+          rzp.on("payment.failed", function () {
+            setError("Payment failed. Please try again.");
+            setIsSubmitting(false);
+          });
+          rzp.open();
+        } else {
+          // Stripe / PayPal / PhonePe / PayTM direct verification flow
+          const verifyRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:5001'}/api/orders/payment/verify`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              gateway: initData.gateway,
+              stripe_payment_intent_id: initData.paymentIntentId,
+              paypal_order_id: initData.orderID,
+              phonepe_transaction_id: initData.merchantTransactionId,
+              paytm_order_id: initData.orderId,
+              orderPayload
+            })
+          });
+
+          if (!verifyRes.ok) {
+            const errData = await verifyRes.json().catch(() => null);
+            throw new Error(errData?.error || "Payment verification failed");
+          }
+
+          const verifyData = await verifyRes.json();
+          if (verifyData.success && verifyData.orderId) {
+            updateUserSessionOnOrder(orderPayload);
+            setIsSubmitting(false);
+            onOrderSuccess(verifyData.orderId, { ...orderPayload, orderId: verifyData.orderId });
+          } else {
+            throw new Error("Payment failed to verify.");
+          }
+        }
       } else {
+        // Cash on Delivery Order
         const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:5001'}/api/orders`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -1124,50 +1152,109 @@ export default function CheckoutDrawer({ isOpen, onClose, cartItems, primaryColo
               <h3 className={styles.sectionTitle}>Payment Method</h3>
               <div className={styles.paymentOptions}>
 
-                <label className={`${styles.paymentLabel} ${paymentMethod === "UPI" ? styles.paymentLabelActive : ""}`}>
-                  <input
-                    type="radio"
-                    name="payment"
-                    value="UPI"
-                    checked={paymentMethod === "UPI"}
-                    onChange={(e) => setPaymentMethod(e.target.value)}
-                    className={styles.radioInput}
-                  />
-                  <div className={styles.paymentInfo}>
-                    <span className={styles.paymentName}>UPI</span>
-                    <span className={styles.paymentDesc}>Pay instantly using UPI Apps.</span>
-                  </div>
-                </label>
+                {/* Online Payment Option corresponding to Merchant's chosen Active Gateway */}
+                {activeGateway === "razorpay" && (
+                  <label className={`${styles.paymentLabel} ${paymentMethod !== "COD" ? styles.paymentLabelActive : ""}`}>
+                    <input
+                      type="radio"
+                      name="payment"
+                      value="razorpay"
+                      checked={paymentMethod !== "COD"}
+                      onChange={() => setPaymentMethod("razorpay")}
+                      className={styles.radioInput}
+                    />
+                    <div className={styles.paymentInfo}>
+                      <span className={styles.paymentName}>Razorpay (UPI, Cards, Netbanking)</span>
+                      <span className={styles.paymentDesc}>Pay securely with Google Pay, PhonePe, Paytm or Cards.</span>
+                    </div>
+                  </label>
+                )}
 
-                <label className={`${styles.paymentLabel} ${paymentMethod === "Cards" ? styles.paymentLabelActive : ""}`}>
-                  <input
-                    type="radio"
-                    name="payment"
-                    value="Cards"
-                    checked={paymentMethod === "Cards"}
-                    onChange={(e) => setPaymentMethod(e.target.value)}
-                    className={styles.radioInput}
-                  />
-                  <div className={styles.paymentInfo}>
-                    <span className={styles.paymentName}>Credit / Debit Cards</span>
-                    <span className={styles.paymentDesc}>Pay securely with your card.</span>
-                  </div>
-                </label>
+                {activeGateway === "stripe" && (
+                  <label className={`${styles.paymentLabel} ${paymentMethod !== "COD" ? styles.paymentLabelActive : ""}`}>
+                    <input
+                      type="radio"
+                      name="payment"
+                      value="stripe"
+                      checked={paymentMethod !== "COD"}
+                      onChange={() => setPaymentMethod("stripe")}
+                      className={styles.radioInput}
+                    />
+                    <div className={styles.paymentInfo}>
+                      <span className={styles.paymentName}>Stripe (Credit / Debit Cards)</span>
+                      <span className={styles.paymentDesc}>Fast & 256-bit encrypted global card payments.</span>
+                    </div>
+                  </label>
+                )}
 
-                <label className={`${styles.paymentLabel} ${paymentMethod === "Net Banking" ? styles.paymentLabelActive : ""}`}>
-                  <input
-                    type="radio"
-                    name="payment"
-                    value="Net Banking"
-                    checked={paymentMethod === "Net Banking"}
-                    onChange={(e) => setPaymentMethod(e.target.value)}
-                    className={styles.radioInput}
-                  />
-                  <div className={styles.paymentInfo}>
-                    <span className={styles.paymentName}>Net Banking</span>
-                    <span className={styles.paymentDesc}>All major banks supported.</span>
-                  </div>
-                </label>
+                {activeGateway === "paypal" && (
+                  <label className={`${styles.paymentLabel} ${paymentMethod !== "COD" ? styles.paymentLabelActive : ""}`}>
+                    <input
+                      type="radio"
+                      name="payment"
+                      value="paypal"
+                      checked={paymentMethod !== "COD"}
+                      onChange={() => setPaymentMethod("paypal")}
+                      className={styles.radioInput}
+                    />
+                    <div className={styles.paymentInfo}>
+                      <span className={styles.paymentName}>PayPal Express Checkout</span>
+                      <span className={styles.paymentDesc}>Pay conveniently with your PayPal balance or card.</span>
+                    </div>
+                  </label>
+                )}
+
+                {activeGateway === "phonepe" && (
+                  <label className={`${styles.paymentLabel} ${paymentMethod !== "COD" ? styles.paymentLabelActive : ""}`}>
+                    <input
+                      type="radio"
+                      name="payment"
+                      value="phonepe"
+                      checked={paymentMethod !== "COD"}
+                      onChange={() => setPaymentMethod("phonepe")}
+                      className={styles.radioInput}
+                    />
+                    <div className={styles.paymentInfo}>
+                      <span className={styles.paymentName}>PhonePe Payment Gateway</span>
+                      <span className={styles.paymentDesc}>Direct UPI QR & PhonePe app payments.</span>
+                    </div>
+                  </label>
+                )}
+
+                {activeGateway === "paytm" && (
+                  <label className={`${styles.paymentLabel} ${paymentMethod !== "COD" ? styles.paymentLabelActive : ""}`}>
+                    <input
+                      type="radio"
+                      name="payment"
+                      value="paytm"
+                      checked={paymentMethod !== "COD"}
+                      onChange={() => setPaymentMethod("paytm")}
+                      className={styles.radioInput}
+                    />
+                    <div className={styles.paymentInfo}>
+                      <span className={styles.paymentName}>PayTM Wallet & UPI</span>
+                      <span className={styles.paymentDesc}>Instant checkout with PayTM Wallet and Netbanking.</span>
+                    </div>
+                  </label>
+                )}
+
+                {/* Cash on Delivery option if enabled by merchant */}
+                {codEnabled !== false && (
+                  <label className={`${styles.paymentLabel} ${paymentMethod === "COD" ? styles.paymentLabelActive : ""}`}>
+                    <input
+                      type="radio"
+                      name="payment"
+                      value="COD"
+                      checked={paymentMethod === "COD"}
+                      onChange={(e) => setPaymentMethod(e.target.value)}
+                      className={styles.radioInput}
+                    />
+                    <div className={styles.paymentInfo}>
+                      <span className={styles.paymentName}>Cash on Delivery (COD)</span>
+                      <span className={styles.paymentDesc}>Pay in cash upon doorstep delivery.</span>
+                    </div>
+                  </label>
+                )}
               </div>
             </div>
 

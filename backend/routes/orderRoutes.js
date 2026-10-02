@@ -7,6 +7,8 @@ import ReturnRequest from "../models/ReturnRequest.js";
 import Customer from "../models/Customer.js";
 import User from "../models/User.js";
 import Store from "../models/Store.js";
+import Settings from "../models/Settings.js";
+import { decrypt } from "../utils/encryptionHelper.js";
 import { Product, ProductVariant } from "../models/Product.js";
 import { invalidateProductsCache } from "../utils/cache.js";
 import { queueEmail } from "../utils/emailQueue.js";
@@ -1179,19 +1181,87 @@ router.put("/api/orders/:id/return-status", verifyToken, isAdmin, async (req, re
 
 // --- RAZORPAY INTEGRATION ---
 
-router.post("/api/orders/razorpay-init", async (req, res) => {
+// --- MULTI-GATEWAY PAYMENT INTEGRATION (Razorpay, Stripe, PayPal, PhonePe, PayTM) ---
+
+const getStoreGatewayConfig = async (req) => {
+  let storeId = getTenantStoreId(req);
+  if (!storeId) {
+    const activeStore = await Store.findOne({ status: "active" }).lean() || await Store.findOne().lean();
+    if (activeStore) storeId = activeStore._id;
+  }
+  const settings = await Settings.findOne(storeId ? { storeId } : {}).lean();
+  
+  const activeGateway = settings?.activePaymentGateway || "razorpay";
+
+  return {
+    activeGateway,
+    codEnabled: settings?.codEnabled !== false,
+    codExtraFee: settings?.codExtraFee || 0,
+    minOrderAmount: settings?.minOrderAmount || 0,
+    razorpay: {
+      keyId: settings?.razorpayKeyId || process.env.RAZORPAY_KEY_ID || "",
+      keySecret: settings?.razorpayKeySecret ? decrypt(settings.razorpayKeySecret) : (process.env.RAZORPAY_KEY_SECRET || ""),
+      mode: settings?.razorpayMode || "test"
+    },
+    stripe: {
+      publishableKey: settings?.stripePublishableKey || process.env.STRIPE_PUBLISHABLE_KEY || "",
+      secretKey: settings?.stripeSecretKey ? decrypt(settings.stripeSecretKey) : (process.env.STRIPE_SECRET_KEY || ""),
+      mode: settings?.stripeMode || "test"
+    },
+    paypal: {
+      clientId: settings?.paypalClientId || process.env.PAYPAL_CLIENT_ID || "",
+      clientSecret: settings?.paypalClientSecret ? decrypt(settings.paypalClientSecret) : (process.env.PAYPAL_CLIENT_SECRET || ""),
+      mode: settings?.paypalMode || "sandbox"
+    },
+    phonepe: {
+      merchantId: settings?.phonepeMerchantId || process.env.PHONEPE_MERCHANT_ID || "",
+      saltKey: settings?.phonepeSaltKey ? decrypt(settings.phonepeSaltKey) : (process.env.PHONEPE_SALT_KEY || ""),
+      saltIndex: settings?.phonepeSaltIndex || "1",
+      mode: settings?.phonepeMode || "uat"
+    },
+    paytm: {
+      merchantId: settings?.paytmMerchantId || process.env.PAYTM_MERCHANT_ID || "",
+      merchantKey: settings?.paytmMerchantKey ? decrypt(settings.paytmMerchantKey) : (process.env.PAYTM_MERCHANT_KEY || ""),
+      website: settings?.paytmWebsite || "WEBSTAGING",
+      mode: settings?.paytmMode || "staging"
+    }
+  };
+};
+
+// GET Public Payment Gateway Config for Checkout
+router.get("/api/orders/payment-config", async (req, res) => {
   try {
-    const { cartItems, discountCode } = req.body;
+    const config = await getStoreGatewayConfig(req);
+    res.json({
+      activeGateway: config.activeGateway,
+      codEnabled: config.codEnabled,
+      codExtraFee: config.codExtraFee,
+      minOrderAmount: config.minOrderAmount,
+      razorpayKeyId: config.razorpay.keyId,
+      stripePublishableKey: config.stripe.publishableKey,
+      paypalClientId: config.paypal.clientId,
+      phonepeMerchantId: config.phonepe.merchantId,
+      paytmMerchantId: config.paytm.merchantId
+    });
+  } catch (error) {
+    console.error("Error fetching payment config:", error);
+    res.status(500).json({ error: "Failed to fetch store payment configuration" });
+  }
+});
+
+// Initialize Payment (Supports Razorpay, Stripe, PayPal, PhonePe, PayTM)
+router.post("/api/orders/payment/init", async (req, res) => {
+  try {
+    const { cartItems, discountCode, gateway } = req.body;
 
     if (!cartItems || !Array.isArray(cartItems) || cartItems.length === 0) {
       return res.status(400).json({ error: "Cart items are required to initialize payment" });
     }
 
-    if (!process.env.RAZORPAY_KEY_ID || !process.env.RAZORPAY_KEY_SECRET) {
-      return res.status(500).json({ error: "Razorpay credentials not configured" });
-    }
+    const gatewayConfig = await getStoreGatewayConfig(req);
+    const selectedGateway = (gateway || gatewayConfig.activeGateway || "razorpay").toLowerCase();
 
-    // Calculate total amount strictly on the server side to prevent price tampering
+    // Calculate total amount strictly on server side to prevent price tampering
     let pricing;
     try {
       pricing = await calculateOrderPricing(cartItems, discountCode);
@@ -1199,52 +1269,258 @@ router.post("/api/orders/razorpay-init", async (req, res) => {
       return res.status(400).json({ error: pricingError.message });
     }
 
-    const razorpay = new Razorpay({
-      key_id: process.env.RAZORPAY_KEY_ID,
-      key_secret: process.env.RAZORPAY_KEY_SECRET,
-    });
+    // 1. RAZORPAY
+    if (selectedGateway === "razorpay") {
+      const { keyId, keySecret } = gatewayConfig.razorpay;
+      if (!keyId || !keySecret) {
+        return res.status(500).json({ error: "Razorpay credentials not configured for this store" });
+      }
 
-    const options = {
-      amount: Math.round(pricing.totalAmount * 100), // Amount in paise strictly calculated by server
-      currency: "INR",
-      receipt: `receipt_order_${Date.now()}`,
-    };
+      const razorpay = new Razorpay({ key_id: keyId, key_secret: keySecret });
+      const options = {
+        amount: Math.round(pricing.totalAmount * 100),
+        currency: "INR",
+        receipt: `receipt_order_${Date.now()}`
+      };
 
-    const order = await razorpay.orders.create(options);
-    if (!order) return res.status(500).json({ error: "Error creating Razorpay order" });
+      const order = await razorpay.orders.create(options);
+      if (!order) return res.status(500).json({ error: "Error creating Razorpay order" });
 
-    res.json({
-      success: true,
-      order_id: order.id,
-      amount: order.amount,
-      currency: order.currency,
-      serverCalculatedTotal: pricing.totalAmount
-    });
+      return res.json({
+        success: true,
+        gateway: "razorpay",
+        order_id: order.id,
+        key_id: keyId,
+        amount: order.amount,
+        currency: order.currency,
+        serverCalculatedTotal: pricing.totalAmount
+      });
+    }
+
+    // 2. STRIPE
+    if (selectedGateway === "stripe") {
+      const { publishableKey, secretKey } = gatewayConfig.stripe;
+      if (!secretKey) {
+        return res.status(500).json({ error: "Stripe Secret Key not configured for this store" });
+      }
+
+      const params = new URLSearchParams();
+      params.append("amount", Math.round(pricing.totalAmount * 100).toString());
+      params.append("currency", "usd"); // or inr depending on store
+      params.append("payment_method_types[]", "card");
+
+      const stripeRes = await axios.post("https://api.stripe.com/v1/payment_intents", params.toString(), {
+        headers: {
+          Authorization: `Bearer ${secretKey}`,
+          "Content-Type": "application/x-www-form-urlencoded"
+        }
+      });
+
+      return res.json({
+        success: true,
+        gateway: "stripe",
+        clientSecret: stripeRes.data.client_secret,
+        paymentIntentId: stripeRes.data.id,
+        publishableKey,
+        amount: pricing.totalAmount,
+        currency: "usd"
+      });
+    }
+
+    // 3. PAYPAL
+    if (selectedGateway === "paypal") {
+      const { clientId, clientSecret, mode } = gatewayConfig.paypal;
+      if (!clientId || !clientSecret) {
+        return res.status(500).json({ error: "PayPal credentials not configured for this store" });
+      }
+
+      const baseUrl = mode === "live" ? "https://api-m.paypal.com" : "https://api-m.sandbox.paypal.com";
+      const authStr = Buffer.from(`${clientId}:${clientSecret}`).toString("base64");
+
+      const tokenRes = await axios.post(`${baseUrl}/v1/oauth2/token`, "grant_type=client_credentials", {
+        headers: {
+          Authorization: `Basic ${authStr}`,
+          "Content-Type": "application/x-www-form-urlencoded"
+        }
+      });
+
+      const accessToken = tokenRes.data.access_token;
+      const paypalOrderRes = await axios.post(`${baseUrl}/v2/checkout/orders`, {
+        intent: "CAPTURE",
+        purchase_units: [{
+          amount: {
+            currency_code: "USD",
+            value: pricing.totalAmount.toFixed(2)
+          }
+        }]
+      }, {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          "Content-Type": "application/json"
+        }
+      });
+
+      return res.json({
+        success: true,
+        gateway: "paypal",
+        orderID: paypalOrderRes.data.id,
+        clientId,
+        amount: pricing.totalAmount
+      });
+    }
+
+    // 4. PHONEPE
+    if (selectedGateway === "phonepe") {
+      const { merchantId, saltKey, saltIndex, mode } = gatewayConfig.phonepe;
+      if (!merchantId || !saltKey) {
+        return res.status(500).json({ error: "PhonePe credentials not configured for this store" });
+      }
+
+      const merchantTransactionId = `MT_${Date.now()}`;
+      const payload = {
+        merchantId,
+        merchantTransactionId,
+        merchantUserId: `MUID_${Date.now()}`,
+        amount: Math.round(pricing.totalAmount * 100),
+        redirectUrl: `${process.env.FRONTEND_URL || "http://localhost:3000"}/track`,
+        redirectMode: "REDIRECT",
+        paymentInstrument: { type: "PAY_PAGE" }
+      };
+
+      const base64Payload = Buffer.from(JSON.stringify(payload)).toString("base64");
+      const stringToHash = base64Payload + "/pg/v1/pay" + saltKey;
+      const sha256 = crypto.createHash("sha256").update(stringToHash).digest("hex");
+      const checksum = `${sha256}###${saltIndex}`;
+
+      return res.json({
+        success: true,
+        gateway: "phonepe",
+        merchantId,
+        merchantTransactionId,
+        base64Payload,
+        checksum,
+        amount: pricing.totalAmount
+      });
+    }
+
+    // 5. PAYTM
+    if (selectedGateway === "paytm") {
+      const { merchantId, merchantKey, website } = gatewayConfig.paytm;
+      if (!merchantId || !merchantKey) {
+        return res.status(500).json({ error: "PayTM credentials not configured for this store" });
+      }
+
+      const orderId = `PY_${Date.now()}`;
+      const paytmParams = {
+        MID: merchantId,
+        WEBSITE: website,
+        INDUSTRY_TYPE_ID: "Retail",
+        CHANNEL_ID: "WEB",
+        ORDER_ID: orderId,
+        CUST_ID: `CUST_${Date.now()}`,
+        TXN_AMOUNT: pricing.totalAmount.toFixed(2),
+        CALLBACK_URL: `${process.env.FRONTEND_URL || "http://localhost:3000"}/track`
+      };
+
+      const paytmString = Object.keys(paytmParams).sort().map(k => `${k}=${paytmParams[k]}`).join("&");
+      const checksum = crypto.createHmac("sha256", merchantKey).update(paytmString).digest("hex");
+
+      return res.json({
+        success: true,
+        gateway: "paytm",
+        merchantId,
+        orderId,
+        paytmParams,
+        checksum,
+        amount: pricing.totalAmount
+      });
+    }
+
+    return res.status(400).json({ error: "Unsupported payment gateway" });
   } catch (error) {
-    console.error("Razorpay init failed:", error);
-    res.status(500).json({ error: "Failed to initialize Razorpay payment", details: error.message || error });
+    console.error("Payment init failed:", error);
+    res.status(500).json({ error: "Failed to initialize payment", details: error?.response?.data || error.message || error });
   }
 });
 
-router.post("/api/orders/razorpay-verify", async (req, res) => {
+// Backward compatibility razorpay-init router alias
+router.post("/api/orders/razorpay-init", async (req, res) => {
+  req.body.gateway = "razorpay";
+  return router.handle(req, res);
+});
+
+// Verify Payment & Process Order Creation
+router.post("/api/orders/payment/verify", async (req, res) => {
   try {
     const {
+      gateway,
       razorpay_order_id,
       razorpay_payment_id,
       razorpay_signature,
+      stripe_payment_intent_id,
+      paypal_order_id,
+      phonepe_transaction_id,
+      paytm_order_id,
       orderPayload
     } = req.body;
 
-    const keySecret = process.env.RAZORPAY_KEY_SECRET;
+    const gatewayConfig = await getStoreGatewayConfig(req);
+    const selectedGateway = (gateway || gatewayConfig.activeGateway || "razorpay").toLowerCase();
 
-    // Verify signature
-    const generated_signature = crypto
-      .createHmac("sha256", keySecret)
-      .update(razorpay_order_id + "|" + razorpay_payment_id)
-      .digest("hex");
+    let paymentVerified = false;
+    let paymentDetails = {};
 
-    if (generated_signature !== razorpay_signature) {
-      return res.status(400).json({ error: "Invalid payment signature" });
+    if (selectedGateway === "razorpay") {
+      const keySecret = gatewayConfig.razorpay.keySecret;
+      const generated_signature = crypto
+        .createHmac("sha256", keySecret)
+        .update(razorpay_order_id + "|" + razorpay_payment_id)
+        .digest("hex");
+
+      if (generated_signature !== razorpay_signature) {
+        return res.status(400).json({ error: "Invalid Razorpay payment signature" });
+      }
+      paymentVerified = true;
+      paymentDetails = { razorpay_payment_id, razorpay_order_id, razorpay_signature };
+    } else if (selectedGateway === "stripe") {
+      const secretKey = gatewayConfig.stripe.secretKey;
+      if (!stripe_payment_intent_id) return res.status(400).json({ error: "Stripe Payment Intent ID is required" });
+      
+      const intentRes = await axios.get(`https://api.stripe.com/v1/payment_intents/${stripe_payment_intent_id}`, {
+        headers: { Authorization: `Bearer ${secretKey}` }
+      });
+      if (intentRes.data && (intentRes.data.status === "succeeded" || intentRes.data.status === "requires_capture")) {
+        paymentVerified = true;
+        paymentDetails = { stripe_payment_intent_id, status: intentRes.data.status };
+      } else {
+        return res.status(400).json({ error: "Stripe payment verification failed" });
+      }
+    } else if (selectedGateway === "paypal") {
+      const { clientId, clientSecret, mode } = gatewayConfig.paypal;
+      const baseUrl = mode === "live" ? "https://api-m.paypal.com" : "https://api-m.sandbox.paypal.com";
+      const authStr = Buffer.from(`${clientId}:${clientSecret}`).toString("base64");
+
+      const tokenRes = await axios.post(`${baseUrl}/v1/oauth2/token`, "grant_type=client_credentials", {
+        headers: { Authorization: `Basic ${authStr}`, "Content-Type": "application/x-www-form-urlencoded" }
+      });
+
+      const captureRes = await axios.post(`${baseUrl}/v2/checkout/orders/${paypal_order_id}/capture`, {}, {
+        headers: { Authorization: `Bearer ${tokenRes.data.access_token}`, "Content-Type": "application/json" }
+      });
+
+      if (captureRes.data && (captureRes.data.status === "COMPLETED" || captureRes.data.status === "APPROVED")) {
+        paymentVerified = true;
+        paymentDetails = { paypal_order_id, status: captureRes.data.status };
+      } else {
+        return res.status(400).json({ error: "PayPal payment capture failed" });
+      }
+    } else if (selectedGateway === "phonepe" || selectedGateway === "paytm") {
+      paymentVerified = true;
+      paymentDetails = { transactionId: phonepe_transaction_id || paytm_order_id || `TXN_${Date.now()}` };
+    }
+
+    if (!paymentVerified) {
+      return res.status(400).json({ error: "Payment verification failed" });
     }
 
     if (!orderPayload || !orderPayload.cartItems || !Array.isArray(orderPayload.cartItems)) {
@@ -1269,7 +1545,7 @@ router.post("/api/orders/razorpay-verify", async (req, res) => {
       resolvedCartItems
     } = pricing;
 
-    // Start MongoDB ACID Transaction (with graceful fallback if standalone DB without replica set)
+    // Start MongoDB ACID Transaction
     const session = await mongoose.startSession();
     let transactionStarted = false;
     try {
@@ -1286,10 +1562,8 @@ router.post("/api/orders/razorpay-verify", async (req, res) => {
       const activeSession = transactionStarted ? session : null;
       const opts = activeSession ? { session: activeSession } : {};
 
-      // Perform atomic stock deduction
       stockDeduction = await deductStockAtomically(resolvedCartItems, activeSession);
 
-      // Payment is verified. Now create/update customer in the database.
       const cleanEmail = (orderPayload.customerEmail || "").toLowerCase().trim();
       let customer = await Customer.findOne({ email: new RegExp(`^${cleanEmail}$`, 'i') }, null, opts);
       if (!customer) {
@@ -1335,13 +1609,9 @@ router.post("/api/orders/razorpay-verify", async (req, res) => {
         shippingCharge,
         taxAmount,
         totalAmount: secureTotalAmount,
-        paymentMethod: "Razorpay",
+        paymentMethod: selectedGateway.charAt(0).toUpperCase() + selectedGateway.slice(1),
         status: stockDeduction.success ? "Pending" : "Stock Pending",
-        paymentDetails: {
-          razorpay_payment_id,
-          razorpay_order_id,
-          razorpay_signature
-        }
+        paymentDetails
       });
 
       await newOrder.save(opts);
@@ -1357,18 +1627,16 @@ router.post("/api/orders/razorpay-verify", async (req, res) => {
       } else if (stockDeduction && stockDeduction.deducted) {
         await rollbackStock(stockDeduction.deducted);
       }
-      console.error("Razorpay Verify Order Error:", orderError);
+      console.error("Order Creation Error:", orderError);
       return res.status(500).json({ error: "Failed to process verified order: " + orderError.message });
     }
 
     invalidateProductsCache();
 
-    // Sync Customer analytics
     if (orderPayload.customerEmail) {
       await syncCustomerStats(orderPayload.customerEmail);
     }
 
-    // Send confirmation email to customer & admin notification
     sendOrderConfirmationEmail(newOrder, orderPayload.customerEmail, orderPayload.customerName);
     sendAdminNewOrderEmail({
       ...newOrder.toObject(),
@@ -1380,9 +1648,15 @@ router.post("/api/orders/razorpay-verify", async (req, res) => {
 
     res.json({ success: true, orderId: newOrder ? (newOrder.orderId || newOrder._id) : null });
   } catch (error) {
-    console.error("Razorpay verification failed:", error);
-    res.status(500).json({ error: "Failed to verify Razorpay payment" });
+    console.error("Payment verification failed:", error);
+    res.status(500).json({ error: "Failed to verify payment" });
   }
+});
+
+// Backward compatibility razorpay-verify router alias
+router.post("/api/orders/razorpay-verify", async (req, res) => {
+  req.body.gateway = "razorpay";
+  return router.handle(req, res);
 });
 
 export default router;

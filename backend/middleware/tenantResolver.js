@@ -10,17 +10,7 @@ const domainStoreCache = new Map();
  * @param {string|null} identifier 
  */
 export const invalidateTenantCache = (identifier = null) => {
-  if (!identifier) {
-    domainStoreCache.clear();
-    return;
-  }
-  const strId = String(identifier);
-  domainStoreCache.delete(strId);
-  for (const [key, value] of domainStoreCache.entries()) {
-    if (value && (String(value._id) === strId || value.subdomain === strId || value.customDomain === strId)) {
-      domainStoreCache.delete(key);
-    }
-  }
+  domainStoreCache.clear();
 };
 
 /**

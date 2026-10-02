@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import Store from "../models/Store.js";
 
 /**
@@ -21,6 +22,30 @@ export const getTenantStoreId = (req) => {
   if (headerStoreId) {
     return headerStoreId;
   }
+  return null;
+};
+
+export const getTenantStoreIdAsync = async (req) => {
+  const syncStoreId = getTenantStoreId(req);
+  if (syncStoreId) return syncStoreId;
+
+  if (req.user) {
+    const userId = req.user.id || req.user._id;
+    const userEmail = req.user.email ? req.user.email.toLowerCase() : null;
+    const filterConditions = [];
+    if (userId && mongoose.Types.ObjectId.isValid(userId)) filterConditions.push({ ownerId: userId });
+    if (userEmail) filterConditions.push({ ownerEmail: userEmail });
+
+    if (filterConditions.length > 0) {
+      const store = await Store.findOne({ $or: filterConditions }).lean();
+      if (store) {
+        req.user.storeId = store._id;
+        req.storeId = store._id;
+        return store._id;
+      }
+    }
+  }
+
   return null;
 };
 

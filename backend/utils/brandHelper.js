@@ -19,9 +19,9 @@ export const getBrandInfo = async (storeId = null) => {
       }
     }
 
-    // Fallback store name lookup if brandLogoValue is not set
+    // Fetch store model to get exact businessName
     let storeNameFromModel = "";
-    if (activeStoreId && (!settings || !settings.brandLogoValue)) {
+    if (activeStoreId) {
       const storeDoc = await Store.findById(activeStoreId).lean();
       if (storeDoc) {
         storeNameFromModel = storeDoc.businessName || storeDoc.name || "";
@@ -30,14 +30,15 @@ export const getBrandInfo = async (storeId = null) => {
 
     const brandLogoType = settings?.brandLogoType || "text";
     const brandLogoValue = settings?.brandLogoValue || storeNameFromModel || "";
+    const isUrl = brandLogoValue && (brandLogoValue.startsWith("http") || brandLogoValue.startsWith("/") || brandLogoValue.startsWith("data:"));
     
-    // Determine brand logo image URL and clean brand text name set by admin
-    const brandLogoUrl = brandLogoType === "image" && brandLogoValue ? brandLogoValue : null;
+    // Determine brand logo image URL and clean brand text name set by merchant
+    const brandLogoUrl = (brandLogoType === "image" || isUrl) ? brandLogoValue : null;
     let brandName = storeNameFromModel || "Store";
-    if (brandLogoType === "text" && brandLogoValue) {
+    if (brandLogoType === "text" && brandLogoValue && !isUrl) {
       brandName = brandLogoValue;
-    } else if (settings?.heroTitle) {
-      brandName = settings.heroTitle;
+    } else if (storeNameFromModel) {
+      brandName = storeNameFromModel;
     }
 
     const brandTagline = settings?.videoSubtitle || "Official Online Store";

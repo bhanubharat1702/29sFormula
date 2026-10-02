@@ -72,8 +72,12 @@ router.get("/api/storefront/home", async (req, res) => {
     const storeId = getTenantStoreId(req);
     const storeFilter = storeId ? { storeId } : {};
 
-    const [settings, arrivals, reviews] = await Promise.all([
-      Settings.findOne(storeFilter).lean(),
+    let settings = await Settings.findOne(storeFilter).lean();
+    if (!settings) {
+      settings = await Settings.findOne({}).lean() || {};
+    }
+
+    const [arrivals, reviews] = await Promise.all([
       Product.find({ ...storeFilter, category: "Latest Arrivals" }).sort({ createdAt: -1 }).limit(10).lean(),
       Review.find(storeFilter).sort({ createdAt: -1 }).limit(10).lean()
     ]);

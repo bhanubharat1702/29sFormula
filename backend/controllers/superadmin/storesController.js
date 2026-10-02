@@ -17,6 +17,9 @@ import { BillingInvoice } from "../../models/Billing.js";
 import { recordAuditLog } from "../../services/auditLogService.js";
 import { dispatchCommunicationEvent } from "../../routes/superadmin/communications.js";
 
+import { invalidateSettingsCache } from "../../utils/cache.js";
+import { invalidateTenantCache } from "../../middleware/tenantResolver.js";
+
 const getJwtSecret = () => process.env.JWT_SECRET || "ecommerce_secret_jwt_key_2026";
 
 /**
@@ -565,6 +568,21 @@ export const updateStoreHandler = async (req, res) => {
     if (internalNotes !== undefined) store.internalNotes = internalNotes;
 
     await store.save();
+
+    // Sync Settings document & clear caches
+    let settings = await Settings.findOne({ storeId: store._id });
+    if (settings) {
+      if (name !== undefined && settings.brandLogoType === "text") {
+        settings.brandLogoValue = name;
+      }
+      if (businessLogo !== undefined && businessLogo.trim()) {
+        settings.brandLogoType = "image";
+        settings.brandLogoValue = businessLogo.trim();
+      }
+      await settings.save();
+    }
+    invalidateSettingsCache(null);
+    invalidateTenantCache(null);
 
     // Sync owner User document
     if (store.ownerEmail) {
