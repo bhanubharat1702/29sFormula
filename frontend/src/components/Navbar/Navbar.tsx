@@ -7,6 +7,7 @@ import styles from "./Navbar.module.css";
 import { fetchAndSyncUserCart } from "@/utils/cartSync";
 import { useCart } from "@/context/CartContext";
 import { SearchListSkeleton } from "@/components/Skeletons/Skeletons";
+import { clearAuthSession } from "@/utils/auth";
 
 interface NavbarProps {
   onCartClick: () => void;
@@ -163,10 +164,9 @@ export default function Navbar({ onCartClick }: NavbarProps) {
 
 
   const handleLogout = () => {
-    localStorage.removeItem("userSession");
     setCurrentUser(null);
     setShowProfileDropdown(false);
-    window.location.reload();
+    clearAuthSession("/login");
   };
 
   useEffect(() => {

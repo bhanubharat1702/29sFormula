@@ -16,6 +16,7 @@ import { FaqItem, DashboardStats, Product } from "./types";
 import { fontCategories, getFontFamilyStack } from "./constants/fonts";
 import { useAdminAuth } from "./hooks/useAdminAuth";
 import { useDashboardData, getAuthHeaders, ensureAdminToken } from "./hooks/useDashboardData";
+import { clearAuthSession } from "@/utils/auth";
 import AdminModals from "./components/modals/AdminModals";
 import CustomizeLayoutModal from "./components/modals/CustomizeLayoutModal";
 
@@ -1502,9 +1503,7 @@ export default function AdminDashboard() {
       setOnlineStoreDropdownOpen(false);
       setSettingsDropdownOpen(true);
     } else if (target === "logout") {
-      localStorage.removeItem("adminSession");
-      localStorage.removeItem("lastActivityTime");
-      window.location.href = "/login";
+      clearAuthSession("/login");
     } else if (target === "storefront") {
       window.location.href = "/";
     }

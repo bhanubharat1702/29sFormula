@@ -223,7 +223,7 @@ router.post("/api/settings/payment/test-connection", optionalAuth, async (req, r
     if (gateway === "phonepe") {
       const merchantId = (credentials?.merchantId || settings?.phonepeMerchantId || "").trim();
       const saltKey = getCred(credentials?.saltKey, settings?.phonepeSaltKey);
-      const saltIndex = credentials?.saltIndex || settings?.phonepeSaltIndex || "1";
+      const saltIndex = (credentials?.saltIndex || settings?.phonepeSaltIndex || "1").trim();
 
       if (!merchantId || !saltKey) {
         return res.status(400).json({ error: "PhonePe Merchant ID and Salt Key are required" });
@@ -231,32 +231,51 @@ router.post("/api/settings/payment/test-connection", optionalAuth, async (req, r
 
       const envMode = mode || credentials?.mode || settings?.phonepeMode || "uat";
       const baseUrl = envMode === "production" ? "https://api.phonepe.com/apis/hermes" : "https://api-preprod.phonepe.com/apis/pg-sandbox";
-      const endpoint = `${baseUrl}/pg/v1/status/${merchantId}/TEST_VERIFY_CONN_${Date.now()}`;
+      const now = Date.now();
+      const txnId = `TEST_VERIFY_${now}`;
+      const statusPath = `/pg/v1/status/${merchantId}/${txnId}`;
+      const endpoint = `${baseUrl}${statusPath}`;
 
-      const stringToHash = `/pg/v1/status/${merchantId}/TEST_VERIFY_CONN_${Date.now()}` + saltKey;
+      const stringToHash = statusPath + saltKey;
       const sha256 = crypto.createHash("sha256").update(stringToHash).digest("hex");
       const checksum = `${sha256}###${saltIndex}`;
 
       try {
-        await axios.get(endpoint, {
+        const response = await axios.get(endpoint, {
           headers: {
             "Content-Type": "application/json",
             "X-VERIFY": checksum,
             "X-MERCHANT-ID": merchantId
           }
         });
-        return res.json({
-          success: true,
-          message: `PhonePe (${envMode.toUpperCase()}) credentials verified successfully!`
-        });
-      } catch (phonepeErr) {
-        if (phonepeErr.response && [400, 404].includes(phonepeErr.response.status)) {
+
+        const resCode = response.data?.code;
+        if (response.data?.success || ["TRANSACTION_NOT_FOUND", "PAYMENT_ERROR", "PAYMENT_SUCCESS", "PAYMENT_PENDING"].includes(resCode)) {
           return res.json({
             success: true,
-            message: `PhonePe (${envMode.toUpperCase()}) Salt Key & Merchant ID verified successfully!`
+            message: `PhonePe (${envMode.toUpperCase()}) credentials verified successfully!`
+          });
+        } else {
+          return res.status(400).json({
+            error: response.data?.message || `PhonePe verification failed: ${resCode || "Invalid credentials"}`
           });
         }
-        throw phonepeErr;
+      } catch (phonepeErr) {
+        const errData = phonepeErr.response?.data;
+        const errCode = errData?.code;
+        const errMessage = errData?.message || errData?.error || phonepeErr.message;
+
+        // PhonePe returns TRANSACTION_NOT_FOUND or PAYMENT_ERROR when signature & Merchant ID match but order is dummy
+        if (["TRANSACTION_NOT_FOUND", "PAYMENT_ERROR", "PAYMENT_PENDING"].includes(errCode) || (typeof errMessage === "string" && errMessage.toLowerCase().includes("transaction not found"))) {
+          return res.json({
+            success: true,
+            message: `PhonePe (${envMode.toUpperCase()}) credentials verified successfully!`
+          });
+        }
+
+        return res.status(400).json({
+          error: `PhonePe verification failed (${envMode.toUpperCase()}): ${errMessage || "Invalid Merchant ID or Salt Key"}`
+        });
       }
     }
 

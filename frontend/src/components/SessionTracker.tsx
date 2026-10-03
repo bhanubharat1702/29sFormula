@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import { clearAuthSession } from "@/utils/auth";
 
 export default function SessionTracker() {
   useEffect(() => {
@@ -30,13 +31,10 @@ export default function SessionTracker() {
       if (lastActivity) {
         const elapsed = Date.now() - parseInt(lastActivity, 10);
         if (elapsed > thirtyMinutes) {
-          localStorage.removeItem("adminSession");
-          localStorage.removeItem("userSession");
-          localStorage.removeItem("lastActivityTime");
-          
-          // Redirect to login page with expired flag
           if (window.location.pathname !== "/login") {
-            window.location.href = "/login?expired=true";
+            clearAuthSession("/login?expired=true");
+          } else {
+            clearAuthSession("/login");
           }
         }
       }

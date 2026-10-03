@@ -1289,9 +1289,10 @@ export function PaymentsSubTab(props: any) {
     }
 
     try {
+      const authHeaders = getAuthHeaders();
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:5001'}/api/settings/payment/test-connection`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', ...authHeaders },
         body: JSON.stringify({ gateway: gatewayName, credentials, mode })
       });
 

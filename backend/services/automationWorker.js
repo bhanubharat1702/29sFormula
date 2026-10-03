@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import Store from "../models/Store.js";
 import { BillingInvoice } from "../models/Billing.js";
 import { AutomationRule, Broadcast, DeliveryLog } from "../models/Communication.js";
@@ -9,6 +10,9 @@ import { dispatchCommunicationEvent } from "../controllers/superadmin/communicat
  * Fires matched automation rules and writes delivery logs.
  */
 export const runAutomationWorker = async () => {
+  if (mongoose.connection.readyState !== 1) {
+    return { success: false, reason: "Database connection not ready" };
+  }
   try {
     const rules = await AutomationRule.find({ enabled: true });
     let totalExecutions = 0;

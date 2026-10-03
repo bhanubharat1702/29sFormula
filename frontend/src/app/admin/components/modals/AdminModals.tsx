@@ -1976,7 +1976,7 @@ export default function AdminModals(props: any) {
 
       {/* Selected Customer Detail Modal */}
       {selectedCustomer && (
-        <div className={styles.modalOverlay} onClick={() => setSelectedCustomer(null)} style={{ display: "flex", alignItems: "center", justifyContent: "center", position: "fixed", top: 0, left: 0, right: 0, bottom: 0, backgroundColor: "rgba(0,0,0,0.5)", zIndex: 10000, padding: "20px" }} data-lenis-prevent="true">
+        <div className={styles.modalOverlay} onClick={() => setSelectedCustomer(null)} style={{ display: "flex", alignItems: "center", justifyContent: "center", position: "fixed", top: 0, left: 0, right: 0, bottom: 0, backgroundColor: "rgba(0,0,0,0.6)", backdropFilter: "blur(8px) saturate(180%)", WebkitBackdropFilter: "blur(8px) saturate(180%)", zIndex: 100005, padding: "20px" }} data-lenis-prevent="true">
           <div className={styles.modalContent} onClick={(e) => e.stopPropagation()} style={{ width: "100%", maxWidth: "600px", background: "#fff", borderRadius: "8px", padding: "30px", maxHeight: "90vh", overflowY: "auto", display: "flex", flexDirection: "column" }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "1px solid #eaeaea", paddingBottom: "12px", marginBottom: "20px" }}>
               <h2 style={{ fontSize: "1.1rem", fontWeight: 700, margin: 0, color: "#111827" }}>Customer Details</h2>
@@ -2153,7 +2153,7 @@ export default function AdminModals(props: any) {
 
       {/* Selected Order Detail Modal */}
       {selectedOrder && (
-        <div className={styles.modalOverlay} onClick={() => setSelectedOrder(null)} style={{ display: "flex", alignItems: "center", justifyContent: "center", position: "fixed", top: 0, left: 0, right: 0, bottom: 0, backgroundColor: "rgba(0,0,0,0.5)", zIndex: 10000, padding: "20px" }}>
+        <div className={styles.modalOverlay} onClick={() => setSelectedOrder(null)} style={{ display: "flex", alignItems: "center", justifyContent: "center", position: "fixed", top: 0, left: 0, right: 0, bottom: 0, backgroundColor: "rgba(0,0,0,0.6)", backdropFilter: "blur(8px) saturate(180%)", WebkitBackdropFilter: "blur(8px) saturate(180%)", zIndex: 100005, padding: "20px" }}>
           <div className={styles.modalContent} onClick={(e) => e.stopPropagation()} style={{ width: "100%", maxWidth: "900px", background: "#fff", borderRadius: "8px", padding: "30px", maxHeight: "90vh", overflow: "hidden", display: "flex", flexDirection: "column" }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingBottom: "12px", marginBottom: "20px" }}>
               <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>

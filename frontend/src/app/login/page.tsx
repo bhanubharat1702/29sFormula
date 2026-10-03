@@ -125,7 +125,6 @@ export default function LoginPage() {
         throw new Error(data.error || "Google Sign-In failed.");
       }
 
-      setSuccess(true);
       localStorage.setItem("userSession", JSON.stringify(data));
       localStorage.setItem("lastActivityTime", Date.now().toString());
       await fetchAndSyncUserCart();
@@ -141,9 +140,7 @@ export default function LoginPage() {
         return "/";
       };
 
-      setTimeout(() => {
-        window.location.href = getTargetRedirect();
-      }, 1500);
+      window.location.href = getTargetRedirect();
     } catch (err: any) {
       setError(err.message || "Google Sign-In error.");
     } finally {
@@ -176,7 +173,6 @@ export default function LoginPage() {
         throw new Error(data.error || "Login failed.");
       }
 
-      setSuccess(true);
       localStorage.setItem("userSession", JSON.stringify(data));
       if (data.token) {
         localStorage.setItem("adminToken", data.token);
@@ -191,16 +187,14 @@ export default function LoginPage() {
       localStorage.setItem("lastActivityTime", Date.now().toString());
 
       if (isOwnerOrAdmin) {
-        setTimeout(() => {
-          if (data.dashboardUrl && typeof window !== "undefined") {
-            const currentHost = window.location.host;
-            if (data.storeSubdomain && !currentHost.startsWith(data.storeSubdomain)) {
-              window.location.href = data.dashboardUrl;
-              return;
-            }
+        if (data.dashboardUrl && typeof window !== "undefined") {
+          const currentHost = window.location.host;
+          if (data.storeSubdomain && !currentHost.startsWith(data.storeSubdomain)) {
+            window.location.href = data.dashboardUrl;
+            return;
           }
-          window.location.href = "/admin";
-        }, 1200);
+        }
+        window.location.href = "/admin";
         return;
       }
 
@@ -217,9 +211,7 @@ export default function LoginPage() {
         return "/";
       };
 
-      setTimeout(() => {
-        window.location.href = getTargetRedirect();
-      }, 1500);
+      window.location.href = getTargetRedirect();
     } catch (err: any) {
       setError(err.message || "Invalid credentials.");
     } finally {
@@ -378,17 +370,7 @@ export default function LoginPage() {
           </p>
         </div>
 
-        {success ? (
-          <div className={styles.successState}>
-            <div className={styles.checkCircle}>
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={3} stroke="currentColor" className={styles.checkIcon}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="m4.5 12.75 6 6 9-13.5" />
-              </svg>
-            </div>
-            <h2 className={styles.successTitle}>{isAdmin ? "Admin Authorized" : "Welcome Back"}</h2>
-            <p className={styles.successDesc}>Redirecting to {isAdmin ? "admin dashboard" : "homepage"}...</p>
-          </div>
-        ) : resetStep === 'request_email' ? (
+        {resetStep === 'request_email' ? (
           <form onSubmit={handleRequestResetOtp} className={styles.loginForm}>
             {error && <div className={styles.errorAlert}>{error}</div>}
 

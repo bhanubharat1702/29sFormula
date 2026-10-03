@@ -66,6 +66,12 @@ const deleteFromCloudinary = async (url) => {
   try {
     const result = await cloudinary.uploader.destroy(publicId, { resource_type: resourceType });
     console.log(`Cloudinary deletion success for ${publicId} (${resourceType}):`, result);
+    try {
+      const Asset = (await import("../models/Asset.js")).default;
+      await Asset.deleteOne({ $or: [{ publicId }, { url }] });
+    } catch (dbErr) {
+      console.error("Failed to delete asset record from DB:", dbErr);
+    }
   } catch (error) {
     console.error(`Cloudinary deletion failed for ${publicId}:`, error);
   }

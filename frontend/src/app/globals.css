@@ -97,4 +97,30 @@ input[type="number"]::-webkit-inner-spin-button {
   border-radius: 6px;
 }
 
+/* Universal Modal & Popup Backdrop Overlay System */
+[class*="modalOverlay"],
+[class*="policyModalOverlay"],
+[class*="cartOverlay"],
+[class*="mobileFilterOverlay"],
+[class*="quickViewOverlay"],
+.overlay,
+.modalOverlay {
+  backdrop-filter: blur(8px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(8px) saturate(180%) !important;
+  background-color: rgba(0, 0, 0, 0.6) !important;
+}
+
+/* Modal Box & Container Solid Background Elevation */
+[class*="modalContent"],
+[class*="modalBox"],
+[class*="policyModalContent"],
+[class*="unsavedModal"],
+[class*="mobileAlertModalOverride"],
+[class*="mobileModalOverride"],
+[class*="detailsCard"] {
+  background-color: #ffffff !important;
+  color: #111827 !important;
+}
+
+
 
