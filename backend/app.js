@@ -26,6 +26,7 @@ import platformRoutes from "./routes/platformRoutes.js";
 import merchantDomainRoutes from "./routes/merchantDomainRoutes.js";
 
 import { tenantResolver } from "./middleware/tenantResolver.js";
+import { storefrontSuspensionGate } from "./middleware/suspensionGate.js";
 
 const app = express();
 
@@ -38,6 +39,9 @@ app.use(express.urlencoded({ limit: "100mb", extended: true }));
 
 // Resolve Tenant Context (req.storeId & req.store & AsyncLocalStorage) for every incoming request
 app.use(tenantResolver);
+
+// Global Storefront Suspension Gate (Blocks public storefront traffic when store is suspended)
+app.use(storefrontSuspensionGate);
 
 // Apply general API rate limiting
 app.use("/api", generalLimiter);

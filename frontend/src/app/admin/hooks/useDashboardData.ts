@@ -116,6 +116,9 @@ export const ensureAdminToken = async (forceRefresh = false): Promise<Record<str
 
 export function useDashboardData() {
   const [dashboardStats, setDashboardStats] = useState<DashboardStats | null>(null);
+  const [isSuspended, setIsSuspended] = useState<boolean>(false);
+  const [suspensionReason, setSuspensionReason] = useState<string>("");
+  const [suspendedAtDate, setSuspendedAtDate] = useState<string | null>(null);
 
   const fetchDashboardStats = async (timeline: string = "all", retries = 3) => {
     try {
@@ -125,8 +128,28 @@ export function useDashboardData() {
         headers
       });
 
+      if (res.status === 451 || res.status === 403) {
+        const errData = await res.json().catch(() => ({}));
+        if (errData.isSuspended) {
+          setIsSuspended(true);
+          if (errData.suspensionReason) setSuspensionReason(errData.suspensionReason);
+          if (errData.suspendedAt) setSuspendedAtDate(errData.suspendedAt);
+
+          if (typeof window !== "undefined") {
+            const sessionStr = localStorage.getItem("userSession");
+            let sessionObj = sessionStr ? JSON.parse(sessionStr) : {};
+            sessionObj.isStoreSuspended = true;
+            if (errData.suspensionReason) sessionObj.suspensionReason = errData.suspensionReason;
+            if (errData.suspendedAt) sessionObj.suspendedAt = errData.suspendedAt;
+            if (errData.storeName) sessionObj.storeName = errData.storeName;
+            localStorage.setItem("userSession", JSON.stringify(sessionObj));
+          }
+          return;
+        }
+      }
+
       // If token expired or unauthorized, force token refresh & retry once
-      if ((res.status === 401 || res.status === 403) && typeof window !== "undefined") {
+      if (res.status === 401 && typeof window !== "undefined") {
         localStorage.removeItem("adminToken");
         headers = await ensureAdminToken(true);
         res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:5001'}/api/admin/dashboard-stats?timeline=${timeline}&t=${Date.now()}`, {
@@ -138,6 +161,26 @@ export function useDashboardData() {
       if (!res.ok) throw new Error(`Failed to fetch dashboard stats (HTTP ${res.status})`);
       const data = await res.json();
       setDashboardStats(data);
+
+      // Store is ACTIVE - reset suspension state
+      setIsSuspended(false);
+      setSuspensionReason("");
+      setSuspendedAtDate(null);
+
+      if (typeof window !== "undefined") {
+        const sessionStr = localStorage.getItem("userSession");
+        if (sessionStr) {
+          try {
+            let sessionObj = JSON.parse(sessionStr);
+            if (sessionObj.isStoreSuspended) {
+              sessionObj.isStoreSuspended = false;
+              delete sessionObj.suspensionReason;
+              delete sessionObj.suspendedAt;
+              localStorage.setItem("userSession", JSON.stringify(sessionObj));
+            }
+          } catch (e) {}
+        }
+      }
     } catch (err: any) {
       if (retries > 0) {
         console.warn(`Dashboard fetch failed (${err.message}), retrying... (${retries} retries left)`);
@@ -150,6 +193,9 @@ export function useDashboardData() {
 
   return {
     dashboardStats,
-    fetchDashboardStats
+    fetchDashboardStats,
+    isSuspended,
+    suspensionReason,
+    suspendedAtDate
   };
 }

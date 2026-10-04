@@ -4,6 +4,7 @@ import Store from "../models/Store.js";
 import { DomainSettings, ReservedSubdomain, RESERVED_SUBDOMAINS } from "../models/Domain.js";
 import { invalidateTenantCache } from "../middleware/tenantResolver.js";
 import { getPlanDomainLimit, countCustomDomains } from "./superadmin/domainsController.js";
+import { subdomainBloomFilter, customDomainBloomFilter, reservedSubdomainBloomFilter } from "../utils/bloomFilter.js";
 
 const DEFAULT_PLATFORM_DOMAIN = "29sformula.com";
 
@@ -55,8 +56,11 @@ const isReservedSubdomain = async (subdomain) => {
     const clean = String(subdomain || "").toLowerCase().trim();
     if (!clean) return true;
     if (RESERVED_SUBDOMAINS.includes(clean)) return true;
-    const inDb = await ReservedSubdomain.findOne({ subdomain: clean }).lean().catch(() => null);
-    return Boolean(inDb);
+    if (reservedSubdomainBloomFilter.mightContain(clean)) {
+        const inDb = await ReservedSubdomain.findOne({ subdomain: clean }).lean().catch(() => null);
+        return Boolean(inDb);
+    }
+    return false;
 };
 
 // Serialize one custom domain from store.domains[] for the merchant UI.
@@ -198,7 +202,10 @@ export const checkSubdomainAvailability = async (req, res) => {
         }
 
         const isOwnCurrent = clean === store.subdomain;
-        const taken = await Store.findOne({ subdomain: clean, _id: { $ne: store._id } }).lean();
+        let taken = null;
+        if (!isOwnCurrent && subdomainBloomFilter.mightContain(clean)) {
+            taken = await Store.findOne({ subdomain: clean, _id: { $ne: store._id } }).lean();
+        }
 
         res.json({
             subdomain: clean,
@@ -233,13 +240,17 @@ export const assignPlatformSubdomain = async (req, res) => {
             return res.status(400).json({ error: `Subdomain '${clean}' is a reserved system keyword.` });
         }
 
-        const taken = await Store.findOne({ subdomain: clean, _id: { $ne: store._id } }).lean();
+        let taken = null;
+        if (subdomainBloomFilter.mightContain(clean)) {
+            taken = await Store.findOne({ subdomain: clean, _id: { $ne: store._id } }).lean();
+        }
         if (taken) {
             return res.status(409).json({ error: `Subdomain '${clean}' is already assigned to another store. Please choose another.` });
         }
 
         const previous = store.subdomain;
         store.subdomain = clean;
+        subdomainBloomFilter.add(clean);
 
         // Keep the aggregate subdomain-type record in sync so the super-admin
         // domain list and tenant resolver never expose a stale hostname.
@@ -322,9 +333,12 @@ export const addMerchantDomain = async (req, res) => {
         }
 
         // Prevent this hostname (or its sub-host) colliding with any other store.
-        const existingStore = await Store.findOne({
-            $or: [{ customDomain: cleanDomain }, { "domains.domain": cleanDomain }]
-        }).lean();
+        let existingStore = null;
+        if (customDomainBloomFilter.mightContain(cleanDomain)) {
+            existingStore = await Store.findOne({
+                $or: [{ customDomain: cleanDomain }, { "domains.domain": cleanDomain }]
+            }).lean();
+        }
         if (existingStore) {
             return res.status(409).json({ error: `Domain '${cleanDomain}' is already connected to another store.` });
         }
@@ -362,10 +376,13 @@ export const addMerchantDomain = async (req, res) => {
         };
 
         // Re-check collision right before atomic update to prevent race conditions
-        const finalCheck = await Store.findOne({
-            _id: { $ne: store._id },
-            $or: [{ customDomain: cleanDomain }, { "domains.domain": cleanDomain }]
-        }).lean();
+        let finalCheck = null;
+        if (customDomainBloomFilter.mightContain(cleanDomain)) {
+            finalCheck = await Store.findOne({
+                _id: { $ne: store._id },
+                $or: [{ customDomain: cleanDomain }, { "domains.domain": cleanDomain }]
+            }).lean();
+        }
         if (finalCheck) {
             return res.status(409).json({ error: `Domain '${cleanDomain}' is already connected to another store.` });
         }
@@ -393,6 +410,7 @@ export const addMerchantDomain = async (req, res) => {
             return res.status(409).json({ error: `Domain '${cleanDomain}' is already connected to your store.` });
         }
 
+        customDomainBloomFilter.add(cleanDomain);
         invalidateTenantCache(store._id);
 
         res.status(201).json({

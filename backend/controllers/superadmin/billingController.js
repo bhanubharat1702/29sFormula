@@ -2,6 +2,7 @@ import Store from "../../models/Store.js";
 import { Plan, Coupon, BillingInvoice, PaymentLog, TaxCurrencyConfig } from "../../models/Billing.js";
 import { recordAuditLog } from "../../services/auditLogService.js";
 import { dispatchCommunicationEvent } from "./communicationsController.js";
+import { discountCodeBloomFilter } from "../../utils/bloomFilter.js";
 
 // Helper to calculate exact plan upgrade/downgrade prorations
 export const calculatePlanProration = ({ oldPrice = 0, newPrice = 0, billingCycleDays = 30, daysRemaining = 15 }) => {
@@ -775,6 +776,8 @@ export const createCoupon = async (req, res) => {
       expiresAt: expiresAt ? new Date(expiresAt) : null,
       isActive: true
     });
+
+    discountCodeBloomFilter.add(coupon.code);
 
     await recordAuditLog({
       adminUser: req.superAdmin?.name || "Super Admin",

@@ -5,8 +5,10 @@ import Order from "../models/Order.js";
 import Settings from "../models/Settings.js";
 import { getPaginationParams, buildPaginatedResponse, setPaginationHeaders } from "../utils/paginationHelper.js";
 import { getTenantStoreId } from "../utils/tenantHelper.js";
+import { storefrontSuspensionGate } from "../middleware/suspensionGate.js";
 
 const router = express.Router();
+router.use(storefrontSuspensionGate);
 
 router.get("/api/storefront/shop", async (req, res) => {
   try {

@@ -19,6 +19,7 @@ import { dispatchCommunicationEvent } from "../../routes/superadmin/communicatio
 
 import { invalidateSettingsCache } from "../../utils/cache.js";
 import { invalidateTenantCache } from "../../middleware/tenantResolver.js";
+import { subdomainBloomFilter, customDomainBloomFilter, reservedSubdomainBloomFilter } from "../../utils/bloomFilter.js";
 
 const getJwtSecret = () => process.env.JWT_SECRET || "ecommerce_secret_jwt_key_2026";
 
@@ -501,6 +502,9 @@ export const createStoreHandler = async (req, res) => {
       }
     }).catch(e => console.error("Welcome email dispatch warning:", e));
 
+    if (cleanSubdomain) subdomainBloomFilter.add(cleanSubdomain);
+    if (cleanCustomDomain) customDomainBloomFilter.add(cleanCustomDomain);
+
     res.status(201).json({
       message: "New Merchant Store created successfully!",
       store: newStore,
@@ -568,16 +572,21 @@ export const updateStoreHandler = async (req, res) => {
     if (subdomain !== undefined) {
       const cleanSub = subdomain.toLowerCase().trim();
       if (cleanSub && cleanSub !== store.subdomain) {
-        const reservedInDb = await ReservedSubdomain.findOne({ subdomain: cleanSub }).lean().catch(() => null);
-        if (RESERVED_SUBDOMAINS.includes(cleanSub) || reservedInDb) {
-          return res.status(400).json({ error: `Subdomain '${cleanSub}' is a reserved system keyword.` });
+        if (reservedSubdomainBloomFilter.mightContain(cleanSub)) {
+          const reservedInDb = await ReservedSubdomain.findOne({ subdomain: cleanSub }).lean().catch(() => null);
+          if (RESERVED_SUBDOMAINS.includes(cleanSub) || reservedInDb) {
+            return res.status(400).json({ error: `Subdomain '${cleanSub}' is a reserved system keyword.` });
+          }
         }
-        const taken = await Store.findOne({ subdomain: cleanSub, _id: { $ne: store._id } }).lean();
-        if (taken) {
-          return res.status(400).json({ error: `Subdomain '${cleanSub}' is already taken.` });
+        if (subdomainBloomFilter.mightContain(cleanSub)) {
+          const taken = await Store.findOne({ subdomain: cleanSub, _id: { $ne: store._id } }).lean();
+          if (taken) {
+            return res.status(400).json({ error: `Subdomain '${cleanSub}' is already taken.` });
+          }
         }
       }
       store.subdomain = cleanSub;
+      if (cleanSub) subdomainBloomFilter.add(cleanSub);
     }
     if (customDomain !== undefined) {
       const cleanCustom = customDomain.toLowerCase().trim();
@@ -603,8 +612,33 @@ export const updateStoreHandler = async (req, res) => {
     if (ownerPhone !== undefined) store.ownerPhone = ownerPhone.trim();
     if (businessType !== undefined) store.businessType = businessType;
 
-    const statusChanged = isActive !== undefined && store.isActive !== isActive;
-    if (isActive !== undefined) store.isActive = isActive;
+    const statusChanged = (isActive !== undefined && store.isActive !== isActive) || (req.body.status !== undefined && store.status !== req.body.status);
+    if (isActive !== undefined) {
+      store.isActive = Boolean(isActive);
+      if (!isActive && store.status !== "suspended") {
+        store.status = "suspended";
+      } else if (isActive && store.status === "suspended") {
+        store.status = "active";
+      }
+    }
+    if (req.body.status !== undefined) {
+      store.status = req.body.status;
+      if (req.body.status === "suspended" || req.body.status === "cancelled") {
+        store.isActive = false;
+      } else if (req.body.status === "active" || req.body.status === "trial") {
+        store.isActive = true;
+      }
+    }
+    if (req.body.suspensionReason !== undefined || req.body.reason !== undefined) {
+      store.suspensionReason = String(req.body.suspensionReason || req.body.reason || "").trim();
+    }
+    if (!store.isActive || store.status === "suspended") {
+      if (!store.suspendedAt) store.suspendedAt = new Date();
+      if (!store.suspensionReason) store.suspensionReason = "Account suspended by platform administrator.";
+    } else {
+      store.suspendedAt = null;
+      store.suspensionReason = "";
+    }
     if (plan !== undefined) store.plan = plan;
     if (internalNotes !== undefined) store.internalNotes = internalNotes;
 
@@ -862,5 +896,87 @@ export const deleteStoreHandler = async (req, res) => {
   } catch (err) {
     console.error("SuperAdmin Delete Store Error:", err);
     res.status(400).json({ error: err.message || "Failed to delete store." });
+  }
+};
+
+// PATCH/PUT /api/superadmin/stores/:id/toggle-status — Toggle Store Status (Active <-> Suspended)
+export const toggleStoreStatusHandler = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const store = await Store.findById(id);
+    if (!store) {
+      return res.status(404).json({ error: "Store not found." });
+    }
+
+    const beforeValue = {
+      name: store.name,
+      isActive: store.isActive,
+      status: store.status,
+      subdomain: store.subdomain
+    };
+
+    // Toggle active state
+    const newIsActive = !(store.isActive !== false && store.status !== "suspended");
+    store.isActive = newIsActive;
+    store.status = newIsActive ? "active" : "suspended";
+
+    if (!newIsActive) {
+      store.suspensionReason = (req.body?.reason || req.body?.suspensionReason || "Account suspended by platform administrator.").trim();
+      store.suspendedAt = new Date();
+    } else {
+      store.suspensionReason = "";
+      store.suspendedAt = null;
+    }
+
+    await store.save();
+
+    invalidateSettingsCache(null);
+    invalidateTenantCache(store._id);
+
+    // SOC 2 Audit Log Entry
+    const clientMeta = getClientMeta(req);
+    await recordAuditLog({
+      ...clientMeta,
+      action: newIsActive ? "Restore Merchant Store" : "Suspend Merchant Store",
+      actionCategory: "tenant",
+      target: store.name,
+      targetId: store._id.toString(),
+      storeId: store._id,
+      storeName: store.name,
+      beforeValue,
+      afterValue: { name: store.name, isActive: store.isActive, status: store.status },
+      reason: req.body?.reason || (newIsActive ? "Admin reactivated store" : "Admin suspended store")
+    });
+
+    // Email alert to merchant owner
+    if (store.ownerEmail) {
+      const emailCategory = newIsActive ? "restoration" : "suspension";
+      dispatchCommunicationEvent({
+        category: emailCategory,
+        recipientEmail: store.ownerEmail,
+        storeId: store._id,
+        storeName: store.name,
+        variables: {
+          store_name: store.name,
+          reason: req.body?.reason || (newIsActive ? "Administrative reactivation" : "Administrative suspension")
+        }
+      }).catch(e => console.error("Status toggle email notification warning:", e));
+    }
+
+    res.json({
+      message: `Store '${store.name}' has been ${newIsActive ? "activated" : "suspended"} successfully.`,
+      store: {
+        _id: store._id,
+        name: store.name,
+        subdomain: store.subdomain,
+        customDomain: store.customDomain,
+        plan: store.plan,
+        status: store.status,
+        isActive: store.isActive
+      }
+    });
+  } catch (err) {
+    console.error("Toggle Store Status Error:", err);
+    res.status(500).json({ error: "Failed to toggle store status." });
   }
 };

@@ -137,6 +137,8 @@ const StoreSchema = new mongoose.Schema({
     enum: ['trial', 'active', 'past_due', 'suspended', 'cancelled', 'scheduled_for_deletion'],
     default: 'trial'
   },
+  suspensionReason: { type: String, default: '' },
+  suspendedAt: { type: Date, default: null },
   scheduledDeletionAt: { type: Date, default: null },
   trialDays: { type: Number, default: 14 },
   trialEndsAt: { type: Date, default: null },

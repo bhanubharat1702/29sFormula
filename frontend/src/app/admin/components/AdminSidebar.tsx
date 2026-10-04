@@ -56,7 +56,7 @@ export default function AdminSidebar({
   const displayBrandName = storeBusinessName || (brandLogoType === "text" && brandLogoValue && !brandLogoValue.startsWith('http') ? brandLogoValue : "");
 
   return (
-    <aside className={`${styles.sidebar} ${isMobileMenuOpen ? styles.sidebarOpen : ''}`}>
+    <aside data-allow-suspended="true" className={`${styles.sidebar} ${isMobileMenuOpen ? styles.sidebarOpen : ''}`}>
       <div className={styles.sidebarTop}>
         <div className={styles.sidebarHeaderTop}>
           <div className={styles.brandRow}>

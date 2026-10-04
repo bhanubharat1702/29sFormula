@@ -9,6 +9,7 @@ import Footer from "@/components/Footer";
 
 import Navbar from "@/components/Navbar/Navbar";
 import Preloader from "@/components/Preloader";
+import PublicSuspendedStorefront from "./components/PublicSuspendedStorefront";
 import CartDrawer from "@/components/CartDrawer";
 import CheckoutDrawer from "@/components/CheckoutDrawer";
 import OrderSuccessModal from "@/components/OrderSuccessModal";
@@ -373,17 +374,30 @@ export default function Home() {
     }
   }, [videoUrl]);
 
+  const [isStoreSuspended, setIsStoreSuspended] = useState<boolean>(false);
+  const [suspendedStoreName, setSuspendedStoreName] = useState<string>("Online Store");
+
   const loadData = useCallback(() => {
     setIsStorefrontLoading(true);
     setIsStorefrontError(false);
     setStorefrontErrorMessage("");
 
     fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:5001'}/api/storefront/home`, { cache: "no-store" })
-      .then(res => {
+      .then(async res => {
+        if (res.status === 451 || res.status === 403) {
+          const errData = await res.json().catch(() => ({}));
+          if (errData.isSuspended) {
+            setIsStoreSuspended(true);
+            setSuspendedStoreName(errData.storeName || "Online Store");
+            setIsStorefrontLoading(false);
+            return null;
+          }
+        }
         if (!res.ok) throw new Error(`Server returned status ${res.status}`);
         return res.json();
       })
       .then(payload => {
+        if (!payload) return;
         setIsStorefrontLoading(false);
         setIsStorefrontError(false);
         if (payload.arrivals && Array.isArray(payload.arrivals)) {
@@ -752,6 +766,10 @@ export default function Home() {
       setBestSellersPage(p => p - 1);
     }
   };
+
+  if (isStoreSuspended) {
+    return <PublicSuspendedStorefront storeName={suspendedStoreName} />;
+  }
 
   return (
     <div suppressHydrationWarning className={styles.page}>

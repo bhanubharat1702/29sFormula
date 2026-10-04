@@ -80,15 +80,13 @@ export const tenantResolver = async (req, res, next) => {
           { "domains.domain": cleanHost },
           { "domains.domain": hostNoWww },
           { "domains.domain": hostWithWww }
-        ],
-        isActive: true
+        ]
       }).lean();
 
       // Second Priority: Subdomain slug match
       if (!store) {
         store = await Store.findOne({
-          subdomain: subdomainPart,
-          isActive: true
+          subdomain: subdomainPart
         }).lean();
       }
 
@@ -139,6 +137,8 @@ export const tenantResolver = async (req, res, next) => {
       req.storeId = store._id;
       req.store = store;
       req.isStoreSuspended = Boolean(store.status === "suspended" || store.isActive === false);
+      req.suspensionReason = store.suspensionReason || (req.isStoreSuspended ? "Account suspended by platform administrator." : "");
+      req.suspendedAt = store.suspendedAt || null;
     }
 
     const activeStoreId = req.storeId ? String(req.storeId) : null;

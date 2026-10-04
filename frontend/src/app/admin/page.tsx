@@ -19,6 +19,7 @@ import { useDashboardData, getAuthHeaders, ensureAdminToken } from "./hooks/useD
 import { clearAuthSession } from "@/utils/auth";
 import AdminModals from "./components/modals/AdminModals";
 import CustomizeLayoutModal from "./components/modals/CustomizeLayoutModal";
+import MerchantSuspendedDashboard from "./components/MerchantSuspendedDashboard";
 
 
 
@@ -26,7 +27,13 @@ import CustomizeLayoutModal from "./components/modals/CustomizeLayoutModal";
 
 export default function AdminDashboard() {
   const fetchedTabs = useRef(new Set<string>());
-  const { dashboardStats, fetchDashboardStats } = useDashboardData();
+  const {
+    dashboardStats,
+    fetchDashboardStats,
+    isSuspended: isSuspendedFromData,
+    suspensionReason: reasonFromData,
+    suspendedAtDate: dateFromData
+  } = useDashboardData();
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -58,6 +65,35 @@ export default function AdminDashboard() {
   const [storeSupportPhone, setStoreSupportPhone] = useState<string>("");
   const [storeSubdomain, setStoreSubdomain] = useState<string>("");
   const [storeCustomDomain, setStoreCustomDomain] = useState<string>("");
+
+  const [isStoreSuspended, setIsStoreSuspended] = useState<boolean>(false);
+  const [suspensionReason, setSuspensionReason] = useState<string>("Account suspended by platform administrator.");
+  const [suspendedAtDate, setSuspendedAtDate] = useState<string | null>(null);
+  const [showSuspendedActionModal, setShowSuspendedActionModal] = useState<boolean>(false);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const sessionStr = localStorage.getItem("userSession");
+      if (sessionStr) {
+        try {
+          const session = JSON.parse(sessionStr);
+          if (session.isStoreSuspended) {
+            setIsStoreSuspended(true);
+            if (session.suspensionReason) setSuspensionReason(session.suspensionReason);
+            if (session.suspendedAt) setSuspendedAtDate(session.suspendedAt);
+            if (session.storeName) setStoreBusinessName(session.storeName);
+            if (session.storeSubdomain) setStoreSubdomain(session.storeSubdomain);
+          }
+        } catch (e) {}
+      }
+    }
+  }, []);
+
+  useEffect(() => {
+    if (isSuspendedFromData !== undefined) {
+      setIsStoreSuspended(isSuspendedFromData);
+    }
+  }, [isSuspendedFromData]);
 
   // Scroll detection state for mobile header
   const [isHeaderVisible, setIsHeaderVisible] = useState(true);
@@ -3108,6 +3144,10 @@ export default function AdminDashboard() {
     })
     .sort((a, b) => a.name.localeCompare(b.name));
 
+  const effectiveIsSuspended = isStoreSuspended || isSuspendedFromData;
+  const effectiveReason = reasonFromData || suspensionReason;
+  const effectiveDate = dateFromData || suspendedAtDate;
+
   if (!authorized) {
     return (
       <div className={styles.authCheckingWrapper}>
@@ -3116,8 +3156,6 @@ export default function AdminDashboard() {
       </div>
     );
   }
-
-
 
   const getSearchResults = () => {
     if (!searchQuery.trim()) return { pages: [], products: [], orders: [], customers: [] };
@@ -3426,8 +3464,13 @@ export default function AdminDashboard() {
         </div>
 
         {/* Dynamic tabs render content */}
-        <div className={styles.scrollableContent}>
-
+        <div className={styles.scrollableContent} style={{ position: 'relative' }}>
+          <div style={{
+            filter: effectiveIsSuspended ? 'blur(5px)' : 'none',
+            pointerEvents: effectiveIsSuspended ? 'none' : 'auto',
+            userSelect: effectiveIsSuspended ? 'none' : 'auto',
+            transition: 'all 0.3s ease'
+          }}>
           {activeTab === "home" && (
             <HomeTab
               dashboardStats={dashboardStats}
@@ -3866,6 +3909,156 @@ export default function AdminDashboard() {
               termsOfServiceText={termsOfServiceText}
               setTermsOfServiceText={setTermsOfServiceText}
             />
+          )}
+          </div>
+
+          {/* Suspended Store Blur Overlay & On-Hold Card */}
+          {effectiveIsSuspended && (
+            <div style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              minHeight: '100%',
+              backgroundColor: 'rgba(0, 0, 0, 0.25)',
+              backdropFilter: 'blur(6px)',
+              WebkitBackdropFilter: 'blur(6px)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              zIndex: 90,
+              padding: '24px'
+            }}>
+              <div style={{
+                maxWidth: '480px',
+                width: '100%',
+                backgroundColor: '#ffffff',
+                border: '1px solid #e4e4e7',
+                borderRadius: '16px',
+                boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.05)',
+                padding: '32px 28px',
+                textAlign: 'center',
+                color: '#18181b',
+                boxSizing: 'border-box'
+              }}>
+                {/* System Lock Icon */}
+                <div style={{
+                  width: '52px',
+                  height: '52px',
+                  borderRadius: '50%',
+                  backgroundColor: '#fef2f2',
+                  border: '1px solid #fecdd3',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  margin: '0 auto 16px auto',
+                  color: '#ef4444'
+                }}>
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.75} stroke="currentColor" style={{ width: "26px", height: "26px" }}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z" />
+                  </svg>
+                </div>
+
+                {/* Title */}
+                <h2 style={{
+                  fontSize: '20px',
+                  fontWeight: 700,
+                  color: '#09090b',
+                  marginBottom: '4px',
+                  letterSpacing: '-0.02em'
+                }}>
+                  {storeBusinessName || "Your Merchant Store"} is On Hold
+                </h2>
+                {storeSubdomain && (
+                  <p style={{ fontSize: '13px', color: '#71717a', marginBottom: '20px' }}>
+                    Domain Host: <code style={{ color: '#2563eb', backgroundColor: '#eff6ff', padding: '2px 8px', borderRadius: '4px', fontSize: '12px', fontWeight: 600 }}>{storeSubdomain}</code>
+                  </p>
+                )}
+
+                {/* Notice Box */}
+                <div style={{
+                  backgroundColor: '#fef2f2',
+                  borderTop: '1px solid #fecdd3',
+                  borderRight: '1px solid #fecdd3',
+                  borderBottom: '1px solid #fecdd3',
+                  borderLeft: '4px solid #ef4444',
+                  borderRadius: '10px',
+                  padding: '16px',
+                  textAlign: 'left',
+                  marginBottom: '20px'
+                }}>
+                  <div style={{ fontSize: '11px', fontWeight: 700, color: '#991b1b', letterSpacing: '0.05em', textTransform: 'uppercase', marginBottom: '4px' }}>
+                    REASON FOR SUSPENSION
+                  </div>
+                  <div style={{ fontSize: '14px', color: '#7f1d1d', lineHeight: '1.5', fontWeight: 500 }}>
+                    "{effectiveReason || "Account suspended by platform administrator."}"
+                  </div>
+                  {effectiveDate && (
+                    <div style={{ fontSize: '12px', color: '#991b1b', marginTop: '8px', opacity: 0.85 }}>
+                      Effective Date: {new Date(effectiveDate).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric", hour: "2-digit", minute: "2-digit" })}
+                    </div>
+                  )}
+                </div>
+
+                <p style={{ fontSize: '13px', color: '#71717a', lineHeight: '1.5', marginBottom: '24px' }}>
+                  Your storefront and administrative actions are locked by platform administration. Sidebar navigation remains enabled to view store sections.
+                </p>
+
+                {/* System Action Buttons */}
+                <div style={{ display: 'flex', gap: '10px', justifyContent: 'center' }}>
+                  <a
+                    href={`mailto:support@29sformula.com?subject=${encodeURIComponent(`Store Suspension Appeal - ${storeBusinessName || 'Store'} (${storeSubdomain})`)}`}
+                    style={{
+                      padding: '10px 18px',
+                      borderRadius: '8px',
+                      backgroundColor: '#2563eb',
+                      color: '#ffffff',
+                      fontWeight: 600,
+                      fontSize: '14px',
+                      textDecoration: 'none',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '8px',
+                      transition: 'background-color 0.15s ease'
+                    }}
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" style={{ width: "16px", height: "16px" }}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0L3.32 8.91a2.25 2.25 0 0 1-1.07-1.916V6.75" />
+                    </svg>
+                    Contact Super Admin
+                  </a>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      localStorage.removeItem("userSession");
+                      localStorage.removeItem("adminSession");
+                      localStorage.removeItem("adminToken");
+                      window.location.href = "/login";
+                    }}
+                    style={{
+                      padding: '10px 18px',
+                      borderRadius: '8px',
+                      backgroundColor: '#ffffff',
+                      border: '1px solid #d1d5db',
+                      color: '#374151',
+                      fontWeight: 600,
+                      fontSize: '14px',
+                      cursor: 'pointer',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '8px',
+                      transition: 'all 0.15s ease'
+                    }}
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" style={{ width: "16px", height: "16px" }}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15m3 0 3-3m0 0-3-3m3 3H9" />
+                    </svg>
+                    Sign Out
+                  </button>
+                </div>
+              </div>
+            </div>
           )}
         </div>
       </div>
@@ -4464,6 +4657,7 @@ export default function AdminDashboard() {
           primaryColor={primaryColor}
         />
       )}
+
     </div>
   );
 }

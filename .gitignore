@@ -16,4 +16,4 @@ coverage/
 # Agent/AI tooling files (not part of project source)
 .agents/
 openspec/
-*_audit.md
+*.md

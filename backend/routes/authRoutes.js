@@ -175,10 +175,8 @@ router.post("/api/auth/login", loginLimiter, validate(loginSchema), async (req, 
         }).setOptions({ skipTenantFilter: true }).lean()
       : null;
 
-    // Block login for merchant store owners/staff if store is suspended
-    if (store && (store.status === "suspended" || store.isActive === false) && (isOwner || user.role === "admin" || user.isAdmin)) {
-      return res.status(403).json({ error: "Your merchant account is currently suspended. Please contact platform support." });
-    }
+    const isStoreSuspended = Boolean(store && (store.status === "suspended" || store.isActive === false));
+    const suspensionReason = (store && store.suspensionReason) || (isStoreSuspended ? "Account suspended by platform administrator." : "");
 
     // Update lastLoginAt timestamp on user
     await User.findByIdAndUpdate(user._id, { lastLoginAt: new Date() });
@@ -204,6 +202,10 @@ router.post("/api/auth/login", loginLimiter, validate(loginSchema), async (req, 
       storeName: store ? store.name : null,
       storeUrl: store ? `http://${store.subdomain}.${baseDomain}` : null,
       dashboardUrl,
+      isStoreSuspended,
+      suspensionReason: isStoreSuspended ? suspensionReason : "",
+      suspendedAt: isStoreSuspended ? store?.suspendedAt : null,
+      supportEmail: "support@29sformula.com",
       isGoogleUser: false
     });
   } catch (error) {

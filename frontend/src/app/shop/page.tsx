@@ -14,6 +14,7 @@ import CustomCheckbox from "@/components/CustomCheckbox/CustomCheckbox";
 import NewtonsCradleLoader from "@/components/NewtonsCradleLoader";
 import { StorefrontGridSkeleton } from "@/components/Skeletons/Skeletons";
 import QuickViewDrawer from "@/components/QuickViewDrawer";
+import PublicSuspendedStorefront from "../components/PublicSuspendedStorefront";
 import { useCart } from "@/context/CartContext";
 import { saveCart, clearCart, fetchAndSyncUserCart } from "@/utils/cartSync";
 
@@ -49,6 +50,8 @@ export default function Shop() {
   const [primaryColor, setPrimaryColor] = useState<string>(
     "#ffffff"
   );
+  const [isStoreSuspended, setIsStoreSuspended] = useState<boolean>(false);
+  const [suspendedStoreName, setSuspendedStoreName] = useState<string>("Online Store");
 
   // Filtering & Sorting State
   const [inStockOnly, setInStockOnly] = useState<boolean>(false);
@@ -200,11 +203,20 @@ export default function Shop() {
 
     // Fetch shop data
     fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:5001'}/api/storefront/shop`, { cache: "no-store" })
-      .then(res => {
+      .then(async res => {
+        if (res.status === 451 || res.status === 403) {
+          const errData = await res.json().catch(() => ({}));
+          if (errData.isSuspended) {
+            setIsStoreSuspended(true);
+            setSuspendedStoreName(errData.storeName || "Online Store");
+            return null;
+          }
+        }
         if (!res.ok) throw new Error("Failed to fetch shop data");
         return res.json();
       })
       .then(data => {
+        if (!data) return;
         if (data.products && Array.isArray(data.products)) {
           setProducts(data.products);
           localStorage.setItem("storefront_products", JSON.stringify(data.products));
@@ -352,6 +364,10 @@ export default function Shop() {
       window.history.replaceState({}, "", url.toString());
     }
   };
+
+  if (isStoreSuspended) {
+    return <PublicSuspendedStorefront storeName={suspendedStoreName} />;
+  }
 
   return (
     <div suppressHydrationWarning className={styles.page}>

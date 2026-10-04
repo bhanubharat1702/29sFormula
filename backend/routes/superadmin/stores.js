@@ -4,6 +4,7 @@ import {
   getStoresHandler,
   createStoreHandler,
   updateStoreHandler,
+  toggleStoreStatusHandler,
   restoreStoreHandler,
   impersonateStoreHandler,
   deleteStoreHandler,
@@ -22,9 +23,12 @@ router.get("/api/superadmin/tenants", verifySuperAdminToken, getStoresHandler);
 // Store Provisioning Route
 router.post("/api/superadmin/stores", verifySuperAdminToken, createStoreHandler);
 
-// Store Modification Routes
+// Store Modification & Status Toggle Routes
 router.put("/api/superadmin/stores/:id", verifySuperAdminToken, updateStoreHandler);
 router.put("/api/superadmin/tenants/:id", verifySuperAdminToken, updateStoreHandler);
+router.patch("/api/superadmin/stores/:id/toggle-status", verifySuperAdminToken, toggleStoreStatusHandler);
+router.put("/api/superadmin/stores/:id/toggle-status", verifySuperAdminToken, toggleStoreStatusHandler);
+router.patch("/api/superadmin/stores/:id/status", verifySuperAdminToken, toggleStoreStatusHandler);
 
 // Store Deletion Cancellation Route
 router.post("/api/superadmin/stores/:id/restore", verifySuperAdminToken, restoreStoreHandler);

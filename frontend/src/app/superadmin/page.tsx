@@ -746,15 +746,20 @@ export default function SuperAdminPage() {
         setConfirmModal(null);
         const token = localStorage.getItem("superAdminToken");
         try {
-          const res = await fetch(`http://localhost:5001/api/superadmin/stores/${store._id}/toggle-status`, {
+          const apiBase = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001";
+          const res = await fetch(`${apiBase}/api/superadmin/stores/${store._id}/toggle-status`, {
             method: "PATCH",
-            headers: { Authorization: `Bearer ${token}` },
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json"
+            }
           });
           if (res.ok) {
             triggerToast(`Store ${store.name} ${action}ed.`);
             fetchData();
           } else {
-            alert(`Failed to ${action} store.`);
+            const errData = await res.json().catch(() => ({}));
+            alert(errData.error || `Failed to ${action} store.`);
           }
         } catch {
           alert(`Network error toggling status.`);

@@ -3,6 +3,7 @@ import Discount from "../models/Discount.js";
 import { getPaginationParams, buildPaginatedResponse, setPaginationHeaders } from "../utils/paginationHelper.js";
 import { validate } from "../middleware/validate.js";
 import { createDiscountSchema, validateDiscountQuerySchema } from "../utils/schemas.js";
+import { discountCodeBloomFilter } from "../utils/bloomFilter.js";
 
 const router = express.Router();
 
@@ -38,14 +39,16 @@ router.get("/api/discounts", async (req, res) => {
 router.post("/api/discounts", validate(createDiscountSchema), async (req, res) => {
   try {
     const { code, type, value, minOrderAmount } = req.body;
+    const cleanCode = String(code).toUpperCase().trim();
     const newDiscount = new Discount({
-      code: String(code).toUpperCase().trim(),
+      code: cleanCode,
       type: type || "percentage",
       value: Number(value),
       minOrderAmount: Number(minOrderAmount) || 0,
       active: true
     });
     await newDiscount.save();
+    discountCodeBloomFilter.add(cleanCode);
     res.status(201).json(newDiscount);
   } catch (error) {
     res.status(500).json({ error: "Failed to create discount (code may already exist)." });
@@ -64,7 +67,14 @@ router.delete("/api/discounts/:id", async (req, res) => {
 router.get("/api/discounts/validate", validate(validateDiscountQuerySchema, "query"), async (req, res) => {
   try {
     const { code, subtotal } = req.query;
-    const discount = await Discount.findOne({ code: String(code).toUpperCase().trim(), active: true });
+    const cleanCode = String(code).toUpperCase().trim();
+
+    // Fast-path Bloom Filter check
+    if (!discountCodeBloomFilter.mightContain(cleanCode)) {
+      return res.status(404).json({ error: "Invalid discount code" });
+    }
+
+    const discount = await Discount.findOne({ code: cleanCode, active: true });
     if (!discount) return res.status(404).json({ error: "Invalid discount code" });
     
     if (discount.minOrderAmount > 0 && subtotal !== undefined) {

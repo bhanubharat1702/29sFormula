@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 import dotenv from "dotenv";
 import { runMigration } from "../scripts/migrateMultiTenant.js";
+import { initBloomFilters } from "../utils/bloomFilter.js";
 
 dotenv.config();
 
@@ -37,6 +38,10 @@ export const connectDB = async () => {
       // Automatically run multi-tenant seed migration and legacy data sanitizer on server startup
       runMigration({ standalone: false }).catch((err) => {
         console.warn("Startup migration warning:", err.message);
+      });
+      // Hydrate all Bloom Filters
+      initBloomFilters().catch((err) => {
+        console.warn("Bloom filter hydration warning:", err.message);
       });
     } catch (err) {
       console.error("Failed to connect to MongoDB:", err.message);

@@ -15,6 +15,7 @@ import CartDrawer from "@/components/CartDrawer";
 import OrderSuccessModal from "@/components/OrderSuccessModal";
 import QuickViewDrawer from "@/components/QuickViewDrawer";
 import Navbar from "@/components/Navbar/Navbar";
+import PublicSuspendedStorefront from "@/app/components/PublicSuspendedStorefront";
 import { useCart } from "@/context/CartContext";
 import { saveCart, clearCart, fetchAndSyncUserCart } from "@/utils/cartSync";
 import { saveRecentlyViewed } from "@/utils/recentlyViewed";
@@ -503,23 +504,35 @@ export default function ProductDetailPage() {
 
 
 
+  const [isStoreSuspended, setIsStoreSuspended] = useState<boolean>(false);
+  const [suspendedStoreName, setSuspendedStoreName] = useState<string>("Online Store");
+
   useEffect(() => {
 
     // Get primary color and Product Page CMS settings from backend
     fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:5001'}/api/settings`, { cache: "no-store" })
-      .then(res => res.json())
-      .then(data => {
-        if (data) {
-          if (data.primaryColor) setPrimaryColor(data.primaryColor);
-              if (typeof document !== "undefined") document.documentElement.style.setProperty("--primary-brand-color", data.primaryColor);
-          if (data.showProductReviews !== undefined) setShowProductReviews(data.showProductReviews);
-          if (data.showProductExploreMore !== undefined) setShowProductExploreMore(data.showProductExploreMore);
-          if (data.showProductFaq !== undefined) setShowProductFaq(data.showProductFaq);
-          if (data.usageGuideText) setUsageGuideText(data.usageGuideText);
-          if (data.exploreMoreTitle) setExploreMoreTitle(data.exploreMoreTitle);
-          if (data.deliverySubtext) setDeliverySubtext(data.deliverySubtext);
-          if (data.faqs !== undefined && Array.isArray(data.faqs)) setFaqsList(data.faqs);
+      .then(async res => {
+        if (res.status === 451 || res.status === 403) {
+          const errData = await res.json().catch(() => ({}));
+          if (errData.isSuspended) {
+            setIsStoreSuspended(true);
+            setSuspendedStoreName(errData.storeName || "Online Store");
+            return null;
+          }
         }
+        return res.json();
+      })
+      .then(data => {
+        if (!data) return;
+        if (data.primaryColor) setPrimaryColor(data.primaryColor);
+        if (typeof document !== "undefined") document.documentElement.style.setProperty("--primary-brand-color", data.primaryColor);
+        if (data.showProductReviews !== undefined) setShowProductReviews(data.showProductReviews);
+        if (data.showProductExploreMore !== undefined) setShowProductExploreMore(data.showProductExploreMore);
+        if (data.showProductFaq !== undefined) setShowProductFaq(data.showProductFaq);
+        if (data.usageGuideText) setUsageGuideText(data.usageGuideText);
+        if (data.exploreMoreTitle) setExploreMoreTitle(data.exploreMoreTitle);
+        if (data.deliverySubtext) setDeliverySubtext(data.deliverySubtext);
+        if (data.faqs !== undefined && Array.isArray(data.faqs)) setFaqsList(data.faqs);
       })
       .catch(err => console.warn("Error setting dynamic colors:", err));
 
@@ -679,6 +692,10 @@ export default function ProductDetailPage() {
         </Link>
       </div>
     );
+  }
+
+  if (isStoreSuspended) {
+    return <PublicSuspendedStorefront storeName={suspendedStoreName} />;
   }
 
   return (
