@@ -4,14 +4,22 @@ export interface PlanItem {
   code: string;
   description: string;
   monthlyPrice: number;
-  yearlyPrice: number;
+  yearlyPrice?: number;
   trialDays: number;
-  transactionFeePercent: number;
+  transactionFeePercent?: number;
   limits: {
     maxProducts: number;
     maxOrders: number;
     maxStaff: number;
     maxStorageMB: number;
+  };
+  featureFlags?: {
+    customDomain?: boolean;
+    advancedAnalytics?: boolean;
+    aiTools?: boolean;
+    loyaltyProgram?: boolean;
+    multiCurrency?: boolean;
+    [key: string]: any;
   };
   featureList: string[];
   isVisible: boolean;

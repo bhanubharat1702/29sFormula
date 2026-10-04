@@ -128,8 +128,9 @@ const StoreSchema = new mongoose.Schema({
   // ── Plan & Subscription ──────────────────────────────────────
   plan: {
     type: String,
-    enum: ['starter', 'growth', 'pro', 'enterprise'],
-    default: 'starter'
+    default: 'starter',
+    trim: true,
+    lowercase: true
   },
   status: {
     type: String,
@@ -164,9 +165,9 @@ const StoreSchema = new mongoose.Schema({
 
   // ── Feature Flags Overrides ──────────────────────────────────
   featureFlags: {
-    customDomain: { type: Boolean, default: true },
-    advancedAnalytics: { type: Boolean, default: true },
-    aiTools: { type: Boolean, default: true },
+    customDomain: { type: Boolean, default: null },
+    advancedAnalytics: { type: Boolean, default: null },
+    aiTools: { type: Boolean, default: null },
     loyaltyProgram: { type: Boolean, default: false },
     multiCurrency: { type: Boolean, default: false },
     betaCheckout: { type: Boolean, default: false }
@@ -212,6 +213,8 @@ const StoreSchema = new mongoose.Schema({
     default: {}
   }
 }, { timestamps: true });
+
+StoreSchema.index({ "domains.domain": 1 }, { unique: true, sparse: true });
 
 const Store = mongoose.models.Store || mongoose.model('Store', StoreSchema);
 export default Store;

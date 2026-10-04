@@ -197,10 +197,6 @@ const CustomRefundSelect = ({
   onSelect: (newStatus: string) => void;
   maxWidth?: string;
 }) => {
-  if (currentRefundStatus === "Refunded") {
-    return null;
-  }
-
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = React.useRef<HTMLDivElement>(null);
 
@@ -213,6 +209,10 @@ const CustomRefundSelect = ({
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
+
+  if (currentRefundStatus === "Refunded") {
+    return null;
+  }
 
   const options = ["Not Refunded", "Refunded"];
 

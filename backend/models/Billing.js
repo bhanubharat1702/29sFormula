@@ -6,14 +6,19 @@ const PlanSchema = new mongoose.Schema({
   code: { type: String, required: true, unique: true, lowercase: true, trim: true }, // starter, growth, pro, enterprise
   description: { type: String, default: '' },
   monthlyPrice: { type: Number, required: true, min: 0 },
-  yearlyPrice: { type: Number, required: true, min: 0 },
   trialDays: { type: Number, default: 14 },
-  transactionFeePercent: { type: Number, default: 0 }, // e.g. 2.0%, 1.0%, 0.5% if gateway skipped
   limits: {
     maxProducts: { type: Number, default: 100 },
     maxOrders: { type: Number, default: 1000 },
     maxStaff: { type: Number, default: 2 },
     maxStorageMB: { type: Number, default: 500 }
+  },
+  featureFlags: {
+    customDomain: { type: Boolean, default: false },
+    advancedAnalytics: { type: Boolean, default: false },
+    aiTools: { type: Boolean, default: false },
+    loyaltyProgram: { type: Boolean, default: false },
+    multiCurrency: { type: Boolean, default: false }
   },
   featureList: [{ type: String }],
   isVisible: { type: Boolean, default: true },

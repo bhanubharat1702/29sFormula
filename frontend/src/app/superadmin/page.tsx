@@ -27,6 +27,7 @@ import EditStoreModal from "./components/modals/EditStoreModal";
 import { MerchantDetailsModal } from "./components/modals/MerchantDetailsModal";
 import InviteAdminModal from "./components/modals/InviteAdminModal";
 import ConfirmModal from "./components/modals/ConfirmModal";
+import DeleteStoreModal from "./components/modals/DeleteStoreModal";
 import ToastNotification from "./components/common/ToastNotification";
 import { isTokenExpired } from "./utils/auth";
 
@@ -114,6 +115,7 @@ export default function SuperAdminPage() {
   // Toast & Modal Feedback
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [confirmModal, setConfirmModal] = useState<ConfirmModalData | null>(null);
+  const [deleteStoreModalStore, setDeleteStoreModalStore] = useState<StoreItem | null>(null);
 
   // Extended Settings State
   const [platformName, setPlatformName] = useState("Multi-Tenant E-Commerce");
@@ -761,32 +763,33 @@ export default function SuperAdminPage() {
     });
   };
 
-  const handleDeleteStore = async (storeId: string, subdomain: string) => {
-    setConfirmModal({
-      isOpen: true,
-      title: "Delete Merchant Store",
-      message: `PERMANENT ACTION: Delete store "${subdomain}" and all associated products, orders, and configuration data?`,
-      actionLabel: "Delete Permanently",
-      isDanger: true,
-      onConfirm: async () => {
-        setConfirmModal(null);
-        const token = localStorage.getItem("superAdminToken");
-        try {
-          const res = await fetch(`http://localhost:5001/api/superadmin/stores/${storeId}`, {
-            method: "DELETE",
-            headers: { Authorization: `Bearer ${token}` },
-          });
-          if (res.ok) {
-            triggerToast(`Store ${subdomain} deleted.`);
-            fetchData();
-          } else {
-            alert("Failed to delete store.");
-          }
-        } catch {
-          alert("Network error deleting store.");
-        }
-      },
-    });
+  const handleDeleteStore = (store: StoreItem) => {
+    setDeleteStoreModalStore(store);
+  };
+
+  const executeDeleteStore = async (password: string) => {
+    if (!deleteStoreModalStore) return;
+    const token = localStorage.getItem("superAdminToken");
+    try {
+      const res = await fetch(`http://localhost:5001/api/superadmin/stores/${deleteStoreModalStore._id}`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify({ password }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        triggerToast(`Store ${deleteStoreModalStore.subdomain} deleted.`);
+        setDeleteStoreModalStore(null);
+        fetchData();
+      } else {
+        alert(data.error || "Failed to delete store.");
+      }
+    } catch {
+      alert("Network error deleting store.");
+    }
   };
 
   const handleProvisionFromDemo = (demo: DemoRequestItem) => {
@@ -1175,6 +1178,13 @@ export default function SuperAdminPage() {
       <ConfirmModal
         confirmModal={confirmModal}
         onClose={() => setConfirmModal(null)}
+      />
+
+      <DeleteStoreModal
+        store={deleteStoreModalStore}
+        isOpen={!!deleteStoreModalStore}
+        onClose={() => setDeleteStoreModalStore(null)}
+        onConfirm={executeDeleteStore}
       />
 
       <MerchantDetailsModal

@@ -89,12 +89,16 @@ const buildDnsInstructions = (domain, targetCname, targetA, verificationToken) =
     txtRecord: { host: `_platform-challenge.${domain}`, type: "TXT", value: verificationToken }
 });
 
+import { hasFeature } from "../utils/entitlement.js";
+
 // Compute the merchant's custom-domain entitlement snapshot.
-const buildEntitlement = (store, settings) => {
+const buildEntitlement = async (store, settings) => {
     const plan = (store.plan || "starter").toLowerCase();
-    const limit = getPlanDomainLimit(plan, settings);
+    const isEntitledByPlan = await hasFeature(store, "customDomain");
+    const configuredLimit = getPlanDomainLimit(plan, settings);
+    const limit = isEntitledByPlan ? Math.max(1, configuredLimit) : 0;
     const used = countCustomDomains(store);
-    const featureEnabled = store.featureFlags?.customDomain !== false;
+    const featureEnabled = isEntitledByPlan;
     const entitled = featureEnabled && limit > 0;
     return {
         plan,
@@ -141,7 +145,7 @@ export const listMerchantDomains = async (req, res) => {
             }, settings));
         }
 
-        const entitlement = buildEntitlement(store, settings);
+        const entitlement = await buildEntitlement(store, settings);
 
         // Auto-derive a sensible free subdomain from the merchant's brand/store name.
         const brandName = store.businessName || store.name || "";
@@ -294,7 +298,7 @@ export const addMerchantDomain = async (req, res) => {
         }
 
         // Plan entitlement gate — the actual "conditions controlled by super admin".
-        const entitlement = buildEntitlement(store, settings);
+        const entitlement = await buildEntitlement(store, settings);
         if (!entitlement.entitled) {
             return res.status(403).json({
                 error: entitlement.featureEnabled
@@ -357,17 +361,38 @@ export const addMerchantDomain = async (req, res) => {
             dnsFailureReason: "Awaiting CNAME/A record and TXT ownership token verification."
         };
 
-        if (!store.domains) store.domains = [];
-        store.domains.push(newDomain);
-        if (isFirstCustom) store.customDomain = cleanDomain;
+        // Re-check collision right before atomic update to prevent race conditions
+        const finalCheck = await Store.findOne({
+            _id: { $ne: store._id },
+            $or: [{ customDomain: cleanDomain }, { "domains.domain": cleanDomain }]
+        }).lean();
+        if (finalCheck) {
+            return res.status(409).json({ error: `Domain '${cleanDomain}' is already connected to another store.` });
+        }
 
-        store.auditTrail.push({
-            action: "Custom Domain Added",
-            performedBy: req.user?.email || "Merchant",
-            details: `Merchant added custom domain '${cleanDomain}'.`
-        });
+        const updatedStore = await Store.findOneAndUpdate(
+            {
+                _id: store._id,
+                "domains.domain": { $ne: cleanDomain }
+            },
+            {
+                $push: {
+                    domains: newDomain,
+                    auditTrail: {
+                        action: "Custom Domain Added",
+                        performedBy: req.user?.email || "Merchant",
+                        details: `Merchant added custom domain '${cleanDomain}'.`
+                    }
+                },
+                ...(isFirstCustom ? { customDomain: cleanDomain } : {})
+            },
+            { new: true }
+        );
 
-        await store.save();
+        if (!updatedStore) {
+            return res.status(409).json({ error: `Domain '${cleanDomain}' is already connected to your store.` });
+        }
+
         invalidateTenantCache(store._id);
 
         res.status(201).json({
@@ -377,6 +402,9 @@ export const addMerchantDomain = async (req, res) => {
             entitlement: buildEntitlement(store, settings)
         });
     } catch (err) {
+        if (err.code === 11000) {
+            return res.status(409).json({ error: "Domain is already connected to another store." });
+        }
         console.error("Add Merchant Domain Error:", err);
         res.status(500).json({ error: err.message || "Failed to add domain." });
     }

@@ -20,11 +20,8 @@ router.post("/api/upload", upload.single("file"), async (req, res) => {
       return res.status(400).json({ error: "No file uploaded" });
     }
 
-    if (!req.storeId) {
-      return res.status(400).json({ error: "Tenant context (storeId) is required for file uploads" });
-    }
-
-    const folder = `store-engine/tenant_${req.storeId}`;
+    const effectiveStoreId = req.storeId || "superadmin";
+    const folder = `store-engine/tenant_${effectiveStoreId}`;
 
     // Set up Cloudinary upload stream
     const uploadStream = cloudinary.uploader.upload_stream(
@@ -43,7 +40,7 @@ router.post("/api/upload", upload.single("file"), async (req, res) => {
           const asset = await Asset.create({
             url: result.secure_url || result.url,
             publicId: result.public_id,
-            storeId: req.storeId
+            storeId: req.storeId || null
           });
 
           return res.json({

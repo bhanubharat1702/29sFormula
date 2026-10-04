@@ -1,7 +1,8 @@
 "use client";
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import styles from "../../page.module.css";
+import { PlanItem } from "../billingTypes";
 
 interface EditStoreModalProps {
   isOpen: boolean;
@@ -62,7 +63,30 @@ export default function EditStoreModal({
   editInternalNotes,
   setEditInternalNotes,
 }: EditStoreModalProps) {
+  const [plans, setPlans] = useState<PlanItem[]>([]);
+
+  useEffect(() => {
+    if (isOpen) {
+      const token = typeof window !== "undefined" ? localStorage.getItem("superAdminToken") : "";
+      fetch("/api/superadmin/billing/plans", {
+        headers: { Authorization: `Bearer ${token}` }
+      })
+        .then((res) => (res.ok ? res.json() : []))
+        .then((data) => {
+          if (Array.isArray(data) && data.length > 0) {
+            setPlans(data);
+          }
+        })
+        .catch((err) => console.error("Error fetching plans for edit modal:", err));
+    }
+  }, [isOpen]);
+
   if (!isOpen) return null;
+
+  const currentPlanObj = plans.find((p) => p.code === editPlan);
+  const isCustomDomainAllowed = currentPlanObj
+    ? Boolean(currentPlanObj.featureFlags?.customDomain)
+    : editPlan !== "starter";
 
   return (
     <div className={styles.modalOverlay}>
@@ -125,36 +149,50 @@ export default function EditStoreModal({
               <select
                 value={editPlan}
                 onChange={(e) => {
-                  setEditPlan(e.target.value);
-                  if (e.target.value === "starter") setEditCustomDomain("");
+                  const val = e.target.value;
+                  setEditPlan(val);
+                  const foundPlan = plans.find((p) => p.code === val);
+                  if (foundPlan && !foundPlan.featureFlags?.customDomain) {
+                    setEditCustomDomain("");
+                  }
                 }}
                 className={styles.input}
               >
-                <option value="starter">Starter Plan</option>
-                <option value="pro">Pro Merchant Plan</option>
-                <option value="enterprise">Enterprise Plan</option>
+                {plans.map((p) => (
+                  <option key={p._id} value={p.code}>
+                    {p.name} (${p.monthlyPrice}/mo)
+                  </option>
+                ))}
+                {plans.length === 0 && (
+                  <>
+                    <option value="starter">Starter Plan</option>
+                    <option value="growth">Growth Plan</option>
+                    <option value="pro">Pro Merchant Plan</option>
+                    <option value="enterprise">Enterprise Plan</option>
+                  </>
+                )}
               </select>
             </div>
 
             <div className={styles.formGroup}>
-              <label className={styles.label} style={{ opacity: editPlan === "starter" ? 0.6 : 1 }}>
-                Custom CNAME Domain {editPlan === "starter" ? "(Pro/Enterprise Only)" : ""}
+              <label className={styles.label} style={{ opacity: !isCustomDomainAllowed ? 0.6 : 1 }}>
+                Custom CNAME Domain {!isCustomDomainAllowed ? "(Requires plan with Custom Domain)" : ""}
               </label>
               <input
                 type="text"
-                placeholder={editPlan === "starter" ? "Requires Pro or Enterprise plan" : "e.g. store.custombrand.com"}
-                value={editPlan === "starter" ? "" : editCustomDomain}
-                disabled={editPlan === "starter"}
+                placeholder={!isCustomDomainAllowed ? "Custom domain not enabled for this plan" : "e.g. store.custombrand.com"}
+                value={!isCustomDomainAllowed ? "" : editCustomDomain}
+                disabled={!isCustomDomainAllowed}
                 onChange={(e) => setEditCustomDomain(e.target.value)}
                 className={styles.input}
                 style={{
-                  backgroundColor: editPlan === "starter" ? "#f3f4f6" : "#ffffff",
-                  cursor: editPlan === "starter" ? "not-allowed" : "text"
+                  backgroundColor: !isCustomDomainAllowed ? "#f3f4f6" : "#ffffff",
+                  cursor: !isCustomDomainAllowed ? "not-allowed" : "text"
                 }}
               />
-              {editPlan === "starter" && (
+              {!isCustomDomainAllowed && (
                 <span style={{ fontSize: "0.72rem", color: "#6b7280", marginTop: "3px", display: "block" }}>
-                  🔒 Custom CNAME Domain is available on Pro or Enterprise plans only.
+                  🔒 Custom CNAME Domain is not enabled on this subscription plan tier.
                 </span>
               )}
             </div>

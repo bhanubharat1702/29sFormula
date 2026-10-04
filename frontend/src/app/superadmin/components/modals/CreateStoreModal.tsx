@@ -1,7 +1,8 @@
 "use client";
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import styles from "../../page.module.css";
+import { PlanItem } from "../billingTypes";
 
 interface CreateStoreModalProps {
   isOpen: boolean;
@@ -60,7 +61,53 @@ export default function CreateStoreModal({
   newPassword,
   setNewPassword,
 }: CreateStoreModalProps) {
+  const [plans, setPlans] = useState<PlanItem[]>([]);
+  const [uploadingLogo, setUploadingLogo] = useState(false);
+
+  const handleLogoFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploadingLogo(true);
+    const reader = new FileReader();
+    reader.onload = (evt) => {
+      const result = evt.target?.result as string;
+      if (result) {
+        setNewBusinessLogo(result);
+      }
+      setUploadingLogo(false);
+    };
+    reader.onerror = () => {
+      setUploadingLogo(false);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  useEffect(() => {
+    if (isOpen) {
+      const token = typeof window !== "undefined" ? localStorage.getItem("superAdminToken") : "";
+      fetch("/api/superadmin/billing/plans", {
+        headers: { Authorization: `Bearer ${token}` }
+      })
+        .then((res) => (res.ok ? res.json() : []))
+        .then((data) => {
+          if (Array.isArray(data) && data.length > 0) {
+            setPlans(data);
+            if (!newPlan || !data.some((p: PlanItem) => p.code === newPlan)) {
+              setNewPlan(data[0].code);
+            }
+          }
+        })
+        .catch((err) => console.error("Error fetching plans for modal:", err));
+    }
+  }, [isOpen]);
+
   if (!isOpen) return null;
+
+  const currentPlanObj = plans.find((p) => p.code === newPlan);
+  const isCustomDomainAllowed = currentPlanObj
+    ? Boolean(currentPlanObj.featureFlags?.customDomain)
+    : newPlan !== "starter";
 
   return (
     <div className={styles.modalOverlay}>
@@ -105,25 +152,63 @@ export default function CreateStoreModal({
 
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
             <div className={styles.formGroup}>
-              <label className={styles.label}>Merchant Logo URL (Optional)</label>
-              <input
-                type="text"
-                placeholder="e.g. https://cdn.example.com/logo.png"
-                value={newBusinessLogo}
-                onChange={(e) => setNewBusinessLogo(e.target.value)}
-                className={styles.input}
-              />
-              {newBusinessLogo && (
-                <div style={{ marginTop: "4px", display: "flex", alignItems: "center", gap: "8px" }}>
-                  <img
-                    src={newBusinessLogo}
-                    alt="Logo Preview"
-                    style={{ width: "24px", height: "24px", borderRadius: "4px", objectFit: "cover", border: "1px solid #e5e7eb" }}
-                    onError={(e) => (e.currentTarget.style.display = "none")}
-                  />
-                  <span style={{ fontSize: "0.72rem", color: "#6b7280" }}>Logo Preview</span>
+              <label className={styles.label}>Merchant Logo (Optional)</label>
+              <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+                <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
+                  <label
+                    style={{
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: "6px",
+                      padding: "5px 10px",
+                      borderRadius: "6px",
+                      border: "1px solid #d1d5db",
+                      background: "#f9fafb",
+                      fontSize: "0.78rem",
+                      fontWeight: 600,
+                      color: "#374151",
+                      cursor: "pointer"
+                    }}
+                  >
+                    📁 Upload from Device
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleLogoFileSelect}
+                      style={{ display: "none" }}
+                    />
+                  </label>
+                  <span style={{ fontSize: "0.72rem", color: "#6b7280" }}>or paste image URL</span>
                 </div>
-              )}
+
+                <input
+                  type="text"
+                  placeholder="https://cdn.example.com/logo.png"
+                  value={newBusinessLogo}
+                  onChange={(e) => setNewBusinessLogo(e.target.value)}
+                  className={styles.input}
+                />
+
+                {uploadingLogo && <span style={{ fontSize: "0.72rem", color: "#2563eb" }}>Uploading image...</span>}
+
+                {newBusinessLogo && (
+                  <div style={{ marginTop: "4px", display: "flex", alignItems: "center", gap: "8px" }}>
+                    <img
+                      src={newBusinessLogo}
+                      alt="Logo Preview"
+                      style={{ height: "28px", maxWidth: "100px", borderRadius: "4px", objectFit: "contain", border: "1px solid #e5e7eb", background: "#f9fafb" }}
+                      onError={(e) => (e.currentTarget.style.display = "none")}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setNewBusinessLogo("")}
+                      style={{ border: "none", background: "transparent", color: "#ef4444", fontSize: "0.72rem", cursor: "pointer", textDecoration: "underline" }}
+                    >
+                      Clear Logo
+                    </button>
+                  </div>
+                )}
+              </div>
             </div>
 
             <div className={styles.formGroup}>
@@ -150,36 +235,50 @@ export default function CreateStoreModal({
               <select
                 value={newPlan}
                 onChange={(e) => {
-                  setNewPlan(e.target.value);
-                  if (e.target.value === "starter") setNewCustomDomain("");
+                  const val = e.target.value;
+                  setNewPlan(val);
+                  const foundPlan = plans.find((p) => p.code === val);
+                  if (foundPlan && !foundPlan.featureFlags?.customDomain) {
+                    setNewCustomDomain("");
+                  }
                 }}
                 className={styles.input}
               >
-                <option value="starter">Starter Plan (₹999/mo)</option>
-                <option value="pro">Pro Merchant Plan (₹2,499/mo)</option>
-                <option value="enterprise">Enterprise Plan</option>
+                {plans.map((p) => (
+                  <option key={p._id} value={p.code}>
+                    {p.name} (${p.monthlyPrice}/mo)
+                  </option>
+                ))}
+                {plans.length === 0 && (
+                  <>
+                    <option value="starter">Starter Plan ($29/mo)</option>
+                    <option value="growth">Growth Plan ($49/mo)</option>
+                    <option value="pro">Pro Plan ($79/mo)</option>
+                    <option value="enterprise">Enterprise Plan ($299/mo)</option>
+                  </>
+                )}
               </select>
             </div>
 
             <div className={styles.formGroup}>
-              <label className={styles.label} style={{ opacity: newPlan === "starter" ? 0.6 : 1 }}>
-                Custom CNAME Domain {newPlan === "starter" ? "(Pro/Enterprise Only)" : "(Optional)"}
+              <label className={styles.label} style={{ opacity: !isCustomDomainAllowed ? 0.6 : 1 }}>
+                Custom CNAME Domain {!isCustomDomainAllowed ? "(Requires plan with Custom Domain)" : "(Optional)"}
               </label>
               <input
                 type="text"
-                placeholder={newPlan === "starter" ? "Requires Pro or Enterprise plan" : "e.g. store.acmefashion.com"}
-                value={newPlan === "starter" ? "" : newCustomDomain}
-                disabled={newPlan === "starter"}
+                placeholder={!isCustomDomainAllowed ? "Custom domain not enabled for this plan" : "e.g. store.acmefashion.com"}
+                value={!isCustomDomainAllowed ? "" : newCustomDomain}
+                disabled={!isCustomDomainAllowed}
                 onChange={(e) => setNewCustomDomain(e.target.value)}
                 className={styles.input}
                 style={{
-                  backgroundColor: newPlan === "starter" ? "#f3f4f6" : "#ffffff",
-                  cursor: newPlan === "starter" ? "not-allowed" : "text"
+                  backgroundColor: !isCustomDomainAllowed ? "#f3f4f6" : "#ffffff",
+                  cursor: !isCustomDomainAllowed ? "not-allowed" : "text"
                 }}
               />
-              {newPlan === "starter" && (
+              {!isCustomDomainAllowed && (
                 <span style={{ fontSize: "0.72rem", color: "#6b7280", marginTop: "3px", display: "block" }}>
-                  🔒 Custom CNAME Domain is available on Pro or Enterprise plans only.
+                  🔒 Custom CNAME Domain is not enabled on this subscription plan tier.
                 </span>
               )}
             </div>

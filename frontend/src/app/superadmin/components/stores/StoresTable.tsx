@@ -8,7 +8,7 @@ interface StoresTableProps {
   filteredStores: StoreItem[];
   onOpenEditModal: (store: StoreItem) => void;
   onToggleStatus: (store: StoreItem) => void;
-  onDeleteStore: (storeId: string, subdomain: string) => void;
+  onDeleteStore: (store: StoreItem) => void;
   onSelectStore?: (store: StoreItem) => void;
   currentPage?: number;
   totalPages?: number;
@@ -168,7 +168,7 @@ export const StoresTable: React.FC<StoresTableProps> = ({
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
-                          onDeleteStore(store._id, store.subdomain);
+                          onDeleteStore(store);
                         }}
                         className={`${styles.btnAction} ${styles.btnActionDanger}`}
                       >

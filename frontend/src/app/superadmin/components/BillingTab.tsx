@@ -20,6 +20,7 @@ import BillingPayments from "./billing/BillingPayments";
 import BillingCoupons from "./billing/BillingCoupons";
 import BillingTaxCurrency from "./billing/BillingTaxCurrency";
 import { PlanModal, ManageSubModal, CouponModal } from "./billing/BillingModals";
+import DeletePlanModal from "./modals/DeletePlanModal";
 
 interface BillingTabProps {
   token: string;
@@ -45,19 +46,19 @@ export default function BillingTab({ token, onShowToast, onUnauthorized }: Billi
   const [isCreatePlanModalOpen, setIsCreatePlanModalOpen] = useState(false);
   const [isEditPlanModalOpen, setIsEditPlanModalOpen] = useState(false);
   const [editingPlan, setEditingPlan] = useState<PlanItem | null>(null);
+  const [deletingPlanModalPlan, setDeletingPlanModalPlan] = useState<PlanItem | null>(null);
 
   const [planForm, setPlanForm] = useState({
     name: "",
     code: "",
     description: "",
     monthlyPrice: 49,
-    yearlyPrice: 490,
     trialDays: 14,
-    transactionFeePercent: 1.5,
     maxProducts: 500,
     maxOrders: 5000,
     maxStaff: 5,
     maxStorageMB: 2000,
+    customDomain: true,
     featureListStr: "Custom Domain, Cart Recovery, 24/7 Support",
     isVisible: true,
     isPopular: false
@@ -176,17 +177,17 @@ export default function BillingTab({ token, onShowToast, onUnauthorized }: Billi
     try {
       const payload = {
         name: planForm.name,
-        code: planForm.code,
         description: planForm.description,
         monthlyPrice: Number(planForm.monthlyPrice),
-        yearlyPrice: Number(planForm.yearlyPrice),
         trialDays: Number(planForm.trialDays),
-        transactionFeePercent: Number(planForm.transactionFeePercent),
         limits: {
           maxProducts: Number(planForm.maxProducts),
           maxOrders: Number(planForm.maxOrders),
           maxStaff: Number(planForm.maxStaff),
           maxStorageMB: Number(planForm.maxStorageMB)
+        },
+        featureFlags: {
+          customDomain: Boolean(planForm.customDomain)
         },
         featureList: planForm.featureListStr.split(",").map((s) => s.trim()).filter(Boolean),
         isVisible: planForm.isVisible,
@@ -209,20 +210,19 @@ export default function BillingTab({ token, onShowToast, onUnauthorized }: Billi
     }
   };
 
-  const handleEditPlanOpen = (p: PlanItem) => {
+  const handleEditPlanOpen = (p: any) => {
     setEditingPlan(p);
     setPlanForm({
       name: p.name,
       code: p.code,
       description: p.description || "",
       monthlyPrice: p.monthlyPrice,
-      yearlyPrice: p.yearlyPrice,
       trialDays: p.trialDays,
-      transactionFeePercent: p.transactionFeePercent || 0,
       maxProducts: p.limits?.maxProducts || 500,
       maxOrders: p.limits?.maxOrders || 5000,
       maxStaff: p.limits?.maxStaff || 5,
       maxStorageMB: p.limits?.maxStorageMB || 2000,
+      customDomain: p.featureFlags?.customDomain !== undefined ? Boolean(p.featureFlags.customDomain) : (p.code !== "starter"),
       featureListStr: (p.featureList || []).join(", "),
       isVisible: p.isVisible,
       isPopular: !!p.isPopular
@@ -238,14 +238,15 @@ export default function BillingTab({ token, onShowToast, onUnauthorized }: Billi
         name: planForm.name,
         description: planForm.description,
         monthlyPrice: Number(planForm.monthlyPrice),
-        yearlyPrice: Number(planForm.yearlyPrice),
         trialDays: Number(planForm.trialDays),
-        transactionFeePercent: Number(planForm.transactionFeePercent),
         limits: {
           maxProducts: Number(planForm.maxProducts),
           maxOrders: Number(planForm.maxOrders),
           maxStaff: Number(planForm.maxStaff),
           maxStorageMB: Number(planForm.maxStorageMB)
+        },
+        featureFlags: {
+          customDomain: Boolean(planForm.customDomain)
         },
         featureList: planForm.featureListStr.split(",").map((s) => s.trim()).filter(Boolean),
         isVisible: planForm.isVisible,
@@ -262,6 +263,30 @@ export default function BillingTab({ token, onShowToast, onUnauthorized }: Billi
 
       onShowToast(`Plan "${payload.name}" updated! (Existing subscribers remain grandfathered).`);
       setIsEditPlanModalOpen(false);
+      fetchPlans();
+    } catch (err: any) {
+      alert(err.message);
+    }
+  };
+
+  const handleDeletePlanOpen = (plan: PlanItem) => {
+    setDeletingPlanModalPlan(plan);
+  };
+
+  const handleConfirmDeletePlan = async (password: string) => {
+    if (!deletingPlanModalPlan) return;
+
+    try {
+      const res = await fetch(`/api/superadmin/billing/plans/${deletingPlanModalPlan._id}`, {
+        method: "DELETE",
+        headers: getAuthHeaders(),
+        body: JSON.stringify({ password })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Failed to delete plan");
+
+      onShowToast(`Plan "${deletingPlanModalPlan.name}" deleted successfully.`);
+      setDeletingPlanModalPlan(null);
       fetchPlans();
     } catch (err: any) {
       alert(err.message);
@@ -434,13 +459,12 @@ export default function BillingTab({ token, onShowToast, onUnauthorized }: Billi
               code: "",
               description: "",
               monthlyPrice: 49,
-              yearlyPrice: 490,
               trialDays: 14,
-              transactionFeePercent: 1.5,
               maxProducts: 500,
               maxOrders: 5000,
               maxStaff: 5,
               maxStorageMB: 2000,
+              customDomain: true,
               featureListStr: "Custom Domain, Cart Recovery, 24/7 Support",
               isVisible: true,
               isPopular: false
@@ -448,6 +472,7 @@ export default function BillingTab({ token, onShowToast, onUnauthorized }: Billi
             setIsCreatePlanModalOpen(true);
           }}
           onOpenEdit={handleEditPlanOpen}
+          onDeletePlan={handleDeletePlanOpen}
         />
       )}
 
@@ -511,6 +536,13 @@ export default function BillingTab({ token, onShowToast, onUnauthorized }: Billi
         setCouponForm={setCouponForm}
         onClose={() => setIsCouponModalOpen(false)}
         onSubmit={handleCreateCoupon}
+      />
+
+      <DeletePlanModal
+        plan={deletingPlanModalPlan}
+        isOpen={!!deletingPlanModalPlan}
+        onClose={() => setDeletingPlanModalPlan(null)}
+        onConfirm={handleConfirmDeletePlan}
       />
     </div>
   );

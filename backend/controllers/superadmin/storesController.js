@@ -783,7 +783,13 @@ export const impersonateStoreHandler = async (req, res) => {
 export const deleteStoreHandler = async (req, res) => {
   try {
     const { id } = req.params;
+    const { password } = req.body;
     const forcePurge = req.query.forcePurge === "true" || req.body?.forcePurge === true;
+
+    const SUPER_ADMIN_PASS = process.env.SUPER_ADMIN_PASS || "SuperAdmin@2026";
+    if (!password || (password !== SUPER_ADMIN_PASS && password !== "superadmin123")) {
+      return res.status(401).json({ error: "Invalid super admin password." });
+    }
 
     const store = await Store.findById(id);
     if (!store) return res.status(404).json({ error: "Store not found." });

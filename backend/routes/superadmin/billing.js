@@ -5,6 +5,7 @@ import {
   getPlans,
   createPlan,
   updatePlan,
+  deletePlan,
   getSubscriptions,
   handleSubscriptionAction,
   getInvoices,
@@ -27,6 +28,7 @@ router.get("/api/superadmin/billing/overview", verifySuperAdminToken, getBilling
 router.get("/api/superadmin/billing/plans", verifySuperAdminToken, getPlans);
 router.post("/api/superadmin/billing/plans", verifySuperAdminToken, createPlan);
 router.put("/api/superadmin/billing/plans/:id", verifySuperAdminToken, updatePlan);
+router.delete("/api/superadmin/billing/plans/:id", verifySuperAdminToken, deletePlan);
 
 router.get("/api/superadmin/billing/subscriptions", verifySuperAdminToken, getSubscriptions);
 router.put("/api/superadmin/billing/subscriptions/:id/action", verifySuperAdminToken, handleSubscriptionAction);

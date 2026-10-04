@@ -2,6 +2,8 @@ import React, { useState, useRef } from 'react';
 import { COUNTRIES, BUSINESS_CATEGORIES, CURRENCIES, TIMEZONES } from '../../../constants/storeOptions';
 import styles from '../../../page.module.css';
 import { getAuthHeaders } from '../../../hooks/useDashboardData';
+import DomainIssueModal, { DomainIssueModalConfig } from '../../modals/DomainIssueModal';
+
 
 export interface ChangedField {
   field: string;
@@ -671,6 +673,7 @@ export function DomainSubTab() {
   const [subdomainCheck, setSubdomainCheck] = useState<any>(null);
   const [checkingSubdomain, setCheckingSubdomain] = useState(false);
   const [savingSubdomain, setSavingSubdomain] = useState(false);
+  const [modalConfig, setModalConfig] = useState<DomainIssueModalConfig | null>(null);
 
   const loadDomains = async () => {
     setLoading(true);
@@ -702,9 +705,68 @@ export function DomainSubTab() {
     txtRecord: { host: `_platform-challenge.${d.domain}`, type: 'TXT', value: d.verificationToken || '(generated on add)' }
   });
 
+  const triggerDomainIssueModal = (errMessage: string, domainName?: string, targetDomainItem?: DomainItem) => {
+    const msg = (errMessage || '').toLowerCase();
+
+    if (msg.includes('plan') || msg.includes('upgrade') || msg.includes('limit reached')) {
+      setModalConfig({
+        type: 'plan_upgrade',
+        domain: domainName,
+        errorMessage: errMessage,
+        onUpgrade: () => {
+          setNotice({ type: 'success', text: 'Please contact support or super admin to upgrade your store plan.' });
+        }
+      });
+    } else if (msg.includes('reserved') || msg.includes('platform') || msg.includes('system keyword')) {
+      setModalConfig({
+        type: 'reserved_domain',
+        domain: domainName,
+        errorMessage: errMessage
+      });
+    } else if (msg.includes('already connected') || msg.includes('already assigned') || msg.includes('already registered')) {
+      setModalConfig({
+        type: 'domain_conflict',
+        domain: domainName,
+        errorMessage: errMessage,
+        onRecheck: domainName ? () => handleRecheck(domainName) : undefined
+      });
+    } else if (msg.includes('blocked') || msg.includes('restricted')) {
+      setModalConfig({
+        type: 'domain_blocked',
+        domain: domainName,
+        errorMessage: errMessage
+      });
+    } else if (msg.includes('valid domain') || msg.includes('format') || msg.includes('invalid') || msg.includes('remove http')) {
+      setModalConfig({
+        type: 'invalid_format',
+        domain: domainName,
+        errorMessage: errMessage
+      });
+    } else {
+      setModalConfig({
+        type: 'dns_failed',
+        domain: domainName,
+        errorMessage: errMessage,
+        dnsDetails: targetDomainItem ? {
+          cnameHost: targetDomainItem.domain,
+          cnameValue: targetDomainItem.targetCname,
+          txtHost: `_platform-challenge.${targetDomainItem.domain}`,
+          txtValue: targetDomainItem.verificationToken
+        } : undefined,
+        onRecheck: domainName ? () => handleRecheck(domainName) : undefined
+      });
+    }
+  };
+
   const handleAddDomain = async () => {
     const domain = newDomain.trim();
     if (!domain) return;
+
+    if (domain.includes('http://') || domain.includes('https://') || domain.includes('/') || domain.includes(' ')) {
+      triggerDomainIssueModal('Please remove http://, https://, spaces, or slashes from your domain name.', domain);
+      return;
+    }
+
     setAddPending(true);
     setNotice(null);
     try {
@@ -714,13 +776,16 @@ export function DomainSubTab() {
         body: JSON.stringify({ domain })
       });
       const data = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(data.error || 'Failed to add domain.');
+      if (!res.ok) {
+        triggerDomainIssueModal(data.error || 'Failed to add domain.', domain);
+        return;
+      }
       setNewDomain('');
       setDnsInstructions(data.dnsInstructions || null);
       setNotice({ type: 'success', text: data.message || 'Domain added. Configure DNS to verify.' });
       await loadDomains();
     } catch (err: any) {
-      setNotice({ type: 'error', text: err.message });
+      triggerDomainIssueModal(err.message || 'Failed to add domain.', domain);
     } finally {
       setAddPending(false);
     }
@@ -729,6 +794,7 @@ export function DomainSubTab() {
   const handleRecheck = async (domain: string) => {
     setRechecking(domain);
     setNotice(null);
+    const target = customDomains.find(d => d.domain === domain);
     try {
       const res = await fetch(`${API_BASE}/api/merchant/domains/recheck`, {
         method: 'POST',
@@ -736,12 +802,28 @@ export function DomainSubTab() {
         body: JSON.stringify({ domain })
       });
       const data = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(data.error || 'Failed to recheck domain.');
-      setNotice({ type: (data.verified || data.awaitingApproval) ? 'success' : 'error', text: data.message });
+      if (!res.ok || (!data.verified && !data.awaitingApproval)) {
+        const localDns = target ? {
+          cnameHost: target.domain,
+          cnameValue: target.targetCname,
+          txtHost: `_platform-challenge.${target.domain}`,
+          txtValue: target.verificationToken
+        } : undefined;
+
+        setModalConfig({
+          type: 'dns_failed',
+          domain,
+          errorMessage: data.message || data.error || 'DNS records not detected yet.',
+          dnsDetails: localDns,
+          onRecheck: () => handleRecheck(domain)
+        });
+      } else {
+        setNotice({ type: 'success', text: data.message });
+      }
       if (data.dnsInstructions) setDnsInstructions(data.dnsInstructions);
       await loadDomains();
     } catch (err: any) {
-      setNotice({ type: 'error', text: err.message });
+      triggerDomainIssueModal(err.message || 'Failed to recheck domain.', domain, target);
     } finally {
       setRechecking(null);
     }
@@ -756,16 +838,18 @@ export function DomainSubTab() {
         body: JSON.stringify({ domain })
       });
       const data = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(data.error || 'Failed to set primary domain.');
+      if (!res.ok) {
+        triggerDomainIssueModal(data.error || 'Failed to set primary domain.', domain);
+        return;
+      }
       setNotice({ type: 'success', text: data.message });
       await loadDomains();
     } catch (err: any) {
-      setNotice({ type: 'error', text: err.message });
+      triggerDomainIssueModal(err.message || 'Failed to set primary domain.', domain);
     }
   };
 
-  const handleRemove = async (domain: string) => {
-    if (typeof window !== 'undefined' && !window.confirm(`Disconnect custom domain "${domain}"? Your store will fall back to the platform subdomain.`)) return;
+  const performRemove = async (domain: string) => {
     setNotice(null);
     try {
       const res = await fetch(`${API_BASE}/api/merchant/domains`, {
@@ -774,13 +858,24 @@ export function DomainSubTab() {
         body: JSON.stringify({ domain })
       });
       const data = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(data.error || 'Failed to remove domain.');
+      if (!res.ok) {
+        triggerDomainIssueModal(data.error || 'Failed to remove domain.', domain);
+        return;
+      }
       setDnsInstructions(null);
       setNotice({ type: 'success', text: data.message });
       await loadDomains();
     } catch (err: any) {
-      setNotice({ type: 'error', text: err.message });
+      triggerDomainIssueModal(err.message || 'Failed to remove domain.', domain);
     }
+  };
+
+  const handleRemove = (domain: string) => {
+    setModalConfig({
+      type: 'remove_confirm',
+      domain,
+      onConfirm: () => performRemove(domain)
+    });
   };
 
   const handleCheckSubdomain = async () => {
@@ -799,9 +894,7 @@ export function DomainSubTab() {
     }
   };
 
-  const handleSaveSubdomain = async () => {
-    const label = subdomainDraft.trim();
-    if (!label) return;
+  const performSaveSubdomain = async (label: string) => {
     setSavingSubdomain(true);
     setNotice(null);
     try {
@@ -811,16 +904,29 @@ export function DomainSubTab() {
         body: JSON.stringify({ subdomain: label })
       });
       const data = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(data.error || 'Failed to update subdomain.');
+      if (!res.ok) {
+        triggerDomainIssueModal(data.error || 'Failed to update subdomain.', undefined);
+        return;
+      }
       setNotice({ type: 'success', text: data.message });
       setEditingSubdomain(false);
       setSubdomainCheck(null);
       await loadDomains();
     } catch (err: any) {
-      setNotice({ type: 'error', text: err.message });
+      triggerDomainIssueModal(err.message || 'Failed to update subdomain.', undefined);
     } finally {
       setSavingSubdomain(false);
     }
+  };
+
+  const handleSaveSubdomain = () => {
+    const label = subdomainDraft.trim();
+    if (!label) return;
+    setModalConfig({
+      type: 'subdomain_change_confirm',
+      subdomain: label,
+      onConfirm: () => performSaveSubdomain(label)
+    });
   };
 
   const platformDomain = settings?.platformOwnDomain || '29sformula.com';
@@ -833,6 +939,8 @@ export function DomainSubTab() {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+      <DomainIssueModal config={modalConfig} onClose={() => setModalConfig(null)} />
+
       {notice && (
         <div style={{
           padding: '10px 14px', borderRadius: '8px', fontSize: '0.82rem',
@@ -925,7 +1033,7 @@ export function DomainSubTab() {
                   Your {planLabel(entitlement.plan)} plan does not include a custom brand domain. Upgrade to the {planLabel(entitlement.minPlanWithCustomDomain)} plan to connect your own domain.
                 </span>
                 <button
-                  onClick={() => setNotice({ type: 'success', text: 'Redirecting to plan upgrades… Please contact support to upgrade your plan.' })}
+                  onClick={() => setModalConfig({ type: 'plan_upgrade', errorMessage: `Your ${planLabel(entitlement.plan)} plan does not include custom brand domains. Upgrade to ${planLabel(entitlement.minPlanWithCustomDomain)} or higher.` })}
                   style={{ ...primaryBtn, alignSelf: 'flex-start' }}
                 >
                   Upgrade Plan

@@ -57,30 +57,17 @@ export function PlanModal({
         </h3>
 
         <form onSubmit={onSubmit}>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px", marginBottom: "12px" }}>
-            <div>
-              <label style={{ fontSize: "0.8rem", fontWeight: 600 }}>Plan Name</label>
-              <input
-                type="text"
-                required
-                className={styles.sidebarSearchInput}
-                style={{ width: "100%", marginTop: "4px" }}
-                value={planForm.name}
-                onChange={(e) => setPlanForm({ ...planForm, name: e.target.value })}
-              />
-            </div>
-            <div>
-              <label style={{ fontSize: "0.8rem", fontWeight: 600 }}>Plan Code</label>
-              <input
-                type="text"
-                required
-                disabled={isEdit}
-                className={styles.sidebarSearchInput}
-                style={{ width: "100%", marginTop: "4px" }}
-                value={planForm.code}
-                onChange={(e) => setPlanForm({ ...planForm, code: e.target.value })}
-              />
-            </div>
+          <div style={{ marginBottom: "12px" }}>
+            <label style={{ fontSize: "0.8rem", fontWeight: 600 }}>Plan Name</label>
+            <input
+              type="text"
+              required
+              className={styles.sidebarSearchInput}
+              style={{ width: "100%", marginTop: "4px" }}
+              value={planForm.name}
+              onChange={(e) => setPlanForm({ ...planForm, name: e.target.value })}
+              placeholder="e.g. Starter, Growth, Pro, Enterprise"
+            />
           </div>
 
           <div style={{ marginBottom: "12px" }}>
@@ -94,44 +81,40 @@ export function PlanModal({
             />
           </div>
 
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "12px", marginBottom: "12px" }}>
-            <div>
-              <label style={{ fontSize: "0.8rem", fontWeight: 600 }}>Monthly ($)</label>
-              <input
-                type="number"
-                required
-                className={styles.sidebarSearchInput}
-                style={{ width: "100%", marginTop: "4px" }}
-                value={planForm.monthlyPrice}
-                onChange={(e) => setPlanForm({ ...planForm, monthlyPrice: Number(e.target.value) })}
-              />
-            </div>
-            <div>
-              <label style={{ fontSize: "0.8rem", fontWeight: 600 }}>Yearly ($)</label>
-              <input
-                type="number"
-                required
-                className={styles.sidebarSearchInput}
-                style={{ width: "100%", marginTop: "4px" }}
-                value={planForm.yearlyPrice}
-                onChange={(e) => setPlanForm({ ...planForm, yearlyPrice: Number(e.target.value) })}
-              />
-            </div>
-            <div>
-              <label style={{ fontSize: "0.8rem", fontWeight: 600 }}>Platform Fee (%)</label>
-              <input
-                type="number"
-                step="0.1"
-                className={styles.sidebarSearchInput}
-                style={{ width: "100%", marginTop: "4px" }}
-                value={planForm.transactionFeePercent}
-                onChange={(e) => setPlanForm({ ...planForm, transactionFeePercent: Number(e.target.value) })}
-              />
+          <div style={{ marginBottom: "12px" }}>
+            <label style={{ fontSize: "0.8rem", fontWeight: 600 }}>Monthly Price ($)</label>
+            <input
+              type="number"
+              required
+              className={styles.sidebarSearchInput}
+              style={{ width: "100%", marginTop: "4px" }}
+              value={planForm.monthlyPrice}
+              onChange={(e) => setPlanForm({ ...planForm, monthlyPrice: Number(e.target.value) })}
+            />
+          </div>
+
+          <div style={{ marginBottom: "14px", padding: "12px", border: "1px solid #e5e7eb", borderRadius: "8px", backgroundColor: "#f9fafb" }}>
+            <label style={{ fontSize: "0.82rem", fontWeight: 700, display: "block", marginBottom: "8px", color: "#111827" }}>
+              Plan Features & Entitlements
+            </label>
+            <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+              <label style={{ display: "flex", alignItems: "center", gap: "8px", fontSize: "0.84rem", cursor: "pointer", fontWeight: 600, color: "#0c0a09" }}>
+                <input
+                  type="checkbox"
+                  checked={Boolean(planForm.customDomain)}
+                  onChange={(e) => setPlanForm({ ...planForm, customDomain: e.target.checked })}
+                  style={{ width: "16px", height: "16px", accentColor: "#0c0a09" }}
+                />
+                Custom Domain Access: {planForm.customDomain ? "ON (Enabled)" : "OFF (Disabled)"}
+              </label>
+              <span style={{ fontSize: "0.76rem", color: "#6b7280", marginLeft: "24px" }}>
+                Allows merchants on this plan to connect custom domain names (e.g. www.merchantbrand.com).
+              </span>
             </div>
           </div>
 
           <div style={{ marginBottom: "12px" }}>
-            <label style={{ fontSize: "0.8rem", fontWeight: 600 }}>Features List (Comma Separated)</label>
+            <label style={{ fontSize: "0.8rem", fontWeight: 600 }}>Features List (Comma Separated Display Tags)</label>
             <input
               type="text"
               className={styles.sidebarSearchInput}

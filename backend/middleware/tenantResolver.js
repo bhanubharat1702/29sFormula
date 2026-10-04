@@ -50,71 +50,77 @@ const extractCandidateHosts = (req) => {
 
 export const tenantResolver = async (req, res, next) => {
   try {
-    let storeId = req.headers["x-tenant-id"] || req.headers["x-store-id"] || req.body?.storeId || req.query?.storeId;
     let store = null;
+    const candidateHosts = extractCandidateHosts(req);
 
-    // Check authorization header if storeId not provided in custom header
-    if (!storeId && (req.headers.authorization || req.headers.Authorization)) {
-      const authHeader = req.headers.authorization || req.headers.Authorization;
-      if (authHeader && authHeader.startsWith("Bearer ")) {
-        const token = authHeader.split(" ")[1];
-        try {
-          const decoded = jwt.decode(token);
-          if (decoded && decoded.storeId) {
-            storeId = decoded.storeId;
-          }
-        } catch (e) { }
+    // 1. Resolve tenant primarily from Host / Origin / Referer domain headers (e.g. tenant.29sformula.com or store-a.com)
+    for (const hostStr of candidateHosts) {
+      const cleanHost = hostStr.split(":")[0].toLowerCase();
+
+      // Skip generic localhost/ip without subdomain or x-store-domain
+      if (!cleanHost || cleanHost === "localhost" || cleanHost === "127.0.0.1") {
+        continue;
       }
-    }
 
-    // 1. Direct storeId from headers or token
-    if (storeId) {
-      if (domainStoreCache.has(String(storeId))) {
-        store = domainStoreCache.get(String(storeId));
-      } else {
-        store = await Store.findById(storeId).lean();
-        if (store) domainStoreCache.set(String(storeId), store);
+      if (domainStoreCache.has(cleanHost)) {
+        store = domainStoreCache.get(cleanHost);
+        break;
       }
-    }
 
-    // 2. Resolve from Origin / Referer / Host headers (e.g. demo.localhost:3000)
-    if (!store) {
-      const candidateHosts = extractCandidateHosts(req);
+      const subdomainPart = cleanHost.split(".")[0];
+      const hostNoWww = cleanHost.startsWith("www.") ? cleanHost.slice(4) : cleanHost;
+      const hostWithWww = cleanHost.startsWith("www.") ? cleanHost : `www.${cleanHost}`;
 
-      for (const hostStr of candidateHosts) {
-        const cleanHost = hostStr.split(":")[0].toLowerCase();
+      // First Priority: Exact custom domain / domain item match
+      store = await Store.findOne({
+        $or: [
+          { customDomain: cleanHost },
+          { customDomain: hostNoWww },
+          { customDomain: hostWithWww },
+          { "domains.domain": cleanHost },
+          { "domains.domain": hostNoWww },
+          { "domains.domain": hostWithWww }
+        ],
+        isActive: true
+      }).lean();
 
-        // Skip generic localhost/ip without subdomain
-        if (!cleanHost || cleanHost === "localhost" || cleanHost === "127.0.0.1") {
-          continue;
-        }
-
-        if (domainStoreCache.has(cleanHost)) {
-          store = domainStoreCache.get(cleanHost);
-          break;
-        }
-
-        // Subdomain is first part before dot (e.g. "demo" from "demo.localhost")
-        const subdomainPart = cleanHost.split(".")[0];
-
-        // Custom domains are stored as the canonical apex host (e.g. "brand.com"),
-        // while merchants frequently serve them from the "www." host. Match both.
-        const hostNoWww = cleanHost.startsWith("www.") ? cleanHost.slice(4) : cleanHost;
-
+      // Second Priority: Subdomain slug match
+      if (!store) {
         store = await Store.findOne({
-          $or: [
-            { customDomain: cleanHost },
-            { customDomain: hostNoWww },
-            { "domains.domain": cleanHost },
-            { "domains.domain": hostNoWww },
-            { subdomain: subdomainPart }
-          ],
+          subdomain: subdomainPart,
           isActive: true
         }).lean();
+      }
 
-        if (store) {
-          domainStoreCache.set(cleanHost, store);
-          break;
+      if (store) {
+        domainStoreCache.set(cleanHost, store);
+        break;
+      }
+    }
+
+    // 2. Fallback to token storeId or explicitly authenticated context if domain was generic
+    if (!store) {
+      let storeId = req.headers["x-tenant-id"] || req.headers["x-store-id"] || req.body?.storeId || req.query?.storeId;
+
+      if (!storeId && (req.headers.authorization || req.headers.Authorization)) {
+        const authHeader = req.headers.authorization || req.headers.Authorization;
+        if (authHeader && authHeader.startsWith("Bearer ")) {
+          const token = authHeader.split(" ")[1];
+          try {
+            const decoded = jwt.decode(token);
+            if (decoded && decoded.storeId) {
+              storeId = decoded.storeId;
+            }
+          } catch (e) { }
+        }
+      }
+
+      if (storeId) {
+        if (domainStoreCache.has(String(storeId))) {
+          store = domainStoreCache.get(String(storeId));
+        } else {
+          store = await Store.findById(storeId).lean();
+          if (store) domainStoreCache.set(String(storeId), store);
         }
       }
     }

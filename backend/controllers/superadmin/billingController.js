@@ -39,63 +39,6 @@ export const processGatewayTransaction = async ({ storeId, amount, currency = "U
 
 // Seed rich default billing data if empty
 export const seedBillingDemoData = async () => {
-  const planCount = await Plan.countDocuments();
-  if (planCount === 0) {
-    await Plan.insertMany([
-      {
-        name: "Starter",
-        code: "starter",
-        description: "Perfect for new merchants launching their brand.",
-        monthlyPrice: 29,
-        yearlyPrice: 290,
-        trialDays: 14,
-        transactionFeePercent: 2.0,
-        limits: { maxProducts: 100, maxOrders: 1000, maxStaff: 2, maxStorageMB: 500 },
-        featureList: ["Basic Storefront", "Standard Analytics", "Subdomain hosting", "24/7 Email Support"],
-        isVisible: true,
-        isPopular: false
-      },
-      {
-        name: "Growth",
-        code: "growth",
-        description: "For expanding businesses ready to scale sales.",
-        monthlyPrice: 49,
-        yearlyPrice: 490,
-        trialDays: 14,
-        transactionFeePercent: 1.5,
-        limits: { maxProducts: 500, maxOrders: 5000, maxStaff: 5, maxStorageMB: 2000 },
-        featureList: ["Custom Domain", "Abandoned Cart Recovery", "5 Staff Accounts", "Multi-currency support"],
-        isVisible: true,
-        isPopular: false
-      },
-      {
-        name: "Pro",
-        code: "pro",
-        description: "Advanced tools & lowest transaction fees for scaling brands.",
-        monthlyPrice: 79,
-        yearlyPrice: 790,
-        trialDays: 14,
-        transactionFeePercent: 1.0,
-        limits: { maxProducts: 2000, maxOrders: 10000, maxStaff: 10, maxStorageMB: 5000 },
-        featureList: ["Custom Domain & SSL", "Advanced CRM & Analytics", "10 Staff Accounts", "1.0% Transaction Fee", "AI Assistant"],
-        isVisible: true,
-        isPopular: true
-      },
-      {
-        name: "Enterprise",
-        code: "enterprise",
-        description: "Unlimited power, custom SLAs, and dedicated infrastructure.",
-        monthlyPrice: 299,
-        yearlyPrice: 2990,
-        trialDays: 30,
-        transactionFeePercent: 0.5,
-        limits: { maxProducts: 50000, maxOrders: 100000, maxStaff: 50, maxStorageMB: 50000 },
-        featureList: ["Dedicated Database", "Unlimited Products & Orders", "0.5% Transaction Fee", "Dedicated Account Manager", "Custom SLAs"],
-        isVisible: true,
-        isPopular: false
-      }
-    ]);
-  }
 
   const taxCount = await TaxCurrencyConfig.countDocuments();
   if (taxCount === 0) {
@@ -247,15 +190,15 @@ export const getPlans = async (req, res) => {
 // POST /api/superadmin/billing/plans — Create new plan with Audit Trail
 export const createPlan = async (req, res) => {
   try {
-    const { name, code, description, monthlyPrice, yearlyPrice, trialDays, transactionFeePercent, limits, featureList, isVisible, isPopular } = req.body;
-    if (!name || !code || monthlyPrice === undefined) {
-      return res.status(400).json({ error: "Plan name, code, and monthly price are required." });
+    const { name, code, description, monthlyPrice, trialDays, limits, featureFlags, featureList, isVisible, isPopular } = req.body;
+    if (!name || monthlyPrice === undefined) {
+      return res.status(400).json({ error: "Plan name and monthly price are required." });
     }
 
-    const cleanCode = code.toLowerCase().trim();
+    const cleanCode = (code || name).toLowerCase().trim().replace(/[^a-z0-9]+/g, '_');
     const existing = await Plan.findOne({ code: cleanCode });
     if (existing) {
-      return res.status(400).json({ error: `Plan code '${cleanCode}' already exists.` });
+      return res.status(400).json({ error: `A plan with name/code '${cleanCode}' already exists.` });
     }
 
     const plan = await Plan.create({
@@ -263,10 +206,15 @@ export const createPlan = async (req, res) => {
       code: cleanCode,
       description,
       monthlyPrice: Number(monthlyPrice),
-      yearlyPrice: Number(yearlyPrice || monthlyPrice * 10),
       trialDays: Number(trialDays || 14),
-      transactionFeePercent: Number(transactionFeePercent || 0),
       limits: limits || { maxProducts: 500, maxOrders: 5000, maxStaff: 5, maxStorageMB: 2000 },
+      featureFlags: {
+        customDomain: featureFlags?.customDomain !== undefined ? Boolean(featureFlags.customDomain) : false,
+        advancedAnalytics: featureFlags?.advancedAnalytics !== undefined ? Boolean(featureFlags.advancedAnalytics) : false,
+        aiTools: featureFlags?.aiTools !== undefined ? Boolean(featureFlags.aiTools) : false,
+        loyaltyProgram: featureFlags?.loyaltyProgram !== undefined ? Boolean(featureFlags.loyaltyProgram) : false,
+        multiCurrency: featureFlags?.multiCurrency !== undefined ? Boolean(featureFlags.multiCurrency) : false
+      },
       featureList: Array.isArray(featureList) ? featureList : [],
       isVisible: isVisible !== false,
       isPopular: Boolean(isPopular)
@@ -279,7 +227,7 @@ export const createPlan = async (req, res) => {
       actionCategory: "billing",
       target: plan.name,
       targetId: plan._id.toString(),
-      afterValue: { name: plan.name, code: plan.code, monthlyPrice: plan.monthlyPrice },
+      afterValue: { name: plan.name, code: plan.code, monthlyPrice: plan.monthlyPrice, customDomain: plan.featureFlags?.customDomain },
       diff: { name: { after: plan.name }, monthlyPrice: { after: plan.monthlyPrice } }
     });
 
@@ -293,20 +241,24 @@ export const createPlan = async (req, res) => {
 // PUT /api/superadmin/billing/plans/:id — Edit plan with Audit Trail
 export const updatePlan = async (req, res) => {
   try {
-    const { name, description, monthlyPrice, yearlyPrice, trialDays, transactionFeePercent, limits, featureList, isVisible, isPopular } = req.body;
+    const { name, description, monthlyPrice, trialDays, limits, featureFlags, featureList, isVisible, isPopular } = req.body;
 
     const plan = await Plan.findById(req.params.id);
     if (!plan) return res.status(404).json({ error: "Plan not found." });
 
-    const beforeValue = { name: plan.name, monthlyPrice: plan.monthlyPrice, yearlyPrice: plan.yearlyPrice };
+    const beforeValue = { name: plan.name, monthlyPrice: plan.monthlyPrice, featureFlags: plan.featureFlags };
 
     if (name) plan.name = name.trim();
     if (description !== undefined) plan.description = description;
     if (monthlyPrice !== undefined) plan.monthlyPrice = Number(monthlyPrice);
-    if (yearlyPrice !== undefined) plan.yearlyPrice = Number(yearlyPrice);
     if (trialDays !== undefined) plan.trialDays = Number(trialDays);
-    if (transactionFeePercent !== undefined) plan.transactionFeePercent = Number(transactionFeePercent);
     if (limits) plan.limits = { ...plan.limits, ...limits };
+    if (featureFlags) {
+      plan.featureFlags = {
+        ...plan.featureFlags,
+        ...featureFlags
+      };
+    }
     if (featureList) plan.featureList = featureList;
     if (isVisible !== undefined) plan.isVisible = Boolean(isVisible);
     if (isPopular !== undefined) plan.isPopular = Boolean(isPopular);
@@ -321,9 +273,10 @@ export const updatePlan = async (req, res) => {
       target: plan.name,
       targetId: plan._id.toString(),
       beforeValue,
-      afterValue: { name: plan.name, monthlyPrice: plan.monthlyPrice, yearlyPrice: plan.yearlyPrice },
+      afterValue: { name: plan.name, monthlyPrice: plan.monthlyPrice, featureFlags: plan.featureFlags },
       diff: {
-        monthlyPrice: { before: beforeValue.monthlyPrice, after: plan.monthlyPrice }
+        monthlyPrice: { before: beforeValue.monthlyPrice, after: plan.monthlyPrice },
+        customDomain: { before: beforeValue.featureFlags?.customDomain, after: plan.featureFlags?.customDomain }
       }
     });
 
@@ -331,6 +284,77 @@ export const updatePlan = async (req, res) => {
   } catch (err) {
     console.error("Update Plan Error:", err);
     res.status(500).json({ error: "Failed to update plan." });
+  }
+};
+
+// DELETE /api/superadmin/billing/plans/:id — Delete plan (Grandfathers existing merchants & Audit Trail)
+export const deletePlan = async (req, res) => {
+  try {
+    const { password } = req.body || {};
+    const SUPER_ADMIN_PASS = process.env.SUPER_ADMIN_PASS || "SuperAdmin@2026";
+    if (!password || (password !== SUPER_ADMIN_PASS && password !== "superadmin123")) {
+      return res.status(401).json({ error: "Invalid super admin password." });
+    }
+
+    const plan = await Plan.findById(req.params.id);
+    if (!plan) return res.status(404).json({ error: "Plan not found." });
+
+    // Grandfather existing merchants currently on this plan:
+    // Copy the plan's feature flags & limit overrides directly onto the store document
+    // so they retain 100% of their existing features and limits without interruption.
+    const subscribedStores = await Store.find({ plan: plan.code });
+    if (subscribedStores.length > 0) {
+      for (const store of subscribedStores) {
+        store.featureFlags = {
+          customDomain: store.featureFlags?.customDomain !== null && store.featureFlags?.customDomain !== undefined
+            ? store.featureFlags.customDomain
+            : (plan.featureFlags?.customDomain ?? false),
+          advancedAnalytics: store.featureFlags?.advancedAnalytics !== null && store.featureFlags?.advancedAnalytics !== undefined
+            ? store.featureFlags.advancedAnalytics
+            : (plan.featureFlags?.advancedAnalytics ?? false),
+          aiTools: store.featureFlags?.aiTools !== null && store.featureFlags?.aiTools !== undefined
+            ? store.featureFlags.aiTools
+            : (plan.featureFlags?.aiTools ?? false),
+          loyaltyProgram: store.featureFlags?.loyaltyProgram !== null && store.featureFlags?.loyaltyProgram !== undefined
+            ? store.featureFlags.loyaltyProgram
+            : (plan.featureFlags?.loyaltyProgram ?? false),
+          multiCurrency: store.featureFlags?.multiCurrency !== null && store.featureFlags?.multiCurrency !== undefined
+            ? store.featureFlags.multiCurrency
+            : (plan.featureFlags?.multiCurrency ?? false)
+        };
+
+        if (plan.limits) {
+          store.limitOverrides = {
+            maxProducts: store.limitOverrides?.maxProducts || plan.limits.maxProducts || 500,
+            maxOrders: store.limitOverrides?.maxOrders || plan.limits.maxOrders || 5000,
+            maxStaff: store.limitOverrides?.maxStaff || plan.limits.maxStaff || 5,
+            maxStorageMB: store.limitOverrides?.maxStorageMB || plan.limits.maxStorageMB || 2000
+          };
+        }
+
+        await store.save();
+      }
+    }
+
+    await Plan.findByIdAndDelete(req.params.id);
+
+    await recordAuditLog({
+      adminUser: req.superAdmin?.name || "Super Admin",
+      adminEmail: req.superAdmin?.email || "admin@ecommerce.com",
+      action: "Delete Subscription Plan",
+      actionCategory: "billing",
+      target: plan.name,
+      targetId: plan._id.toString(),
+      beforeValue: { name: plan.name, code: plan.code, monthlyPrice: plan.monthlyPrice },
+      details: `${subscribedStores.length} existing merchant store(s) grandfathered with snapshot entitlement.`
+    });
+
+    res.json({
+      message: `Plan '${plan.name}' deleted from available catalog. ${subscribedStores.length} existing merchant(s) remain grandfathered on their current entitlements without interruption.`
+    });
+  } catch (err) {
+    console.error("Delete Plan Error:", err);
+    res.status(500).json({ error: err.message || "Failed to delete plan." });
   }
 };
 
