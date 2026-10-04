@@ -52,6 +52,67 @@ const settingsSchema = new mongoose.Schema({
   heroButtonSize: { type: String, default: "md" },
   heroButtonColor: { type: String, default: "#ffffff" },
   heroButtonTextColor: { type: String, default: "#000000" },
+  heroAutoPlay: { type: Boolean, default: true },
+  heroAutoPlaySpeed: { type: Number, default: 5 },
+  heroSlides: {
+    type: [{
+      id: { type: String },
+      titleText: { type: String, default: "WELCOME TO OUR STORE" },
+      titleFontType: { type: String, default: "Outfit" },
+      titleFontColor: { type: String, default: "#ffffff" },
+      titleFontSize: { type: String, default: "4.5rem" },
+      titleFontAlignment: { type: String, default: "center" },
+      titleFontWeight: { type: String, default: "700" },
+      showTitle: { type: Boolean, default: true },
+
+      manifestoText: { type: String, default: "PREMIUM QUALITY YOU CAN TRUST. EVERY PRODUCT IS CRAFTED WITH CARE AND DELIVERED WITH PASSION." },
+      manifestoFontType: { type: String, default: "Outfit" },
+      manifestoFontColor: { type: String, default: "#ffffff" },
+      manifestoFontSize: { type: String, default: "1.1rem" },
+      manifestoFontAlignment: { type: String, default: "center" },
+      manifestoFontWeight: { type: String, default: "600" },
+      showManifesto: { type: Boolean, default: true },
+
+      buttonText: { type: String, default: "Shop Now" },
+      buttonRedirectUrl: { type: String, default: "/shop" },
+      buttonStyle: { type: String, default: "solid" },
+      buttonSize: { type: String, default: "md" },
+      buttonColor: { type: String, default: "#ffffff" },
+      buttonTextColor: { type: String, default: "#000000" },
+      showButton: { type: Boolean, default: true },
+
+      layoutTemplate: { type: String, default: "center" },
+      bgType: { type: String, default: "color" },
+      bgColor: { type: String, default: "#121212" },
+      bgImage: { type: String, default: "" },
+      bgVideo: { type: String, default: "" },
+
+      mobileLayoutTemplate: { type: String, default: "center" },
+      mobileTitleText: { type: String, default: "" },
+      mobileTitleFontType: { type: String, default: "Outfit" },
+      mobileTitleFontColor: { type: String, default: "#ffffff" },
+      mobileTitleFontSize: { type: String, default: "2.5rem" },
+      mobileTitleFontAlignment: { type: String, default: "center" },
+      mobileTitleFontWeight: { type: String, default: "700" },
+      showMobileHeroTitle: { type: Boolean, default: true },
+
+      mobileManifestoText: { type: String, default: "" },
+      mobileManifestoFontType: { type: String, default: "Outfit" },
+      mobileManifestoFontColor: { type: String, default: "#ffffff" },
+      mobileManifestoFontSize: { type: String, default: "0.85rem" },
+      mobileManifestoFontAlignment: { type: String, default: "center" },
+      mobileManifestoFontWeight: { type: String, default: "500" },
+      showMobileHeroManifesto: { type: Boolean, default: true },
+
+      mobileButtonText: { type: String, default: "Shop Now" },
+      mobileButtonStyle: { type: String, default: "solid" },
+      mobileButtonSize: { type: String, default: "sm" },
+      mobileButtonColor: { type: String, default: "#ffffff" },
+      mobileButtonTextColor: { type: String, default: "#000000" },
+      showMobileHeroButton: { type: Boolean, default: true }
+    }],
+    default: []
+  },
 
   // Mobile-specific Hero Layout
   mobileHeroTemplate: { type: String, default: "center" },

@@ -927,6 +927,9 @@ export default function Home() {
         heroBgImage={heroBgImage}
         heroBgVideo={heroBgVideo}
         primaryColor={primaryColor}
+        heroSlides={globalSettings?.heroSlides}
+        heroAutoPlay={globalSettings?.heroAutoPlay}
+        heroAutoPlaySpeed={globalSettings?.heroAutoPlaySpeed}
       />
 
       {/* 4.5 Trust Icon Bar Section */}

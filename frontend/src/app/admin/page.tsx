@@ -12,7 +12,7 @@ import CustomersTab from "./components/tabs/CustomersTab";
 import MarketingTab from "./components/tabs/MarketingTab";
 import DiscountsTab from "./components/tabs/DiscountsTab";
 import SettingsTab from "./components/tabs/settings/SettingsTab";
-import { FaqItem, DashboardStats, Product } from "./types";
+import { FaqItem, DashboardStats, Product, HeroSlideItem } from "./types";
 import { fontCategories, getFontFamilyStack } from "./constants/fonts";
 import { useAdminAuth } from "./hooks/useAdminAuth";
 import { useDashboardData, getAuthHeaders, ensureAdminToken } from "./hooks/useDashboardData";
@@ -355,6 +355,9 @@ export default function AdminDashboard() {
   const [heroButtonSize, setHeroButtonSize] = useState<string>("md");
   const [heroButtonColor, setHeroButtonColor] = useState<string>("#ffffff");
   const [heroButtonTextColor, setHeroButtonTextColor] = useState<string>("#000000");
+  const [heroSlides, setHeroSlides] = useState<HeroSlideItem[]>([]);
+  const [heroAutoPlay, setHeroAutoPlay] = useState<boolean>(true);
+  const [heroAutoPlaySpeed, setHeroAutoPlaySpeed] = useState<number>(5);
   const [heroManifesto, setHeroManifesto] = useState<string>("");
   const [heroManifestoFontType, setHeroManifestoFontType] = useState<string>("Outfit");
   const [heroManifestoFontColor, setHeroManifestoFontColor] = useState<string>("#ffffff");
@@ -1140,6 +1143,9 @@ export default function AdminDashboard() {
         setHeroButtonSize(data.heroButtonSize || "md");
         setHeroButtonColor(data.heroButtonColor || "");
         setHeroButtonTextColor(data.heroButtonTextColor || "#ffffff");
+        if (Array.isArray(data.heroSlides)) setHeroSlides(data.heroSlides);
+        if (data.heroAutoPlay !== undefined) setHeroAutoPlay(data.heroAutoPlay);
+        if (data.heroAutoPlaySpeed !== undefined) setHeroAutoPlaySpeed(data.heroAutoPlaySpeed);
 
         // Mobile hero layout setters (unlinked)
         setMobileHeroTemplate(data.mobileHeroTemplate || data.heroTemplate || "center");
@@ -1938,6 +1944,9 @@ export default function AdminDashboard() {
           heroButtonSize,
           heroButtonColor,
           heroButtonTextColor,
+          heroSlides,
+          heroAutoPlay,
+          heroAutoPlaySpeed,
           mobileHeroTemplate,
           mobileHeroTitle,
           mobileHeroTitleFontType,
@@ -4373,6 +4382,9 @@ export default function AdminDashboard() {
             bgColor: heroBgColor,
             bgImage: heroBgImage,
             bgVideo: heroBgVideo,
+            heroSlides,
+            heroAutoPlay,
+            heroAutoPlaySpeed,
 
             mobileLayoutTemplate: mobileHeroTemplate,
             mobileTitleText: mobileHeroTitle,
@@ -4427,6 +4439,9 @@ export default function AdminDashboard() {
             if (config.bgColor) setHeroBgColor(config.bgColor);
             if (config.bgImage !== undefined) setHeroBgImage(config.bgImage);
             if (config.bgVideo !== undefined) setHeroBgVideo(config.bgVideo);
+            if (Array.isArray(config.heroSlides)) setHeroSlides(config.heroSlides);
+            if (config.heroAutoPlay !== undefined) setHeroAutoPlay(config.heroAutoPlay);
+            if (config.heroAutoPlaySpeed !== undefined) setHeroAutoPlaySpeed(config.heroAutoPlaySpeed);
 
             if (config.mobileLayoutTemplate) setMobileHeroTemplate(config.mobileLayoutTemplate);
             if (config.mobileTitleText !== undefined) setMobileHeroTitle(config.mobileTitleText);

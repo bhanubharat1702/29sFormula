@@ -48,6 +48,63 @@ export interface Product {
   variants?: { size: string; quantity: number; price: number; makingPrice?: number; category: string[] }[];
 }
 
+export interface HeroSlideItem {
+  id: string;
+  titleText: string;
+  titleFontType?: string;
+  titleFontColor?: string;
+  titleFontSize?: string;
+  titleFontAlignment?: string;
+  titleFontWeight?: string;
+  showTitle?: boolean;
+
+  manifestoText: string;
+  manifestoFontType?: string;
+  manifestoFontColor?: string;
+  manifestoFontSize?: string;
+  manifestoFontAlignment?: string;
+  manifestoFontWeight?: string;
+  showManifesto?: boolean;
+
+  buttonText: string;
+  buttonRedirectUrl?: string;
+  buttonStyle?: string;
+  buttonSize?: string;
+  buttonColor?: string;
+  buttonTextColor?: string;
+  showButton?: boolean;
+
+  layoutTemplate?: string;
+  bgType?: "color" | "image" | "video";
+  bgColor?: string;
+  bgImage?: string;
+  bgVideo?: string;
+
+  mobileLayoutTemplate?: string;
+  mobileTitleText?: string;
+  mobileTitleFontType?: string;
+  mobileTitleFontColor?: string;
+  mobileTitleFontSize?: string;
+  mobileTitleFontAlignment?: string;
+  mobileTitleFontWeight?: string;
+  showMobileHeroTitle?: boolean;
+
+  mobileManifestoText?: string;
+  mobileManifestoFontType?: string;
+  mobileManifestoFontColor?: string;
+  mobileManifestoFontSize?: string;
+  mobileManifestoFontAlignment?: string;
+  mobileManifestoFontWeight?: string;
+  showMobileHeroManifesto?: boolean;
+
+  mobileButtonText?: string;
+  mobileButtonStyle?: string;
+  mobileButtonSize?: string;
+  mobileButtonColor?: string;
+  mobileButtonTextColor?: string;
+  showMobileHeroButton?: boolean;
+}
+
 export interface LayoutCustomizationConfig {
   titleText: string;
   titleFontType: string;
@@ -77,6 +134,11 @@ export interface LayoutCustomizationConfig {
   bgColor?: string;
   bgImage?: string;
   bgVideo?: string;
+
+  // Carousel Slides
+  heroSlides?: HeroSlideItem[];
+  heroAutoPlay?: boolean;
+  heroAutoPlaySpeed?: number;
 
   // Mobile-specific Layout Properties (Unlinked)
   mobileLayoutTemplate?: string;

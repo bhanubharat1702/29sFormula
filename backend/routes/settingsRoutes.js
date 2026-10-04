@@ -460,6 +460,9 @@ router.post("/api/settings", optionalAuth, async (req, res) => {
     if (req.body.heroManifestoFontSize !== undefined) settings.heroManifestoFontSize = req.body.heroManifestoFontSize;
     if (req.body.heroManifestoFontAlignment !== undefined) settings.heroManifestoFontAlignment = req.body.heroManifestoFontAlignment;
     if (req.body.heroManifestoFontWeight !== undefined) settings.heroManifestoFontWeight = req.body.heroManifestoFontWeight;
+    if (req.body.heroSlides !== undefined) settings.heroSlides = req.body.heroSlides;
+    if (req.body.heroAutoPlay !== undefined) settings.heroAutoPlay = req.body.heroAutoPlay;
+    if (req.body.heroAutoPlaySpeed !== undefined) settings.heroAutoPlaySpeed = req.body.heroAutoPlaySpeed;
 
     // Mobile Hero Layout Fields
     if (req.body.mobileHeroTemplate !== undefined) settings.mobileHeroTemplate = req.body.mobileHeroTemplate;
@@ -692,6 +695,7 @@ router.post("/api/settings", optionalAuth, async (req, res) => {
       settings.brandLogoValue = req.body.businessName.trim();
     }
 
+    settings.markModified('heroSlides');
     await settings.save();
 
     // Sync store details back to Store model
