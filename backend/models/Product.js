@@ -16,6 +16,11 @@ const productSchema = new mongoose.Schema({
   price: { type: Number },
   strikePrice: { type: Number },
   makingPrice: { type: Number, default: 0 },
+  priceBook: [{
+    currency: { type: String, required: true },
+    price: { type: Number, required: true },
+    strikePrice: { type: Number }
+  }],
   quantity: { type: Number, default: 0 },
   category: { type: [String], default: [] },
   sizes: { type: [String], default: [] }
@@ -44,6 +49,11 @@ const productVariantSchema = new mongoose.Schema({
   price: { type: Number, required: true },
   strikePrice: { type: Number },
   makingPrice: { type: Number, default: 0 },
+  priceBook: [{
+    currency: { type: String, required: true },
+    price: { type: Number, required: true },
+    strikePrice: { type: Number }
+  }],
   category: { type: [String], default: [] }
 }, { timestamps: true });
 

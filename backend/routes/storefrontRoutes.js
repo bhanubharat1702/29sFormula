@@ -2,7 +2,10 @@ import express from "express";
 import { Product, ProductVariant } from "../models/Product.js";
 import Review from "../models/Review.js";
 import Order from "../models/Order.js";
+import StoreMarket from "../models/StoreMarket.js";
+import Store from "../models/Store.js";
 import Settings from "../models/Settings.js";
+import { detectShopperCountry } from "../utils/geoIpHelper.js";
 import { getPaginationParams, buildPaginatedResponse, setPaginationHeaders } from "../utils/paginationHelper.js";
 import { getTenantStoreId } from "../utils/tenantHelper.js";
 import { storefrontSuspensionGate } from "../middleware/suspensionGate.js";
@@ -153,6 +156,81 @@ router.get("/api/storefront/home", async (req, res) => {
   } catch (error) {
     console.error("Failed to fetch storefront data:", error);
     res.status(500).json({ error: "Failed to fetch storefront data" });
+  }
+});
+
+router.get("/api/storefront/markets", async (req, res) => {
+  try {
+    const storeId = getTenantStoreId(req);
+    const store = storeId ? await Store.findById(storeId).lean() : null;
+
+    const baseCurrency = store?.currency || "INR";
+    const baseCountry = store?.country || "India";
+
+    // Convert store base country string (e.g., "India" or "IN") to 2-letter uppercase ISO if possible
+    const baseCountryCode = (baseCountry.toLowerCase() === "india" || baseCountry.toUpperCase() === "IN") 
+      ? "IN" 
+      : (baseCountry.toLowerCase() === "united states" || baseCountry.toUpperCase() === "US") 
+      ? "US" 
+      : baseCountry.substring(0, 2).toUpperCase();
+
+    const activeMarkets = storeId 
+      ? await StoreMarket.find({ storeId, isActive: true }).lean() 
+      : [];
+
+    const detectedCountry = await detectShopperCountry(req);
+
+    let isAllowed = true;
+    let currentMarket = null;
+
+    if (activeMarkets.length > 0) {
+      // Find matching market for detected country
+      const matched = activeMarkets.find(m => m.countryCode === detectedCountry);
+      if (matched) {
+        isAllowed = true;
+        currentMarket = matched;
+      } else if (detectedCountry === baseCountryCode) {
+        // Base country is always allowed
+        isAllowed = true;
+        currentMarket = {
+          countryCode: baseCountryCode,
+          currencyCode: baseCurrency,
+          exchangeRate: 1,
+          shippingRate: 0,
+          freeShippingThreshold: null,
+          isActive: true
+        };
+      } else {
+        // Country is not in merchant's active markets
+        isAllowed = false;
+        currentMarket = null;
+      }
+    } else {
+      // Default: No restricted markets defined by merchant; allow all traffic in base currency
+      isAllowed = true;
+      currentMarket = {
+        countryCode: detectedCountry,
+        currencyCode: baseCurrency,
+        exchangeRate: 1,
+        shippingRate: 0,
+        freeShippingThreshold: null,
+        isActive: true
+      };
+    }
+
+    res.json({
+      success: true,
+      storeName: store?.businessName || store?.name || "Our Store",
+      baseCurrency,
+      baseCountry: baseCountryCode,
+      detectedCountry,
+      isAllowed,
+      currentMarket,
+      activeMarkets
+    });
+  } catch (error) {
+    console.error("Failed to fetch storefront market configuration:", error);
+    res.status(500).json({ error: "Failed to resolve market configuration" });
   }
 });
 

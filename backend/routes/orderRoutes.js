@@ -406,27 +406,44 @@ router.post("/api/orders", async (req, res) => {
       shippingAddress,
       cartItems,
       paymentMethod,
-      discountCode
+      discountCode,
+      currency,
+      exchangeRate,
+      shippingCharge: clientShippingCharge
     } = req.body;
 
     if (!customerName || !customerEmail || !customerPhone || !shippingAddress || !cartItems || !Array.isArray(cartItems) || cartItems.length === 0) {
       return res.status(400).json({ error: "Missing required order details" });
     }
 
-    // Secure server-side pricing calculation (ignores client's totalAmount, subtotal, discountAmount)
+    const storeId = getTenantStoreId(req);
+
+    // Secure server-side pricing calculation with multi-currency & tax zone resolution
     let pricing;
     try {
-      pricing = await calculateOrderPricing(cartItems, discountCode);
+      pricing = await calculateOrderPricing(cartItems, discountCode, {
+        shippingAddress,
+        targetCurrency: currency,
+        storeId,
+        customExchangeRate: exchangeRate,
+        shippingCharge: clientShippingCharge
+      });
     } catch (pricingError) {
       return res.status(400).json({ error: pricingError.message });
     }
 
     const {
+      currency: baseCurrency,
+      presentmentCurrency,
+      exchangeRate: resolvedExchangeRate,
       subtotal,
       discountCode: verifiedDiscountCode,
       discountAmount,
       shippingCharge,
       taxAmount,
+      taxRate,
+      taxName,
+      taxInclusive,
       totalAmount: secureTotalAmount,
       resolvedCartItems
     } = pricing;
@@ -483,7 +500,6 @@ router.post("/api/orders", async (req, res) => {
       }
 
       const orderId = await getNextOrderId(activeSession);
-      const storeId = getTenantStoreId(req);
 
       const createdOrder = new Order({
         storeId: storeId || undefined,
@@ -494,11 +510,16 @@ router.post("/api/orders", async (req, res) => {
         customerPhone,
         shippingAddress,
         cartItems: resolvedCartItems,
+        currency: baseCurrency,
+        presentmentCurrency: presentmentCurrency || baseCurrency,
+        exchangeRate: resolvedExchangeRate || 1,
         subtotal,
         discountCode: verifiedDiscountCode,
         discountAmount,
         shippingCharge,
         taxAmount,
+        taxRate,
+        taxInclusive,
         totalAmount: secureTotalAmount,
         paymentMethod: paymentMethod || "Razorpay",
         status: "Pending",
@@ -1252,19 +1273,25 @@ router.get("/api/orders/payment-config", async (req, res) => {
 // Initialize Payment (Supports Razorpay, Stripe, PayPal, PhonePe, PayTM)
 router.post("/api/orders/payment/init", async (req, res) => {
   try {
-    const { cartItems, discountCode, gateway } = req.body;
+    const { cartItems, discountCode, gateway, shippingAddress, currency, exchangeRate } = req.body;
 
     if (!cartItems || !Array.isArray(cartItems) || cartItems.length === 0) {
       return res.status(400).json({ error: "Cart items are required to initialize payment" });
     }
 
+    const storeId = getTenantStoreId(req);
     const gatewayConfig = await getStoreGatewayConfig(req);
     const selectedGateway = (gateway || gatewayConfig.activeGateway || "razorpay").toLowerCase();
 
     // Calculate total amount strictly on server side to prevent price tampering
     let pricing;
     try {
-      pricing = await calculateOrderPricing(cartItems, discountCode);
+      pricing = await calculateOrderPricing(cartItems, discountCode, {
+        shippingAddress,
+        targetCurrency: currency,
+        storeId,
+        customExchangeRate: exchangeRate
+      });
     } catch (pricingError) {
       return res.status(400).json({ error: pricingError.message });
     }
@@ -1606,20 +1633,33 @@ router.post("/api/orders/payment/verify", async (req, res) => {
       return res.status(400).json({ error: "Invalid order payload" });
     }
 
-    // Strictly re-calculate pricing from database to ensure no tampering during payment verification
+    const storeId = getTenantStoreId(req);
+
+    // Strictly re-calculate pricing from database with multi-currency and tax zone resolution
     let pricing;
     try {
-      pricing = await calculateOrderPricing(orderPayload.cartItems, orderPayload.discountCode);
+      pricing = await calculateOrderPricing(orderPayload.cartItems, orderPayload.discountCode, {
+        shippingAddress: orderPayload.shippingAddress,
+        targetCurrency: orderPayload.currency,
+        storeId,
+        customExchangeRate: orderPayload.exchangeRate
+      });
     } catch (pricingError) {
       return res.status(400).json({ error: pricingError.message });
     }
 
     const {
+      currency: baseCurrency,
+      presentmentCurrency,
+      exchangeRate: resolvedExchangeRate,
       subtotal,
       discountCode: verifiedDiscountCode,
       discountAmount,
       shippingCharge,
       taxAmount,
+      taxRate,
+      taxName,
+      taxInclusive,
       totalAmount: secureTotalAmount,
       resolvedCartItems
     } = pricing;
@@ -1679,14 +1719,20 @@ router.post("/api/orders/payment/verify", async (req, res) => {
 
       newOrder = new Order({
         ...orderPayload,
+        storeId: storeId || undefined,
         cartItems: resolvedCartItems,
         orderId,
         customerId: customer._id,
+        currency: baseCurrency,
+        presentmentCurrency: presentmentCurrency || baseCurrency,
+        exchangeRate: resolvedExchangeRate || 1,
         subtotal,
         discountCode: verifiedDiscountCode,
         discountAmount,
         shippingCharge,
         taxAmount,
+        taxRate,
+        taxInclusive,
         totalAmount: secureTotalAmount,
         paymentMethod: selectedGateway.charAt(0).toUpperCase() + selectedGateway.slice(1),
         status: stockDeduction.success ? "Pending" : "Stock Pending",

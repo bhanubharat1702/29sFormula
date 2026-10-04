@@ -5,6 +5,8 @@ import confetti from "canvas-confetti";
 import styles from "./CheckoutDrawer.module.css";
 import CustomCheckbox from "./CustomCheckbox/CustomCheckbox";
 import { getAppliedCoupon } from "@/utils/cartSync";
+import { useMarket } from "@/context/MarketContext";
+import { PriceDisplay } from "@/components/PriceDisplay";
 
 const loadRazorpayScript = (): Promise<boolean> => {
   return new Promise((resolve) => {
@@ -96,6 +98,7 @@ interface CheckoutDrawerProps {
 }
 
 export default function CheckoutDrawer({ isOpen, onClose, cartItems, primaryColor, onOrderSuccess }: CheckoutDrawerProps) {
+  const marketContext = useMarket();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const autofillInputRef = useRef<HTMLInputElement>(null);
   const [name, setName] = useState("");
@@ -585,6 +588,9 @@ export default function CheckoutDrawer({ isOpen, onClose, cartItems, primaryColo
       }).catch(err => console.error("Error saving address for future:", err));
     }
 
+    const activeCurrency = marketContext?.currentMarket?.currencyCode || marketContext?.baseCurrency || "INR";
+    const activeExchangeRate = marketContext?.currentMarket?.exchangeRate || 1;
+
     const orderPayload = {
       customerName: name,
       customerEmail: email,
@@ -601,10 +607,12 @@ export default function CheckoutDrawer({ isOpen, onClose, cartItems, primaryColo
       subtotal: subtotalAmount,
       discountCode: appliedCouponCode || "",
       discountAmount: discount,
-      shippingCharge: 0,
+      shippingCharge: marketContext?.currentMarket?.shippingRate || 0,
       taxAmount: 0,
       totalAmount,
-      paymentMethod
+      paymentMethod,
+      currency: activeCurrency,
+      exchangeRate: activeExchangeRate
     };
 
     try {
@@ -615,7 +623,9 @@ export default function CheckoutDrawer({ isOpen, onClose, cartItems, primaryColo
           body: JSON.stringify({
             cartItems: orderPayload.cartItems,
             discountCode: appliedCouponCode || "",
-            gateway: activeGateway
+            gateway: activeGateway,
+            currency: activeCurrency,
+            exchangeRate: activeExchangeRate
           })
         });
 

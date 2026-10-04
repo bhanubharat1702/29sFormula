@@ -663,6 +663,37 @@ export default function AdminSidebar({
                   </div>
                 </div>
 
+                {/* Item 4.5: Global Markets */}
+                <div
+                  onClick={() => {
+                    setActiveTab("settings");
+                    if (setSettingsSubTab) setSettingsSubTab("markets");
+                    if (isMobileMenuOpen && setIsMobileMenuOpen) setIsMobileMenuOpen(false);
+                  }}
+                  className={styles.subMenuItem}
+                >
+                  {activeTab === "settings" && settingsSubTab === "markets" ? (
+                    <svg style={{ display: "block", minWidth: "28px", width: "28px", height: "36px", marginRight: "8px", color: "#d1d5db" }} viewBox="0 0 28 36" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M 12 0 L 12 14 A 4 4 0 0 0 16 18 L 24 18" strokeLinecap="round" strokeLinejoin="round" />
+                      <path d="M 20 14 L 24 18 L 20 22" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  ) : activeTab === "settings" && (settingsSubTab === "notifications" || settingsSubTab === "policies" || settingsSubTab === "integrations" || settingsSubTab === "trust") ? (
+                    <svg style={{ display: "block", minWidth: "28px", width: "28px", height: "36px", marginRight: "8px", color: "#d1d5db" }} viewBox="0 0 28 36" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M 12 0 L 12 36" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  ) : (
+                    <div style={{ minWidth: "28px", width: "28px", height: "36px", marginRight: "8px" }} />
+                  )}
+                  <div className={`${styles.subMenuItemCapsule} ${activeTab === "settings" && settingsSubTab === "markets" ? styles.subMenuItemCapsuleActive : ""}`} style={{ display: "flex", alignItems: "center", width: "100%", justifyContent: "space-between" }}>
+                    <div style={{ display: "flex", alignItems: "center" }}>
+                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" style={{ width: "13px", height: "13px", marginRight: "6px" }}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 21a9.004 9.004 0 0 0 8.716-6.747M12 21a9.004 9.004 0 0 1-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3" />
+                      </svg>
+                      Global Markets
+                    </div>
+                  </div>
+                </div>
+
                 {/* Item 4.5: Notifications & Email */}
                 <div
                   onClick={() => {

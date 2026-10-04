@@ -24,6 +24,8 @@ import discountRoutes from "./routes/discountRoutes.js";
 import superAdminRoutes from "./routes/superAdminRoutes.js";
 import platformRoutes from "./routes/platformRoutes.js";
 import merchantDomainRoutes from "./routes/merchantDomainRoutes.js";
+import taxZoneRoutes from "./routes/taxZoneRoutes.js";
+import marketRoutes from "./routes/marketRoutes.js";
 
 import { tenantResolver } from "./middleware/tenantResolver.js";
 import { storefrontSuspensionGate } from "./middleware/suspensionGate.js";
@@ -60,6 +62,8 @@ app.use("/", discountRoutes);
 app.use("/", superAdminRoutes);
 app.use("/", platformRoutes);
 app.use("/", merchantDomainRoutes);
+app.use("/", taxZoneRoutes);
+app.use("/", marketRoutes);
 
 // Global Error Handler Middleware with Sentry Exception Capture
 app.use((err, req, res, next) => {

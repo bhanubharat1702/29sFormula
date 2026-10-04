@@ -4,6 +4,8 @@ import "./globals.css";
 import SmoothScroll from "@/components/SmoothScroll";
 import SessionTracker from "@/components/SessionTracker";
 import { CartProvider } from "@/context/CartContext";
+import { MarketProvider } from "@/context/MarketContext";
+import { GeoblockGuard } from "@/components/GeoblockGuard";
 import Script from "next/script";
 
 const outfit = Outfit({
@@ -102,12 +104,16 @@ export default function RootLayout({
         />
       </head>
       <body>
-        <CartProvider>
-          <SmoothScroll>
-            <SessionTracker />
-            {children}
-          </SmoothScroll>
-        </CartProvider>
+        <MarketProvider>
+          <CartProvider>
+            <GeoblockGuard>
+              <SmoothScroll>
+                <SessionTracker />
+                {children}
+              </SmoothScroll>
+            </GeoblockGuard>
+          </CartProvider>
+        </MarketProvider>
       </body>
     </html>
   );

@@ -2404,6 +2404,8 @@ interface SettingsTabProps {
   [key: string]: any;
 }
 
+import { MarketsSubTab } from './MarketsSubTab';
+
 export default function SettingsTab(props: SettingsTabProps) {
   const { settingsSubTab = "general" } = props;
 
@@ -2414,6 +2416,7 @@ export default function SettingsTab(props: SettingsTabProps) {
         {settingsSubTab === "domain" && <DomainSubTab />}
         {settingsSubTab === "payments" && <PaymentsSubTab {...props} />}
         {settingsSubTab === "shipping" && <ShippingSubTab {...props} />}
+        {settingsSubTab === "markets" && <MarketsSubTab storeCurrency={props.storeCurrency || 'INR'} />}
         {settingsSubTab === "notifications" && <NotificationsSubTab {...props} />}
         {settingsSubTab === "integrations" && <IntegrationsSubTab {...props} />}
         {settingsSubTab === "policies" && <PoliciesSubTab {...props} />}
