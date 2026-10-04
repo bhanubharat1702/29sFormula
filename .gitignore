@@ -12,3 +12,8 @@ yarn-error.log*
 out/
 build/
 coverage/
+
+# Agent/AI tooling files (not part of project source)
+.agents/
+openspec/
+*_audit.md
