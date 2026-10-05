@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import styles from "../../page.module.css";
 import { LayoutCustomizationConfig, HeroSlideItem } from '../../types';
 import { fontCategories } from '../../constants/fonts';
@@ -22,131 +22,135 @@ export default function CustomizeLayoutModal({
   sectionName = "Hero Section",
   primaryColor = "#ffffff"
 }: CustomizeLayoutModalProps) {
+  const canvasFrameRef = useRef<HTMLDivElement>(null);
+  const titleRef = useRef<HTMLDivElement>(null);
+  const manifestoRef = useRef<HTMLDivElement>(null);
+  const buttonRef = useRef<HTMLDivElement>(null);
 
   // Default multi-slide hero dataset
   const initialSlides: HeroSlideItem[] = (initialConfig.heroSlides && initialConfig.heroSlides.length > 0)
     ? initialConfig.heroSlides
     : [
-        {
-          id: "slide_1",
-          titleText: initialConfig.titleText || "WELCOME TO OUR STORE",
-          titleFontType: initialConfig.titleFontType || "Outfit",
-          titleFontColor: initialConfig.titleFontColor || "#ffffff",
-          titleFontSize: initialConfig.titleFontSize || "4.5rem",
-          titleFontAlignment: initialConfig.titleFontAlignment || "center",
-          titleFontWeight: initialConfig.titleFontWeight || "700",
-          showTitle: initialConfig.showTitle !== undefined ? initialConfig.showTitle : true,
+      {
+        id: "slide_1",
+        titleText: initialConfig.titleText || "WELCOME TO OUR STORE",
+        titleFontType: initialConfig.titleFontType || "Outfit",
+        titleFontColor: initialConfig.titleFontColor || "#ffffff",
+        titleFontSize: initialConfig.titleFontSize || "4.5rem",
+        titleFontAlignment: initialConfig.titleFontAlignment || "center",
+        titleFontWeight: initialConfig.titleFontWeight || "700",
+        showTitle: initialConfig.showTitle !== undefined ? initialConfig.showTitle : true,
 
-          manifestoText: initialConfig.manifestoText || "PREMIUM QUALITY YOU CAN TRUST. EVERY PRODUCT IS CRAFTED WITH CARE AND DELIVERED WITH PASSION.",
-          manifestoFontType: initialConfig.manifestoFontType || "Outfit",
-          manifestoFontColor: initialConfig.manifestoFontColor || "#ffffff",
-          manifestoFontSize: initialConfig.manifestoFontSize || "1.1rem",
-          manifestoFontAlignment: initialConfig.manifestoFontAlignment || "center",
-          manifestoFontWeight: initialConfig.manifestoFontWeight || "500",
-          showManifesto: initialConfig.showManifesto !== undefined ? initialConfig.showManifesto : true,
+        manifestoText: initialConfig.manifestoText || "PREMIUM QUALITY YOU CAN TRUST. EVERY PRODUCT IS CRAFTED WITH CARE AND DELIVERED WITH PASSION.",
+        manifestoFontType: initialConfig.manifestoFontType || "Outfit",
+        manifestoFontColor: initialConfig.manifestoFontColor || "#ffffff",
+        manifestoFontSize: initialConfig.manifestoFontSize || "1.1rem",
+        manifestoFontAlignment: initialConfig.manifestoFontAlignment || "center",
+        manifestoFontWeight: initialConfig.manifestoFontWeight || "500",
+        showManifesto: initialConfig.showManifesto !== undefined ? initialConfig.showManifesto : true,
 
-          buttonText: initialConfig.buttonText || "Shop Now",
-          buttonStyle: initialConfig.buttonStyle || "solid",
-          buttonSize: initialConfig.buttonSize || "md",
-          buttonColor: initialConfig.buttonColor || "#ffffff",
-          buttonTextColor: initialConfig.buttonTextColor || "#000000",
-          showButton: initialConfig.showButton !== undefined ? initialConfig.showButton : true,
+        buttonText: initialConfig.buttonText || "Shop Now",
+        buttonStyle: initialConfig.buttonStyle || "solid",
+        buttonSize: initialConfig.buttonSize || "md",
+        buttonColor: initialConfig.buttonColor || "#ffffff",
+        buttonTextColor: initialConfig.buttonTextColor || "#000000",
+        showButton: initialConfig.showButton !== undefined ? initialConfig.showButton : true,
 
-          layoutTemplate: initialConfig.layoutTemplate || "center",
-          bgType: (initialConfig.bgType as any) || "color",
-          bgColor: initialConfig.bgColor || "#121212",
-          bgImage: initialConfig.bgImage || "",
-          bgVideo: initialConfig.bgVideo || "",
+        layoutTemplate: initialConfig.layoutTemplate || "center",
+        bgType: (initialConfig.bgType as any) || "color",
+        bgColor: initialConfig.bgColor || "#121212",
+        bgImage: initialConfig.bgImage || "",
+        bgVideo: initialConfig.bgVideo || "",
 
-          mobileLayoutTemplate: initialConfig.mobileLayoutTemplate || "center",
-          mobileTitleText: initialConfig.mobileTitleText || "",
-          mobileTitleFontType: initialConfig.mobileTitleFontType || "Outfit",
-          mobileTitleFontColor: initialConfig.mobileTitleFontColor || "#ffffff",
-          mobileTitleFontSize: initialConfig.mobileTitleFontSize || "2.5rem",
-          mobileTitleFontAlignment: initialConfig.mobileTitleFontAlignment || "center",
-          mobileTitleFontWeight: initialConfig.mobileTitleFontWeight || "700",
-          showMobileHeroTitle: initialConfig.showMobileHeroTitle !== undefined ? initialConfig.showMobileHeroTitle : true,
+        mobileLayoutTemplate: initialConfig.mobileLayoutTemplate || "center",
+        mobileTitleText: initialConfig.mobileTitleText || "",
+        mobileTitleFontType: initialConfig.mobileTitleFontType || "Outfit",
+        mobileTitleFontColor: initialConfig.mobileTitleFontColor || "#ffffff",
+        mobileTitleFontSize: initialConfig.mobileTitleFontSize || "2.5rem",
+        mobileTitleFontAlignment: initialConfig.mobileTitleFontAlignment || "center",
+        mobileTitleFontWeight: initialConfig.mobileTitleFontWeight || "700",
+        showMobileHeroTitle: initialConfig.showMobileHeroTitle !== undefined ? initialConfig.showMobileHeroTitle : true,
 
-          mobileManifestoText: initialConfig.mobileManifestoText || "",
-          mobileManifestoFontType: initialConfig.mobileManifestoFontType || "Outfit",
-          mobileManifestoFontColor: initialConfig.mobileManifestoFontColor || "#ffffff",
-          mobileManifestoFontSize: initialConfig.mobileManifestoFontSize || "0.85rem",
-          mobileManifestoFontAlignment: initialConfig.mobileManifestoFontAlignment || "center",
-          mobileManifestoFontWeight: initialConfig.mobileManifestoFontWeight || "500",
-          showMobileHeroManifesto: initialConfig.showMobileHeroManifesto !== undefined ? initialConfig.showMobileHeroManifesto : true,
+        mobileManifestoText: initialConfig.mobileManifestoText || "",
+        mobileManifestoFontType: initialConfig.mobileManifestoFontType || "Outfit",
+        mobileManifestoFontColor: initialConfig.mobileManifestoFontColor || "#ffffff",
+        mobileManifestoFontSize: initialConfig.mobileManifestoFontSize || "0.85rem",
+        mobileManifestoFontAlignment: initialConfig.mobileManifestoFontAlignment || "center",
+        mobileManifestoFontWeight: initialConfig.mobileManifestoFontWeight || "500",
+        showMobileHeroManifesto: initialConfig.showMobileHeroManifesto !== undefined ? initialConfig.showMobileHeroManifesto : true,
 
-          mobileButtonText: initialConfig.mobileButtonText || "Shop Now",
-          mobileButtonStyle: initialConfig.mobileButtonStyle || "solid",
-          mobileButtonSize: initialConfig.mobileButtonSize || "sm",
-          mobileButtonColor: initialConfig.mobileButtonColor || "#ffffff",
-          mobileButtonTextColor: initialConfig.mobileButtonTextColor || "#000000",
-          showMobileHeroButton: initialConfig.showMobileHeroButton !== undefined ? initialConfig.showMobileHeroButton : true
-        },
-        {
-          id: "slide_2",
-          titleText: "SUMMER COLLECTION 2025",
-          titleFontType: "Outfit",
-          titleFontColor: "#f59e0b",
-          titleFontSize: "4.5rem",
-          titleFontAlignment: "center",
-          titleFontWeight: "700",
-          showTitle: true,
+        mobileButtonText: initialConfig.mobileButtonText || "Shop Now",
+        mobileButtonStyle: initialConfig.mobileButtonStyle || "solid",
+        mobileButtonSize: initialConfig.mobileButtonSize || "sm",
+        mobileButtonColor: initialConfig.mobileButtonColor || "#ffffff",
+        mobileButtonTextColor: initialConfig.mobileButtonTextColor || "#000000",
+        showMobileHeroButton: initialConfig.showMobileHeroButton !== undefined ? initialConfig.showMobileHeroButton : true
+      },
+      {
+        id: "slide_2",
+        titleText: "SUMMER COLLECTION 2025",
+        titleFontType: "Outfit",
+        titleFontColor: "#f59e0b",
+        titleFontSize: "4.5rem",
+        titleFontAlignment: "center",
+        titleFontWeight: "700",
+        showTitle: true,
 
-          manifestoText: "GET UP TO 50% OFF THIS WEEK ONLY. PREMIUM HAND-CRAFTED APPAREL FOR EVERY SEASON.",
-          manifestoFontType: "Outfit",
-          manifestoFontColor: "#ffffff",
-          manifestoFontSize: "1.1rem",
-          manifestoFontAlignment: "center",
-          manifestoFontWeight: "500",
-          showManifesto: true,
+        manifestoText: "GET UP TO 50% OFF THIS WEEK ONLY. PREMIUM HAND-CRAFTED APPAREL FOR EVERY SEASON.",
+        manifestoFontType: "Outfit",
+        manifestoFontColor: "#ffffff",
+        manifestoFontSize: "1.1rem",
+        manifestoFontAlignment: "center",
+        manifestoFontWeight: "500",
+        showManifesto: true,
 
-          buttonText: "EXPLORE COLLECTION",
-          buttonRedirectUrl: "/category/offers",
-          buttonStyle: "solid",
-          buttonSize: "md",
-          buttonColor: "#f59e0b",
-          buttonTextColor: "#000000",
-          showButton: true,
+        buttonText: "EXPLORE COLLECTION",
+        buttonRedirectUrl: "/category/offers",
+        buttonStyle: "solid",
+        buttonSize: "md",
+        buttonColor: "#f59e0b",
+        buttonTextColor: "#000000",
+        showButton: true,
 
-          layoutTemplate: "center",
-          bgType: "color",
-          bgColor: "#1e293b",
-          bgImage: "",
-          bgVideo: ""
-        },
-        {
-          id: "slide_3",
-          titleText: "NEW ARRIVALS DROP",
-          titleFontType: "Outfit",
-          titleFontColor: "#38bdf8",
-          titleFontSize: "4.5rem",
-          titleFontAlignment: "center",
-          titleFontWeight: "700",
-          showTitle: true,
+        layoutTemplate: "center",
+        bgType: "color",
+        bgColor: "#1e293b",
+        bgImage: "",
+        bgVideo: ""
+      },
+      {
+        id: "slide_3",
+        titleText: "NEW ARRIVALS DROP",
+        titleFontType: "Outfit",
+        titleFontColor: "#38bdf8",
+        titleFontSize: "4.5rem",
+        titleFontAlignment: "center",
+        titleFontWeight: "700",
+        showTitle: true,
 
-          manifestoText: "DISCOVER MODERN LUXURY STYLES CRAFTED WITH UNCOMPROMISING PRECISION AND BEAUTY.",
-          manifestoFontType: "Outfit",
-          manifestoFontColor: "#ffffff",
-          manifestoFontSize: "1.1rem",
-          manifestoFontAlignment: "center",
-          manifestoFontWeight: "500",
-          showManifesto: true,
+        manifestoText: "DISCOVER MODERN LUXURY STYLES CRAFTED WITH UNCOMPROMISING PRECISION AND BEAUTY.",
+        manifestoFontType: "Outfit",
+        manifestoFontColor: "#ffffff",
+        manifestoFontSize: "1.1rem",
+        manifestoFontAlignment: "center",
+        manifestoFontWeight: "500",
+        showManifesto: true,
 
-          buttonText: "DISCOVER NOW",
-          buttonRedirectUrl: "/category/new-arrivals",
-          buttonStyle: "outline",
-          buttonSize: "md",
-          buttonColor: "#38bdf8",
-          buttonTextColor: "#ffffff",
-          showButton: true,
+        buttonText: "DISCOVER NOW",
+        buttonRedirectUrl: "/category/new-arrivals",
+        buttonStyle: "outline",
+        buttonSize: "md",
+        buttonColor: "#38bdf8",
+        buttonTextColor: "#ffffff",
+        showButton: true,
 
-          layoutTemplate: "center",
-          bgType: "color",
-          bgColor: "#0f172a",
-          bgImage: "",
-          bgVideo: ""
-        }
-      ];
+        layoutTemplate: "center",
+        bgType: "color",
+        bgColor: "#0f172a",
+        bgImage: "",
+        bgVideo: ""
+      }
+    ];
 
   const [slides, setSlides] = useState<HeroSlideItem[]>(initialSlides);
   const [activeSlideIndex, setActiveSlideIndex] = useState<number>(0);
@@ -193,6 +197,15 @@ export default function CustomizeLayoutModal({
   // Local state for UI
   const [selectedElement, setSelectedElement] = useState<"title" | "manifesto" | "button" | null>("title");
   const [previewDevice, setPreviewDevice] = useState<'desktop' | 'mobile'>('desktop');
+
+  // Element box container dimensions (width, height, padding, background, offset positions X/Y)
+  const [titleContainer, setTitleContainer] = useState<{ width?: number; height?: number; bgColor?: string; padding?: number; offsetX: number; offsetY: number }>({ offsetX: 0, offsetY: 0, padding: 12 });
+  const [manifestoContainer, setManifestoContainer] = useState<{ width?: number; height?: number; bgColor?: string; padding?: number; offsetX: number; offsetY: number }>({ offsetX: 0, offsetY: 0, padding: 10 });
+  const [buttonContainer, setButtonContainer] = useState<{ width?: number; height?: number; paddingX?: number; paddingY?: number; offsetX: number; offsetY: number }>({ offsetX: 0, offsetY: 0 });
+
+  // Alignment guide lines state
+  const [showVerticalGuide, setShowVerticalGuide] = useState<boolean>(false);
+  const [showHorizontalGuide, setShowHorizontalGuide] = useState<boolean>(false);
 
   // Mobile-specific layout states
   const [mobileLayoutTemplate, setMobileLayoutTemplate] = useState(activeSlide.mobileLayoutTemplate || activeSlide.layoutTemplate || "center");
@@ -371,6 +384,10 @@ export default function CustomizeLayoutModal({
   };
 
   const handleAddSlide = () => {
+    if (slides.length >= 5) {
+      alert("Maximum limit of 5 hero carousel slides per merchant reached.");
+      return;
+    }
     updateCurrentSlideStateInList();
     const newSlide: HeroSlideItem = {
       id: `slide_${Date.now()}`,
@@ -467,10 +484,25 @@ export default function CustomizeLayoutModal({
     setDraggedSlideIndex(null);
   };
 
-  // Media File Upload (Image or Video)
+  // Media File Upload (Image or Video) with Size Validation
   const handleMediaFileUpload = (e: React.ChangeEvent<HTMLInputElement>, mediaKind: "image" | "video") => {
     const file = e.target.files?.[0];
     if (!file) return;
+
+    const maxImageSize = 10 * 1024 * 1024; // 10 MB
+    const maxVideoSize = 100 * 1024 * 1024; // 100 MB
+
+    if (mediaKind === "image" && file.size > maxImageSize) {
+      alert(`Image file size exceeds maximum allowed limit of 10 MB. Selected file size: ${(file.size / (1024 * 1024)).toFixed(1)} MB.`);
+      e.target.value = "";
+      return;
+    }
+
+    if (mediaKind === "video" && file.size > maxVideoSize) {
+      alert(`Video file size exceeds maximum allowed limit of 100 MB. Selected file size: ${(file.size / (1024 * 1024)).toFixed(1)} MB.`);
+      e.target.value = "";
+      return;
+    }
 
     setUploadingMedia(true);
     setUploadProgress(0);
@@ -831,24 +863,24 @@ export default function CustomizeLayoutModal({
                     >
                       {type === "color" && (
                         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                          <circle cx="13.5" cy="6.5" r=".5" fill="currentColor"/>
-                          <circle cx="17.5" cy="10.5" r=".5" fill="currentColor"/>
-                          <circle cx="8.5" cy="7.5" r=".5" fill="currentColor"/>
-                          <circle cx="6.5" cy="12.5" r=".5" fill="currentColor"/>
-                          <path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.92 0 1.7-.75 1.7-1.67 0-.42-.16-.81-.43-1.12-.27-.31-.43-.72-.43-1.21 0-.92.75-1.67 1.67-1.67H17c2.76 0 5-2.24 5-5 0-4.42-4.48-8-10-8z"/>
+                          <circle cx="13.5" cy="6.5" r=".5" fill="currentColor" />
+                          <circle cx="17.5" cy="10.5" r=".5" fill="currentColor" />
+                          <circle cx="8.5" cy="7.5" r=".5" fill="currentColor" />
+                          <circle cx="6.5" cy="12.5" r=".5" fill="currentColor" />
+                          <path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.92 0 1.7-.75 1.7-1.67 0-.42-.16-.81-.43-1.12-.27-.31-.43-.72-.43-1.21 0-.92.75-1.67 1.67-1.67H17c2.76 0 5-2.24 5-5 0-4.42-4.48-8-10-8z" />
                         </svg>
                       )}
                       {type === "image" && (
                         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                          <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
-                          <circle cx="8.5" cy="8.5" r="1.5"/>
-                          <polyline points="21 15 16 10 5 21"/>
+                          <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+                          <circle cx="8.5" cy="8.5" r="1.5" />
+                          <polyline points="21 15 16 10 5 21" />
                         </svg>
                       )}
                       {type === "video" && (
                         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                          <polygon points="23 7 16 12 23 17 23 7"/>
-                          <rect x="1" y="5" width="15" height="14" rx="2" ry="2"/>
+                          <polygon points="23 7 16 12 23 17 23 7" />
+                          <rect x="1" y="5" width="15" height="14" rx="2" ry="2" />
                         </svg>
                       )}
                       <span>{type}</span>
@@ -966,7 +998,12 @@ export default function CustomizeLayoutModal({
                     <button
                       key={t.id}
                       type="button"
-                      onClick={() => setCurrentLayoutTemplate(t.id)}
+                      onClick={() => {
+                        setCurrentLayoutTemplate(t.id);
+                        setTitleContainer(prev => ({ ...prev, offsetX: 0, offsetY: 0 }));
+                        setManifestoContainer(prev => ({ ...prev, offsetX: 0, offsetY: 0 }));
+                        setButtonContainer(prev => ({ ...prev, offsetX: 0, offsetY: 0 }));
+                      }}
                       style={{
                         background: "none",
                         border: isSelected ? "2px solid #3b82f6" : "1px solid #e2e8f0",
@@ -1070,39 +1107,293 @@ export default function CustomizeLayoutModal({
 
                   {/* Typography & Color Customization for Title & Subtitle */}
                   {(selectedElement === "title" || selectedElement === "manifesto") && (
-                    <div style={{ display: "flex", flexDirection: "column", gap: "12px", borderTop: "1px solid #f1f5f9", paddingTop: "12px" }}>
-                      {/* Font Family & Size */}
-                      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" }}>
-                        <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
-                          <label style={{ fontSize: "0.78rem", fontWeight: 700, color: "#475569" }}>Font Family</label>
-                          <select
-                            value={selectedElement === "title" ? currentTitleFontType : currentManifestoFontType}
-                            onChange={(e) => {
-                              if (selectedElement === "title") setCurrentTitleFontType(e.target.value);
-                              else setCurrentManifestoFontType(e.target.value);
+                    <div style={{ display: "flex", flexDirection: "column", gap: "14px", borderTop: "1px solid #f1f5f9", paddingTop: "14px" }}>
+                      {/* Custom Font Family Dropdown Menu with Live Hover */}
+                      <div style={{ display: "flex", flexDirection: "column", gap: "4px", position: "relative" }}>
+                        <label style={{ fontSize: "0.78rem", fontWeight: 700, color: "#475569" }}>Font Family</label>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setIsFontDropdownOpen(!isFontDropdownOpen);
+                            setIsFontSizeDropdownOpen(false);
+                            setIsFontWeightDropdownOpen(false);
+                          }}
+                          style={{
+                            padding: "8px 12px",
+                            borderRadius: "6px",
+                            border: "1px solid #cbd5e1",
+                            fontSize: "0.82rem",
+                            color: "#0f172a",
+                            backgroundColor: "#ffffff",
+                            cursor: "pointer",
+                            display: "flex",
+                            justifyContent: "space-between",
+                            alignItems: "center",
+                            textAlign: "left",
+                            fontWeight: 600,
+                            fontFamily: `"${selectedElement === "title" ? currentTitleFontType : currentManifestoFontType}", sans-serif`
+                          }}
+                        >
+                          <span>{selectedElement === "title" ? currentTitleFontType : currentManifestoFontType}</span>
+                          <span style={{ fontSize: "0.7rem", color: "#64748b" }}>▼</span>
+                        </button>
+
+                        {isFontDropdownOpen && (
+                          <div
+                            onMouseLeave={() => setHoveredFontType(null)}
+                            style={{
+                              position: "absolute",
+                              top: "100%",
+                              left: 0,
+                              right: 0,
+                              zIndex: 100,
+                              marginTop: "4px",
+                              maxHeight: "220px",
+                              overflowY: "auto",
+                              backgroundColor: "#ffffff",
+                              borderRadius: "8px",
+                              border: "1px solid #cbd5e1",
+                              boxShadow: "0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05)",
+                              padding: "4px"
                             }}
-                            style={{ padding: "6px 8px", borderRadius: "6px", border: "1px solid #cbd5e1", fontSize: "0.8rem", color: "#000" }}
                           >
-                            {fontCategories.flatMap(cat => cat.fonts).map(font => (
-                              <option key={font.name} value={font.name}>{font.name}</option>
-                            ))}
-                          </select>
+                            {fontCategories.flatMap(cat => cat.fonts).map(font => {
+                              const activeVal = selectedElement === "title" ? currentTitleFontType : currentManifestoFontType;
+                              const isSelected = activeVal === font.name;
+
+                              const handleHoverFont = (fontName: string) => {
+                                setHoveredFontType(fontName);
+                                // Dynamically load Google Font if not already loaded into DOM
+                                const fontId = `google-font-${fontName.replace(/\s+/g, '-').toLowerCase()}`;
+                                if (!document.getElementById(fontId)) {
+                                  const link = document.createElement('link');
+                                  link.id = fontId;
+                                  link.rel = 'stylesheet';
+                                  link.href = `https://fonts.googleapis.com/css2?family=${encodeURIComponent(fontName)}:wght@300;400;500;600;700;800;900&display=swap`;
+                                  document.head.appendChild(link);
+                                }
+                              };
+
+                              return (
+                                <div
+                                  key={font.name}
+                                  onMouseEnter={() => handleHoverFont(font.name)}
+                                  onClick={() => {
+                                    handleHoverFont(font.name);
+                                    if (selectedElement === "title") setCurrentTitleFontType(font.name);
+                                    else setCurrentManifestoFontType(font.name);
+                                    setHoveredFontType(null);
+                                    setIsFontDropdownOpen(false);
+                                  }}
+                                  style={{
+                                    padding: "6px 10px",
+                                    borderRadius: "4px",
+                                    fontSize: "0.82rem",
+                                    fontFamily: `"${font.name}", sans-serif`,
+                                    cursor: "pointer",
+                                    backgroundColor: isSelected ? "#eff6ff" : "transparent",
+                                    color: isSelected ? "#2563eb" : "#1e293b",
+                                    fontWeight: isSelected ? 700 : 500,
+                                    display: "flex",
+                                    justifyContent: "space-between",
+                                    alignItems: "center"
+                                  }}
+                                >
+                                  <span>{font.label || font.name}</span>
+                                  {isSelected && <span style={{ fontSize: "0.75rem" }}>✓</span>}
+                                </div>
+                              );
+                            })}
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Custom Font Size & Font Boldness Dropdowns */}
+                      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" }}>
+                        {/* Custom Font Size Dropdown */}
+                        <div style={{ display: "flex", flexDirection: "column", gap: "4px", position: "relative" }}>
+                          <label style={{ fontSize: "0.78rem", fontWeight: 700, color: "#475569" }}>Font Size</label>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setIsFontSizeDropdownOpen(!isFontSizeDropdownOpen);
+                              setIsFontDropdownOpen(false);
+                              setIsFontWeightDropdownOpen(false);
+                            }}
+                            style={{
+                              padding: "8px 12px",
+                              borderRadius: "6px",
+                              border: "1px solid #cbd5e1",
+                              fontSize: "0.82rem",
+                              color: "#0f172a",
+                              backgroundColor: "#ffffff",
+                              cursor: "pointer",
+                              display: "flex",
+                              justifyContent: "space-between",
+                              alignItems: "center",
+                              textAlign: "left",
+                              fontWeight: 600
+                            }}
+                          >
+                            <span>{selectedElement === "title" ? currentTitleFontSize : currentManifestoFontSize}</span>
+                            <span style={{ fontSize: "0.7rem", color: "#64748b" }}>▼</span>
+                          </button>
+
+                          {isFontSizeDropdownOpen && (
+                            <div
+                              onMouseLeave={() => setHoveredFontSize(null)}
+                              style={{
+                                position: "absolute",
+                                top: "100%",
+                                left: 0,
+                                right: 0,
+                                zIndex: 100,
+                                marginTop: "4px",
+                                maxHeight: "200px",
+                                overflowY: "auto",
+                                backgroundColor: "#ffffff",
+                                borderRadius: "8px",
+                                border: "1px solid #cbd5e1",
+                                boxShadow: "0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05)",
+                                padding: "4px"
+                              }}
+                            >
+                              {[
+                                "0.75rem", "0.85rem", "1.0rem", "1.1rem", "1.25rem", "1.5rem", "1.75rem",
+                                "2.0rem", "2.25rem", "2.5rem", "3.0rem", "3.5rem", "4.0rem", "4.5rem",
+                                "5.0rem", "5.5rem", "6.0rem", "7.0rem", "8.0rem"
+                              ].map(size => {
+                                const activeSize = selectedElement === "title" ? currentTitleFontSize : currentManifestoFontSize;
+                                const isSelected = activeSize === size;
+                                return (
+                                  <div
+                                    key={size}
+                                    onMouseEnter={() => setHoveredFontSize(size)}
+                                    onClick={() => {
+                                      if (selectedElement === "title") setCurrentTitleFontSize(size);
+                                      else setCurrentManifestoFontSize(size);
+                                      setHoveredFontSize(null);
+                                      setIsFontSizeDropdownOpen(false);
+                                    }}
+                                    style={{
+                                      padding: "6px 10px",
+                                      borderRadius: "4px",
+                                      fontSize: "0.8rem",
+                                      cursor: "pointer",
+                                      backgroundColor: isSelected ? "#eff6ff" : "transparent",
+                                      color: isSelected ? "#2563eb" : "#1e293b",
+                                      fontWeight: isSelected ? 700 : 500
+                                    }}
+                                  >
+                                    {size}
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          )}
                         </div>
 
-                        <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
-                          <label style={{ fontSize: "0.78rem", fontWeight: 700, color: "#475569" }}>Font Size</label>
-                          <input
-                            type="text"
-                            value={selectedElement === "title" ? currentTitleFontSize : currentManifestoFontSize}
-                            onChange={(e) => {
-                              if (selectedElement === "title") setCurrentTitleFontSize(e.target.value);
-                              else setCurrentManifestoFontSize(e.target.value);
+                        {/* Custom Font Boldness Dropdown */}
+                        <div style={{ display: "flex", flexDirection: "column", gap: "4px", position: "relative" }}>
+                          <label style={{ fontSize: "0.78rem", fontWeight: 700, color: "#475569" }}>Font Boldness</label>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setIsFontWeightDropdownOpen(!isFontWeightDropdownOpen);
+                              setIsFontDropdownOpen(false);
+                              setIsFontSizeDropdownOpen(false);
                             }}
-                            placeholder="e.g. 4.5rem or 1.1rem"
-                            style={{ padding: "6px 8px", borderRadius: "6px", border: "1px solid #cbd5e1", fontSize: "0.8rem", color: "#000" }}
-                          />
+                            style={{
+                              padding: "8px 12px",
+                              borderRadius: "6px",
+                              border: "1px solid #cbd5e1",
+                              fontSize: "0.82rem",
+                              color: "#0f172a",
+                              backgroundColor: "#ffffff",
+                              cursor: "pointer",
+                              display: "flex",
+                              justifyContent: "space-between",
+                              alignItems: "center",
+                              textAlign: "left",
+                              fontWeight: 600
+                            }}
+                          >
+                            <span>
+                              {
+                                [
+                                  { value: "300", label: "Light (300)" },
+                                  { value: "400", label: "Normal (400)" },
+                                  { value: "500", label: "Medium (500)" },
+                                  { value: "600", label: "Semi Bold (600)" },
+                                  { value: "700", label: "Bold (700)" },
+                                  { value: "800", label: "Extra Bold (800)" },
+                                  { value: "900", label: "Black (900)" }
+                                ].find(w => w.value === (selectedElement === "title" ? currentTitleFontWeight : currentManifestoFontWeight))?.label || "Normal (400)"
+                              }
+                            </span>
+                            <span style={{ fontSize: "0.7rem", color: "#64748b" }}>▼</span>
+                          </button>
+
+                          {isFontWeightDropdownOpen && (
+                            <div
+                              onMouseLeave={() => setHoveredFontWeight(null)}
+                              style={{
+                                position: "absolute",
+                                top: "100%",
+                                left: 0,
+                                right: 0,
+                                zIndex: 100,
+                                marginTop: "4px",
+                                maxHeight: "200px",
+                                overflowY: "auto",
+                                backgroundColor: "#ffffff",
+                                borderRadius: "8px",
+                                border: "1px solid #cbd5e1",
+                                boxShadow: "0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05)",
+                                padding: "4px"
+                              }}
+                            >
+                              {[
+                                { value: "300", label: "Light (300)" },
+                                { value: "400", label: "Normal (400)" },
+                                { value: "500", label: "Medium (500)" },
+                                { value: "600", label: "Semi Bold (600)" },
+                                { value: "700", label: "Bold (700)" },
+                                { value: "800", label: "Extra Bold (800)" },
+                                { value: "900", label: "Black (900)" }
+                              ].map(w => {
+                                const activeWeight = selectedElement === "title" ? currentTitleFontWeight : currentManifestoFontWeight;
+                                const isSelected = activeWeight === w.value;
+                                return (
+                                  <div
+                                    key={w.value}
+                                    onMouseEnter={() => setHoveredFontWeight(w.value)}
+                                    onClick={() => {
+                                      if (selectedElement === "title") setCurrentTitleFontWeight(w.value);
+                                      else setCurrentManifestoFontWeight(w.value);
+                                      setHoveredFontWeight(null);
+                                      setIsFontWeightDropdownOpen(false);
+                                    }}
+                                    style={{
+                                      padding: "6px 10px",
+                                      borderRadius: "4px",
+                                      fontSize: "0.8rem",
+                                      cursor: "pointer",
+                                      backgroundColor: isSelected ? "#eff6ff" : "transparent",
+                                      color: isSelected ? "#2563eb" : "#1e293b",
+                                      fontWeight: Number(w.value) || 500
+                                    }}
+                                  >
+                                    {w.label}
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          )}
                         </div>
                       </div>
+
+
 
                       {/* Text Color & Alignment */}
                       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" }}>
@@ -1162,26 +1453,26 @@ export default function CustomizeLayoutModal({
                                 >
                                   {align === "left" && (
                                     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                      <line x1="17" y1="10" x2="3" y2="10"/>
-                                      <line x1="21" y1="6" x2="3" y2="6"/>
-                                      <line x1="21" y1="14" x2="3" y2="14"/>
-                                      <line x1="15" y1="18" x2="3" y2="18"/>
+                                      <line x1="17" y1="10" x2="3" y2="10" />
+                                      <line x1="21" y1="6" x2="3" y2="6" />
+                                      <line x1="21" y1="14" x2="3" y2="14" />
+                                      <line x1="15" y1="18" x2="3" y2="18" />
                                     </svg>
                                   )}
                                   {align === "center" && (
                                     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                      <line x1="18" y1="10" x2="6" y2="10"/>
-                                      <line x1="21" y1="6" x2="3" y2="6"/>
-                                      <line x1="21" y1="14" x2="3" y2="14"/>
-                                      <line x1="16" y1="18" x2="8" y2="18"/>
+                                      <line x1="18" y1="10" x2="6" y2="10" />
+                                      <line x1="21" y1="6" x2="3" y2="6" />
+                                      <line x1="21" y1="14" x2="3" y2="14" />
+                                      <line x1="16" y1="18" x2="8" y2="18" />
                                     </svg>
                                   )}
                                   {align === "right" && (
                                     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                      <line x1="21" y1="10" x2="7" y2="10"/>
-                                      <line x1="21" y1="6" x2="3" y2="6"/>
-                                      <line x1="21" y1="14" x2="3" y2="14"/>
-                                      <line x1="21" y1="18" x2="9" y2="18"/>
+                                      <line x1="21" y1="10" x2="7" y2="10" />
+                                      <line x1="21" y1="6" x2="3" y2="6" />
+                                      <line x1="21" y1="14" x2="3" y2="14" />
+                                      <line x1="21" y1="18" x2="9" y2="18" />
                                     </svg>
                                   )}
                                 </button>
@@ -1193,9 +1484,43 @@ export default function CustomizeLayoutModal({
                     </div>
                   )}
 
-                  {/* Button Styling Options */}
+                  {/* Button Styling & Sizing Options */}
                   {selectedElement === "button" && (
                     <div style={{ display: "flex", flexDirection: "column", gap: "12px", borderTop: "1px solid #f1f5f9", paddingTop: "12px" }}>
+                      {/* Button Size Selection */}
+                      <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+                        <label style={{ fontSize: "0.78rem", fontWeight: 700, color: "#475569" }}>Button Size</label>
+                        <div style={{ display: "flex", gap: "6px" }}>
+                          {[
+                            { id: "sm", label: "Small" },
+                            { id: "md", label: "Medium" },
+                            { id: "lg", label: "Large" }
+                          ].map((sz) => {
+                            const isSelected = currentButtonSize === sz.id;
+                            return (
+                              <button
+                                key={sz.id}
+                                type="button"
+                                onClick={() => setCurrentButtonSize(sz.id)}
+                                style={{
+                                  flex: 1,
+                                  padding: "6px 0",
+                                  borderRadius: "6px",
+                                  border: isSelected ? "2px solid #3b82f6" : "1px solid #cbd5e1",
+                                  backgroundColor: isSelected ? "#eff6ff" : "#ffffff",
+                                  color: isSelected ? "#1d4ed8" : "#475569",
+                                  fontSize: "0.78rem",
+                                  fontWeight: 600,
+                                  cursor: "pointer"
+                                }}
+                              >
+                                {sz.label}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+
                       {/* Button Redirect Page Dropdown */}
                       <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
                         <label style={{ fontSize: "0.78rem", fontWeight: 700, color: "#475569" }}>Button Redirect Target</label>
@@ -1278,18 +1603,18 @@ export default function CustomizeLayoutModal({
             <div style={{
               flex: 1,
               backgroundColor: "#f8fafc",
-              padding: "24px",
+              padding: "16px",
               display: "flex",
               flexDirection: "column",
-              overflow: "hidden",
+              overflowY: "auto",
               boxSizing: "border-box",
               position: "relative"
             }}>
               {/* Top Viewport Device Bar */}
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "12px", zIndex: 10 }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px", zIndex: 10 }}>
                 <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
                   <span style={{ fontSize: "0.72rem", fontWeight: 800, textTransform: "uppercase", color: "#475569", letterSpacing: "0.08em" }}>
-                    LIVE PREVIEW CANVAS
+                    LIVE PREVIEW
                   </span>
                   <span style={{ fontSize: "0.7rem", backgroundColor: "#e2e8f0", padding: "2px 8px", borderRadius: "4px", fontWeight: 600, color: "#475569" }}>
                     1440 x 680 (Scalable)
@@ -1316,11 +1641,11 @@ export default function CustomizeLayoutModal({
                     }}
                   >
                     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
-                      <line x1="8" y1="21" x2="16" y2="21"/>
-                      <line x1="12" y1="17" x2="12" y2="21"/>
+                      <rect x="2" y="3" width="20" height="14" rx="2" ry="2" />
+                      <line x1="8" y1="21" x2="16" y2="21" />
+                      <line x1="12" y1="17" x2="12" y2="21" />
                     </svg>
-                    Desktop
+
                   </button>
 
                   <button
@@ -1341,10 +1666,10 @@ export default function CustomizeLayoutModal({
                     }}
                   >
                     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <rect x="5" y="2" width="14" height="20" rx="2" ry="2"/>
-                      <line x1="12" y1="18" x2="12.01" y2="18"/>
+                      <rect x="5" y="2" width="14" height="20" rx="2" ry="2" />
+                      <line x1="12" y1="18" x2="12.01" y2="18" />
                     </svg>
-                    Mobile
+
                   </button>
                 </div>
               </div>
@@ -1360,10 +1685,11 @@ export default function CustomizeLayoutModal({
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                minHeight: "340px"
+                minHeight: "420px"
               }}>
                 {/* Scaled Canvas Frame */}
                 <div
+                  ref={canvasFrameRef}
                   onClick={() => setSelectedElement(null)}
                   style={{
                     position: "absolute",
@@ -1371,7 +1697,7 @@ export default function CustomizeLayoutModal({
                     left: "50%",
                     width: previewDevice === 'desktop' ? "1280px" : "393px",
                     height: previewDevice === 'desktop' ? "720px" : "852px",
-                    transform: previewDevice === 'desktop' ? "translate(-50%, -50%) scale(0.48)" : "translate(-50%, -50%) scale(0.44)",
+                    transform: previewDevice === 'desktop' ? "translate(-50%, -50%) scale(0.60)" : "translate(-50%, -50%) scale(0.50)",
                     transformOrigin: "center center",
                     backgroundColor: bgType === "color" ? (bgColor || "#121212") : "#121212",
                     backgroundImage: bgType === "image" && bgImage ? `url("${bgImage}")` : "none",
@@ -1400,6 +1726,46 @@ export default function CustomizeLayoutModal({
                     <video src={bgVideo} autoPlay muted loop playsInline style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", zIndex: 1 }} />
                   )}
                   {bgType !== "color" && <div style={{ position: "absolute", inset: 0, backgroundColor: "rgba(0, 0, 0, 0.45)", zIndex: 1 }} />}
+
+                  {/* Dynamic Vertical Alignment Guide Line (Canvas Geometric X-Axis Center) */}
+                  {showVerticalGuide && (
+                    <div style={{
+                      position: "absolute",
+                      left: "50%",
+                      top: 0,
+                      bottom: 0,
+                      width: "2px",
+                      backgroundColor: "#3b82f6",
+                      opacity: 0.85,
+                      boxShadow: "0 0 10px #3b82f6",
+                      zIndex: 25,
+                      pointerEvents: "none"
+                    }}>
+                      <div style={{ position: "absolute", top: "16px", left: "50%", transform: "translateX(-50%)", fontSize: "0.7rem", fontWeight: 800, backgroundColor: "#2563eb", color: "#fff", padding: "3px 8px", borderRadius: "4px", textTransform: "uppercase", letterSpacing: "0.05em", boxShadow: "0 2px 6px rgba(0,0,0,0.3)" }}>
+                        X CENTER
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Dynamic Horizontal Alignment Guide Line (Canvas Geometric Y-Axis Center) */}
+                  {showHorizontalGuide && (
+                    <div style={{
+                      position: "absolute",
+                      top: "50%",
+                      left: 0,
+                      right: 0,
+                      height: "2px",
+                      backgroundColor: "#3b82f6",
+                      opacity: 0.85,
+                      boxShadow: "0 0 10px #3b82f6",
+                      zIndex: 25,
+                      pointerEvents: "none"
+                    }}>
+                      <div style={{ position: "absolute", left: "16px", top: "50%", transform: "translateY(-50%)", fontSize: "0.7rem", fontWeight: 800, backgroundColor: "#2563eb", color: "#fff", padding: "3px 8px", borderRadius: "4px", textTransform: "uppercase", letterSpacing: "0.05em", boxShadow: "0 2px 6px rgba(0,0,0,0.3)" }}>
+                        Y CENTER
+                      </div>
+                    </div>
+                  )}
 
                   {/* Left Carousel Prev Arrow */}
                   <button
@@ -1464,36 +1830,173 @@ export default function CustomizeLayoutModal({
                   </button>
 
                   <div style={{ position: "relative", zIndex: 2, display: "flex", flexDirection: "column", gap: "20px", maxWidth: "800px", width: "100%" }}>
+                    {/* Helper component or inline rendering for selection & interactive handles */}
                     {/* 1. Hero Title Element */}
                     <div
+                      ref={titleRef}
                       onClick={(e) => {
                         e.stopPropagation();
                         setSelectedElement("title");
                       }}
+                      onMouseDown={(e) => {
+                        setSelectedElement("title");
+                        const startX = e.clientX;
+                        const startY = e.clientY;
+                        const initialOffsetX = titleContainer.offsetX;
+                        const initialOffsetY = titleContainer.offsetY;
+
+                        // Capture base un-transformed element center relative to canvas center
+                        const scale = previewDevice === 'desktop' ? 0.60 : 0.50;
+                        let baseCenterX = 0;
+                        let baseCenterY = 0;
+                        if (titleRef.current && canvasFrameRef.current) {
+                          const elemRect = titleRef.current.getBoundingClientRect();
+                          const canvasRect = canvasFrameRef.current.getBoundingClientRect();
+                          const currentElemCenterX = elemRect.left + elemRect.width / 2;
+                          const canvasCenterX = canvasRect.left + canvasRect.width / 2;
+                          baseCenterX = (currentElemCenterX - canvasCenterX) / scale - initialOffsetX;
+
+                          const currentElemCenterY = elemRect.top + elemRect.height / 2;
+                          const canvasCenterY = canvasRect.top + canvasRect.height / 2;
+                          baseCenterY = (currentElemCenterY - canvasCenterY) / scale - initialOffsetY;
+                        }
+
+                        const handleMouseMove = (moveEvent: MouseEvent) => {
+                          const dx = (moveEvent.clientX - startX) / scale;
+                          const dy = (moveEvent.clientY - startY) / scale;
+                          let nextX = initialOffsetX + dx;
+                          let nextY = initialOffsetY + dy;
+
+                          const projectedCenterX = baseCenterX + nextX;
+                          const projectedCenterY = baseCenterY + nextY;
+
+                          const snapThreshold = 20; // scale-independent canvas px threshold
+
+                          if (Math.abs(projectedCenterX) < snapThreshold) {
+                            nextX = -baseCenterX;
+                            setShowVerticalGuide(true);
+                          } else {
+                            setShowVerticalGuide(false);
+                          }
+
+                          if (Math.abs(projectedCenterY) < snapThreshold) {
+                            nextY = -baseCenterY;
+                            setShowHorizontalGuide(true);
+                          } else {
+                            setShowHorizontalGuide(false);
+                          }
+
+                          setTitleContainer((prev) => ({
+                            ...prev,
+                            offsetX: nextX,
+                            offsetY: nextY
+                          }));
+                        };
+
+                        const handleMouseUp = () => {
+                          setShowVerticalGuide(false);
+                          setShowHorizontalGuide(false);
+                          window.removeEventListener("mousemove", handleMouseMove);
+                          window.removeEventListener("mouseup", handleMouseUp);
+                        };
+
+                        window.addEventListener("mousemove", handleMouseMove);
+                        window.addEventListener("mouseup", handleMouseUp);
+                      }}
                       style={{
-                        cursor: "pointer",
+                        cursor: selectedElement === "title" ? "move" : "pointer",
                         border: selectedElement === "title" ? "2px dashed #3b82f6" : "1px dashed transparent",
-                        padding: "10px",
+                        padding: `${titleContainer.padding ?? 12}px`,
                         borderRadius: "8px",
-                        backgroundColor: selectedElement === "title" ? "rgba(59, 130, 246, 0.15)" : "transparent",
-                        position: "relative"
+                        backgroundColor: titleContainer.bgColor || (selectedElement === "title" ? "rgba(59, 130, 246, 0.12)" : "transparent"),
+                        width: titleContainer.width ? `${titleContainer.width}px` : "auto",
+                        height: titleContainer.height ? `${titleContainer.height}px` : "auto",
+                        transform: `translate(${titleContainer.offsetX}px, ${titleContainer.offsetY}px)`,
+                        position: "relative",
+                        userSelect: "none",
+                        boxSizing: "border-box",
+                        display: "flex",
+                        flexDirection: "column",
+                        justifyContent: "center"
                       }}
                     >
                       {selectedElement === "title" && (
-                        <div style={{ position: "absolute", top: "-22px", left: "0", fontSize: "0.7rem", fontWeight: 800, backgroundColor: "#2563eb", color: "#fff", padding: "2px 8px", borderRadius: "4px", textTransform: "uppercase" }}>
-                          ACTIVE TITLE ({previewDevice})
-                        </div>
+                        <>
+                          <div style={{ position: "absolute", top: "-24px", left: "0", fontSize: "0.7rem", fontWeight: 800, backgroundColor: "#2563eb", color: "#fff", padding: "2px 8px", borderRadius: "4px", textTransform: "uppercase", whiteSpace: "nowrap", pointerEvents: "none" }}>
+                            TITLE BOX (DRAG DOTS TO RESIZE BOX, DRAG BOX TO REPOSITION)
+                          </div>
+                          {/* 4 Corner Resize Dots */}
+                          {[
+                            { pos: { top: "-6px", left: "-6px" }, cursor: "nwse-resize", type: "tl" },
+                            { pos: { top: "-6px", right: "-6px" }, cursor: "nesw-resize", type: "tr" },
+                            { pos: { bottom: "-6px", left: "-6px" }, cursor: "nesw-resize", type: "bl" },
+                            { pos: { bottom: "-6px", right: "-6px" }, cursor: "nwse-resize", type: "br" }
+                          ].map((handle, idx) => (
+                            <div
+                              key={idx}
+                              onMouseDown={(e) => {
+                                e.stopPropagation();
+                                e.preventDefault();
+                                const startX = e.clientX;
+                                const startY = e.clientY;
+                                const initialWidth = titleContainer.width || e.currentTarget.parentElement?.clientWidth || 400;
+                                const initialHeight = titleContainer.height || e.currentTarget.parentElement?.clientHeight || 80;
+
+                                const handleMouseMove = (moveEvent: MouseEvent) => {
+                                  const scale = previewDevice === 'desktop' ? 0.60 : 0.50;
+                                  const dx = (moveEvent.clientX - startX) / scale;
+                                  const dy = (moveEvent.clientY - startY) / scale;
+
+                                  let newWidth = initialWidth;
+                                  let newHeight = initialHeight;
+
+                                  if (handle.type.includes("r")) newWidth = initialWidth + dx;
+                                  if (handle.type.includes("l")) newWidth = initialWidth - dx;
+                                  if (handle.type.includes("b")) newHeight = initialHeight + dy;
+                                  if (handle.type.includes("t")) newHeight = initialHeight - dy;
+
+                                  setTitleContainer((prev) => ({
+                                    ...prev,
+                                    width: Math.max(120, newWidth),
+                                    height: Math.max(40, newHeight)
+                                  }));
+                                };
+
+                                const handleMouseUp = () => {
+                                  window.removeEventListener("mousemove", handleMouseMove);
+                                  window.removeEventListener("mouseup", handleMouseUp);
+                                };
+
+                                window.addEventListener("mousemove", handleMouseMove);
+                                window.addEventListener("mouseup", handleMouseUp);
+                              }}
+                              style={{
+                                position: "absolute",
+                                width: "12px",
+                                height: "12px",
+                                backgroundColor: "#2563eb",
+                                border: "2px solid #ffffff",
+                                borderRadius: "50%",
+                                cursor: handle.cursor,
+                                zIndex: 10,
+                                boxShadow: "0 2px 4px rgba(0,0,0,0.2)",
+                                ...handle.pos
+                              }}
+                            />
+                          ))}
+                        </>
                       )}
                       {currentShowTitle ? (
                         <h1 style={{
-                          fontFamily: `"${currentTitleFontType}", sans-serif`,
+                          fontFamily: `"${(selectedElement === "title" && hoveredFontType) ? hoveredFontType : currentTitleFontType}", sans-serif`,
                           color: currentTitleFontColor,
-                          fontSize: currentTitleFontSize,
-                          fontWeight: Number(currentTitleFontWeight) || 700,
+                          fontSize: (selectedElement === "title" && hoveredFontSize) ? hoveredFontSize : currentTitleFontSize,
+                          fontWeight: Number((selectedElement === "title" && hoveredFontWeight) ? hoveredFontWeight : currentTitleFontWeight) || 700,
                           textAlign: (currentTitleFontAlignment as any) || "center",
                           margin: 0,
                           lineHeight: "1.1",
-                          wordBreak: "break-word"
+                          wordBreak: "break-word",
+                          transition: "font-family 0.15s ease, font-size 0.15s ease, font-weight 0.15s ease"
                         }}>
                           {currentTitleText || "WELCOME TO OUR STORE"}
                         </h1>
@@ -1506,35 +2009,170 @@ export default function CustomizeLayoutModal({
 
                     {/* 2. Hero Manifesto Subtitle */}
                     <div
+                      ref={manifestoRef}
                       onClick={(e) => {
                         e.stopPropagation();
                         setSelectedElement("manifesto");
                       }}
+                      onMouseDown={(e) => {
+                        setSelectedElement("manifesto");
+                        const startX = e.clientX;
+                        const startY = e.clientY;
+                        const initialOffsetX = manifestoContainer.offsetX;
+                        const initialOffsetY = manifestoContainer.offsetY;
+
+                        const scale = previewDevice === 'desktop' ? 0.60 : 0.50;
+                        let baseCenterX = 0;
+                        let baseCenterY = 0;
+                        if (manifestoRef.current && canvasFrameRef.current) {
+                          const elemRect = manifestoRef.current.getBoundingClientRect();
+                          const canvasRect = canvasFrameRef.current.getBoundingClientRect();
+                          const currentElemCenterX = elemRect.left + elemRect.width / 2;
+                          const canvasCenterX = canvasRect.left + canvasRect.width / 2;
+                          baseCenterX = (currentElemCenterX - canvasCenterX) / scale - initialOffsetX;
+
+                          const currentElemCenterY = elemRect.top + elemRect.height / 2;
+                          const canvasCenterY = canvasRect.top + canvasRect.height / 2;
+                          baseCenterY = (currentElemCenterY - canvasCenterY) / scale - initialOffsetY;
+                        }
+
+                        const handleMouseMove = (moveEvent: MouseEvent) => {
+                          const dx = (moveEvent.clientX - startX) / scale;
+                          const dy = (moveEvent.clientY - startY) / scale;
+                          let nextX = initialOffsetX + dx;
+                          let nextY = initialOffsetY + dy;
+
+                          const projectedCenterX = baseCenterX + nextX;
+                          const projectedCenterY = baseCenterY + nextY;
+
+                          const snapThreshold = 20;
+
+                          if (Math.abs(projectedCenterX) < snapThreshold) {
+                            nextX = -baseCenterX;
+                            setShowVerticalGuide(true);
+                          } else {
+                            setShowVerticalGuide(false);
+                          }
+
+                          if (Math.abs(projectedCenterY) < snapThreshold) {
+                            nextY = -baseCenterY;
+                            setShowHorizontalGuide(true);
+                          } else {
+                            setShowHorizontalGuide(false);
+                          }
+
+                          setManifestoContainer((prev) => ({
+                            ...prev,
+                            offsetX: nextX,
+                            offsetY: nextY
+                          }));
+                        };
+
+                        const handleMouseUp = () => {
+                          setShowVerticalGuide(false);
+                          setShowHorizontalGuide(false);
+                          window.removeEventListener("mousemove", handleMouseMove);
+                          window.removeEventListener("mouseup", handleMouseUp);
+                        };
+
+                        window.addEventListener("mousemove", handleMouseMove);
+                        window.addEventListener("mouseup", handleMouseUp);
+                      }}
                       style={{
-                        cursor: "pointer",
+                        cursor: selectedElement === "manifesto" ? "move" : "pointer",
                         border: selectedElement === "manifesto" ? "2px dashed #3b82f6" : "1px dashed transparent",
-                        padding: "10px",
+                        padding: `${manifestoContainer.padding ?? 10}px`,
                         borderRadius: "8px",
-                        backgroundColor: selectedElement === "manifesto" ? "rgba(59, 130, 246, 0.15)" : "transparent",
-                        position: "relative"
+                        backgroundColor: manifestoContainer.bgColor || (selectedElement === "manifesto" ? "rgba(59, 130, 246, 0.12)" : "transparent"),
+                        width: manifestoContainer.width ? `${manifestoContainer.width}px` : "auto",
+                        height: manifestoContainer.height ? `${manifestoContainer.height}px` : "auto",
+                        transform: `translate(${manifestoContainer.offsetX}px, ${manifestoContainer.offsetY}px)`,
+                        position: "relative",
+                        userSelect: "none",
+                        boxSizing: "border-box",
+                        display: "flex",
+                        flexDirection: "column",
+                        justifyContent: "center"
                       }}
                     >
                       {selectedElement === "manifesto" && (
-                        <div style={{ position: "absolute", top: "-22px", left: "0", fontSize: "0.7rem", fontWeight: 800, backgroundColor: "#2563eb", color: "#fff", padding: "2px 8px", borderRadius: "4px", textTransform: "uppercase" }}>
-                          ACTIVE SUBTITLE ({previewDevice})
-                        </div>
+                        <>
+                          <div style={{ position: "absolute", top: "-24px", left: "0", fontSize: "0.7rem", fontWeight: 800, backgroundColor: "#2563eb", color: "#fff", padding: "2px 8px", borderRadius: "4px", textTransform: "uppercase", whiteSpace: "nowrap", pointerEvents: "none" }}>
+                            SUBTITLE BOX (DRAG DOTS TO RESIZE BOX, DRAG BOX TO REPOSITION)
+                          </div>
+                          {/* 4 Corner Resize Dots */}
+                          {[
+                            { pos: { top: "-6px", left: "-6px" }, cursor: "nwse-resize", type: "tl" },
+                            { pos: { top: "-6px", right: "-6px" }, cursor: "nesw-resize", type: "tr" },
+                            { pos: { bottom: "-6px", left: "-6px" }, cursor: "nesw-resize", type: "bl" },
+                            { pos: { bottom: "-6px", right: "-6px" }, cursor: "nwse-resize", type: "br" }
+                          ].map((handle, idx) => (
+                            <div
+                              key={idx}
+                              onMouseDown={(e) => {
+                                e.stopPropagation();
+                                e.preventDefault();
+                                const startX = e.clientX;
+                                const startY = e.clientY;
+                                const initialWidth = manifestoContainer.width || e.currentTarget.parentElement?.clientWidth || 350;
+                                const initialHeight = manifestoContainer.height || e.currentTarget.parentElement?.clientHeight || 60;
+
+                                const handleMouseMove = (moveEvent: MouseEvent) => {
+                                  const scale = previewDevice === 'desktop' ? 0.60 : 0.50;
+                                  const dx = (moveEvent.clientX - startX) / scale;
+                                  const dy = (moveEvent.clientY - startY) / scale;
+
+                                  let newWidth = initialWidth;
+                                  let newHeight = initialHeight;
+
+                                  if (handle.type.includes("r")) newWidth = initialWidth + dx;
+                                  if (handle.type.includes("l")) newWidth = initialWidth - dx;
+                                  if (handle.type.includes("b")) newHeight = initialHeight + dy;
+                                  if (handle.type.includes("t")) newHeight = initialHeight - dy;
+
+                                  setManifestoContainer((prev) => ({
+                                    ...prev,
+                                    width: Math.max(100, newWidth),
+                                    height: Math.max(30, newHeight)
+                                  }));
+                                };
+
+                                const handleMouseUp = () => {
+                                  window.removeEventListener("mousemove", handleMouseMove);
+                                  window.removeEventListener("mouseup", handleMouseUp);
+                                };
+
+                                window.addEventListener("mousemove", handleMouseMove);
+                                window.addEventListener("mouseup", handleMouseUp);
+                              }}
+                              style={{
+                                position: "absolute",
+                                width: "12px",
+                                height: "12px",
+                                backgroundColor: "#2563eb",
+                                border: "2px solid #ffffff",
+                                borderRadius: "50%",
+                                cursor: handle.cursor,
+                                zIndex: 10,
+                                boxShadow: "0 2px 4px rgba(0,0,0,0.2)",
+                                ...handle.pos
+                              }}
+                            />
+                          ))}
+                        </>
                       )}
                       {currentShowManifesto ? (
                         <p style={{
-                          fontFamily: `"${currentManifestoFontType}", sans-serif`,
+                          fontFamily: `"${(selectedElement === "manifesto" && hoveredFontType) ? hoveredFontType : currentManifestoFontType}", sans-serif`,
                           color: currentManifestoFontColor,
-                          fontSize: currentManifestoFontSize,
-                          fontWeight: Number(currentManifestoFontWeight) || 500,
+                          fontSize: (selectedElement === "manifesto" && hoveredFontSize) ? hoveredFontSize : currentManifestoFontSize,
+                          fontWeight: Number((selectedElement === "manifesto" && hoveredFontWeight) ? hoveredFontWeight : currentManifestoFontWeight) || 500,
                           textAlign: (currentManifestoFontAlignment as any) || "center",
                           margin: 0,
                           lineHeight: "1.6",
                           textTransform: "uppercase",
-                          letterSpacing: "0.03em"
+                          letterSpacing: "0.03em",
+                          transition: "font-family 0.15s ease, font-size 0.15s ease, font-weight 0.15s ease"
                         }}>
                           {currentManifestoText || ""}
                         </p>
@@ -1547,33 +2185,174 @@ export default function CustomizeLayoutModal({
 
                     {/* 3. Hero Button */}
                     <div
+                      ref={buttonRef}
                       onClick={(e) => {
                         e.stopPropagation();
                         setSelectedElement("button");
                       }}
+                      onMouseDown={(e) => {
+                        setSelectedElement("button");
+                        const startX = e.clientX;
+                        const startY = e.clientY;
+                        const initialOffsetX = buttonContainer.offsetX;
+                        const initialOffsetY = buttonContainer.offsetY;
+
+                        const scale = previewDevice === 'desktop' ? 0.60 : 0.50;
+                        let baseCenterX = 0;
+                        let baseCenterY = 0;
+                        if (buttonRef.current && canvasFrameRef.current) {
+                          const elemRect = buttonRef.current.getBoundingClientRect();
+                          const canvasRect = canvasFrameRef.current.getBoundingClientRect();
+                          const currentElemCenterX = elemRect.left + elemRect.width / 2;
+                          const canvasCenterX = canvasRect.left + canvasRect.width / 2;
+                          baseCenterX = (currentElemCenterX - canvasCenterX) / scale - initialOffsetX;
+
+                          const currentElemCenterY = elemRect.top + elemRect.height / 2;
+                          const canvasCenterY = canvasRect.top + canvasRect.height / 2;
+                          baseCenterY = (currentElemCenterY - canvasCenterY) / scale - initialOffsetY;
+                        }
+
+                        const handleMouseMove = (moveEvent: MouseEvent) => {
+                          const dx = (moveEvent.clientX - startX) / scale;
+                          const dy = (moveEvent.clientY - startY) / scale;
+                          let nextX = initialOffsetX + dx;
+                          let nextY = initialOffsetY + dy;
+
+                          const projectedCenterX = baseCenterX + nextX;
+                          const projectedCenterY = baseCenterY + nextY;
+
+                          const snapThreshold = 20;
+
+                          if (Math.abs(projectedCenterX) < snapThreshold) {
+                            nextX = -baseCenterX;
+                            setShowVerticalGuide(true);
+                          } else {
+                            setShowVerticalGuide(false);
+                          }
+
+                          if (Math.abs(projectedCenterY) < snapThreshold) {
+                            nextY = -baseCenterY;
+                            setShowHorizontalGuide(true);
+                          } else {
+                            setShowHorizontalGuide(false);
+                          }
+
+                          setButtonContainer((prev) => ({
+                            ...prev,
+                            offsetX: nextX,
+                            offsetY: nextY
+                          }));
+                        };
+
+                        const handleMouseUp = () => {
+                          setShowVerticalGuide(false);
+                          setShowHorizontalGuide(false);
+                          window.removeEventListener("mousemove", handleMouseMove);
+                          window.removeEventListener("mouseup", handleMouseUp);
+                        };
+
+                        window.addEventListener("mousemove", handleMouseMove);
+                        window.addEventListener("mouseup", handleMouseUp);
+                      }}
                       style={{
-                        cursor: "pointer",
+                        cursor: selectedElement === "button" ? "move" : "pointer",
                         border: selectedElement === "button" ? "2px dashed #3b82f6" : "1px dashed transparent",
-                        padding: "8px",
+                        padding: "4px",
                         borderRadius: "8px",
-                        backgroundColor: selectedElement === "button" ? "rgba(59, 130, 246, 0.15)" : "transparent",
+                        backgroundColor: selectedElement === "button" ? "rgba(59, 130, 246, 0.12)" : "transparent",
                         display: "inline-block",
+                        position: "relative",
+                        userSelect: "none",
+                        width: buttonContainer.width ? `${buttonContainer.width}px` : "auto",
+                        height: buttonContainer.height ? `${buttonContainer.height}px` : "auto",
+                        transform: `translate(${buttonContainer.offsetX}px, ${buttonContainer.offsetY}px)`,
                         alignSelf:
                           currentLayoutTemplate === "center" || currentLayoutTemplate.endsWith("center") ? "center" :
                             currentLayoutTemplate.startsWith("right") ? "flex-end" : "flex-start"
                       }}
                     >
+                      {selectedElement === "button" && (
+                        <>
+                          <div style={{ position: "absolute", top: "-24px", left: "0", fontSize: "0.7rem", fontWeight: 800, backgroundColor: "#2563eb", color: "#fff", padding: "2px 8px", borderRadius: "4px", textTransform: "uppercase", whiteSpace: "nowrap", pointerEvents: "none" }}>
+                            BUTTON BOX (DRAG DOTS TO RESIZE BOX, DRAG BOX TO REPOSITION)
+                          </div>
+                          {/* 4 Corner Resize Dots */}
+                          {[
+                            { pos: { top: "-6px", left: "-6px" }, cursor: "nwse-resize", type: "tl" },
+                            { pos: { top: "-6px", right: "-6px" }, cursor: "nesw-resize", type: "tr" },
+                            { pos: { bottom: "-6px", left: "-6px" }, cursor: "nesw-resize", type: "bl" },
+                            { pos: { bottom: "-6px", right: "-6px" }, cursor: "nwse-resize", type: "br" }
+                          ].map((handle, idx) => (
+                            <div
+                              key={idx}
+                              onMouseDown={(e) => {
+                                e.stopPropagation();
+                                e.preventDefault();
+                                const startX = e.clientX;
+                                const startY = e.clientY;
+                                const initialWidth = buttonContainer.width || e.currentTarget.parentElement?.clientWidth || 180;
+                                const initialHeight = buttonContainer.height || e.currentTarget.parentElement?.clientHeight || 50;
+
+                                const handleMouseMove = (moveEvent: MouseEvent) => {
+                                  const scale = previewDevice === 'desktop' ? 0.60 : 0.50;
+                                  const dx = (moveEvent.clientX - startX) / scale;
+                                  const dy = (moveEvent.clientY - startY) / scale;
+
+                                  let newWidth = initialWidth;
+                                  let newHeight = initialHeight;
+
+                                  if (handle.type.includes("r")) newWidth = initialWidth + dx;
+                                  if (handle.type.includes("l")) newWidth = initialWidth - dx;
+                                  if (handle.type.includes("b")) newHeight = initialHeight + dy;
+                                  if (handle.type.includes("t")) newHeight = initialHeight - dy;
+
+                                  setButtonContainer((prev) => ({
+                                    ...prev,
+                                    width: Math.max(80, newWidth),
+                                    height: Math.max(30, newHeight)
+                                  }));
+                                };
+
+                                const handleMouseUp = () => {
+                                  window.removeEventListener("mousemove", handleMouseMove);
+                                  window.removeEventListener("mouseup", handleMouseUp);
+                                };
+
+                                window.addEventListener("mousemove", handleMouseMove);
+                                window.addEventListener("mouseup", handleMouseUp);
+                              }}
+                              style={{
+                                position: "absolute",
+                                width: "12px",
+                                height: "12px",
+                                backgroundColor: "#2563eb",
+                                border: "2px solid #ffffff",
+                                borderRadius: "50%",
+                                cursor: handle.cursor,
+                                zIndex: 10,
+                                boxShadow: "0 2px 4px rgba(0,0,0,0.2)",
+                                ...handle.pos
+                              }}
+                            />
+                          ))}
+                        </>
+                      )}
                       {currentShowButton ? (
                         <div style={{
-                          display: "inline-block",
-                          padding: "14px 36px",
-                          fontSize: "0.85rem",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          width: "100%",
+                          height: "100%",
+                          padding: buttonContainer.width ? "0 12px" : (currentButtonSize === "sm" ? "8px 20px" : currentButtonSize === "lg" ? "18px 48px" : "14px 36px"),
+                          fontSize: currentButtonSize === "sm" ? "0.75rem" : currentButtonSize === "lg" ? "1.0rem" : "0.85rem",
                           backgroundColor: currentButtonStyle === "solid" ? (currentButtonColor || primaryColor || "#000") : "transparent",
                           color: currentButtonStyle === "solid" ? (currentButtonTextColor || "#ffffff") : (currentButtonColor || "#ffffff"),
                           border: `2px solid ${currentButtonColor || primaryColor || "#ffffff"}`,
                           fontWeight: 700,
                           textTransform: "uppercase",
-                          letterSpacing: "0.1em"
+                          letterSpacing: "0.1em",
+                          boxSizing: "border-box"
                         }}>
                           {currentButtonText || "SHOP NOW"}
                         </div>
@@ -1650,7 +2429,7 @@ export default function CustomizeLayoutModal({
                     </div>
 
                     <h4 style={{ margin: 0, fontSize: "0.85rem", fontWeight: 800, color: "#0f172a", letterSpacing: "0.04em", textTransform: "uppercase" }}>
-                      HERO CAROUSEL SLIDES ({slides.length})
+                      HERO CAROUSEL SLIDES ({slides.length}/5 MAX)
                     </h4>
 
                     <span style={{ fontSize: "0.8rem", color: "#94a3b8", display: "flex", alignItems: "center", gap: "6px" }}>
@@ -1744,14 +2523,14 @@ export default function CustomizeLayoutModal({
                         onDrop={(e) => handleDrop(e, index)}
                         onClick={() => selectSlide(index)}
                         style={{
-                          width: "215px",
-                          minWidth: "215px",
-                          height: "105px",
-                          borderRadius: "10px",
+                          width: "160px",
+                          minWidth: "160px",
+                          height: "78px",
+                          borderRadius: "8px",
                           backgroundColor: isActive ? "#0f172a" : "#334155",
                           border: isActive ? "2px solid #2563eb" : "1px solid #475569",
-                          boxShadow: isActive ? "0 0 16px rgba(37, 99, 235, 0.45)" : "none",
-                          padding: "10px 12px",
+                          boxShadow: isActive ? "0 0 12px rgba(37, 99, 235, 0.45)" : "none",
+                          padding: "6px 8px",
                           display: "flex",
                           flexDirection: "column",
                           justifyContent: "space-between",
@@ -1760,30 +2539,112 @@ export default function CustomizeLayoutModal({
                           transition: "all 0.2s ease"
                         }}
                       >
-                        {/* Top Header inside card */}
-                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                          <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-                            <span style={{ color: "#64748b", cursor: "grab", fontSize: "0.85rem", fontWeight: 700 }}>::</span>
+                        {/* Shrunk Live Slide Micro-Canvas Preview */}
+                        <div style={{
+                          position: "relative",
+                          width: "100%",
+                          height: "64px",
+                          borderRadius: "6px",
+                          overflow: "hidden",
+                          backgroundColor: slide.bgType === "color" ? (slide.bgColor || "#121212") : "#121212",
+                          backgroundImage: slide.bgType === "image" && slide.bgImage ? `url("${slide.bgImage}")` : "none",
+                          backgroundSize: "cover",
+                          backgroundPosition: "center",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          marginTop: "4px"
+                        }}>
+                          {/* Mini Canvas Shrunk Viewport */}
+                          <div style={{
+                            width: "1280px",
+                            height: "720px",
+                            transform: "scale(0.12)",
+                            transformOrigin: "center center",
+                            display: "flex",
+                            flexDirection: "column",
+                            justifyContent:
+                              (slide.layoutTemplate || "center") === "top-left" || (slide.layoutTemplate || "center") === "right-top" || (slide.layoutTemplate || "center") === "top-center" ? "flex-start" :
+                                (slide.layoutTemplate || "center") === "bottom-left" || (slide.layoutTemplate || "center") === "right-bottom" || (slide.layoutTemplate || "center") === "bottom-center" ? "flex-end" : "center",
+                            alignItems:
+                              (slide.layoutTemplate || "center") === "center" || (slide.layoutTemplate || "center").endsWith("center") ? "center" :
+                                (slide.layoutTemplate || "center").startsWith("right") ? "flex-end" : "flex-start",
+                            padding: "60px 5%",
+                            textAlign:
+                              (slide.layoutTemplate || "center") === "center" || (slide.layoutTemplate || "center").endsWith("center") ? "center" :
+                                (slide.layoutTemplate || "center").startsWith("right") ? "right" : "left",
+                            pointerEvents: "none",
+                            userSelect: "none"
+                          }}>
+                            {slide.showTitle !== false && (
+                              <h1 style={{
+                                fontFamily: `"${slide.titleFontType || "Outfit"}", sans-serif`,
+                                color: slide.titleFontColor || "#ffffff",
+                                fontSize: slide.titleFontSize || "4.5rem",
+                                fontWeight: Number(slide.titleFontWeight) || 700,
+                                textAlign: (slide.titleFontAlignment as any) || "center",
+                                margin: 0,
+                                lineHeight: "1.1"
+                              }}>
+                                {slide.titleText || "SLIDE TITLE"}
+                              </h1>
+                            )}
+                            {slide.showManifesto !== false && (
+                              <p style={{
+                                fontFamily: `"${slide.manifestoFontType || "Outfit"}", sans-serif`,
+                                color: slide.manifestoFontColor || "#ffffff",
+                                fontSize: slide.manifestoFontSize || "1.1rem",
+                                fontWeight: Number(slide.manifestoFontWeight) || 500,
+                                textAlign: (slide.manifestoFontAlignment as any) || "center",
+                                margin: "14px 0 0 0",
+                                textTransform: "uppercase"
+                              }}>
+                                {slide.manifestoText || ""}
+                              </p>
+                            )}
+                            {slide.showButton !== false && (
+                              <div style={{
+                                marginTop: "20px",
+                                padding: slide.buttonSize === "sm" ? "10px 24px" : slide.buttonSize === "lg" ? "18px 48px" : "14px 36px",
+                                fontSize: slide.buttonSize === "sm" ? "0.85rem" : slide.buttonSize === "lg" ? "1.2rem" : "1.0rem",
+                                backgroundColor: slide.buttonStyle === "solid" ? (slide.buttonColor || "#ffffff") : "transparent",
+                                color: slide.buttonStyle === "solid" ? (slide.buttonTextColor || "#000000") : (slide.buttonColor || "#ffffff"),
+                                border: `2px solid ${slide.buttonColor || "#ffffff"}`,
+                                fontWeight: 700,
+                                textTransform: "uppercase",
+                                display: "inline-block"
+                              }}>
+                                {slide.buttonText || "SHOP NOW"}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Top Header Floating Badge inside card */}
+                        <div style={{ position: "absolute", top: "8px", left: "8px", right: "8px", display: "flex", justifyContent: "space-between", alignItems: "center", zIndex: 10 }}>
+                          <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
+                            <span style={{ color: "#ffffff", cursor: "grab", fontSize: "0.75rem", fontWeight: 800, textShadow: "0 1px 3px rgba(0,0,0,0.8)" }}>::</span>
                             <span style={{
-                              fontSize: "0.62rem",
+                              fontSize: "0.55rem",
                               fontWeight: 800,
-                              padding: "2px 7px",
+                              padding: "2px 6px",
                               borderRadius: "4px",
-                              backgroundColor: isActive ? "#2563eb" : "#475569",
+                              backgroundColor: isActive ? "#2563eb" : "rgba(15, 23, 42, 0.85)",
                               color: "#ffffff",
-                              letterSpacing: "0.05em"
+                              letterSpacing: "0.04em",
+                              boxShadow: "0 2px 4px rgba(0,0,0,0.3)"
                             }}>
                               SLIDE {index + 1}
                             </span>
                           </div>
 
-                          <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
+                          <div style={{ display: "flex", alignItems: "center", gap: "3px", backgroundColor: "rgba(15, 23, 42, 0.75)", padding: "1px 4px", borderRadius: "4px" }}>
                             {index > 0 && (
                               <button
                                 type="button"
                                 title="Move Left"
                                 onClick={(e) => moveSlide(e, index, 'left')}
-                                style={{ background: "none", border: "none", color: "#64748b", cursor: "pointer", padding: "0 2px", fontSize: "0.75rem" }}
+                                style={{ background: "none", border: "none", color: "#ffffff", cursor: "pointer", padding: "0 2px", fontSize: "0.65rem" }}
                               >
                                 ◀
                               </button>
@@ -1793,7 +2654,7 @@ export default function CustomizeLayoutModal({
                                 type="button"
                                 title="Move Right"
                                 onClick={(e) => moveSlide(e, index, 'right')}
-                                style={{ background: "none", border: "none", color: "#64748b", cursor: "pointer", padding: "0 2px", fontSize: "0.75rem" }}
+                                style={{ background: "none", border: "none", color: "#ffffff", cursor: "pointer", padding: "0 2px", fontSize: "0.65rem" }}
                               >
                                 ▶
                               </button>
@@ -1805,9 +2666,9 @@ export default function CustomizeLayoutModal({
                               style={{
                                 background: "none",
                                 border: "none",
-                                color: "#64748b",
+                                color: "#f87171",
                                 cursor: "pointer",
-                                fontSize: "0.85rem",
+                                fontSize: "0.75rem",
                                 padding: "0 2px"
                               }}
                             >
@@ -1815,40 +2676,6 @@ export default function CustomizeLayoutModal({
                             </button>
                           </div>
                         </div>
-
-                        {/* Title & Subtitle Preview */}
-                        <div style={{ padding: "0 2px" }}>
-                          <div style={{
-                            fontSize: "0.74rem",
-                            fontWeight: 800,
-                            color: isActive ? "#ffffff" : (index === 1 ? "#f59e0b" : "#ffffff"),
-                            textTransform: "uppercase",
-                            whiteSpace: "nowrap",
-                            overflow: "hidden",
-                            textOverflow: "ellipsis"
-                          }}>
-                            {slide.titleText || `SLIDE ${index + 1}`}
-                          </div>
-                          <div style={{
-                            fontSize: "0.6rem",
-                            color: "#94a3b8",
-                            whiteSpace: "nowrap",
-                            overflow: "hidden",
-                            textOverflow: "ellipsis",
-                            marginTop: "2px"
-                          }}>
-                            {slide.manifestoText || "No description provided"}
-                          </div>
-                        </div>
-
-                        {/* Bottom Indicator Pill Line */}
-                        <div style={{
-                          height: "4px",
-                          borderRadius: "2px",
-                          backgroundColor: isActive ? "#2563eb" : "#64748b",
-                          width: "36px",
-                          margin: "0 auto"
-                        }} />
                       </div>
                     );
                   })}
@@ -1857,10 +2684,10 @@ export default function CustomizeLayoutModal({
                   <div
                     onClick={handleAddSlide}
                     style={{
-                      width: "150px",
-                      minWidth: "150px",
-                      height: "105px",
-                      borderRadius: "10px",
+                      width: "110px",
+                      minWidth: "110px",
+                      height: "78px",
+                      borderRadius: "8px",
                       border: "2px dashed #cbd5e1",
                       backgroundColor: "#ffffff",
                       display: "flex",
@@ -1869,12 +2696,12 @@ export default function CustomizeLayoutModal({
                       justifyContent: "center",
                       cursor: "pointer",
                       color: "#475569",
-                      gap: "4px",
+                      gap: "2px",
                       transition: "all 0.2s ease"
                     }}
                   >
-                    <span style={{ fontSize: "1.2rem", fontWeight: 700, color: "#475569" }}>+</span>
-                    <span style={{ fontSize: "0.78rem", fontWeight: 700, color: "#475569" }}>+ Add Slide</span>
+                    <span style={{ fontSize: "1.0rem", fontWeight: 700, color: "#475569" }}>+</span>
+                    <span style={{ fontSize: "0.7rem", fontWeight: 700, color: "#475569" }}>Add Slide</span>
                   </div>
                 </div>
 
