@@ -157,6 +157,7 @@ export default function CustomizeLayoutModal({
   const [heroAutoPlay, setHeroAutoPlay] = useState<boolean>(initialConfig.heroAutoPlay ?? true);
   const [heroAutoPlaySpeed, setHeroAutoPlaySpeed] = useState<number>(initialConfig.heroAutoPlaySpeed ?? 5);
   const [draggedSlideIndex, setDraggedSlideIndex] = useState<number | null>(null);
+  const [dropInsertIndex, setDropInsertIndex] = useState<number | null>(null);
 
   const [uploadingMedia, setUploadingMedia] = useState<boolean>(false);
   const [uploadProgress, setUploadProgress] = useState<number | null>(null);
@@ -203,6 +204,11 @@ export default function CustomizeLayoutModal({
   const [manifestoContainer, setManifestoContainer] = useState<{ width?: number; height?: number; bgColor?: string; padding?: number; offsetX: number; offsetY: number }>({ offsetX: 0, offsetY: 0, padding: 10 });
   const [buttonContainer, setButtonContainer] = useState<{ width?: number; height?: number; paddingX?: number; paddingY?: number; offsetX: number; offsetY: number }>({ offsetX: 0, offsetY: 0 });
 
+  // Mobile element box container dimensions
+  const [mobileTitleContainer, setMobileTitleContainer] = useState<{ width?: number; height?: number; bgColor?: string; padding?: number; offsetX: number; offsetY: number }>({ offsetX: 0, offsetY: 0, padding: 8 });
+  const [mobileManifestoContainer, setMobileManifestoContainer] = useState<{ width?: number; height?: number; bgColor?: string; padding?: number; offsetX: number; offsetY: number }>({ offsetX: 0, offsetY: 0, padding: 6 });
+  const [mobileButtonContainer, setMobileButtonContainer] = useState<{ width?: number; height?: number; paddingX?: number; paddingY?: number; offsetX: number; offsetY: number }>({ offsetX: 0, offsetY: 0 });
+
   // Alignment guide lines state
   const [showVerticalGuide, setShowVerticalGuide] = useState<boolean>(false);
   const [showHorizontalGuide, setShowHorizontalGuide] = useState<boolean>(false);
@@ -238,6 +244,15 @@ export default function CustomizeLayoutModal({
     activeSlide.showMobileHeroButton !== undefined ? activeSlide.showMobileHeroButton : (activeSlide.showButton !== undefined ? activeSlide.showButton : true)
   );
 
+  // Default container baseline auto-dimensions per device view
+  const defaultDesktopTitleContainer = { width: 750, height: 90, padding: 12, offsetX: 0, offsetY: 0 };
+  const defaultDesktopManifestoContainer = { width: 680, height: 60, padding: 10, offsetX: 0, offsetY: 0 };
+  const defaultDesktopButtonContainer = { width: 200, height: 50, offsetX: 0, offsetY: 0 };
+
+  const defaultMobileTitleContainer = { width: 320, height: 75, padding: 8, offsetX: 0, offsetY: 0 };
+  const defaultMobileManifestoContainer = { width: 290, height: 55, padding: 6, offsetX: 0, offsetY: 0 };
+  const defaultMobileButtonContainer = { width: 160, height: 44, offsetX: 0, offsetY: 0 };
+
   // Sync state when active slide switches
   const loadSlideToState = (slide: HeroSlideItem) => {
     setTitleText(slide.titleText || "");
@@ -270,6 +285,10 @@ export default function CustomizeLayoutModal({
     setBgImage(slide.bgImage || "");
     setBgVideo(slide.bgVideo || "");
 
+    setTitleContainer(slide.titleContainer ? { ...slide.titleContainer } : { ...defaultDesktopTitleContainer });
+    setManifestoContainer(slide.manifestoContainer ? { ...slide.manifestoContainer } : { ...defaultDesktopManifestoContainer });
+    setButtonContainer(slide.buttonContainer ? { ...slide.buttonContainer } : { ...defaultDesktopButtonContainer });
+
     setMobileLayoutTemplate(slide.mobileLayoutTemplate || slide.layoutTemplate || "center");
     setMobileTitleText(slide.mobileTitleText || "");
     setMobileTitleFontType(slide.mobileTitleFontType || slide.titleFontType || "Outfit");
@@ -293,6 +312,10 @@ export default function CustomizeLayoutModal({
     setMobileButtonColor(slide.mobileButtonColor || "");
     setMobileButtonTextColor(slide.mobileButtonTextColor || "#ffffff");
     setMobileShowButton(slide.showMobileHeroButton !== undefined ? slide.showMobileHeroButton : true);
+
+    setMobileTitleContainer(slide.mobileTitleContainer ? { ...slide.mobileTitleContainer } : { ...defaultMobileTitleContainer });
+    setMobileManifestoContainer(slide.mobileManifestoContainer ? { ...slide.mobileManifestoContainer } : { ...defaultMobileManifestoContainer });
+    setMobileButtonContainer(slide.mobileButtonContainer ? { ...slide.mobileButtonContainer } : { ...defaultMobileButtonContainer });
   };
 
   const updateCurrentSlideStateInList = (overrides?: Partial<HeroSlideItem>) => {
@@ -331,6 +354,10 @@ export default function CustomizeLayoutModal({
           bgImage,
           bgVideo,
 
+          titleContainer,
+          manifestoContainer,
+          buttonContainer,
+
           mobileLayoutTemplate,
           mobileTitleText,
           mobileTitleFontType,
@@ -354,6 +381,10 @@ export default function CustomizeLayoutModal({
           mobileButtonColor,
           mobileButtonTextColor,
           showMobileHeroButton: mobileShowButton,
+
+          mobileTitleContainer,
+          mobileManifestoContainer,
+          mobileButtonContainer,
           ...overrides
         };
       }
@@ -368,10 +399,11 @@ export default function CustomizeLayoutModal({
     titleText, showTitle, titleFontType, titleFontSize, titleFontColor, titleFontWeight, titleFontAlignment,
     manifestoText, showManifesto, manifestoFontType, manifestoFontSize, manifestoFontColor, manifestoFontWeight, manifestoFontAlignment,
     buttonText, buttonRedirectUrl, showButton, buttonStyle, buttonSize, buttonColor, buttonTextColor,
-    layoutTemplate, bgType, bgColor, bgImage, bgVideo,
+    layoutTemplate, bgType, bgColor, bgImage, bgVideo, titleContainer, manifestoContainer, buttonContainer,
     mobileLayoutTemplate, mobileTitleText, mobileTitleFontType, mobileTitleFontColor, mobileTitleFontSize, mobileTitleFontAlignment, mobileTitleFontWeight, mobileShowTitle,
     mobileManifestoText, mobileManifestoFontType, mobileManifestoFontColor, mobileManifestoFontSize, mobileManifestoFontAlignment, mobileManifestoFontWeight, mobileShowManifesto,
-    mobileButtonText, mobileButtonStyle, mobileButtonSize, mobileButtonColor, mobileButtonTextColor, mobileShowButton
+    mobileButtonText, mobileButtonStyle, mobileButtonSize, mobileButtonColor, mobileButtonTextColor, mobileShowButton,
+    mobileTitleContainer, mobileManifestoContainer, mobileButtonContainer
   ]);
 
   const selectSlide = (index: number) => {
@@ -418,7 +450,16 @@ export default function CustomizeLayoutModal({
       bgType: "color",
       bgColor: "#0f172a",
       bgImage: "",
-      bgVideo: ""
+      bgVideo: "",
+
+      // Auto-calculated baseline bounds on creation for desktop and mobile
+      titleContainer: { width: 750, height: 90, padding: 12, offsetX: 0, offsetY: 0 },
+      manifestoContainer: { width: 680, height: 60, padding: 10, offsetX: 0, offsetY: 0 },
+      buttonContainer: { width: 200, height: 50, offsetX: 0, offsetY: 0 },
+
+      mobileTitleContainer: { width: 320, height: 75, padding: 8, offsetX: 0, offsetY: 0 },
+      mobileManifestoContainer: { width: 290, height: 55, padding: 6, offsetX: 0, offsetY: 0 },
+      mobileButtonContainer: { width: 160, height: 44, offsetX: 0, offsetY: 0 }
     };
     const newSlides = [...slides, newSlide];
     setSlides(newSlides);
@@ -464,24 +505,88 @@ export default function CustomizeLayoutModal({
   // Drag & Drop reorder handlers
   const handleDragStart = (e: React.DragEvent, index: number) => {
     e.dataTransfer.setData("text/plain", index.toString());
+    e.dataTransfer.effectAllowed = "move";
+
+    // Clear any text selection in window so native text selection ghosting is eliminated
+    if (window.getSelection) {
+      window.getSelection()?.removeAllRanges();
+    }
+
+    // Create a sleek compact drag badge element to replace default browser snapshot of entire card DOM
+    const dragBadge = document.createElement("div");
+    dragBadge.innerText = `SLIDE ${index + 1}`;
+    dragBadge.style.position = "fixed";
+    dragBadge.style.top = "-9999px";
+    dragBadge.style.left = "-9999px";
+    dragBadge.style.padding = "6px 14px";
+    dragBadge.style.backgroundColor = "#2563eb";
+    dragBadge.style.color = "#ffffff";
+    dragBadge.style.borderRadius = "6px";
+    dragBadge.style.fontSize = "12px";
+    dragBadge.style.fontWeight = "800";
+    dragBadge.style.letterSpacing = "0.04em";
+    dragBadge.style.boxShadow = "0 4px 12px rgba(37, 99, 235, 0.4)";
+    dragBadge.style.zIndex = "9999";
+    document.body.appendChild(dragBadge);
+
+    try {
+      e.dataTransfer.setDragImage(dragBadge, 35, 15);
+    } catch (err) {
+      // Browser fallback
+    }
+
+    setTimeout(() => {
+      if (document.body.contains(dragBadge)) {
+        document.body.removeChild(dragBadge);
+      }
+    }, 0);
+
     setDraggedSlideIndex(index);
+    setDropInsertIndex(index);
   };
 
-  const handleDragOver = (e: React.DragEvent) => {
-    e.preventDefault();
+  const handleDragEnd = () => {
+    setDraggedSlideIndex(null);
+    setDropInsertIndex(null);
   };
 
-  const handleDrop = (e: React.DragEvent, dropIndex: number) => {
+  const handleDragOver = (e: React.DragEvent, targetIndex: number) => {
     e.preventDefault();
-    if (draggedSlideIndex === null || draggedSlideIndex === dropIndex) return;
+    const rect = e.currentTarget.getBoundingClientRect();
+    const mouseX = e.clientX - rect.left;
+    const isAfter = mouseX > rect.width / 2;
+    const computedInsertIndex = isAfter ? targetIndex + 1 : targetIndex;
+
+    if (dropInsertIndex !== computedInsertIndex) {
+      setDropInsertIndex(computedInsertIndex);
+    }
+  };
+
+  const handleDrop = (e: React.DragEvent, targetIndex: number) => {
+    e.preventDefault();
+    const rect = e.currentTarget.getBoundingClientRect();
+    const mouseX = e.clientX - rect.left;
+    const isAfter = mouseX > rect.width / 2;
+    let toPos = isAfter ? targetIndex + 1 : targetIndex;
+
+    const fromIdx = draggedSlideIndex;
+    setDraggedSlideIndex(null);
+    setDropInsertIndex(null);
+
+    if (fromIdx === null) return;
+
+    if (fromIdx < toPos) {
+      toPos = toPos - 1;
+    }
+    if (fromIdx === toPos) return;
+
     updateCurrentSlideStateInList();
     const reordered = [...slides];
-    const [moved] = reordered.splice(draggedSlideIndex, 1);
-    reordered.splice(dropIndex, 0, moved);
+    const [moved] = reordered.splice(fromIdx, 1);
+    reordered.splice(toPos, 0, moved);
     setSlides(reordered);
-    setActiveSlideIndex(dropIndex);
-    loadSlideToState(reordered[dropIndex]);
-    setDraggedSlideIndex(null);
+    setActiveSlideIndex(toPos);
+    loadSlideToState(reordered[toPos]);
   };
 
   // Media File Upload (Image or Video) with Size Validation
@@ -509,39 +614,60 @@ export default function CustomizeLayoutModal({
     const formData = new FormData();
     formData.append("file", file);
 
+    let currentProgress = 0;
+    const progressTimer = setInterval(() => {
+      currentProgress += Math.floor(Math.random() * 7) + 5;
+      if (currentProgress > 92) {
+        currentProgress = 92;
+      }
+      setUploadProgress(currentProgress);
+    }, 120);
+
     const xhr = new XMLHttpRequest();
     xhr.open("POST", `${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:5001'}/api/upload`);
     xhr.upload.onprogress = (event) => {
-      if (event.lengthComputable) {
-        const percentage = Math.round((event.loaded / event.total) * 100);
-        setUploadProgress(percentage);
-      }
-    };
-    xhr.onload = () => {
-      setUploadingMedia(false);
-      setUploadProgress(null);
-      if (xhr.status === 200) {
-        try {
-          const data = JSON.parse(xhr.responseText);
-          if (mediaKind === "image") {
-            setBgImage(data.url);
-            setBgType("image");
-          } else {
-            setBgVideo(data.url);
-            setBgType("video");
-          }
-        } catch (err) {
-          alert("Failed to parse upload server response.");
+      if (event.lengthComputable && event.total > 0) {
+        const realPercentage = Math.round((event.loaded / event.total) * 90);
+        if (realPercentage > currentProgress) {
+          currentProgress = realPercentage;
+          setUploadProgress(realPercentage);
         }
-      } else {
-        alert("Media upload failed.");
       }
     };
+
+    xhr.onload = () => {
+      clearInterval(progressTimer);
+      setUploadProgress(100);
+
+      setTimeout(() => {
+        setUploadingMedia(false);
+        setUploadProgress(null);
+        if (xhr.status === 200) {
+          try {
+            const data = JSON.parse(xhr.responseText);
+            if (mediaKind === "image") {
+              setBgImage(data.url);
+              setBgType("image");
+            } else {
+              setBgVideo(data.url);
+              setBgType("video");
+            }
+          } catch (err) {
+            alert("Failed to parse upload server response.");
+          }
+        } else {
+          alert("Media upload failed.");
+        }
+      }, 300);
+    };
+
     xhr.onerror = () => {
+      clearInterval(progressTimer);
       setUploadingMedia(false);
       setUploadProgress(null);
       alert("Network error during file upload.");
     };
+
     xhr.send(formData);
   };
 
@@ -611,6 +737,15 @@ export default function CustomizeLayoutModal({
   const currentShowButton = isMobileDevice ? mobileShowButton : showButton;
   const setCurrentShowButton = isMobileDevice ? setMobileShowButton : setShowButton;
 
+  const currentTitleContainer = isMobileDevice ? mobileTitleContainer : titleContainer;
+  const setCurrentTitleContainer = isMobileDevice ? setMobileTitleContainer : setTitleContainer;
+
+  const currentManifestoContainer = isMobileDevice ? mobileManifestoContainer : manifestoContainer;
+  const setCurrentManifestoContainer = isMobileDevice ? setMobileManifestoContainer : setManifestoContainer;
+
+  const currentButtonContainer = isMobileDevice ? mobileButtonContainer : buttonContainer;
+  const setCurrentButtonContainer = isMobileDevice ? setMobileButtonContainer : setButtonContainer;
+
   const [isFontDropdownOpen, setIsFontDropdownOpen] = useState(false);
   const [fontDropdownCoords, setFontDropdownCoords] = useState<{ top: number, left: number, width: number } | null>(null);
   const [hoveredFontType, setHoveredFontType] = useState<string | null>(null);
@@ -622,6 +757,274 @@ export default function CustomizeLayoutModal({
   const [isFontWeightDropdownOpen, setIsFontWeightDropdownOpen] = useState(false);
   const [fontWeightDropdownCoords, setFontWeightDropdownCoords] = useState<{ top: number, left: number, width: number } | null>(null);
   const [hoveredFontWeight, setHoveredFontWeight] = useState<string | null>(null);
+
+  const [isButtonStyleDropdownOpen, setIsButtonStyleDropdownOpen] = useState(false);
+  const [hoveredButtonStyle, setHoveredButtonStyle] = useState<string | null>(null);
+
+  const [isButtonRedirectDropdownOpen, setIsButtonRedirectDropdownOpen] = useState(false);
+  const [hoveredButtonRedirectUrl, setHoveredButtonRedirectUrl] = useState<string | null>(null);
+
+  const getButtonStyleStyles = (
+    styleName: string,
+    colorStr?: string,
+    textColorStr?: string,
+    sizeStr?: string,
+    hasCustomWidth?: boolean
+  ): React.CSSProperties => {
+    const baseColor = colorStr || "#ffffff";
+    const baseTextColor = textColorStr || "#000000";
+
+    let styles: React.CSSProperties = {
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      fontWeight: 700,
+      textTransform: "uppercase",
+      letterSpacing: "0.1em",
+      boxSizing: "border-box",
+      transition: "all 0.2s ease",
+      padding: hasCustomWidth
+        ? "0 12px"
+        : sizeStr === "sm"
+        ? "8px 20px"
+        : sizeStr === "lg"
+        ? "18px 48px"
+        : "14px 36px",
+      fontSize:
+        sizeStr === "sm" ? "0.75rem" : sizeStr === "lg" ? "1.0rem" : "0.85rem",
+      borderTopWidth: "0px",
+      borderRightWidth: "0px",
+      borderBottomWidth: "0px",
+      borderLeftWidth: "0px",
+      borderTopStyle: "solid",
+      borderRightStyle: "solid",
+      borderBottomStyle: "solid",
+      borderLeftStyle: "solid",
+      borderTopColor: "transparent",
+      borderRightColor: "transparent",
+      borderBottomColor: "transparent",
+      borderLeftColor: "transparent",
+      borderRadius: "0px",
+      boxShadow: "none",
+      textDecoration: "none",
+      backdropFilter: "none",
+      WebkitBackdropFilter: "none",
+      backgroundImage: "none"
+    };
+
+    switch (styleName) {
+      case "outline":
+        styles.backgroundColor = "transparent";
+        styles.color = baseColor;
+        styles.borderTopWidth = "2px";
+        styles.borderRightWidth = "2px";
+        styles.borderBottomWidth = "2px";
+        styles.borderLeftWidth = "2px";
+        styles.borderTopColor = baseColor;
+        styles.borderRightColor = baseColor;
+        styles.borderBottomColor = baseColor;
+        styles.borderLeftColor = baseColor;
+        styles.borderRadius = "4px";
+        break;
+
+      case "pill":
+        styles.backgroundColor = baseColor;
+        styles.color = baseTextColor;
+        styles.borderTopWidth = "2px";
+        styles.borderRightWidth = "2px";
+        styles.borderBottomWidth = "2px";
+        styles.borderLeftWidth = "2px";
+        styles.borderTopColor = baseColor;
+        styles.borderRightColor = baseColor;
+        styles.borderBottomColor = baseColor;
+        styles.borderLeftColor = baseColor;
+        styles.borderRadius = "9999px";
+        break;
+
+      case "pill-outline":
+        styles.backgroundColor = "transparent";
+        styles.color = baseColor;
+        styles.borderTopWidth = "2px";
+        styles.borderRightWidth = "2px";
+        styles.borderBottomWidth = "2px";
+        styles.borderLeftWidth = "2px";
+        styles.borderTopColor = baseColor;
+        styles.borderRightColor = baseColor;
+        styles.borderBottomColor = baseColor;
+        styles.borderLeftColor = baseColor;
+        styles.borderRadius = "9999px";
+        break;
+
+      case "glass":
+        styles.backgroundColor = "rgba(255, 255, 255, 0.15)";
+        styles.backdropFilter = "blur(12px)";
+        styles.WebkitBackdropFilter = "blur(12px)";
+        styles.color = baseColor;
+        styles.borderTopWidth = "1px";
+        styles.borderRightWidth = "1px";
+        styles.borderBottomWidth = "1px";
+        styles.borderLeftWidth = "1px";
+        styles.borderTopColor = "rgba(255, 255, 255, 0.35)";
+        styles.borderRightColor = "rgba(255, 255, 255, 0.35)";
+        styles.borderBottomColor = "rgba(255, 255, 255, 0.35)";
+        styles.borderLeftColor = "rgba(255, 255, 255, 0.35)";
+        styles.borderRadius = "8px";
+        styles.boxShadow = "0 8px 32px 0 rgba(0, 0, 0, 0.2)";
+        break;
+
+      case "glow":
+        styles.backgroundColor = baseColor;
+        styles.color = baseTextColor;
+        styles.borderTopWidth = "2px";
+        styles.borderRightWidth = "2px";
+        styles.borderBottomWidth = "2px";
+        styles.borderLeftWidth = "2px";
+        styles.borderTopColor = baseColor;
+        styles.borderRightColor = baseColor;
+        styles.borderBottomColor = baseColor;
+        styles.borderLeftColor = baseColor;
+        styles.borderRadius = "8px";
+        styles.boxShadow = `0 0 20px ${baseColor}aa`;
+        break;
+
+      case "3d":
+        styles.backgroundColor = baseColor;
+        styles.color = baseTextColor;
+        styles.borderTopWidth = "2px";
+        styles.borderRightWidth = "2px";
+        styles.borderLeftWidth = "2px";
+        styles.borderBottomWidth = "5px";
+        styles.borderTopColor = baseColor;
+        styles.borderRightColor = baseColor;
+        styles.borderLeftColor = baseColor;
+        styles.borderBottomColor = "rgba(0, 0, 0, 0.35)";
+        styles.borderRadius = "8px";
+        break;
+
+      case "soft":
+        styles.backgroundColor = `${baseColor}22`;
+        styles.color = baseColor;
+        styles.borderTopWidth = "1px";
+        styles.borderRightWidth = "1px";
+        styles.borderBottomWidth = "1px";
+        styles.borderLeftWidth = "1px";
+        styles.borderTopColor = `${baseColor}44`;
+        styles.borderRightColor = `${baseColor}44`;
+        styles.borderBottomColor = `${baseColor}44`;
+        styles.borderLeftColor = `${baseColor}44`;
+        styles.borderRadius = "8px";
+        break;
+
+      case "neon":
+        styles.backgroundColor = "transparent";
+        styles.color = baseColor;
+        styles.borderTopWidth = "2px";
+        styles.borderRightWidth = "2px";
+        styles.borderBottomWidth = "2px";
+        styles.borderLeftWidth = "2px";
+        styles.borderTopColor = baseColor;
+        styles.borderRightColor = baseColor;
+        styles.borderBottomColor = baseColor;
+        styles.borderLeftColor = baseColor;
+        styles.borderRadius = "4px";
+        styles.boxShadow = `0 0 12px ${baseColor}, inset 0 0 12px ${baseColor}`;
+        break;
+
+      case "underline-bar":
+        styles.backgroundColor = "transparent";
+        styles.color = baseColor;
+        styles.borderBottomWidth = "3px";
+        styles.borderBottomColor = baseColor;
+        styles.borderRadius = "0px";
+        break;
+
+      case "double-border":
+        styles.backgroundColor = "transparent";
+        styles.color = baseColor;
+        styles.borderTopWidth = "4px";
+        styles.borderRightWidth = "4px";
+        styles.borderBottomWidth = "4px";
+        styles.borderLeftWidth = "4px";
+        styles.borderTopStyle = "double";
+        styles.borderRightStyle = "double";
+        styles.borderBottomStyle = "double";
+        styles.borderLeftStyle = "double";
+        styles.borderTopColor = baseColor;
+        styles.borderRightColor = baseColor;
+        styles.borderBottomColor = baseColor;
+        styles.borderLeftColor = baseColor;
+        styles.borderRadius = "6px";
+        break;
+
+      case "elevation":
+        styles.backgroundColor = baseColor;
+        styles.color = baseTextColor;
+        styles.borderTopWidth = "1px";
+        styles.borderRightWidth = "1px";
+        styles.borderBottomWidth = "1px";
+        styles.borderLeftWidth = "1px";
+        styles.borderTopColor = baseColor;
+        styles.borderRightColor = baseColor;
+        styles.borderBottomColor = baseColor;
+        styles.borderLeftColor = baseColor;
+        styles.borderRadius = "8px";
+        styles.boxShadow = `0 10px 25px -5px ${baseColor}66`;
+        break;
+
+      case "sharp":
+        styles.backgroundColor = baseColor;
+        styles.color = baseTextColor;
+        styles.borderTopWidth = "2px";
+        styles.borderRightWidth = "2px";
+        styles.borderBottomWidth = "2px";
+        styles.borderLeftWidth = "2px";
+        styles.borderTopColor = baseColor;
+        styles.borderRightColor = baseColor;
+        styles.borderBottomColor = baseColor;
+        styles.borderLeftColor = baseColor;
+        styles.borderRadius = "0px";
+        styles.boxShadow = `4px 4px 0px ${baseTextColor}`;
+        break;
+
+      case "curved-badge":
+        styles.backgroundColor = baseColor;
+        styles.color = baseTextColor;
+        styles.borderTopWidth = "2px";
+        styles.borderRightWidth = "2px";
+        styles.borderBottomWidth = "2px";
+        styles.borderLeftWidth = "2px";
+        styles.borderTopColor = baseColor;
+        styles.borderRightColor = baseColor;
+        styles.borderBottomColor = baseColor;
+        styles.borderLeftColor = baseColor;
+        styles.borderRadius = "16px";
+        break;
+
+      case "minimal":
+        styles.backgroundColor = "transparent";
+        styles.color = baseColor;
+        styles.textDecoration = "underline";
+        styles.textUnderlineOffset = "4px";
+        break;
+
+      case "solid":
+      default:
+        styles.backgroundColor = baseColor;
+        styles.color = baseTextColor;
+        styles.borderTopWidth = "2px";
+        styles.borderRightWidth = "2px";
+        styles.borderBottomWidth = "2px";
+        styles.borderLeftWidth = "2px";
+        styles.borderTopColor = baseColor;
+        styles.borderRightColor = baseColor;
+        styles.borderBottomColor = baseColor;
+        styles.borderLeftColor = baseColor;
+        styles.borderRadius = "4px";
+        break;
+    }
+
+    return styles;
+  };
 
   const handleApply = () => {
     const finalSlides = [...slides];
@@ -907,72 +1310,272 @@ export default function CustomizeLayoutModal({
                 )}
 
                 {bgType === "image" && (
-                  <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-                    <input
-                      type="text"
-                      placeholder="Paste Image URL (https://...)"
-                      value={bgImage || ""}
-                      onChange={(e) => setBgImage(e.target.value)}
-                      style={{ width: "100%", padding: "8px 12px", borderRadius: "6px", border: "1px solid #cbd5e1", fontSize: "0.85rem", color: "#000", boxSizing: "border-box" }}
-                    />
-                    <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
-                      <label style={{
-                        padding: "8px 14px",
-                        borderRadius: "6px",
-                        backgroundColor: "#3b82f6",
-                        color: "#ffffff",
-                        fontSize: "0.8rem",
-                        fontWeight: 700,
-                        cursor: "pointer",
-                        display: "inline-flex",
-                        alignItems: "center",
-                        gap: "6px"
-                      }}>
-                        Upload Image
-                        <input
-                          type="file"
-                          accept="image/*"
-                          onChange={(e) => handleMediaFileUpload(e, "image")}
-                          style={{ display: "none" }}
-                        />
-                      </label>
-                      {uploadingMedia && <span style={{ fontSize: "0.75rem", color: "#3b82f6", fontWeight: 600 }}>Uploading {uploadProgress}%...</span>}
-                    </div>
+                  <div>
+                    {bgImage ? (
+                      <div style={{ display: "flex", gap: "12px", alignItems: "center", backgroundColor: "#f8fafc", padding: "10px", borderRadius: "10px", border: "1px solid #e2e8f0" }}>
+                        {/* Left action buttons */}
+                        <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: "6px" }}>
+                          <label style={{
+                            padding: "8px 12px",
+                            borderRadius: "6px",
+                            backgroundColor: "#2563eb",
+                            color: "#ffffff",
+                            fontSize: "0.78rem",
+                            fontWeight: 700,
+                            cursor: uploadingMedia ? "not-allowed" : "pointer",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            gap: "6px",
+                            opacity: uploadingMedia ? 0.7 : 1
+                          }}>
+                            {uploadingMedia ? (
+                              <>
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" style={{ animation: "spin 1s linear infinite" }}>
+                                  <circle cx="12" cy="12" r="10" strokeOpacity="0.25" />
+                                  <path d="M12 2a10 10 0 0 1 10 10" strokeLinecap="round" />
+                                </svg>
+                                <span>Uploading {uploadProgress ?? 0}%...</span>
+                              </>
+                            ) : (
+                              <>
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                                  <polyline points="17 8 12 3 7 8" />
+                                  <line x1="12" y1="3" x2="12" y2="15" />
+                                </svg>
+                                <span>Replace Image</span>
+                              </>
+                            )}
+                            <input
+                              type="file"
+                              accept="image/*"
+                              disabled={uploadingMedia}
+                              onChange={(e) => handleMediaFileUpload(e, "image")}
+                              style={{ display: "none" }}
+                            />
+                          </label>
+
+                          <button
+                            type="button"
+                            onClick={() => setBgImage("")}
+                            disabled={uploadingMedia}
+                            style={{
+                              padding: "7px 12px",
+                              borderRadius: "6px",
+                              border: "1px solid #fca5a5",
+                              backgroundColor: "#fef2f2",
+                              color: "#dc2626",
+                              fontSize: "0.78rem",
+                              fontWeight: 700,
+                              cursor: "pointer",
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              gap: "6px"
+                            }}
+                          >
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                              <polyline points="3 6 5 6 21 6" />
+                              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                            </svg>
+                            <span>Remove Image</span>
+                          </button>
+                        </div>
+
+                        {/* Right side media preview thumbnail */}
+                        <div style={{
+                          width: "105px",
+                          height: "68px",
+                          borderRadius: "8px",
+                          border: "1px solid #cbd5e1",
+                          overflow: "hidden",
+                          position: "relative",
+                          backgroundColor: "#0f172a",
+                          flexShrink: 0
+                        }}>
+                          <img src={bgImage} alt="Uploaded Image" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                        </div>
+                      </div>
+                    ) : (
+                      <div>
+                        <label style={{
+                          padding: "10px 18px",
+                          borderRadius: "8px",
+                          backgroundColor: "#2563eb",
+                          color: "#ffffff",
+                          fontSize: "0.82rem",
+                          fontWeight: 700,
+                          cursor: uploadingMedia ? "not-allowed" : "pointer",
+                          display: "inline-flex",
+                          alignItems: "center",
+                          gap: "8px",
+                          boxShadow: "0 2px 5px rgba(37, 99, 235, 0.25)",
+                          opacity: uploadingMedia ? 0.7 : 1
+                        }}>
+                          {uploadingMedia ? (
+                            <>
+                              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" style={{ animation: "spin 1s linear infinite" }}>
+                                <circle cx="12" cy="12" r="10" strokeOpacity="0.25" />
+                                <path d="M12 2a10 10 0 0 1 10 10" strokeLinecap="round" />
+                              </svg>
+                              <span>Uploading {uploadProgress ?? 0}%...</span>
+                            </>
+                          ) : (
+                            <>
+                              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                                <polyline points="17 8 12 3 7 8" />
+                                <line x1="12" y1="3" x2="12" y2="15" />
+                              </svg>
+                              <span>Upload Image</span>
+                            </>
+                          )}
+                          <input
+                            type="file"
+                            accept="image/*"
+                            disabled={uploadingMedia}
+                            onChange={(e) => handleMediaFileUpload(e, "image")}
+                            style={{ display: "none" }}
+                          />
+                        </label>
+                      </div>
+                    )}
                   </div>
                 )}
 
                 {bgType === "video" && (
-                  <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-                    <input
-                      type="text"
-                      placeholder="Paste Video URL (.mp4, .webm)"
-                      value={bgVideo || ""}
-                      onChange={(e) => setBgVideo(e.target.value)}
-                      style={{ width: "100%", padding: "8px 12px", borderRadius: "6px", border: "1px solid #cbd5e1", fontSize: "0.85rem", color: "#000", boxSizing: "border-box" }}
-                    />
-                    <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
-                      <label style={{
-                        padding: "8px 14px",
-                        borderRadius: "6px",
-                        backgroundColor: "#8b5cf6",
-                        color: "#ffffff",
-                        fontSize: "0.8rem",
-                        fontWeight: 700,
-                        cursor: "pointer",
-                        display: "inline-flex",
-                        alignItems: "center",
-                        gap: "6px"
-                      }}>
-                        Upload Video MP4
-                        <input
-                          type="file"
-                          accept="video/*"
-                          onChange={(e) => handleMediaFileUpload(e, "video")}
-                          style={{ display: "none" }}
-                        />
-                      </label>
-                      {uploadingMedia && <span style={{ fontSize: "0.75rem", color: "#8b5cf6", fontWeight: 600 }}>Uploading {uploadProgress}%...</span>}
-                    </div>
+                  <div>
+                    {bgVideo ? (
+                      <div style={{ display: "flex", gap: "12px", alignItems: "center", backgroundColor: "#f8fafc", padding: "10px", borderRadius: "10px", border: "1px solid #e2e8f0" }}>
+                        {/* Left action buttons */}
+                        <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: "6px" }}>
+                          <label style={{
+                            padding: "8px 12px",
+                            borderRadius: "6px",
+                            backgroundColor: "#8b5cf6",
+                            color: "#ffffff",
+                            fontSize: "0.78rem",
+                            fontWeight: 700,
+                            cursor: uploadingMedia ? "not-allowed" : "pointer",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            gap: "6px",
+                            opacity: uploadingMedia ? 0.7 : 1
+                          }}>
+                            {uploadingMedia ? (
+                              <>
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" style={{ animation: "spin 1s linear infinite" }}>
+                                  <circle cx="12" cy="12" r="10" strokeOpacity="0.25" />
+                                  <path d="M12 2a10 10 0 0 1 10 10" strokeLinecap="round" />
+                                </svg>
+                                <span>Uploading {uploadProgress ?? 0}%...</span>
+                              </>
+                            ) : (
+                              <>
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                                  <polyline points="17 8 12 3 7 8" />
+                                  <line x1="12" y1="3" x2="12" y2="15" />
+                                </svg>
+                                <span>Replace Video MP4</span>
+                              </>
+                            )}
+                            <input
+                              type="file"
+                              accept="video/*"
+                              disabled={uploadingMedia}
+                              onChange={(e) => handleMediaFileUpload(e, "video")}
+                              style={{ display: "none" }}
+                            />
+                          </label>
+
+                          <button
+                            type="button"
+                            onClick={() => setBgVideo("")}
+                            disabled={uploadingMedia}
+                            style={{
+                              padding: "7px 12px",
+                              borderRadius: "6px",
+                              border: "1px solid #fca5a5",
+                              backgroundColor: "#fef2f2",
+                              color: "#dc2626",
+                              fontSize: "0.78rem",
+                              fontWeight: 700,
+                              cursor: "pointer",
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              gap: "6px"
+                            }}
+                          >
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                              <polyline points="3 6 5 6 21 6" />
+                              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                            </svg>
+                            <span>Remove Video</span>
+                          </button>
+                        </div>
+
+                        {/* Right side media video preview thumbnail */}
+                        <div style={{
+                          width: "105px",
+                          height: "68px",
+                          borderRadius: "8px",
+                          border: "1px solid #cbd5e1",
+                          overflow: "hidden",
+                          position: "relative",
+                          backgroundColor: "#0f172a",
+                          flexShrink: 0
+                        }}>
+                          <video src={bgVideo} autoPlay muted loop playsInline style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                        </div>
+                      </div>
+                    ) : (
+                      <div>
+                        <label style={{
+                          padding: "10px 18px",
+                          borderRadius: "8px",
+                          backgroundColor: "#8b5cf6",
+                          color: "#ffffff",
+                          fontSize: "0.82rem",
+                          fontWeight: 700,
+                          cursor: uploadingMedia ? "not-allowed" : "pointer",
+                          display: "inline-flex",
+                          alignItems: "center",
+                          gap: "8px",
+                          boxShadow: "0 2px 5px rgba(139, 92, 246, 0.25)",
+                          opacity: uploadingMedia ? 0.7 : 1
+                        }}>
+                          {uploadingMedia ? (
+                            <>
+                              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" style={{ animation: "spin 1s linear infinite" }}>
+                                <circle cx="12" cy="12" r="10" strokeOpacity="0.25" />
+                                <path d="M12 2a10 10 0 0 1 10 10" strokeLinecap="round" />
+                              </svg>
+                              <span>Uploading {uploadProgress ?? 0}%...</span>
+                            </>
+                          ) : (
+                            <>
+                              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                                <polyline points="17 8 12 3 7 8" />
+                                <line x1="12" y1="3" x2="12" y2="15" />
+                              </svg>
+                              <span>Upload Video MP4</span>
+                            </>
+                          )}
+                          <input
+                            type="file"
+                            accept="video/*"
+                            disabled={uploadingMedia}
+                            onChange={(e) => handleMediaFileUpload(e, "video")}
+                            style={{ display: "none" }}
+                          />
+                        </label>
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
@@ -1000,9 +1603,9 @@ export default function CustomizeLayoutModal({
                       type="button"
                       onClick={() => {
                         setCurrentLayoutTemplate(t.id);
-                        setTitleContainer(prev => ({ ...prev, offsetX: 0, offsetY: 0 }));
-                        setManifestoContainer(prev => ({ ...prev, offsetX: 0, offsetY: 0 }));
-                        setButtonContainer(prev => ({ ...prev, offsetX: 0, offsetY: 0 }));
+                        setCurrentTitleContainer(prev => ({ ...prev, offsetX: 0, offsetY: 0 }));
+                        setCurrentManifestoContainer(prev => ({ ...prev, offsetX: 0, offsetY: 0 }));
+                        setCurrentButtonContainer(prev => ({ ...prev, offsetX: 0, offsetY: 0 }));
                       }}
                       style={{
                         background: "none",
@@ -1521,49 +2124,228 @@ export default function CustomizeLayoutModal({
                         </div>
                       </div>
 
-                      {/* Button Redirect Page Dropdown */}
-                      <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+                      {/* Button Redirect Page System Custom Dropdown */}
+                      <div style={{ display: "flex", flexDirection: "column", gap: "4px", position: "relative" }}>
                         <label style={{ fontSize: "0.78rem", fontWeight: 700, color: "#475569" }}>Button Redirect Target</label>
-                        <select
-                          value={buttonRedirectUrl}
-                          onChange={(e) => setButtonRedirectUrl(e.target.value)}
-                          style={{ padding: "8px 10px", borderRadius: "6px", border: "1px solid #cbd5e1", fontSize: "0.82rem", color: "#000", fontWeight: 600, backgroundColor: "#ffffff" }}
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setIsButtonRedirectDropdownOpen(!isButtonRedirectDropdownOpen);
+                            setIsButtonStyleDropdownOpen(false);
+                            setIsFontDropdownOpen(false);
+                            setIsFontSizeDropdownOpen(false);
+                            setIsFontWeightDropdownOpen(false);
+                          }}
+                          style={{
+                            padding: "8px 12px",
+                            borderRadius: "6px",
+                            border: "1px solid #cbd5e1",
+                            fontSize: "0.82rem",
+                            color: "#0f172a",
+                            backgroundColor: "#ffffff",
+                            cursor: "pointer",
+                            display: "flex",
+                            justifyContent: "space-between",
+                            alignItems: "center",
+                            textAlign: "left",
+                            fontWeight: 600
+                          }}
                         >
-                          <option value="/shop">All Products Catalog (/shop)</option>
-                          <option value="/category/new-arrivals">New Arrivals (/category/new-arrivals)</option>
-                          <option value="/category/best-sellers">Best Sellers (/category/best-sellers)</option>
-                          <option value="/category/offers">Special Offers & Sale (/category/offers)</option>
-                          <option value="/about">About Us (/about)</option>
-                          <option value="/contact">Contact Support (/contact)</option>
-                          <option value="/faqs">FAQs (/faqs)</option>
-                        </select>
+                          <span>
+                            {
+                              [
+                                { value: "/shop", label: "All Products Catalog (/shop)" },
+                                { value: "/category/new-arrivals", label: "New Arrivals (/category/new-arrivals)" },
+                                { value: "/category/best-sellers", label: "Best Sellers (/category/best-sellers)" },
+                                { value: "/category/offers", label: "Special Offers & Sale (/category/offers)" },
+                                { value: "/about", label: "About Us (/about)" },
+                                { value: "/contact", label: "Contact Support (/contact)" },
+                                { value: "/faqs", label: "FAQs (/faqs)" }
+                              ].find(opt => opt.value === (hoveredButtonRedirectUrl || buttonRedirectUrl))?.label || buttonRedirectUrl || "All Products Catalog (/shop)"
+                            }
+                          </span>
+                          <span style={{ fontSize: "0.7rem", color: "#64748b" }}>▼</span>
+                        </button>
+
+                        {isButtonRedirectDropdownOpen && (
+                          <div
+                            onMouseLeave={() => setHoveredButtonRedirectUrl(null)}
+                            style={{
+                              position: "absolute",
+                              top: "100%",
+                              left: 0,
+                              right: 0,
+                              zIndex: 100,
+                              marginTop: "4px",
+                              maxHeight: "220px",
+                              overflowY: "auto",
+                              backgroundColor: "#ffffff",
+                              borderRadius: "8px",
+                              border: "1px solid #cbd5e1",
+                              boxShadow: "0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05)",
+                              padding: "4px"
+                            }}
+                          >
+                            {[
+                              { value: "/shop", label: "All Products Catalog (/shop)" },
+                              { value: "/category/new-arrivals", label: "New Arrivals (/category/new-arrivals)" },
+                              { value: "/category/best-sellers", label: "Best Sellers (/category/best-sellers)" },
+                              { value: "/category/offers", label: "Special Offers & Sale (/category/offers)" },
+                              { value: "/about", label: "About Us (/about)" },
+                              { value: "/contact", label: "Contact Support (/contact)" },
+                              { value: "/faqs", label: "FAQs (/faqs)" }
+                            ].map((target) => {
+                              const isSelected = buttonRedirectUrl === target.value;
+                              const isHovered = hoveredButtonRedirectUrl === target.value;
+                              return (
+                                <div
+                                  key={target.value}
+                                  onMouseEnter={() => setHoveredButtonRedirectUrl(target.value)}
+                                  onClick={() => {
+                                    setButtonRedirectUrl(target.value);
+                                    setHoveredButtonRedirectUrl(null);
+                                    setIsButtonRedirectDropdownOpen(false);
+                                  }}
+                                  style={{
+                                    padding: "6px 10px",
+                                    borderRadius: "4px",
+                                    fontSize: "0.82rem",
+                                    cursor: "pointer",
+                                    backgroundColor: isHovered ? "#f1f5f9" : isSelected ? "#eff6ff" : "transparent",
+                                    color: isSelected ? "#2563eb" : "#1e293b",
+                                    fontWeight: isSelected ? 700 : 500,
+                                    display: "flex",
+                                    justifyContent: "space-between",
+                                    alignItems: "center"
+                                  }}
+                                >
+                                  <span>{target.label}</span>
+                                  {isSelected && <span style={{ fontSize: "0.75rem" }}>✓</span>}
+                                </div>
+                              );
+                            })}
+                          </div>
+                        )}
                       </div>
 
-                      <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+                      {/* Button Style System Custom Dropdown with Live Hover Preview */}
+                      <div style={{ display: "flex", flexDirection: "column", gap: "4px", position: "relative" }}>
                         <label style={{ fontSize: "0.78rem", fontWeight: 700, color: "#475569" }}>Button Style</label>
-                        <div style={{ display: "flex", gap: "6px" }}>
-                          {["solid", "outline", "minimal"].map((style) => (
-                            <button
-                              key={style}
-                              type="button"
-                              onClick={() => setCurrentButtonStyle(style)}
-                              style={{
-                                flex: 1,
-                                padding: "6px",
-                                borderRadius: "6px",
-                                border: "1px solid #cbd5e1",
-                                backgroundColor: currentButtonStyle === style ? "#111827" : "#ffffff",
-                                color: currentButtonStyle === style ? "#ffffff" : "#374151",
-                                fontSize: "0.78rem",
-                                fontWeight: 600,
-                                cursor: "pointer",
-                                textTransform: "capitalize"
-                              }}
-                            >
-                              {style}
-                            </button>
-                          ))}
-                        </div>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setIsButtonStyleDropdownOpen(!isButtonStyleDropdownOpen);
+                            setIsButtonRedirectDropdownOpen(false);
+                            setIsFontDropdownOpen(false);
+                            setIsFontSizeDropdownOpen(false);
+                            setIsFontWeightDropdownOpen(false);
+                          }}
+                          style={{
+                            padding: "8px 12px",
+                            borderRadius: "6px",
+                            border: "1px solid #cbd5e1",
+                            fontSize: "0.82rem",
+                            color: "#0f172a",
+                            backgroundColor: "#ffffff",
+                            cursor: "pointer",
+                            display: "flex",
+                            justifyContent: "space-between",
+                            alignItems: "center",
+                            textAlign: "left",
+                            fontWeight: 600
+                          }}
+                        >
+                          <span>
+                            {
+                              [
+                                { value: "solid", label: "Solid Filled (Classic)" },
+                                { value: "outline", label: "Outline Border" },
+                                { value: "pill", label: "Solid Pill (Rounded)" },
+                                { value: "pill-outline", label: "Pill Outline (Rounded)" },
+                                { value: "glass", label: "Frosted Glassmorphism" },
+                                { value: "glow", label: "Ambient Shadow Glow" },
+                                { value: "3d", label: "Tactile 3D Pressable" },
+                                { value: "soft", label: "Soft Tinted Light" },
+                                { value: "neon", label: "Cyberpunk Neon Glow" },
+                                { value: "underline-bar", label: "Bottom Underline Bar" },
+                                { value: "double-border", label: "Double Line Border" },
+                                { value: "elevation", label: "Subtle Elevated Card" },
+                                { value: "sharp", label: "Retro Sharp Offset" },
+                                { value: "curved-badge", label: "Soft Curved Badge" },
+                                { value: "minimal", label: "Minimal Text Link" }
+                              ].find(st => st.value === (hoveredButtonStyle || currentButtonStyle))?.label || "Solid Filled (Classic)"
+                            }
+                          </span>
+                          <span style={{ fontSize: "0.7rem", color: "#64748b" }}>▼</span>
+                        </button>
+
+                        {isButtonStyleDropdownOpen && (
+                          <div
+                            onMouseLeave={() => setHoveredButtonStyle(null)}
+                            style={{
+                              position: "absolute",
+                              top: "100%",
+                              left: 0,
+                              right: 0,
+                              zIndex: 100,
+                              marginTop: "4px",
+                              maxHeight: "220px",
+                              overflowY: "auto",
+                              backgroundColor: "#ffffff",
+                              borderRadius: "8px",
+                              border: "1px solid #cbd5e1",
+                              boxShadow: "0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05)",
+                              padding: "4px"
+                            }}
+                          >
+                            {[
+                              { value: "solid", label: "Solid Filled (Classic)" },
+                              { value: "outline", label: "Outline Border" },
+                              { value: "pill", label: "Solid Pill (Rounded)" },
+                              { value: "pill-outline", label: "Pill Outline (Rounded)" },
+                              { value: "glass", label: "Frosted Glassmorphism" },
+                              { value: "glow", label: "Ambient Shadow Glow" },
+                              { value: "3d", label: "Tactile 3D Pressable" },
+                              { value: "soft", label: "Soft Tinted Light" },
+                              { value: "neon", label: "Cyberpunk Neon Glow" },
+                              { value: "underline-bar", label: "Bottom Underline Bar" },
+                              { value: "double-border", label: "Double Line Border" },
+                              { value: "elevation", label: "Subtle Elevated Card" },
+                              { value: "sharp", label: "Retro Sharp Offset" },
+                              { value: "curved-badge", label: "Soft Curved Badge" },
+                              { value: "minimal", label: "Minimal Text Link" }
+                            ].map((style) => {
+                              const isSelected = currentButtonStyle === style.value;
+                              const isHovered = hoveredButtonStyle === style.value;
+                              return (
+                                <div
+                                  key={style.value}
+                                  onMouseEnter={() => setHoveredButtonStyle(style.value)}
+                                  onClick={() => {
+                                    setCurrentButtonStyle(style.value);
+                                    setHoveredButtonStyle(null);
+                                    setIsButtonStyleDropdownOpen(false);
+                                  }}
+                                  style={{
+                                    padding: "6px 10px",
+                                    borderRadius: "4px",
+                                    fontSize: "0.82rem",
+                                    cursor: "pointer",
+                                    backgroundColor: isHovered ? "#f1f5f9" : isSelected ? "#eff6ff" : "transparent",
+                                    color: isSelected ? "#2563eb" : "#1e293b",
+                                    fontWeight: isSelected ? 700 : 500,
+                                    display: "flex",
+                                    justifyContent: "space-between",
+                                    alignItems: "center"
+                                  }}
+                                >
+                                  <span>{style.label}</span>
+                                  {isSelected && <span style={{ fontSize: "0.75rem" }}>✓</span>}
+                                </div>
+                              );
+                            })}
+                          </div>
+                        )}
                       </div>
 
                       <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
@@ -1839,11 +2621,13 @@ export default function CustomizeLayoutModal({
                         setSelectedElement("title");
                       }}
                       onMouseDown={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
                         setSelectedElement("title");
                         const startX = e.clientX;
                         const startY = e.clientY;
-                        const initialOffsetX = titleContainer.offsetX;
-                        const initialOffsetY = titleContainer.offsetY;
+                        const initialOffsetX = currentTitleContainer.offsetX;
+                        const initialOffsetY = currentTitleContainer.offsetY;
 
                         // Capture base un-transformed element center relative to canvas center
                         const scale = previewDevice === 'desktop' ? 0.60 : 0.50;
@@ -1886,7 +2670,7 @@ export default function CustomizeLayoutModal({
                             setShowHorizontalGuide(false);
                           }
 
-                          setTitleContainer((prev) => ({
+                          setCurrentTitleContainer((prev) => ({
                             ...prev,
                             offsetX: nextX,
                             offsetY: nextY
@@ -1906,12 +2690,12 @@ export default function CustomizeLayoutModal({
                       style={{
                         cursor: selectedElement === "title" ? "move" : "pointer",
                         border: selectedElement === "title" ? "2px dashed #3b82f6" : "1px dashed transparent",
-                        padding: `${titleContainer.padding ?? 12}px`,
+                        padding: `${currentTitleContainer.padding ?? 12}px`,
                         borderRadius: "8px",
-                        backgroundColor: titleContainer.bgColor || (selectedElement === "title" ? "rgba(59, 130, 246, 0.12)" : "transparent"),
-                        width: titleContainer.width ? `${titleContainer.width}px` : "auto",
-                        height: titleContainer.height ? `${titleContainer.height}px` : "auto",
-                        transform: `translate(${titleContainer.offsetX}px, ${titleContainer.offsetY}px)`,
+                        backgroundColor: currentTitleContainer.bgColor || (selectedElement === "title" ? "rgba(59, 130, 246, 0.12)" : "transparent"),
+                        width: currentTitleContainer.width ? `${currentTitleContainer.width}px` : "auto",
+                        height: currentTitleContainer.height ? `${currentTitleContainer.height}px` : "auto",
+                        transform: `translate(${currentTitleContainer.offsetX}px, ${currentTitleContainer.offsetY}px)`,
                         position: "relative",
                         userSelect: "none",
                         boxSizing: "border-box",
@@ -1939,8 +2723,8 @@ export default function CustomizeLayoutModal({
                                 e.preventDefault();
                                 const startX = e.clientX;
                                 const startY = e.clientY;
-                                const initialWidth = titleContainer.width || e.currentTarget.parentElement?.clientWidth || 400;
-                                const initialHeight = titleContainer.height || e.currentTarget.parentElement?.clientHeight || 80;
+                                const initialWidth = currentTitleContainer.width || e.currentTarget.parentElement?.clientWidth || 400;
+                                const initialHeight = currentTitleContainer.height || e.currentTarget.parentElement?.clientHeight || 80;
 
                                 const handleMouseMove = (moveEvent: MouseEvent) => {
                                   const scale = previewDevice === 'desktop' ? 0.60 : 0.50;
@@ -1955,7 +2739,7 @@ export default function CustomizeLayoutModal({
                                   if (handle.type.includes("b")) newHeight = initialHeight + dy;
                                   if (handle.type.includes("t")) newHeight = initialHeight - dy;
 
-                                  setTitleContainer((prev) => ({
+                                  setCurrentTitleContainer((prev) => ({
                                     ...prev,
                                     width: Math.max(120, newWidth),
                                     height: Math.max(40, newHeight)
@@ -2015,11 +2799,13 @@ export default function CustomizeLayoutModal({
                         setSelectedElement("manifesto");
                       }}
                       onMouseDown={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
                         setSelectedElement("manifesto");
                         const startX = e.clientX;
                         const startY = e.clientY;
-                        const initialOffsetX = manifestoContainer.offsetX;
-                        const initialOffsetY = manifestoContainer.offsetY;
+                        const initialOffsetX = currentManifestoContainer.offsetX;
+                        const initialOffsetY = currentManifestoContainer.offsetY;
 
                         const scale = previewDevice === 'desktop' ? 0.60 : 0.50;
                         let baseCenterX = 0;
@@ -2061,7 +2847,7 @@ export default function CustomizeLayoutModal({
                             setShowHorizontalGuide(false);
                           }
 
-                          setManifestoContainer((prev) => ({
+                          setCurrentManifestoContainer((prev) => ({
                             ...prev,
                             offsetX: nextX,
                             offsetY: nextY
@@ -2081,12 +2867,12 @@ export default function CustomizeLayoutModal({
                       style={{
                         cursor: selectedElement === "manifesto" ? "move" : "pointer",
                         border: selectedElement === "manifesto" ? "2px dashed #3b82f6" : "1px dashed transparent",
-                        padding: `${manifestoContainer.padding ?? 10}px`,
+                        padding: `${currentManifestoContainer.padding ?? 10}px`,
                         borderRadius: "8px",
-                        backgroundColor: manifestoContainer.bgColor || (selectedElement === "manifesto" ? "rgba(59, 130, 246, 0.12)" : "transparent"),
-                        width: manifestoContainer.width ? `${manifestoContainer.width}px` : "auto",
-                        height: manifestoContainer.height ? `${manifestoContainer.height}px` : "auto",
-                        transform: `translate(${manifestoContainer.offsetX}px, ${manifestoContainer.offsetY}px)`,
+                        backgroundColor: currentManifestoContainer.bgColor || (selectedElement === "manifesto" ? "rgba(59, 130, 246, 0.12)" : "transparent"),
+                        width: currentManifestoContainer.width ? `${currentManifestoContainer.width}px` : "auto",
+                        height: currentManifestoContainer.height ? `${currentManifestoContainer.height}px` : "auto",
+                        transform: `translate(${currentManifestoContainer.offsetX}px, ${currentManifestoContainer.offsetY}px)`,
                         position: "relative",
                         userSelect: "none",
                         boxSizing: "border-box",
@@ -2114,8 +2900,8 @@ export default function CustomizeLayoutModal({
                                 e.preventDefault();
                                 const startX = e.clientX;
                                 const startY = e.clientY;
-                                const initialWidth = manifestoContainer.width || e.currentTarget.parentElement?.clientWidth || 350;
-                                const initialHeight = manifestoContainer.height || e.currentTarget.parentElement?.clientHeight || 60;
+                                const initialWidth = currentManifestoContainer.width || e.currentTarget.parentElement?.clientWidth || 350;
+                                const initialHeight = currentManifestoContainer.height || e.currentTarget.parentElement?.clientHeight || 60;
 
                                 const handleMouseMove = (moveEvent: MouseEvent) => {
                                   const scale = previewDevice === 'desktop' ? 0.60 : 0.50;
@@ -2130,7 +2916,7 @@ export default function CustomizeLayoutModal({
                                   if (handle.type.includes("b")) newHeight = initialHeight + dy;
                                   if (handle.type.includes("t")) newHeight = initialHeight - dy;
 
-                                  setManifestoContainer((prev) => ({
+                                  setCurrentManifestoContainer((prev) => ({
                                     ...prev,
                                     width: Math.max(100, newWidth),
                                     height: Math.max(30, newHeight)
@@ -2191,11 +2977,13 @@ export default function CustomizeLayoutModal({
                         setSelectedElement("button");
                       }}
                       onMouseDown={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
                         setSelectedElement("button");
                         const startX = e.clientX;
                         const startY = e.clientY;
-                        const initialOffsetX = buttonContainer.offsetX;
-                        const initialOffsetY = buttonContainer.offsetY;
+                        const initialOffsetX = currentButtonContainer.offsetX;
+                        const initialOffsetY = currentButtonContainer.offsetY;
 
                         const scale = previewDevice === 'desktop' ? 0.60 : 0.50;
                         let baseCenterX = 0;
@@ -2237,7 +3025,7 @@ export default function CustomizeLayoutModal({
                             setShowHorizontalGuide(false);
                           }
 
-                          setButtonContainer((prev) => ({
+                          setCurrentButtonContainer((prev) => ({
                             ...prev,
                             offsetX: nextX,
                             offsetY: nextY
@@ -2263,9 +3051,9 @@ export default function CustomizeLayoutModal({
                         display: "inline-block",
                         position: "relative",
                         userSelect: "none",
-                        width: buttonContainer.width ? `${buttonContainer.width}px` : "auto",
-                        height: buttonContainer.height ? `${buttonContainer.height}px` : "auto",
-                        transform: `translate(${buttonContainer.offsetX}px, ${buttonContainer.offsetY}px)`,
+                        width: currentButtonContainer.width ? `${currentButtonContainer.width}px` : "auto",
+                        height: currentButtonContainer.height ? `${currentButtonContainer.height}px` : "auto",
+                        transform: `translate(${currentButtonContainer.offsetX}px, ${currentButtonContainer.offsetY}px)`,
                         alignSelf:
                           currentLayoutTemplate === "center" || currentLayoutTemplate.endsWith("center") ? "center" :
                             currentLayoutTemplate.startsWith("right") ? "flex-end" : "flex-start"
@@ -2290,8 +3078,8 @@ export default function CustomizeLayoutModal({
                                 e.preventDefault();
                                 const startX = e.clientX;
                                 const startY = e.clientY;
-                                const initialWidth = buttonContainer.width || e.currentTarget.parentElement?.clientWidth || 180;
-                                const initialHeight = buttonContainer.height || e.currentTarget.parentElement?.clientHeight || 50;
+                                const initialWidth = currentButtonContainer.width || e.currentTarget.parentElement?.clientWidth || 180;
+                                const initialHeight = currentButtonContainer.height || e.currentTarget.parentElement?.clientHeight || 50;
 
                                 const handleMouseMove = (moveEvent: MouseEvent) => {
                                   const scale = previewDevice === 'desktop' ? 0.60 : 0.50;
@@ -2306,7 +3094,7 @@ export default function CustomizeLayoutModal({
                                   if (handle.type.includes("b")) newHeight = initialHeight + dy;
                                   if (handle.type.includes("t")) newHeight = initialHeight - dy;
 
-                                  setButtonContainer((prev) => ({
+                                  setCurrentButtonContainer((prev) => ({
                                     ...prev,
                                     width: Math.max(80, newWidth),
                                     height: Math.max(30, newHeight)
@@ -2339,20 +3127,15 @@ export default function CustomizeLayoutModal({
                       )}
                       {currentShowButton ? (
                         <div style={{
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
                           width: "100%",
                           height: "100%",
-                          padding: buttonContainer.width ? "0 12px" : (currentButtonSize === "sm" ? "8px 20px" : currentButtonSize === "lg" ? "18px 48px" : "14px 36px"),
-                          fontSize: currentButtonSize === "sm" ? "0.75rem" : currentButtonSize === "lg" ? "1.0rem" : "0.85rem",
-                          backgroundColor: currentButtonStyle === "solid" ? (currentButtonColor || primaryColor || "#000") : "transparent",
-                          color: currentButtonStyle === "solid" ? (currentButtonTextColor || "#ffffff") : (currentButtonColor || "#ffffff"),
-                          border: `2px solid ${currentButtonColor || primaryColor || "#ffffff"}`,
-                          fontWeight: 700,
-                          textTransform: "uppercase",
-                          letterSpacing: "0.1em",
-                          boxSizing: "border-box"
+                          ...getButtonStyleStyles(
+                            (selectedElement === "button" && hoveredButtonStyle) ? hoveredButtonStyle : (currentButtonStyle || "solid"),
+                            currentButtonColor || primaryColor || "#ffffff",
+                            currentButtonTextColor || "#000000",
+                            currentButtonSize,
+                            Boolean(currentButtonContainer.width)
+                          )
                         }}>
                           {currentButtonText || "SHOP NOW"}
                         </div>
@@ -2400,7 +3183,7 @@ export default function CustomizeLayoutModal({
 
               {/* -------------------------------------------------------------------------- */}
               {/* -------------------------------------------------------------------------- */}
-              {/* HERO CAROUSEL SLIDES MANAGEMENT BAR (as shown in user screenshot) */}
+              {/* HERO CAROUSEL SLIDES MANAGEMENT BAR (Redesigned layout) */}
               {/* -------------------------------------------------------------------------- */}
               <div style={{
                 marginTop: "16px",
@@ -2409,36 +3192,28 @@ export default function CustomizeLayoutModal({
                 borderRadius: "12px",
                 border: "1px solid #e2e8f0"
               }}>
-                {/* Header row */}
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "14px" }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                    <div style={{
-                      padding: "6px",
-                      backgroundColor: "#eff6ff",
-                      borderRadius: "6px",
-                      color: "#2563eb",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center"
-                    }}>
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                        <rect x="2" y="3" width="20" height="14" rx="2" ry="2" />
-                        <line x1="8" y1="21" x2="16" y2="21" />
-                        <line x1="12" y1="17" x2="12" y2="21" />
-                      </svg>
-                    </div>
-
+                {/* Header row as shown in user screenshot 2 */}
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "14px", flexWrap: "wrap", gap: "10px" }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
                     <h4 style={{ margin: 0, fontSize: "0.85rem", fontWeight: 800, color: "#0f172a", letterSpacing: "0.04em", textTransform: "uppercase" }}>
-                      HERO CAROUSEL SLIDES ({slides.length}/5 MAX)
+                      CAROUSEL SLIDES
                     </h4>
 
-                    <span style={{ fontSize: "0.8rem", color: "#94a3b8", display: "flex", alignItems: "center", gap: "6px" }}>
-                      <span>::</span> Drag handle to reorder • Click card to preview & customize
+                    <span style={{
+                      fontSize: "0.75rem",
+                      fontWeight: 600,
+                      padding: "2px 8px",
+                      borderRadius: "12px",
+                      backgroundColor: "#f1f5f9",
+                      color: "#64748b",
+                      border: "1px solid #e2e8f0"
+                    }}>
+                      {slides.length}/5
                     </span>
                   </div>
 
                   {/* Action Controls */}
-                  <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
                     <button
                       type="button"
                       onClick={() => {
@@ -2460,47 +3235,43 @@ export default function CustomizeLayoutModal({
                       style={{
                         padding: "6px 14px",
                         borderRadius: "20px",
-                        border: heroAutoPlay ? "1px solid #3b82f6" : "1px solid #cbd5e1",
-                        backgroundColor: heroAutoPlay ? "#eff6ff" : "#ffffff",
-                        fontSize: "0.78rem",
+                        border: "1px solid #e2e8f0",
+                        backgroundColor: "#ffffff",
+                        fontSize: "0.8rem",
                         fontWeight: 600,
-                        color: heroAutoPlay ? "#1d4ed8" : "#94a3b8",
+                        color: "#334155",
                         cursor: "pointer",
                         display: "flex",
                         alignItems: "center",
-                        gap: "5px"
+                        gap: "6px",
+                        boxShadow: "0 1px 2px rgba(0,0,0,0.04)"
                       }}
                     >
-                      <span>⏱</span> Auto-play: {heroAutoPlay ? `${heroAutoPlaySpeed}.0s` : "Off"}
+                      <span style={{ fontSize: "0.85rem" }}>⏱</span>
+                      <span>Auto-play: {heroAutoPlay ? `${heroAutoPlaySpeed}.0s` : "Off"}</span>
                     </button>
 
                     <button
                       type="button"
                       onClick={handleAddSlide}
                       style={{
-                        background: "none",
+                        padding: "7px 16px",
+                        borderRadius: "20px",
                         border: "none",
-                        color: "#2563eb",
-                        fontSize: "0.85rem",
+                        backgroundColor: "#2563eb",
+                        fontSize: "0.82rem",
                         fontWeight: 700,
-                        cursor: "pointer",
+                        color: "#ffffff",
+                        cursor: slides.length >= 5 ? "not-allowed" : "pointer",
+                        opacity: slides.length >= 5 ? 0.6 : 1,
                         display: "flex",
                         alignItems: "center",
-                        gap: "6px"
+                        gap: "5px",
+                        boxShadow: "0 2px 4px rgba(37, 99, 235, 0.2)"
                       }}
                     >
-                      <span style={{
-                        width: "18px",
-                        height: "18px",
-                        borderRadius: "50%",
-                        border: "2px solid #2563eb",
-                        display: "inline-flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        fontSize: "0.8rem",
-                        lineHeight: 1
-                      }}>+</span>
-                      Add Slide
+                      <span style={{ fontSize: "0.95rem", lineHeight: 1, fontWeight: 800 }}>+</span>
+                      <span>Add Slide</span>
                     </button>
                   </div>
                 </div>
@@ -2508,185 +3279,303 @@ export default function CustomizeLayoutModal({
                 {/* Slides Cards Horizontal Row */}
                 <div style={{
                   display: "flex",
+                  alignItems: "flex-end",
                   gap: "14px",
                   overflowX: "auto",
-                  paddingBottom: "4px"
+                  paddingBottom: "10px",
+                  paddingTop: "12px",
+                  paddingLeft: "4px",
+                  paddingRight: "10px"
                 }}>
                   {slides.map((slide, index) => {
                     const isActive = index === activeSlideIndex;
+                    const isDragged = index === draggedSlideIndex;
+                    const showLeftLine = dropInsertIndex === index && draggedSlideIndex !== null;
+
+                    // Compute live real-time display properties for PowerPoint thumbnail sync
+                    const displaySlide = isActive ? {
+                      ...slide,
+                      titleText: currentTitleText,
+                      showTitle: currentShowTitle,
+                      titleFontType: currentTitleFontType,
+                      titleFontSize: currentTitleFontSize,
+                      titleFontColor: currentTitleFontColor,
+                      titleFontWeight: currentTitleFontWeight,
+                      titleFontAlignment: currentTitleFontAlignment,
+
+                      manifestoText: currentManifestoText,
+                      showManifesto: currentShowManifesto,
+                      manifestoFontType: currentManifestoFontType,
+                      manifestoFontSize: currentManifestoFontSize,
+                      manifestoFontColor: currentManifestoFontColor,
+                      manifestoFontWeight: currentManifestoFontWeight,
+                      manifestoFontAlignment: currentManifestoFontAlignment,
+
+                      buttonText: currentButtonText,
+                      buttonStyle: (selectedElement === "button" && hoveredButtonStyle) ? hoveredButtonStyle : currentButtonStyle,
+                      buttonSize: currentButtonSize,
+                      buttonColor: currentButtonColor,
+                      buttonTextColor: currentButtonTextColor,
+                      showButton: currentShowButton,
+
+                      layoutTemplate: currentLayoutTemplate,
+                      bgType,
+                      bgColor,
+                      bgImage,
+                      bgVideo,
+
+                      titleContainer: currentTitleContainer,
+                      manifestoContainer: currentManifestoContainer,
+                      buttonContainer: currentButtonContainer
+                    } : slide;
+
                     return (
-                      <div
-                        key={slide.id || index}
-                        draggable
-                        onDragStart={(e) => handleDragStart(e, index)}
-                        onDragOver={handleDragOver}
-                        onDrop={(e) => handleDrop(e, index)}
-                        onClick={() => selectSlide(index)}
-                        style={{
-                          width: "160px",
-                          minWidth: "160px",
-                          height: "78px",
-                          borderRadius: "8px",
-                          backgroundColor: isActive ? "#0f172a" : "#334155",
-                          border: isActive ? "2px solid #2563eb" : "1px solid #475569",
-                          boxShadow: isActive ? "0 0 12px rgba(37, 99, 235, 0.45)" : "none",
-                          padding: "6px 8px",
+                      <React.Fragment key={slide.id || index}>
+                        {/* Clean Solid Insertion Line (Left of card) */}
+                        {showLeftLine && (
+                          <div style={{
+                            width: "3px",
+                            minWidth: "3px",
+                            height: "76px",
+                            backgroundColor: "#ef4444",
+                            borderRadius: "2px",
+                            margin: "0 -2px",
+                            zIndex: 60,
+                            pointerEvents: "none"
+                          }} />
+                        )}
+
+                        {/* Slide Card Container Unit */}
+                        <div style={{
                           display: "flex",
                           flexDirection: "column",
-                          justifyContent: "space-between",
-                          cursor: "pointer",
-                          position: "relative",
-                          transition: "all 0.2s ease"
-                        }}
-                      >
-                        {/* Shrunk Live Slide Micro-Canvas Preview */}
-                        <div style={{
-                          position: "relative",
-                          width: "100%",
-                          height: "64px",
-                          borderRadius: "6px",
-                          overflow: "hidden",
-                          backgroundColor: slide.bgType === "color" ? (slide.bgColor || "#121212") : "#121212",
-                          backgroundImage: slide.bgType === "image" && slide.bgImage ? `url("${slide.bgImage}")` : "none",
-                          backgroundSize: "cover",
-                          backgroundPosition: "center",
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          marginTop: "4px"
+                          alignItems: "flex-start",
+                          gap: "5px"
                         }}>
-                          {/* Mini Canvas Shrunk Viewport */}
-                          <div style={{
-                            width: "1280px",
-                            height: "720px",
-                            transform: "scale(0.12)",
-                            transformOrigin: "center center",
-                            display: "flex",
-                            flexDirection: "column",
-                            justifyContent:
-                              (slide.layoutTemplate || "center") === "top-left" || (slide.layoutTemplate || "center") === "right-top" || (slide.layoutTemplate || "center") === "top-center" ? "flex-start" :
-                                (slide.layoutTemplate || "center") === "bottom-left" || (slide.layoutTemplate || "center") === "right-bottom" || (slide.layoutTemplate || "center") === "bottom-center" ? "flex-end" : "center",
-                            alignItems:
-                              (slide.layoutTemplate || "center") === "center" || (slide.layoutTemplate || "center").endsWith("center") ? "center" :
-                                (slide.layoutTemplate || "center").startsWith("right") ? "flex-end" : "flex-start",
-                            padding: "60px 5%",
-                            textAlign:
-                              (slide.layoutTemplate || "center") === "center" || (slide.layoutTemplate || "center").endsWith("center") ? "center" :
-                                (slide.layoutTemplate || "center").startsWith("right") ? "right" : "left",
-                            pointerEvents: "none",
-                            userSelect: "none"
+                          {/* Slide Number Label - Completely OUTSIDE the preview box */}
+                          <span style={{
+                            fontSize: "0.75rem",
+                            fontWeight: 800,
+                            color: isActive ? "#ea580c" : "#64748b",
+                            letterSpacing: "0.02em",
+                            paddingLeft: "2px"
                           }}>
-                            {slide.showTitle !== false && (
-                              <h1 style={{
-                                fontFamily: `"${slide.titleFontType || "Outfit"}", sans-serif`,
-                                color: slide.titleFontColor || "#ffffff",
-                                fontSize: slide.titleFontSize || "4.5rem",
-                                fontWeight: Number(slide.titleFontWeight) || 700,
-                                textAlign: (slide.titleFontAlignment as any) || "center",
-                                margin: 0,
-                                lineHeight: "1.1"
-                              }}>
-                                {slide.titleText || "SLIDE TITLE"}
-                              </h1>
-                            )}
-                            {slide.showManifesto !== false && (
-                              <p style={{
-                                fontFamily: `"${slide.manifestoFontType || "Outfit"}", sans-serif`,
-                                color: slide.manifestoFontColor || "#ffffff",
-                                fontSize: slide.manifestoFontSize || "1.1rem",
-                                fontWeight: Number(slide.manifestoFontWeight) || 500,
-                                textAlign: (slide.manifestoFontAlignment as any) || "center",
-                                margin: "14px 0 0 0",
-                                textTransform: "uppercase"
-                              }}>
-                                {slide.manifestoText || ""}
-                              </p>
-                            )}
-                            {slide.showButton !== false && (
-                              <div style={{
-                                marginTop: "20px",
-                                padding: slide.buttonSize === "sm" ? "10px 24px" : slide.buttonSize === "lg" ? "18px 48px" : "14px 36px",
-                                fontSize: slide.buttonSize === "sm" ? "0.85rem" : slide.buttonSize === "lg" ? "1.2rem" : "1.0rem",
-                                backgroundColor: slide.buttonStyle === "solid" ? (slide.buttonColor || "#ffffff") : "transparent",
-                                color: slide.buttonStyle === "solid" ? (slide.buttonTextColor || "#000000") : (slide.buttonColor || "#ffffff"),
-                                border: `2px solid ${slide.buttonColor || "#ffffff"}`,
-                                fontWeight: 700,
-                                textTransform: "uppercase",
-                                display: "inline-block"
-                              }}>
-                                {slide.buttonText || "SHOP NOW"}
-                              </div>
-                            )}
-                          </div>
-                        </div>
+                            Slide {index + 1}
+                          </span>
 
-                        {/* Top Header Floating Badge inside card */}
-                        <div style={{ position: "absolute", top: "8px", left: "8px", right: "8px", display: "flex", justifyContent: "space-between", alignItems: "center", zIndex: 10 }}>
-                          <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
-                            <span style={{ color: "#ffffff", cursor: "grab", fontSize: "0.75rem", fontWeight: 800, textShadow: "0 1px 3px rgba(0,0,0,0.8)" }}>::</span>
-                            <span style={{
-                              fontSize: "0.55rem",
-                              fontWeight: 800,
-                              padding: "2px 6px",
-                              borderRadius: "4px",
-                              backgroundColor: isActive ? "#2563eb" : "rgba(15, 23, 42, 0.85)",
-                              color: "#ffffff",
-                              letterSpacing: "0.04em",
-                              boxShadow: "0 2px 4px rgba(0,0,0,0.3)"
-                            }}>
-                              SLIDE {index + 1}
-                            </span>
-                          </div>
-
-                          <div style={{ display: "flex", alignItems: "center", gap: "3px", backgroundColor: "rgba(15, 23, 42, 0.75)", padding: "1px 4px", borderRadius: "4px" }}>
-                            {index > 0 && (
-                              <button
-                                type="button"
-                                title="Move Left"
-                                onClick={(e) => moveSlide(e, index, 'left')}
-                                style={{ background: "none", border: "none", color: "#ffffff", cursor: "pointer", padding: "0 2px", fontSize: "0.65rem" }}
-                              >
-                                ◀
-                              </button>
-                            )}
-                            {index < slides.length - 1 && (
-                              <button
-                                type="button"
-                                title="Move Right"
-                                onClick={(e) => moveSlide(e, index, 'right')}
-                                style={{ background: "none", border: "none", color: "#ffffff", cursor: "pointer", padding: "0 2px", fontSize: "0.65rem" }}
-                              >
-                                ▶
-                              </button>
-                            )}
+                          {/* Shrunk Live Slide Micro-Canvas Preview Box */}
+                          <div
+                            draggable
+                            onDragStart={(e) => handleDragStart(e, index)}
+                            onDragEnd={handleDragEnd}
+                            onDragOver={(e) => handleDragOver(e, index)}
+                            onDrop={(e) => handleDrop(e, index)}
+                            onClick={() => selectSlide(index)}
+                            style={{
+                              width: "132px",
+                              minWidth: "132px",
+                              height: "74px",
+                              borderRadius: "8px",
+                              backgroundColor: displaySlide.bgType === "color" ? (displaySlide.bgColor || "#121212") : "#121212",
+                              backgroundImage: displaySlide.bgType === "image" && displaySlide.bgImage ? `url("${displaySlide.bgImage}")` : "none",
+                              backgroundSize: "cover",
+                              backgroundPosition: "center",
+                              border: isDragged
+                                ? "2px dashed #94a3b8"
+                                : isActive
+                                  ? "2.5px solid #ea580c"
+                                  : "1.5px solid #cbd5e1",
+                              boxShadow: isActive
+                                ? "0 0 0 1px #ea580c, 0 4px 14px rgba(234, 88, 12, 0.35)"
+                                : "0 1px 3px rgba(0,0,0,0.12)",
+                              opacity: isDragged ? 0.35 : 1,
+                              cursor: "pointer",
+                              userSelect: "none",
+                              WebkitUserSelect: "none",
+                              position: "relative",
+                              overflow: "visible",
+                              transition: "all 0.15s ease"
+                            }}
+                          >
+                            {/* X Delete Button - Half in / Half out on top right corner border line */}
                             <button
                               type="button"
                               title="Delete Slide"
                               onClick={(e) => handleRemoveSlide(e, index)}
+                              onMouseDown={(e) => e.stopPropagation()}
                               style={{
-                                background: "none",
-                                border: "none",
-                                color: "#f87171",
+                                position: "absolute",
+                                top: "-8px",
+                                right: "-8px",
+                                width: "19px",
+                                height: "19px",
+                                borderRadius: "50%",
+                                backgroundColor: "#ef4444",
+                                color: "#ffffff",
+                                border: "2px solid #ffffff",
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                fontSize: "0.65rem",
+                                fontWeight: 900,
                                 cursor: "pointer",
-                                fontSize: "0.75rem",
-                                padding: "0 2px"
+                                boxShadow: "0 2px 5px rgba(0,0,0,0.25)",
+                                zIndex: 50,
+                                lineHeight: 1
                               }}
                             >
                               ✕
                             </button>
+
+                            {/* Inner Shrunk Live Preview Content Viewport */}
+                            <div style={{
+                              width: "100%",
+                              height: "100%",
+                              borderRadius: "6px",
+                              overflow: "hidden",
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              position: "relative"
+                            }}>
+                              {displaySlide.bgType === "video" && displaySlide.bgVideo && (
+                                <video src={displaySlide.bgVideo} autoPlay muted loop playsInline style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", zIndex: 1 }} />
+                              )}
+                              {displaySlide.bgType !== "color" && (
+                                <div style={{ position: "absolute", inset: 0, backgroundColor: "rgba(0, 0, 0, 0.45)", zIndex: 1 }} />
+                              )}
+
+                              <div style={{
+                                position: "absolute",
+                                top: 0,
+                                left: 0,
+                                width: "1280px",
+                                height: "720px",
+                                transform: "scale(0.103125)",
+                                transformOrigin: "top left",
+                                display: "flex",
+                                flexDirection: "column",
+                                justifyContent:
+                                  (displaySlide.layoutTemplate || "center") === "top-left" || (displaySlide.layoutTemplate || "center") === "right-top" || (displaySlide.layoutTemplate || "center") === "top-center" ? "flex-start" :
+                                    (displaySlide.layoutTemplate || "center") === "bottom-left" || (displaySlide.layoutTemplate || "center") === "right-bottom" || (displaySlide.layoutTemplate || "center") === "bottom-center" ? "flex-end" : "center",
+                                alignItems:
+                                  (displaySlide.layoutTemplate || "center") === "center" || (displaySlide.layoutTemplate || "center").endsWith("center") ? "center" :
+                                    (displaySlide.layoutTemplate || "center").startsWith("right") ? "flex-end" : "flex-start",
+                                padding: "80px 5%",
+                                textAlign:
+                                  (displaySlide.layoutTemplate || "center") === "center" || (displaySlide.layoutTemplate || "center").endsWith("center") ? "center" :
+                                    (displaySlide.layoutTemplate || "center").startsWith("right") ? "right" : "left",
+                                pointerEvents: "none",
+                                userSelect: "none",
+                                zIndex: 2
+                              }}>
+                                {displaySlide.showTitle !== false && (
+                                  <div style={{
+                                    padding: `${displaySlide.titleContainer?.padding ?? 12}px`,
+                                    borderRadius: "8px",
+                                    backgroundColor: displaySlide.titleContainer?.bgColor || "transparent",
+                                    width: displaySlide.titleContainer?.width ? `${displaySlide.titleContainer.width}px` : "auto",
+                                    height: displaySlide.titleContainer?.height ? `${displaySlide.titleContainer.height}px` : "auto",
+                                    transform: displaySlide.titleContainer ? `translate(${displaySlide.titleContainer.offsetX || 0}px, ${displaySlide.titleContainer.offsetY || 0}px)` : "none",
+                                    boxSizing: "border-box",
+                                    display: "flex",
+                                    flexDirection: "column",
+                                    justifyContent: "center"
+                                  }}>
+                                    <h1 style={{
+                                      fontFamily: `"${displaySlide.titleFontType || "Outfit"}", sans-serif`,
+                                      color: displaySlide.titleFontColor || "#ffffff",
+                                      fontSize: displaySlide.titleFontSize || "4.5rem",
+                                      fontWeight: Number(displaySlide.titleFontWeight) || 700,
+                                      textAlign: (displaySlide.titleFontAlignment as any) || "center",
+                                      margin: 0,
+                                      lineHeight: "1.1"
+                                    }}>
+                                      {displaySlide.titleText || "SLIDE TITLE"}
+                                    </h1>
+                                  </div>
+                                )}
+                                {displaySlide.showManifesto !== false && (
+                                  <div style={{
+                                    padding: `${displaySlide.manifestoContainer?.padding ?? 10}px`,
+                                    borderRadius: "8px",
+                                    backgroundColor: displaySlide.manifestoContainer?.bgColor || "transparent",
+                                    width: displaySlide.manifestoContainer?.width ? `${displaySlide.manifestoContainer.width}px` : "auto",
+                                    height: displaySlide.manifestoContainer?.height ? `${displaySlide.manifestoContainer.height}px` : "auto",
+                                    transform: displaySlide.manifestoContainer ? `translate(${displaySlide.manifestoContainer.offsetX || 0}px, ${displaySlide.manifestoContainer.offsetY || 0}px)` : "none",
+                                    boxSizing: "border-box",
+                                    display: "flex",
+                                    flexDirection: "column",
+                                    justifyContent: "center"
+                                  }}>
+                                    <p style={{
+                                      fontFamily: `"${displaySlide.manifestoFontType || "Outfit"}", sans-serif`,
+                                      color: displaySlide.manifestoFontColor || "#ffffff",
+                                      fontSize: displaySlide.manifestoFontSize || "1.1rem",
+                                      fontWeight: Number(displaySlide.manifestoFontWeight) || 500,
+                                      textAlign: (displaySlide.manifestoFontAlignment as any) || "center",
+                                      margin: "14px 0 0 0",
+                                      textTransform: "uppercase"
+                                    }}>
+                                      {displaySlide.manifestoText || ""}
+                                    </p>
+                                  </div>
+                                )}
+                                {displaySlide.showButton !== false && (
+                                  <div style={{
+                                    width: displaySlide.buttonContainer?.width ? `${displaySlide.buttonContainer.width}px` : "auto",
+                                    height: displaySlide.buttonContainer?.height ? `${displaySlide.buttonContainer.height}px` : "auto",
+                                    transform: displaySlide.buttonContainer ? `translate(${displaySlide.buttonContainer.offsetX || 0}px, ${displaySlide.buttonContainer.offsetY || 0}px)` : "none",
+                                    alignSelf:
+                                      (displaySlide.layoutTemplate || "center") === "center" || (displaySlide.layoutTemplate || "center").endsWith("center") ? "center" :
+                                        (displaySlide.layoutTemplate || "center").startsWith("right") ? "flex-end" : "flex-start"
+                                  }}>
+                                    <div style={{
+                                      width: "100%",
+                                      height: "100%",
+                                      marginTop: "20px",
+                                      ...getButtonStyleStyles(
+                                        displaySlide.buttonStyle || "solid",
+                                        displaySlide.buttonColor || "#ffffff",
+                                        displaySlide.buttonTextColor || "#000000",
+                                        displaySlide.buttonSize,
+                                        Boolean(displaySlide.buttonContainer?.width)
+                                      )
+                                    }}>
+                                      {displaySlide.buttonText || "SHOP NOW"}
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
                           </div>
                         </div>
-                      </div>
+                      </React.Fragment>
                     );
                   })}
+
+                  {/* Clean Solid Insertion Line (Right of last card) */}
+                  {dropInsertIndex === slides.length && draggedSlideIndex !== null && (
+                    <div style={{
+                      width: "3px",
+                      minWidth: "3px",
+                      height: "76px",
+                      backgroundColor: "#ef4444",
+                      borderRadius: "2px",
+                      margin: "0 -2px",
+                      zIndex: 60,
+                      pointerEvents: "none"
+                    }} />
+                  )}
 
                   {/* Add Slide Dashed Card */}
                   <div
                     onClick={handleAddSlide}
                     style={{
-                      width: "110px",
-                      minWidth: "110px",
-                      height: "78px",
+                      width: "90px",
+                      minWidth: "90px",
+                      height: "74px",
+                      marginTop: "22px",
                       borderRadius: "8px",
                       border: "2px dashed #cbd5e1",
                       backgroundColor: "#ffffff",
@@ -2700,8 +3589,8 @@ export default function CustomizeLayoutModal({
                       transition: "all 0.2s ease"
                     }}
                   >
-                    <span style={{ fontSize: "1.0rem", fontWeight: 700, color: "#475569" }}>+</span>
-                    <span style={{ fontSize: "0.7rem", fontWeight: 700, color: "#475569" }}>Add Slide</span>
+                    <span style={{ fontSize: "1.0rem", fontWeight: 700, color: "#2563eb" }}>+</span>
+                    <span style={{ fontSize: "0.68rem", fontWeight: 700, color: "#475569" }}>Add Slide</span>
                   </div>
                 </div>
 

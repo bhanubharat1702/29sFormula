@@ -103,6 +103,16 @@ export interface HeroSlideItem {
   mobileButtonColor?: string;
   mobileButtonTextColor?: string;
   showMobileHeroButton?: boolean;
+
+  // Desktop container bounds & positions
+  titleContainer?: { width?: number; height?: number; bgColor?: string; padding?: number; offsetX: number; offsetY: number };
+  manifestoContainer?: { width?: number; height?: number; bgColor?: string; padding?: number; offsetX: number; offsetY: number };
+  buttonContainer?: { width?: number; height?: number; paddingX?: number; paddingY?: number; offsetX: number; offsetY: number };
+
+  // Mobile container bounds & positions
+  mobileTitleContainer?: { width?: number; height?: number; bgColor?: string; padding?: number; offsetX: number; offsetY: number };
+  mobileManifestoContainer?: { width?: number; height?: number; bgColor?: string; padding?: number; offsetX: number; offsetY: number };
+  mobileButtonContainer?: { width?: number; height?: number; paddingX?: number; paddingY?: number; offsetX: number; offsetY: number };
 }
 
 export interface LayoutCustomizationConfig {
