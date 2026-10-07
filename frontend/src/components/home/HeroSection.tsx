@@ -413,6 +413,10 @@ export default function HeroSection({
             }
           };
 
+          const titleCont = isMobile ? (slide.mobileTitleContainer || slide.titleContainer) : slide.titleContainer;
+          const manifestoCont = isMobile ? (slide.mobileManifestoContainer || slide.manifestoContainer) : slide.manifestoContainer;
+          const buttonCont = isMobile ? (slide.mobileButtonContainer || slide.buttonContainer) : slide.buttonContainer;
+
           return (
             <div
               style={{
@@ -430,20 +434,42 @@ export default function HeroSection({
                 const isLoop = titleAnim.type?.endsWith("-loop") || titleAnim.type === "pulse-beat" || titleAnim.type === "shimmer-gold" || titleAnim.type === "subtle-shake";
 
                 return (
-                  <h1 style={{
-                    fontFamily: sTitleFontType ? `"${sTitleFontType}", sans-serif` : "inherit",
-                    color: sTitleFontColor || "#ffffff",
-                    fontSize: sTitleFontSize || "4.5rem",
-                    fontWeight: Number(sTitleFontWeight) || (sTitleFontWeight as any) || 700,
-                    textAlign: (sTitleFontAlignment as any) || "inherit",
-                    margin: 0,
-                    lineHeight: "1.1",
-                    wordBreak: "break-word",
-                    overflowWrap: "break-word",
-                    animation: isPrevious ? "none" : (animName === "none" ? "none" : `${animName} ${titleAnim.duration || 0.6}s cubic-bezier(0.16, 1, 0.3, 1) ${effectiveDelays["title"] ?? 0}s ${isLoop ? "" : "both"}`)
-                  }}>
-                    {sTitle || ""}
-                  </h1>
+                  <div
+                    style={{
+                      transform: titleCont ? `translate(${titleCont.offsetX || 0}px, ${titleCont.offsetY || 0}px)` : undefined,
+                      width: titleCont?.width ? `${titleCont.width}px` : "auto",
+                      height: titleCont?.height ? `${titleCont.height}px` : "auto",
+                      backgroundColor: titleCont?.bgColor || "transparent",
+                      padding: titleCont?.padding ? `${titleCont.padding}px` : undefined,
+                      borderRadius: "8px",
+                      display: "flex",
+                      flexDirection: "column",
+                      justifyContent: "center"
+                    }}
+                  >
+                    <div style={{
+                      width: "100%",
+                      height: "100%",
+                      display: "flex",
+                      flexDirection: "column",
+                      justifyContent: "center",
+                      animation: isPrevious ? "none" : (animName === "none" ? "none" : `${animName} ${titleAnim.duration || 0.6}s cubic-bezier(0.16, 1, 0.3, 1) ${effectiveDelays["title"] ?? 0}s ${isLoop ? "" : "both"}`)
+                    }}>
+                      <h1 style={{
+                        fontFamily: sTitleFontType ? `"${sTitleFontType}", sans-serif` : "inherit",
+                        color: sTitleFontColor || "#ffffff",
+                        fontSize: sTitleFontSize || "4.5rem",
+                        fontWeight: Number(sTitleFontWeight) || (sTitleFontWeight as any) || 700,
+                        textAlign: (sTitleFontAlignment as any) || "inherit",
+                        margin: 0,
+                        lineHeight: "1.1",
+                        wordBreak: "break-word",
+                        overflowWrap: "break-word"
+                      }}>
+                        {sTitle || ""}
+                      </h1>
+                    </div>
+                  </div>
                 );
               })()}
 
@@ -452,22 +478,44 @@ export default function HeroSection({
                 const isLoop = manifestoAnim.type?.endsWith("-loop") || manifestoAnim.type === "pulse-beat" || manifestoAnim.type === "shimmer-gold" || manifestoAnim.type === "subtle-shake";
 
                 return (
-                  <p style={{
-                    fontFamily: sManifestoFontType ? `"${sManifestoFontType}", sans-serif` : "inherit",
-                    color: sManifestoFontColor || "#ffffff",
-                    fontSize: sManifestoFontSize || "1.1rem",
-                    fontWeight: Number(sManifestoFontWeight) || (sManifestoFontWeight as any) || 500,
-                    textAlign: (sManifestoFontAlignment as any) || "inherit",
-                    margin: 0,
-                    lineHeight: "1.6",
-                    textTransform: "uppercase",
-                    letterSpacing: "0.03em",
-                    wordBreak: "break-word",
-                    overflowWrap: "break-word",
-                    animation: isPrevious ? "none" : (animName === "none" ? "none" : `${animName} ${manifestoAnim.duration || 0.6}s cubic-bezier(0.16, 1, 0.3, 1) ${effectiveDelays["manifesto"] ?? 0}s ${isLoop ? "" : "both"}`)
-                  }}>
-                    {sManifesto || ""}
-                  </p>
+                  <div
+                    style={{
+                      transform: manifestoCont ? `translate(${manifestoCont.offsetX || 0}px, ${manifestoCont.offsetY || 0}px)` : undefined,
+                      width: manifestoCont?.width ? `${manifestoCont.width}px` : "auto",
+                      height: manifestoCont?.height ? `${manifestoCont.height}px` : "auto",
+                      backgroundColor: manifestoCont?.bgColor || "transparent",
+                      padding: manifestoCont?.padding ? `${manifestoCont.padding}px` : undefined,
+                      borderRadius: "8px",
+                      display: "flex",
+                      flexDirection: "column",
+                      justifyContent: "center"
+                    }}
+                  >
+                    <div style={{
+                      width: "100%",
+                      height: "100%",
+                      display: "flex",
+                      flexDirection: "column",
+                      justifyContent: "center",
+                      animation: isPrevious ? "none" : (animName === "none" ? "none" : `${animName} ${manifestoAnim.duration || 0.6}s cubic-bezier(0.16, 1, 0.3, 1) ${effectiveDelays["manifesto"] ?? 0}s ${isLoop ? "" : "both"}`)
+                    }}>
+                      <p style={{
+                        fontFamily: sManifestoFontType ? `"${sManifestoFontType}", sans-serif` : "inherit",
+                        color: sManifestoFontColor || "#ffffff",
+                        fontSize: sManifestoFontSize || "1.1rem",
+                        fontWeight: Number(sManifestoFontWeight) || (sManifestoFontWeight as any) || 500,
+                        textAlign: (sManifestoFontAlignment as any) || "inherit",
+                        margin: 0,
+                        lineHeight: "1.6",
+                        textTransform: "uppercase",
+                        letterSpacing: "0.03em",
+                        wordBreak: "break-word",
+                        overflowWrap: "break-word"
+                      }}>
+                        {sManifesto || ""}
+                      </p>
+                    </div>
+                  </div>
                 );
               })()}
 
@@ -488,23 +536,36 @@ export default function HeroSection({
                     alignSelf:
                       sTemplate === "center" || sTemplate.endsWith("center") ? "center" :
                         sTemplate.startsWith("right") ? "flex-end" : "flex-start",
-                    animation: isPrevious ? "none" : (animName === "none" ? "none" : `${animName} ${buttonAnim.duration || 0.6}s cubic-bezier(0.16, 1, 0.3, 1) ${effectiveDelays["button"] ?? 0}s ${isLoop ? "" : "both"}`)
+                    transform: buttonCont ? `translate(${buttonCont.offsetX || 0}px, ${buttonCont.offsetY || 0}px)` : undefined,
+                    width: buttonCont?.width ? `${buttonCont.width}px` : "auto",
+                    height: buttonCont?.height ? `${buttonCont.height}px` : "auto"
                   }}>
-                    <Link href={slide.buttonRedirectUrl || "/shop"} style={{
-                      display: "inline-block",
-                      padding: paddings[sButtonSize] || paddings.md,
-                      fontSize: fontSizes[sButtonSize] || fontSizes.md,
-                      backgroundColor: isSolid ? btnColor : "transparent",
-                      color: isSolid ? (sButtonTextColor || "#000000") : (sButtonTextColor || btnColor),
-                      border: isSolid || isOutline ? `2px solid ${btnColor}` : "none",
-                      textDecoration: sButtonStyle === "minimal" ? "underline" : "none",
-                      fontWeight: 700,
-                      textTransform: "uppercase",
-                      letterSpacing: "0.1em",
-                      textAlign: "center"
+                    <div style={{
+                      width: "100%",
+                      height: "100%",
+                      animation: isPrevious ? "none" : (animName === "none" ? "none" : `${animName} ${buttonAnim.duration || 0.6}s cubic-bezier(0.16, 1, 0.3, 1) ${effectiveDelays["button"] ?? 0}s ${isLoop ? "" : "both"}`)
                     }}>
-                      {sButtonText || "Shop Now"}
-                    </Link>
+                      <Link href={slide.buttonRedirectUrl || "/shop"} style={{
+                        display: buttonCont?.width ? "flex" : "inline-block",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        width: buttonCont?.width ? "100%" : "auto",
+                        height: buttonCont?.height ? "100%" : "auto",
+                        padding: paddings[sButtonSize] || paddings.md,
+                        fontSize: fontSizes[sButtonSize] || fontSizes.md,
+                        backgroundColor: isSolid ? btnColor : "transparent",
+                        color: isSolid ? (sButtonTextColor || "#000000") : (sButtonTextColor || btnColor),
+                        border: isSolid || isOutline ? `2px solid ${btnColor}` : "none",
+                        textDecoration: sButtonStyle === "minimal" ? "underline" : "none",
+                        fontWeight: 700,
+                        textTransform: "uppercase",
+                        letterSpacing: "0.1em",
+                        textAlign: "center",
+                        boxSizing: "border-box"
+                      }}>
+                        {sButtonText || "Shop Now"}
+                      </Link>
+                    </div>
                   </div>
                 );
               })()}

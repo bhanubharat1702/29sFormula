@@ -341,7 +341,7 @@ export default function AdminDashboard() {
   const [announcementText, setAnnouncementText] = useState<string>("");
   const [heroTitle, setHeroTitle] = useState<string>("");
   const [heroTitleFontType, setHeroTitleFontType] = useState<string>("Outfit");
-  const [heroTitleFontColor, setHeroTitleFontColor] = useState<string>("#ffffff");
+  const [heroTitleFontColor, setHeroTitleFontColor] = useState<string>("#111827");
   const [heroTitleFontSize, setHeroTitleFontSize] = useState<string>("4.5rem");
   const [heroTitleFontAlignment, setHeroTitleFontAlignment] = useState<string>("center");
   const [heroTitleFontWeight, setHeroTitleFontWeight] = useState<string>("700");
@@ -353,8 +353,8 @@ export default function AdminDashboard() {
   const [heroButtonText, setHeroButtonText] = useState<string>("Shop Now");
   const [heroButtonStyle, setHeroButtonStyle] = useState<string>("solid");
   const [heroButtonSize, setHeroButtonSize] = useState<string>("md");
-  const [heroButtonColor, setHeroButtonColor] = useState<string>("#ffffff");
-  const [heroButtonTextColor, setHeroButtonTextColor] = useState<string>("#000000");
+  const [heroButtonColor, setHeroButtonColor] = useState<string>("");
+  const [heroButtonTextColor, setHeroButtonTextColor] = useState<string>("#ffffff");
   const [heroSlides, setHeroSlides] = useState<HeroSlideItem[]>([]);
   const [heroAutoPlay, setHeroAutoPlay] = useState<boolean>(true);
   const [heroAutoPlaySpeed, setHeroAutoPlaySpeed] = useState<number>(5);
@@ -369,7 +369,7 @@ export default function AdminDashboard() {
   const [mobileHeroTemplate, setMobileHeroTemplate] = useState<string>("center");
   const [mobileHeroTitle, setMobileHeroTitle] = useState<string>("");
   const [mobileHeroTitleFontType, setMobileHeroTitleFontType] = useState<string>("Outfit");
-  const [mobileHeroTitleFontColor, setMobileHeroTitleFontColor] = useState<string>("#ffffff");
+  const [mobileHeroTitleFontColor, setMobileHeroTitleFontColor] = useState<string>("#111827");
   const [mobileHeroTitleFontSize, setMobileHeroTitleFontSize] = useState<string>("2.5rem");
   const [mobileHeroTitleFontAlignment, setMobileHeroTitleFontAlignment] = useState<string>("center");
   const [mobileHeroTitleFontWeight, setMobileHeroTitleFontWeight] = useState<string>("700");
@@ -386,8 +386,8 @@ export default function AdminDashboard() {
   const [mobileHeroButtonText, setMobileHeroButtonText] = useState<string>("Shop Now");
   const [mobileHeroButtonStyle, setMobileHeroButtonStyle] = useState<string>("solid");
   const [mobileHeroButtonSize, setMobileHeroButtonSize] = useState<string>("sm");
-  const [mobileHeroButtonColor, setMobileHeroButtonColor] = useState<string>("#ffffff");
-  const [mobileHeroButtonTextColor, setMobileHeroButtonTextColor] = useState<string>("#000000");
+  const [mobileHeroButtonColor, setMobileHeroButtonColor] = useState<string>("");
+  const [mobileHeroButtonTextColor, setMobileHeroButtonTextColor] = useState<string>("#ffffff");
   const [showMobileHeroButton, setShowMobileHeroButton] = useState<boolean>(true);
 
 
@@ -430,10 +430,13 @@ export default function AdminDashboard() {
   const [videoButtonStyle, setVideoButtonStyle] = useState<string>("outline");
   const [videoButtonSize, setVideoButtonSize] = useState<string>("md");
   const [videoButtonColor, setVideoButtonColor] = useState<string>("#ffffff");
-  const [videoButtonTextColor, setVideoButtonTextColor] = useState<string>("#000000");
+  const [videoButtonTextColor, setVideoButtonTextColor] = useState<string>("#121212");
   const [videoBgType, setVideoBgType] = useState<string>("video");
   const [videoBgColor, setVideoBgColor] = useState<string>("#121212");
   const [videoBgImage, setVideoBgImage] = useState<string>("");
+  const [videoSlides, setVideoSlides] = useState<HeroSlideItem[]>([]);
+  const [videoAutoPlay, setVideoAutoPlay] = useState<boolean>(true);
+  const [videoAutoPlaySpeed, setVideoAutoPlaySpeed] = useState<number>(5);
 
   // Mobile-specific Video Layout state (unlinked)
   const [mobileVideoTemplate, setMobileVideoTemplate] = useState<string>("center");
@@ -457,7 +460,7 @@ export default function AdminDashboard() {
   const [mobileVideoButtonStyle, setMobileVideoButtonStyle] = useState<string>("outline");
   const [mobileVideoButtonSize, setMobileVideoButtonSize] = useState<string>("sm");
   const [mobileVideoButtonColor, setMobileVideoButtonColor] = useState<string>("#ffffff");
-  const [mobileVideoButtonTextColor, setMobileVideoButtonTextColor] = useState<string>("#000000");
+  const [mobileVideoButtonTextColor, setMobileVideoButtonTextColor] = useState<string>("#121212");
   const [showMobileVideoButton, setShowMobileVideoButton] = useState<boolean>(true);
   const [isLifestyleCustomizerModalOpen, setIsLifestyleCustomizerModalOpen] = useState(false);
   const [lifestyleTextFontType, setLifestyleTextFontType] = useState<string>("Outfit");
@@ -471,8 +474,11 @@ export default function AdminDashboard() {
   const [lifestyleButtonText, setLifestyleButtonText] = useState<string>("Explore Now");
   const [lifestyleButtonStyle, setLifestyleButtonStyle] = useState<string>("solid");
   const [lifestyleButtonSize, setLifestyleButtonSize] = useState<string>("md");
-  const [lifestyleButtonColor, setLifestyleButtonColor] = useState<string>("#ffffff");
-  const [lifestyleButtonTextColor, setLifestyleButtonTextColor] = useState<string>("#000000");
+  const [lifestyleButtonColor, setLifestyleButtonColor] = useState<string>("");
+  const [lifestyleButtonTextColor, setLifestyleButtonTextColor] = useState<string>("#ffffff");
+  const [lifestyleSlides, setLifestyleSlides] = useState<HeroSlideItem[]>([]);
+  const [lifestyleAutoPlay, setLifestyleAutoPlay] = useState<boolean>(true);
+  const [lifestyleAutoPlaySpeed, setLifestyleAutoPlaySpeed] = useState<number>(5);
 
   const [mobileLifestyleText, setMobileLifestyleText] = useState<string>("");
   const [mobileLifestyleTextFontType, setMobileLifestyleTextFontType] = useState<string>("Outfit");
@@ -485,8 +491,8 @@ export default function AdminDashboard() {
   const [mobileLifestyleButtonText, setMobileLifestyleButtonText] = useState<string>("Explore Now");
   const [mobileLifestyleButtonStyle, setMobileLifestyleButtonStyle] = useState<string>("solid");
   const [mobileLifestyleButtonSize, setMobileLifestyleButtonSize] = useState<string>("sm");
-  const [mobileLifestyleButtonColor, setMobileLifestyleButtonColor] = useState<string>("#ffffff");
-  const [mobileLifestyleButtonTextColor, setMobileLifestyleButtonTextColor] = useState<string>("#000000");
+  const [mobileLifestyleButtonColor, setMobileLifestyleButtonColor] = useState<string>("");
+  const [mobileLifestyleButtonTextColor, setMobileLifestyleButtonTextColor] = useState<string>("#ffffff");
   const [showLifestyle, setShowLifestyle] = useState<boolean>(true);
   const [supportText, setSupportText] = useState<string>("For support inquiries, please contact us.");
   const [careersText, setCareersText] = useState<string>("Join our team! Check out our open positions.");
@@ -615,6 +621,7 @@ export default function AdminDashboard() {
   const [isDeletingProduct, setIsDeletingProduct] = useState<boolean>(false);
   const [customAlert, setCustomAlert] = useState<{ title: string; message: string } | null>(null);
   const [showResetConfirmModal, setShowResetConfirmModal] = useState<boolean>(false);
+  const [showSaveConfirmModal, setShowSaveConfirmModal] = useState<boolean>(false);
 
   const cleanTrustItems = (items: any[]) => {
     if (!Array.isArray(items) || items.length === 0) return [
@@ -655,7 +662,7 @@ export default function AdminDashboard() {
       announcementText: data.announcementText || "",
       heroTitle: data.heroTitle || "",
       heroTitleFontType: data.heroTitleFontType || "Outfit",
-      heroTitleFontColor: data.heroTitleFontColor || "#ffffff",
+      heroTitleFontColor: data.heroTitleFontColor || "#111827",
       heroTitleFontSize: data.heroTitleFontSize || "4.5rem",
       heroTitleFontAlignment: data.heroTitleFontAlignment || "center",
       heroTitleFontWeight: data.heroTitleFontWeight || "700",
@@ -672,12 +679,12 @@ export default function AdminDashboard() {
       heroButtonText: data.heroButtonText || "Shop Now",
       heroButtonStyle: data.heroButtonStyle || "solid",
       heroButtonSize: data.heroButtonSize || "md",
-      heroButtonColor: data.heroButtonColor || "#ffffff",
-      heroButtonTextColor: data.heroButtonTextColor || "#000000",
+      heroButtonColor: data.heroButtonColor || "",
+      heroButtonTextColor: data.heroButtonTextColor || "#ffffff",
       mobileHeroTemplate: data.mobileHeroTemplate || data.heroTemplate || "center",
       mobileHeroTitle: data.mobileHeroTitle !== undefined ? data.mobileHeroTitle : "",
       mobileHeroTitleFontType: data.mobileHeroTitleFontType || data.heroTitleFontType || "Outfit",
-      mobileHeroTitleFontColor: data.mobileHeroTitleFontColor || data.heroTitleFontColor || "#ffffff",
+      mobileHeroTitleFontColor: data.mobileHeroTitleFontColor || data.heroTitleFontColor || "#111827",
       mobileHeroTitleFontSize: data.mobileHeroTitleFontSize || "2.5rem",
       mobileHeroTitleFontAlignment: data.mobileHeroTitleFontAlignment || data.heroTitleFontAlignment || "center",
       mobileHeroTitleFontWeight: data.mobileHeroTitleFontWeight || data.heroTitleFontWeight || "700",
@@ -694,8 +701,8 @@ export default function AdminDashboard() {
       mobileHeroButtonText: data.mobileHeroButtonText || data.heroButtonText || "Shop Now",
       mobileHeroButtonStyle: data.mobileHeroButtonStyle || data.heroButtonStyle || "solid",
       mobileHeroButtonSize: data.mobileHeroButtonSize || "sm",
-      mobileHeroButtonColor: data.mobileHeroButtonColor !== undefined ? data.mobileHeroButtonColor : "#ffffff",
-      mobileHeroButtonTextColor: data.mobileHeroButtonTextColor || data.heroButtonTextColor || "#000000",
+      mobileHeroButtonColor: data.mobileHeroButtonColor !== undefined ? data.mobileHeroButtonColor : (data.heroButtonColor || ""),
+      mobileHeroButtonTextColor: data.mobileHeroButtonTextColor || data.heroButtonTextColor || "#ffffff",
       showMobileHeroButton: data.showMobileHeroButton !== undefined ? data.showMobileHeroButton : true,
       videoTitle: data.videoTitle || "",
       videoSubtitle: data.videoSubtitle || "",
@@ -712,14 +719,14 @@ export default function AdminDashboard() {
       videoSubtitleFontAlignment: data.videoSubtitleFontAlignment || "center",
       videoSubtitleFontWeight: data.videoSubtitleFontWeight || "500",
       videoTemplate: data.videoTemplate || "center",
-      showVideoTitle: data.showVideoTitle !== false,
-      showVideoSubtitle: data.showVideoSubtitle !== false,
-      showVideoButton: data.showVideoButton !== false,
+      showVideoTitle: data.showVideoTitle !== undefined ? data.showVideoTitle : true,
+      showVideoSubtitle: data.showVideoSubtitle !== undefined ? data.showVideoSubtitle : true,
+      showVideoButton: data.showVideoButton !== undefined ? data.showVideoButton : true,
       videoButtonText: data.videoButtonText || "Shop Now",
       videoButtonStyle: data.videoButtonStyle || "outline",
       videoButtonSize: data.videoButtonSize || "md",
       videoButtonColor: data.videoButtonColor || "#ffffff",
-      videoButtonTextColor: data.videoButtonTextColor || "#000000",
+      videoButtonTextColor: data.videoButtonTextColor || "#121212",
       videoBgType: data.videoBgType || "video",
       videoBgColor: data.videoBgColor || "#121212",
       videoBgImage: data.videoBgImage || "",
@@ -744,10 +751,10 @@ export default function AdminDashboard() {
       mobileVideoButtonStyle: data.mobileVideoButtonStyle !== undefined ? data.mobileVideoButtonStyle : (data.videoButtonStyle || "outline"),
       mobileVideoButtonSize: data.mobileVideoButtonSize !== undefined ? data.mobileVideoButtonSize : "sm",
       mobileVideoButtonColor: data.mobileVideoButtonColor !== undefined ? data.mobileVideoButtonColor : "#ffffff",
-      mobileVideoButtonTextColor: data.mobileVideoButtonTextColor !== undefined ? data.mobileVideoButtonTextColor : (data.videoButtonTextColor || "#000000"),
+      mobileVideoButtonTextColor: data.mobileVideoButtonTextColor !== undefined ? data.mobileVideoButtonTextColor : (data.videoButtonTextColor || "#121212"),
       showMobileVideoButton: data.showMobileVideoButton !== undefined ? data.showMobileVideoButton : true,
       lifestyleText: data.lifestyleText || "",
-      lifestyleImage: data.lifestyleImage || "",
+      lifestyleImage: data.lifestyleImage || "https://images.unsplash.com/photo-1615655096345-61a54750068d?auto=format&fit=crop&w=1800&q=80",
       lifestyleTextFontType: data.lifestyleTextFontType || "Outfit",
       lifestyleTextFontColor: data.lifestyleTextFontColor || "#ffffff",
       lifestyleTextFontSize: data.lifestyleTextFontSize || "2.5rem",
@@ -756,10 +763,10 @@ export default function AdminDashboard() {
       showLifestyleText: data.showLifestyleText !== undefined ? data.showLifestyleText : true,
       showLifestyleButton: data.showLifestyleButton !== undefined ? data.showLifestyleButton : true,
       lifestyleButtonText: data.lifestyleButtonText !== undefined ? data.lifestyleButtonText : "Explore Now",
-      lifestyleButtonStyle: data.lifestyleButtonStyle !== undefined ? data.lifestyleButtonStyle : "solid",
-      lifestyleButtonSize: data.lifestyleButtonSize !== undefined ? data.lifestyleButtonSize : "md",
-      lifestyleButtonColor: data.lifestyleButtonColor !== undefined ? data.lifestyleButtonColor : "#ffffff",
-      lifestyleButtonTextColor: data.lifestyleButtonTextColor !== undefined ? data.lifestyleButtonTextColor : "#000000",
+      lifestyleButtonStyle: data.lifestyleButtonStyle || "solid",
+      lifestyleButtonSize: data.lifestyleButtonSize || "md",
+      lifestyleButtonColor: data.lifestyleButtonColor || "",
+      lifestyleButtonTextColor: data.lifestyleButtonTextColor || "#ffffff",
 
       mobileLifestyleText: data.mobileLifestyleText !== undefined ? data.mobileLifestyleText : "",
       mobileLifestyleTextFontType: data.mobileLifestyleTextFontType || data.lifestyleTextFontType || "Outfit",
@@ -770,10 +777,10 @@ export default function AdminDashboard() {
       showMobileLifestyleText: data.showMobileLifestyleText !== undefined ? data.showMobileLifestyleText : true,
       showMobileLifestyleButton: data.showMobileLifestyleButton !== undefined ? data.showMobileLifestyleButton : true,
       mobileLifestyleButtonText: data.mobileLifestyleButtonText !== undefined ? data.mobileLifestyleButtonText : (data.lifestyleButtonText || "Explore Now"),
-      mobileLifestyleButtonStyle: data.mobileLifestyleButtonStyle !== undefined ? data.mobileLifestyleButtonStyle : (data.lifestyleButtonStyle || "solid"),
-      mobileLifestyleButtonSize: data.mobileLifestyleButtonSize !== undefined ? data.mobileLifestyleButtonSize : "sm",
-      mobileLifestyleButtonColor: data.mobileLifestyleButtonColor !== undefined ? data.mobileLifestyleButtonColor : (data.lifestyleButtonColor || "#ffffff"),
-      mobileLifestyleButtonTextColor: data.mobileLifestyleButtonTextColor !== undefined ? data.mobileLifestyleButtonTextColor : (data.lifestyleButtonTextColor || "#000000"),
+      mobileLifestyleButtonStyle: data.mobileLifestyleButtonStyle || data.lifestyleButtonStyle || "solid",
+      mobileLifestyleButtonSize: data.mobileLifestyleButtonSize || "sm",
+      mobileLifestyleButtonColor: data.mobileLifestyleButtonColor !== undefined ? data.mobileLifestyleButtonColor : (data.lifestyleButtonColor || ""),
+      mobileLifestyleButtonTextColor: data.mobileLifestyleButtonTextColor || data.lifestyleButtonTextColor || "#ffffff",
       primaryColor: data.primaryColor || "#ffffff",
       brandLogoType: data.brandLogoType || "text",
       brandLogoValue: data.brandLogoValue || "MY STORE",
@@ -802,13 +809,21 @@ export default function AdminDashboard() {
       contactUsText: data.contactUsText !== undefined ? data.contactUsText : "Need help? Email us at support@yourstore.com and our support team will get back to you within 24 hours.",
       returnPolicyText: data.returnPolicyText !== undefined ? data.returnPolicyText : "We offer a 7-day hassle-free return policy. If you're not fully satisfied with your purchase, contact our support team for a full refund.",
       shippingPolicyText: data.shippingPolicyText !== undefined ? data.shippingPolicyText : "We offer free shipping across India. Orders are typically processed within 1-2 business days and delivered within 4-7 business days.",
-      faqs: data.faqs || [],
+      faqs: cleanFaqs(data.faqs),
       storeAddress1: data.storeDetails?.address1 || data.storeAddress1 || "",
       storeAddress2: data.storeDetails?.address2 || data.storeAddress2 || "",
       storeCity: data.storeDetails?.city || data.storeCity || "",
       storeState: data.storeDetails?.state || data.storeState || "",
       storePostalCode: data.storeDetails?.postalCode || data.storePostalCode || "",
-      heroSlides: data.heroSlides || []
+      heroSlides: Array.isArray(data.heroSlides) ? data.heroSlides : [],
+      heroAutoPlay: data.heroAutoPlay !== undefined ? data.heroAutoPlay : true,
+      heroAutoPlaySpeed: data.heroAutoPlaySpeed || 5,
+      videoSlides: Array.isArray(data.videoSlides) ? data.videoSlides : [],
+      videoAutoPlay: data.videoAutoPlay !== undefined ? data.videoAutoPlay : true,
+      videoAutoPlaySpeed: data.videoAutoPlaySpeed || 5,
+      lifestyleSlides: Array.isArray(data.lifestyleSlides) ? data.lifestyleSlides : [],
+      lifestyleAutoPlay: data.lifestyleAutoPlay !== undefined ? data.lifestyleAutoPlay : true,
+      lifestyleAutoPlaySpeed: data.lifestyleAutoPlaySpeed || 5
     };
   };
 
@@ -821,7 +836,7 @@ export default function AdminDashboard() {
     showTrustMarquee !== originalSettings.showTrustMarquee ||
     trustMarqueeDirection !== originalSettings.trustMarqueeDirection ||
     trustMarqueeSpeed !== originalSettings.trustMarqueeSpeed ||
-    JSON.stringify(cleanTrustItems(trustMarqueeItems)) !== JSON.stringify(originalSettings.trustMarqueeItems || []) ||
+    JSON.stringify(cleanTrustItems(trustMarqueeItems)) !== JSON.stringify(originalSettings.trustMarqueeItems) ||
     announcementText !== originalSettings.announcementText ||
     heroTitle !== originalSettings.heroTitle ||
     heroTitleFontType !== originalSettings.heroTitleFontType ||
@@ -972,7 +987,15 @@ export default function AdminDashboard() {
     returnPolicyText !== originalSettings.returnPolicyText ||
     shippingPolicyText !== originalSettings.shippingPolicyText ||
     JSON.stringify(heroSlides) !== JSON.stringify(originalSettings.heroSlides || []) ||
-    JSON.stringify(cleanFaqs(faqs)) !== JSON.stringify(cleanFaqs(originalSettings.faqs || []))
+    heroAutoPlay !== originalSettings.heroAutoPlay ||
+    heroAutoPlaySpeed !== originalSettings.heroAutoPlaySpeed ||
+    JSON.stringify(videoSlides) !== JSON.stringify(originalSettings.videoSlides || []) ||
+    videoAutoPlay !== originalSettings.videoAutoPlay ||
+    videoAutoPlaySpeed !== originalSettings.videoAutoPlaySpeed ||
+    JSON.stringify(lifestyleSlides) !== JSON.stringify(originalSettings.lifestyleSlides || []) ||
+    lifestyleAutoPlay !== originalSettings.lifestyleAutoPlay ||
+    lifestyleAutoPlaySpeed !== originalSettings.lifestyleAutoPlaySpeed ||
+    JSON.stringify(cleanFaqs(faqs)) !== JSON.stringify(originalSettings.faqs)
   ) : false;
 
   const getChangedFieldsList = () => {
@@ -982,6 +1005,10 @@ export default function AdminDashboard() {
     if (tickerSpeed !== (originalSettings.tickerSpeed || 60)) changes.push("Marquee ticker scrolling speed");
     if (tickerBgColor !== (originalSettings.tickerBgColor || "#ffffff")) changes.push("Marquee ticker background color");
     if (tickerTextColor !== (originalSettings.tickerTextColor || "#000000")) changes.push("Marquee ticker text color");
+    if (showTrustMarquee !== originalSettings.showTrustMarquee) changes.push("Trust marquee visibility toggle");
+    if (trustMarqueeDirection !== (originalSettings.trustMarqueeDirection || "left")) changes.push("Trust marquee scrolling direction");
+    if (trustMarqueeSpeed !== (originalSettings.trustMarqueeSpeed || 35)) changes.push("Trust marquee scrolling speed");
+    if (JSON.stringify(cleanTrustItems(trustMarqueeItems)) !== JSON.stringify(originalSettings.trustMarqueeItems)) changes.push("Trust marquee items");
     if (announcementText !== (originalSettings.announcementText || "")) changes.push("Top announcement banner copy");
     if (heroTitle !== (originalSettings.heroTitle || "")) changes.push("Hero brand header title");
     if (heroTitleFontType !== (originalSettings.heroTitleFontType || "Outfit")) changes.push("Hero title font type");
@@ -1007,6 +1034,7 @@ export default function AdminDashboard() {
     if (videoTitle !== (originalSettings.videoTitle || "")) changes.push("Video banner headline title");
     if (videoSubtitle !== (originalSettings.videoSubtitle || "")) changes.push("Video banner description");
     if (videoUrl !== (originalSettings.videoUrl || "")) changes.push("Background video URL");
+    if (videoFallbackColor !== (originalSettings.videoFallbackColor || "#121212")) changes.push("Video fallback background color");
     if (videoTitleFontType !== (originalSettings.videoTitleFontType || "Outfit")) changes.push("Video title font type");
     if (videoTitleFontColor !== (originalSettings.videoTitleFontColor || "#ffffff")) changes.push("Video title font color");
     if (videoTitleFontSize !== (originalSettings.videoTitleFontSize || "3.5rem")) changes.push("Video title font size");
@@ -1029,7 +1057,7 @@ export default function AdminDashboard() {
     if (videoBgType !== (originalSettings.videoBgType || "video")) changes.push("Video background type");
     if (videoBgColor !== (originalSettings.videoBgColor || "#121212")) changes.push("Video custom background color");
     if (videoBgImage !== (originalSettings.videoBgImage || "")) changes.push("Video background image URL");
-    if (JSON.stringify(faqs) !== JSON.stringify(originalSettings.faqs || [])) changes.push("Frequently Asked Questions (FAQ) list");
+    if (JSON.stringify(cleanFaqs(faqs)) !== JSON.stringify(originalSettings.faqs)) changes.push("Frequently Asked Questions (FAQ) list");
     if (lifestyleText !== (originalSettings.lifestyleText || "")) changes.push("Lifestyle overlay text copy");
     if (lifestyleImage !== (originalSettings.lifestyleImage || "")) changes.push("Lifestyle banner background image");
     if (lifestyleTextFontType !== (originalSettings.lifestyleTextFontType || "Outfit")) changes.push("Lifestyle text font type");
@@ -1065,9 +1093,23 @@ export default function AdminDashboard() {
     if (heroBgImage !== (originalSettings.heroBgImage || "")) changes.push("Hero section background image URL");
     if (heroBgVideo !== (originalSettings.heroBgVideo || "")) changes.push("Hero section background video URL");
     if (showTicker !== (originalSettings.showTicker !== undefined ? originalSettings.showTicker : true)) changes.push("Marquee Ticker visibility toggle");
-    if (showAnnouncement !== (originalSettings.showAnnouncement !== undefined ? originalSettings.showAnnouncement : true)) changes.push("Top Announcement Banner visibility toggle");
+    if (showAnnouncement !== (originalSettings.showAnnouncement !== undefined ? originalSettings.showAnnouncement : true)) changes.push("Announcement visibility toggle");
     if (showVideo !== (originalSettings.showVideo !== undefined ? originalSettings.showVideo : true)) changes.push("Video section visibility toggle");
     if (showLifestyle !== (originalSettings.showLifestyle !== undefined ? originalSettings.showLifestyle : true)) changes.push("Lifestyle banner visibility toggle");
+    if (JSON.stringify(heroSlides) !== JSON.stringify(originalSettings.heroSlides || [])) changes.push("Hero slides configuration");
+    if (heroAutoPlay !== (originalSettings.heroAutoPlay ?? true)) changes.push("Hero slideshow autoplay toggle");
+    if (heroAutoPlaySpeed !== (originalSettings.heroAutoPlaySpeed || 5)) changes.push("Hero slideshow autoplay speed");
+    if (JSON.stringify(videoSlides) !== JSON.stringify(originalSettings.videoSlides || [])) changes.push("Video slides configuration");
+    if (videoAutoPlay !== (originalSettings.videoAutoPlay ?? true)) changes.push("Video slideshow autoplay toggle");
+    if (videoAutoPlaySpeed !== (originalSettings.videoAutoPlaySpeed || 5)) changes.push("Video slideshow autoplay speed");
+    if (JSON.stringify(lifestyleSlides) !== JSON.stringify(originalSettings.lifestyleSlides || [])) changes.push("Lifestyle slides configuration");
+    if (lifestyleAutoPlay !== (originalSettings.lifestyleAutoPlay ?? true)) changes.push("Lifestyle slideshow autoplay toggle");
+    if (lifestyleAutoPlaySpeed !== (originalSettings.lifestyleAutoPlaySpeed || 5)) changes.push("Lifestyle slideshow autoplay speed");
+    if (supportText !== (originalSettings.supportText || "")) changes.push("Customer support text");
+    if (aboutUsText !== (originalSettings.aboutUsText || "")) changes.push("About Us copy");
+    if (contactUsText !== (originalSettings.contactUsText || "")) changes.push("Contact Us copy");
+    if (returnPolicyText !== (originalSettings.returnPolicyText || "")) changes.push("Return policy copy");
+    if (shippingPolicyText !== (originalSettings.shippingPolicyText || "")) changes.push("Shipping policy copy");
     return changes;
   };
 
@@ -1130,11 +1172,11 @@ export default function AdminDashboard() {
         setHeroTitleFontSize(data.heroTitleFontSize || "4.5rem");
         setHeroTitleFontAlignment(data.heroTitleFontAlignment || "center");
         setHeroTitleFontWeight(data.heroTitleFontWeight || "700");
-        if (data.heroManifestoFontType) setHeroManifestoFontType(data.heroManifestoFontType);
-        if (data.heroManifestoFontColor) setHeroManifestoFontColor(data.heroManifestoFontColor);
-        if (data.heroManifestoFontSize) setHeroManifestoFontSize(data.heroManifestoFontSize);
-        if (data.heroManifestoFontAlignment) setHeroManifestoFontAlignment(data.heroManifestoFontAlignment);
-        if (data.heroManifestoFontWeight) setHeroManifestoFontWeight(data.heroManifestoFontWeight);
+        setHeroManifestoFontType(data.heroManifestoFontType || "Outfit");
+        setHeroManifestoFontColor(data.heroManifestoFontColor || "#ffffff");
+        setHeroManifestoFontSize(data.heroManifestoFontSize || "0.72rem");
+        setHeroManifestoFontAlignment(data.heroManifestoFontAlignment || "left");
+        setHeroManifestoFontWeight(data.heroManifestoFontWeight || "500");
         setHeroManifesto(data.heroManifesto || "");
         setHeroTemplate(data.heroTemplate || "center");
         setShowHeroTitle(data.showHeroTitle !== false);
@@ -1145,7 +1187,7 @@ export default function AdminDashboard() {
         setHeroButtonSize(data.heroButtonSize || "md");
         setHeroButtonColor(data.heroButtonColor || "");
         setHeroButtonTextColor(data.heroButtonTextColor || "#ffffff");
-        if (Array.isArray(data.heroSlides)) setHeroSlides(data.heroSlides);
+        setHeroSlides(Array.isArray(data.heroSlides) ? data.heroSlides : []);
         if (data.heroAutoPlay !== undefined) setHeroAutoPlay(data.heroAutoPlay);
         if (data.heroAutoPlaySpeed !== undefined) setHeroAutoPlaySpeed(data.heroAutoPlaySpeed);
 
@@ -1199,6 +1241,9 @@ export default function AdminDashboard() {
         setVideoBgType(data.videoBgType || "video");
         setVideoBgColor(data.videoBgColor || "#121212");
         setVideoBgImage(data.videoBgImage || "");
+        setVideoSlides(Array.isArray(data.videoSlides) ? data.videoSlides : []);
+        if (data.videoAutoPlay !== undefined) setVideoAutoPlay(data.videoAutoPlay);
+        if (data.videoAutoPlaySpeed !== undefined) setVideoAutoPlaySpeed(data.videoAutoPlaySpeed);
 
         // Mobile video layout setters (unlinked)
         setMobileVideoTemplate(data.mobileVideoTemplate || data.videoTemplate || "center");
@@ -1237,6 +1282,9 @@ export default function AdminDashboard() {
         setLifestyleButtonSize(data.lifestyleButtonSize || "md");
         setLifestyleButtonColor(data.lifestyleButtonColor || "");
         setLifestyleButtonTextColor(data.lifestyleButtonTextColor || "#ffffff");
+        setLifestyleSlides(Array.isArray(data.lifestyleSlides) ? data.lifestyleSlides : []);
+        if (data.lifestyleAutoPlay !== undefined) setLifestyleAutoPlay(data.lifestyleAutoPlay);
+        if (data.lifestyleAutoPlaySpeed !== undefined) setLifestyleAutoPlaySpeed(data.lifestyleAutoPlaySpeed);
 
         setMobileLifestyleText(data.mobileLifestyleText !== undefined ? data.mobileLifestyleText : "");
         setMobileLifestyleTextFontType(data.mobileLifestyleTextFontType || data.lifestyleTextFontType || "Outfit");
@@ -1249,7 +1297,7 @@ export default function AdminDashboard() {
         setMobileLifestyleButtonText(data.mobileLifestyleButtonText !== undefined ? data.mobileLifestyleButtonText : (data.lifestyleButtonText || "Explore Now"));
         setMobileLifestyleButtonStyle(data.mobileLifestyleButtonStyle || data.lifestyleButtonStyle || "solid");
         setMobileLifestyleButtonSize(data.mobileLifestyleButtonSize || "sm");
-        setMobileLifestyleButtonColor(data.mobileLifestyleButtonColor !== undefined ? data.mobileLifestyleButtonColor : data.lifestyleButtonColor);
+        setMobileLifestyleButtonColor(data.mobileLifestyleButtonColor !== undefined ? data.mobileLifestyleButtonColor : (data.lifestyleButtonColor || ""));
         setMobileLifestyleButtonTextColor(data.mobileLifestyleButtonTextColor || data.lifestyleButtonTextColor || "#ffffff");
         setPrimaryColor(data.primaryColor || "#ffffff");
         setBrandLogoType(data.brandLogoType || "text");
@@ -1269,16 +1317,16 @@ export default function AdminDashboard() {
         setExploreMoreTitle(data.exploreMoreTitle || "Don't Stop. Explore More.");
         setDeliverySubtext(data.deliverySubtext || "TAXES INCLUDED. SHIPPING CALCULATED AT CHECKOUT.");
         setGoogleClientId(data.googleClientId || "523936375845-75tjhav8ce01o9mdk325iggb1glgpi21.apps.googleusercontent.com");
-        if (data.supportText !== undefined) setSupportText(data.supportText);
-        if (data.careersText !== undefined) setCareersText(data.careersText);
-        if (data.tradeEnquiryText !== undefined) setTradeEnquiryText(data.tradeEnquiryText);
-        if (data.aboutUsText !== undefined) setAboutUsText(data.aboutUsText);
-        if (data.instagramLink !== undefined) setInstagramLink(data.instagramLink);
-        if (data.facebookLink !== undefined) setFacebookLink(data.facebookLink);
-        if (data.contactLink !== undefined) setContactLink(data.contactLink);
-        if (data.contactUsText !== undefined) setContactUsText(data.contactUsText);
-        if (data.returnPolicyText !== undefined) setReturnPolicyText(data.returnPolicyText);
-        if (data.shippingPolicyText !== undefined) setShippingPolicyText(data.shippingPolicyText);
+        setSupportText(data.supportText !== undefined ? data.supportText : "For support inquiries, please contact us.");
+        setCareersText(data.careersText !== undefined ? data.careersText : "Join our team! Check out our open positions.");
+        setTradeEnquiryText(data.tradeEnquiryText !== undefined ? data.tradeEnquiryText : "For trade and wholesale inquiries, contact our B2B team.");
+        setAboutUsText(data.aboutUsText !== undefined ? data.aboutUsText : "We deliver quality products with exceptional customer service.");
+        setInstagramLink(data.instagramLink !== undefined ? data.instagramLink : "#");
+        setFacebookLink(data.facebookLink !== undefined ? data.facebookLink : "#");
+        setContactLink(data.contactLink !== undefined ? data.contactLink : "#");
+        setContactUsText(data.contactUsText !== undefined ? data.contactUsText : "Need help? Email us at support@yourstore.com and our support team will get back to you within 24 hours.");
+        setReturnPolicyText(data.returnPolicyText !== undefined ? data.returnPolicyText : "We offer a 7-day hassle-free return policy. If you're not fully satisfied with your purchase, contact our support team for a full refund.");
+        setShippingPolicyText(data.shippingPolicyText !== undefined ? data.shippingPolicyText : "We offer free shipping across India. Orders are typically processed within 1-2 business days and delivered within 4-7 business days.");
 
         if (data.activePaymentGateway !== undefined) setActivePaymentGateway(data.activePaymentGateway);
         if (data.razorpayKeyId !== undefined) setRazorpayKeyId(data.razorpayKeyId);
@@ -1905,10 +1953,20 @@ export default function AdminDashboard() {
     setPendingTabChange(null);
   };
 
-  const handleSaveSettings = async (e?: any) => {
+  const handleRequestSaveSettings = (e?: any) => {
     if (e && typeof e.preventDefault === 'function') {
       e.preventDefault();
     }
+    const changed = getChangedFieldsList();
+    if (changed.length > 0) {
+      setShowSaveConfirmModal(true);
+    } else {
+      executeSaveSettings();
+    }
+  };
+
+  const executeSaveSettings = async () => {
+    setShowSaveConfirmModal(false);
     try {
       setLoadingSettings(true);
       setError(null);
@@ -1917,6 +1975,7 @@ export default function AdminDashboard() {
         headers: { "Content-Type": "application/json", ...getAuthHeaders() },
         body: JSON.stringify({
           tickerText,
+          tickerDirection,
           tickerSpeed,
           tickerBgColor,
           tickerTextColor,
@@ -2023,6 +2082,9 @@ export default function AdminDashboard() {
           mobileVideoButtonColor,
           mobileVideoButtonTextColor,
           showMobileVideoButton,
+          videoSlides,
+          videoAutoPlay,
+          videoAutoPlaySpeed,
           lifestyleText,
           lifestyleImage,
           lifestyleTextFontType,
@@ -2037,6 +2099,9 @@ export default function AdminDashboard() {
           lifestyleButtonSize,
           lifestyleButtonColor,
           lifestyleButtonTextColor,
+          lifestyleSlides,
+          lifestyleAutoPlay,
+          lifestyleAutoPlaySpeed,
 
           mobileLifestyleText,
           mobileLifestyleTextFontType,
@@ -3561,7 +3626,7 @@ export default function AdminDashboard() {
             activeTab={activeTab}
             customizeSubTab={customizeSubTab}
             error={error}
-            handleSaveSettings={handleSaveSettings}
+            handleSaveSettings={handleRequestSaveSettings}
             setActiveCustomizerSection={setActiveCustomizerSection}
             setIsHeroCustomizerModalOpen={setIsHeroCustomizerModalOpen}
             setIsVideoCustomizerModalOpen={setIsVideoCustomizerModalOpen}
@@ -3732,7 +3797,7 @@ export default function AdminDashboard() {
             <SettingsTab
               settingsSubTab={settingsSubTab}
               setSettingsSubTab={setSettingsSubTab}
-              handleSaveSettings={handleSaveSettings}
+              handleSaveSettings={handleRequestSaveSettings}
               storeBusinessName={storeBusinessName}
               setStoreBusinessName={setStoreBusinessName}
               storeBusinessType={storeBusinessType}
@@ -4165,6 +4230,72 @@ export default function AdminDashboard() {
         </div>
       )}
 
+      {/* Save changes confirmation modal overlay showing exact changes made */}
+      {showSaveConfirmModal && (
+        <div className={styles.modalOverlay} onClick={() => setShowSaveConfirmModal(false)}>
+          <div
+            className={`${styles.unsavedModal} ${styles.mobileAlertModalOverride}`}
+            onClick={(e) => e.stopPropagation()}
+            style={{ maxWidth: "480px" }}
+          >
+            <div className={`${styles.modalHeader} ${styles.mobileAlertHeader}`}>
+              <div style={{
+                width: "36px",
+                height: "36px",
+                borderRadius: "50%",
+                backgroundColor: "#ecfdf5",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                marginRight: "10px",
+                flexShrink: 0
+              }}>
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.2} stroke="#059669" style={{ width: "20px", height: "20px" }}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="m4.5 12.75 6 6 9-13.5" />
+                </svg>
+              </div>
+              <h3 style={{ margin: 0, fontSize: "1.15rem", fontWeight: 700, color: "#111827" }}>
+                Confirm Storefront Changes
+              </h3>
+            </div>
+
+            <p className={`${styles.modalDescription} ${styles.mobileAlertDescription}`} style={{ marginBottom: "12px", color: "#4b5563", fontSize: "0.88rem" }}>
+              The following modifications will be published live to your online store:
+            </p>
+
+            <ul className={styles.changesList} style={{ width: "100%", boxSizing: "border-box", maxHeight: "200px", overflowY: "auto", margin: "0 0 20px 0" }}>
+              {getChangedFieldsList().map((field, idx) => (
+                <li key={idx} className={styles.changeItem} style={{ fontSize: "0.85rem", color: "#1f2937", display: "flex", alignItems: "center", gap: "8px" }}>
+                  <span style={{ color: "#059669", fontWeight: 800 }}>✓</span>
+                  <span>{field}</span>
+                </li>
+              ))}
+            </ul>
+
+            <div className={`${styles.modalActionRow} ${styles.mobileAlertActionRow}`} style={{ display: "flex", gap: "10px", justifyContent: "flex-end" }}>
+              <button
+                type="button"
+                onClick={() => setShowSaveConfirmModal(false)}
+                className={styles.secondaryActionBtn}
+                style={{ padding: "9px 18px", fontSize: "0.85rem", fontWeight: 600 }}
+                disabled={loadingSettings}
+              >
+                Review Changes
+              </button>
+              <button
+                type="button"
+                onClick={executeSaveSettings}
+                className={styles.primaryActionBtn}
+                style={{ padding: "9px 22px", fontSize: "0.85rem", fontWeight: 700, backgroundColor: "#000000", color: "#ffffff" }}
+                disabled={loadingSettings}
+              >
+                {loadingSettings ? "Publishing..." : "Confirm & Save"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Unsaved changes confirmation modal overlay */}
       {showUnsavedModal && (
         <div className={styles.modalOverlay}>
@@ -4510,6 +4641,10 @@ export default function AdminDashboard() {
             bgImage: videoBgImage,
             bgVideo: videoUrl,
 
+            heroSlides: videoSlides,
+            heroAutoPlay: videoAutoPlay,
+            heroAutoPlaySpeed: videoAutoPlaySpeed,
+
             mobileLayoutTemplate: mobileVideoTemplate,
             mobileTitleText: mobileVideoTitle,
             mobileTitleFontType: mobileVideoTitleFontType,
@@ -4535,6 +4670,10 @@ export default function AdminDashboard() {
             showMobileHeroButton: showMobileVideoButton,
           }}
           onApply={(config) => {
+            if (Array.isArray(config.heroSlides)) setVideoSlides(config.heroSlides);
+            if (config.heroAutoPlay !== undefined) setVideoAutoPlay(config.heroAutoPlay);
+            if (config.heroAutoPlaySpeed !== undefined) setVideoAutoPlaySpeed(config.heroAutoPlaySpeed);
+
             setVideoTitle(config.titleText);
             setVideoTitleFontType(config.titleFontType);
             setVideoTitleFontColor(config.titleFontColor);
@@ -4588,8 +4727,6 @@ export default function AdminDashboard() {
             if (config.mobileButtonTextColor !== undefined) setMobileVideoButtonTextColor(config.mobileButtonTextColor);
             if (config.showMobileHeroButton !== undefined) setShowMobileVideoButton(config.showMobileHeroButton);
 
-
-
             setIsVideoCustomizerModalOpen(false);
           }}
           sectionName="Video Section"
@@ -4620,6 +4757,10 @@ export default function AdminDashboard() {
             bgType: "image",
             bgImage: lifestyleImage,
 
+            heroSlides: lifestyleSlides,
+            heroAutoPlay: lifestyleAutoPlay,
+            heroAutoPlaySpeed: lifestyleAutoPlaySpeed,
+
             mobileTitleText: mobileLifestyleText !== undefined ? mobileLifestyleText : lifestyleText,
             mobileTitleFontType: mobileLifestyleTextFontType,
             mobileTitleFontColor: mobileLifestyleTextFontColor,
@@ -4636,6 +4777,10 @@ export default function AdminDashboard() {
             mobileButtonTextColor: mobileLifestyleButtonTextColor,
           }}
           onApply={(config) => {
+            if (Array.isArray(config.heroSlides)) setLifestyleSlides(config.heroSlides);
+            if (config.heroAutoPlay !== undefined) setLifestyleAutoPlay(config.heroAutoPlay);
+            if (config.heroAutoPlaySpeed !== undefined) setLifestyleAutoPlaySpeed(config.heroAutoPlaySpeed);
+
             if (config.titleText !== undefined) setLifestyleText(config.titleText);
             if (config.titleFontType !== undefined) setLifestyleTextFontType(config.titleFontType);
             if (config.titleFontColor !== undefined) setLifestyleTextFontColor(config.titleFontColor);

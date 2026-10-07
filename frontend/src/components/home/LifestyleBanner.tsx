@@ -1,196 +1,154 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import styles from "@/app/page.module.css";
 import { HeroSlideItem } from "@/app/admin/types";
 
-interface VideoBannerProps {
-  showVideo: boolean;
+interface LifestyleBannerProps {
+  showLifestyle: boolean;
   isMobile: boolean;
-  videoTemplate: string;
-  mobileVideoTemplate?: string;
-  videoTitle: string;
-  mobileVideoTitle?: string;
-  videoTitleFontType: string;
-  mobileVideoTitleFontType?: string;
-  videoTitleFontColor: string;
-  mobileVideoTitleFontColor?: string;
-  videoTitleFontSize: string;
-  mobileVideoTitleFontSize?: string;
-  videoTitleFontAlignment: string;
-  mobileVideoTitleFontAlignment?: string;
-  videoTitleFontWeight: string;
-  mobileVideoTitleFontWeight?: string;
-  showVideoTitle: boolean;
-  showMobileVideoTitle?: boolean;
 
-  videoSubtitle: string;
-  mobileVideoSubtitle?: string;
-  videoSubtitleFontType: string;
-  mobileVideoSubtitleFontType?: string;
-  videoSubtitleFontColor: string;
-  mobileVideoSubtitleFontColor?: string;
-  videoSubtitleFontSize: string;
-  mobileVideoSubtitleFontSize?: string;
-  videoSubtitleFontAlignment: string;
-  mobileVideoSubtitleFontAlignment?: string;
-  videoSubtitleFontWeight: string;
-  mobileVideoSubtitleFontWeight?: string;
-  showVideoSubtitle: boolean;
-  showMobileVideoSubtitle?: boolean;
+  lifestyleText: string;
+  mobileLifestyleText?: string;
+  lifestyleTextFontType: string;
+  mobileLifestyleTextFontType?: string;
+  lifestyleTextFontColor: string;
+  mobileLifestyleTextFontColor?: string;
+  lifestyleTextFontSize: string;
+  mobileLifestyleTextFontSize?: string;
+  lifestyleTextFontAlignment: string;
+  mobileLifestyleTextFontAlignment?: string;
+  lifestyleTextFontWeight: string;
+  mobileLifestyleTextFontWeight?: string;
+  showLifestyleText: boolean;
+  showMobileLifestyleText?: boolean;
 
-  videoButtonText: string;
-  mobileVideoButtonText?: string;
-  videoButtonStyle: string;
-  mobileVideoButtonStyle?: string;
-  videoButtonSize: string;
-  mobileVideoButtonSize?: string;
-  videoButtonColor: string;
-  mobileVideoButtonColor?: string;
-  videoButtonTextColor: string;
-  mobileVideoButtonTextColor?: string;
-  showVideoButton: boolean;
-  showMobileVideoButton?: boolean;
+  lifestyleButtonText: string;
+  mobileLifestyleButtonText?: string;
+  lifestyleButtonStyle: string;
+  mobileLifestyleButtonStyle?: string;
+  lifestyleButtonSize: string;
+  mobileLifestyleButtonSize?: string;
+  lifestyleButtonColor: string;
+  mobileLifestyleButtonColor?: string;
+  lifestyleButtonTextColor: string;
+  mobileLifestyleButtonTextColor?: string;
+  showLifestyleButton: boolean;
+  showMobileLifestyleButton?: boolean;
 
-  videoBgType: string;
-  videoBgColor: string;
-  videoFallbackColor: string;
-  videoBgImage: string | null;
-  videoUrl: string | null;
-  videoRef?: React.RefObject<HTMLVideoElement | null>;
+  lifestyleBgColor?: string;
+  lifestyleImage?: string | null;
   primaryColor?: string;
 
   // Carousel & Animation Props
-  videoSlides?: HeroSlideItem[];
-  videoAutoPlay?: boolean;
-  videoAutoPlaySpeed?: number;
+  lifestyleSlides?: HeroSlideItem[];
+  lifestyleAutoPlay?: boolean;
+  lifestyleAutoPlaySpeed?: number;
 }
 
-export default function VideoBanner({
-  showVideo,
+export default function LifestyleBanner({
+  showLifestyle,
   isMobile,
-  videoTemplate,
-  mobileVideoTemplate,
-  videoTitle,
-  mobileVideoTitle,
-  videoTitleFontType,
-  mobileVideoTitleFontType,
-  videoTitleFontColor,
-  mobileVideoTitleFontColor,
-  videoTitleFontSize,
-  mobileVideoTitleFontSize,
-  videoTitleFontAlignment,
-  mobileVideoTitleFontAlignment,
-  videoTitleFontWeight,
-  mobileVideoTitleFontWeight,
-  showVideoTitle,
-  showMobileVideoTitle,
 
-  videoSubtitle,
-  mobileVideoSubtitle,
-  videoSubtitleFontType,
-  mobileVideoSubtitleFontType,
-  videoSubtitleFontColor,
-  mobileVideoSubtitleFontColor,
-  videoSubtitleFontSize,
-  mobileVideoSubtitleFontSize,
-  videoSubtitleFontAlignment,
-  mobileVideoSubtitleFontAlignment,
-  videoSubtitleFontWeight,
-  mobileVideoSubtitleFontWeight,
-  showVideoSubtitle,
-  showMobileVideoSubtitle,
+  lifestyleText,
+  mobileLifestyleText,
+  lifestyleTextFontType,
+  mobileLifestyleTextFontType,
+  lifestyleTextFontColor,
+  mobileLifestyleTextFontColor,
+  lifestyleTextFontSize,
+  mobileLifestyleTextFontSize,
+  lifestyleTextFontAlignment,
+  mobileLifestyleTextFontAlignment,
+  lifestyleTextFontWeight,
+  mobileLifestyleTextFontWeight,
+  showLifestyleText,
+  showMobileLifestyleText,
 
-  videoButtonText,
-  mobileVideoButtonText,
-  videoButtonStyle,
-  mobileVideoButtonStyle,
-  videoButtonSize,
-  mobileVideoButtonSize,
-  videoButtonColor,
-  mobileVideoButtonColor,
-  videoButtonTextColor,
-  mobileVideoButtonTextColor,
-  showVideoButton,
-  showMobileVideoButton,
+  lifestyleButtonText,
+  mobileLifestyleButtonText,
+  lifestyleButtonStyle,
+  mobileLifestyleButtonStyle,
+  lifestyleButtonSize,
+  mobileLifestyleButtonSize,
+  lifestyleButtonColor,
+  mobileLifestyleButtonColor,
+  lifestyleButtonTextColor,
+  mobileLifestyleButtonTextColor,
+  showLifestyleButton,
+  showMobileLifestyleButton,
 
-  videoBgType,
-  videoBgColor,
-  videoFallbackColor,
-  videoBgImage,
-  videoUrl,
-  videoRef,
+  lifestyleBgColor = "#000000",
+  lifestyleImage,
   primaryColor,
 
-  videoSlides,
-  videoAutoPlay = true,
-  videoAutoPlaySpeed = 5
-}: VideoBannerProps) {
-  if (!showVideo) return null;
-
+  lifestyleSlides,
+  lifestyleAutoPlay = true,
+  lifestyleAutoPlaySpeed = 5
+}: LifestyleBannerProps) {
   const [currentSlideIndex, setCurrentSlideIndex] = useState<number>(0);
   const [prevSlideIndex, setPrevSlideIndex] = useState<number | null>(null);
   const [isHovered, setIsHovered] = useState<boolean>(false);
 
-  // Fallback default slide
-  const slides: HeroSlideItem[] = (videoSlides && videoSlides.length > 0)
-    ? videoSlides
+  // Default fallback slide
+  const slides: HeroSlideItem[] = (lifestyleSlides && lifestyleSlides.length > 0)
+    ? lifestyleSlides
     : [
         {
-          id: "default_video_slide",
-          titleText: videoTitle,
-          titleFontType: videoTitleFontType,
-          titleFontColor: videoTitleFontColor,
-          titleFontSize: videoTitleFontSize,
-          titleFontAlignment: videoTitleFontAlignment,
-          titleFontWeight: videoTitleFontWeight,
-          showTitle: showVideoTitle,
+          id: "default_lifestyle_slide",
+          titleText: lifestyleText,
+          titleFontType: lifestyleTextFontType,
+          titleFontColor: lifestyleTextFontColor,
+          titleFontSize: lifestyleTextFontSize,
+          titleFontAlignment: lifestyleTextFontAlignment,
+          titleFontWeight: lifestyleTextFontWeight,
+          showTitle: showLifestyleText,
 
-          manifestoText: videoSubtitle,
-          manifestoFontType: videoSubtitleFontType,
-          manifestoFontColor: videoSubtitleFontColor,
-          manifestoFontSize: videoSubtitleFontSize,
-          manifestoFontAlignment: videoSubtitleFontAlignment,
-          manifestoFontWeight: videoSubtitleFontWeight,
-          showManifesto: showVideoSubtitle,
+          manifestoText: "",
+          manifestoFontType: "Outfit",
+          manifestoFontColor: "#ffffff",
+          manifestoFontSize: "1rem",
+          manifestoFontAlignment: "center",
+          manifestoFontWeight: "500",
+          showManifesto: false,
 
-          buttonText: videoButtonText,
-          buttonStyle: videoButtonStyle,
-          buttonSize: videoButtonSize,
-          buttonColor: videoButtonColor,
-          buttonTextColor: videoButtonTextColor,
-          showButton: showVideoButton,
+          buttonText: lifestyleButtonText,
+          buttonStyle: lifestyleButtonStyle,
+          buttonSize: lifestyleButtonSize,
+          buttonColor: lifestyleButtonColor,
+          buttonTextColor: lifestyleButtonTextColor,
+          showButton: showLifestyleButton,
 
-          layoutTemplate: videoTemplate,
-          bgType: (videoBgType as any) || "video",
-          bgColor: videoBgColor || videoFallbackColor || "#121212",
-          bgImage: videoBgImage || "",
-          bgVideo: videoUrl || "",
+          layoutTemplate: "center",
+          bgType: "image",
+          bgColor: lifestyleBgColor || "#000000",
+          bgImage: lifestyleImage || "",
+          bgVideo: "",
 
-          mobileLayoutTemplate: mobileVideoTemplate,
-          mobileTitleText: mobileVideoTitle,
-          mobileTitleFontType: mobileVideoTitleFontType,
-          mobileTitleFontColor: mobileVideoTitleFontColor,
-          mobileTitleFontSize: mobileVideoTitleFontSize,
-          mobileTitleFontAlignment: mobileVideoTitleFontAlignment,
-          mobileTitleFontWeight: mobileVideoTitleFontWeight,
-          showMobileHeroTitle: showMobileVideoTitle,
+          mobileLayoutTemplate: "center",
+          mobileTitleText: mobileLifestyleText,
+          mobileTitleFontType: mobileLifestyleTextFontType,
+          mobileTitleFontColor: mobileLifestyleTextFontColor,
+          mobileTitleFontSize: mobileLifestyleTextFontSize,
+          mobileTitleFontAlignment: mobileLifestyleTextFontAlignment,
+          mobileTitleFontWeight: mobileLifestyleTextFontWeight,
+          showMobileHeroTitle: showMobileLifestyleText,
 
-          mobileManifestoText: mobileVideoSubtitle,
-          mobileManifestoFontType: mobileVideoSubtitleFontType,
-          mobileManifestoFontColor: mobileVideoSubtitleFontColor,
-          mobileManifestoFontSize: mobileVideoSubtitleFontSize,
-          mobileManifestoFontAlignment: mobileVideoSubtitleFontAlignment,
-          mobileManifestoFontWeight: mobileVideoSubtitleFontWeight,
-          showMobileHeroManifesto: showMobileVideoSubtitle,
+          mobileManifestoText: "",
+          mobileManifestoFontType: "Outfit",
+          mobileManifestoFontColor: "#ffffff",
+          mobileManifestoFontSize: "0.85rem",
+          mobileManifestoFontAlignment: "center",
+          mobileManifestoFontWeight: "500",
+          showMobileHeroManifesto: false,
 
-          mobileButtonText: mobileVideoButtonText,
-          mobileButtonStyle: mobileVideoButtonStyle,
-          mobileButtonSize: mobileVideoButtonSize,
-          mobileButtonColor: mobileVideoButtonColor,
-          mobileButtonTextColor: mobileVideoButtonTextColor,
-          showMobileHeroButton: showMobileVideoButton
+          mobileButtonText: mobileLifestyleButtonText,
+          mobileButtonStyle: mobileLifestyleButtonStyle,
+          mobileButtonSize: mobileLifestyleButtonSize,
+          mobileButtonColor: mobileLifestyleButtonColor,
+          mobileButtonTextColor: mobileLifestyleButtonTextColor,
+          showMobileHeroButton: showMobileLifestyleButton
         }
       ];
 
@@ -202,8 +160,8 @@ export default function VideoBanner({
 
   // Auto-play Timer Effect
   useEffect(() => {
-    if (!videoAutoPlay || slides.length <= 1 || isHovered) return;
-    const intervalMs = (videoAutoPlaySpeed || 5) * 1000;
+    if (!lifestyleAutoPlay || slides.length <= 1 || isHovered) return;
+    const intervalMs = (lifestyleAutoPlaySpeed || 5) * 1000;
     const timer = setInterval(() => {
       setCurrentSlideIndex((prev) => {
         setPrevSlideIndex(prev);
@@ -211,7 +169,7 @@ export default function VideoBanner({
       });
     }, intervalMs);
     return () => clearInterval(timer);
-  }, [videoAutoPlay, videoAutoPlaySpeed, slides.length, isHovered]);
+  }, [lifestyleAutoPlay, lifestyleAutoPlaySpeed, slides.length, isHovered]);
 
   const activeSlide = slides[currentSlideIndex] || slides[0];
 
@@ -226,99 +184,106 @@ export default function VideoBanner({
     }
   }, [currentSlideIndex, prevSlideIndex, activeSlide.slideAnimationDuration]);
 
-  const renderVideoSlide = (
+  const activeShowLifestyleText = isMobile ? (showMobileLifestyleText !== undefined ? showMobileLifestyleText : showLifestyleText) : showLifestyleText;
+  const activeShowLifestyleButton = isMobile ? (showMobileLifestyleButton !== undefined ? showMobileLifestyleButton : showLifestyleButton) : showLifestyleButton;
+
+  if (!showLifestyle && !activeShowLifestyleText && !activeShowLifestyleButton && (!lifestyleSlides || lifestyleSlides.length === 0)) {
+    return null;
+  }
+
+  const renderLifestyleSlide = (
     slide: HeroSlideItem,
     isPrevious: boolean,
     keyStr: string
   ) => {
-    const sBgType = slide.bgType || videoBgType || "video";
-    const sBgColor = slide.bgColor || videoBgColor || videoFallbackColor || "#121212";
-    const sBgImage = slide.bgImage !== undefined && slide.bgImage !== "" ? slide.bgImage : videoBgImage;
-    const sBgVideo = slide.bgVideo !== undefined && slide.bgVideo !== "" ? slide.bgVideo : videoUrl;
+    const sBgType = slide.bgType || "image";
+    const sBgColor = slide.bgColor || lifestyleBgColor || "#000000";
+    const sBgImage = slide.bgImage !== undefined && slide.bgImage !== "" ? slide.bgImage : lifestyleImage;
+    const sBgVideo = slide.bgVideo || "";
 
     const sTemplate = isMobile
-      ? (slide.mobileLayoutTemplate || slide.layoutTemplate || videoTemplate || "center")
-      : (slide.layoutTemplate || videoTemplate || "center");
+      ? (slide.mobileLayoutTemplate || slide.layoutTemplate || "center")
+      : (slide.layoutTemplate || "center");
 
     const sTitle = isMobile
-      ? (slide.mobileTitleText !== "" && slide.mobileTitleText !== undefined ? slide.mobileTitleText : slide.titleText)
-      : slide.titleText;
+      ? (slide.mobileTitleText !== "" && slide.mobileTitleText !== undefined ? slide.mobileTitleText : (slide.titleText || lifestyleText))
+      : (slide.titleText || lifestyleText);
 
     const sTitleFontType = isMobile
-      ? (slide.mobileTitleFontType || slide.titleFontType || videoTitleFontType)
-      : (slide.titleFontType || videoTitleFontType);
+      ? (slide.mobileTitleFontType || slide.titleFontType || lifestyleTextFontType)
+      : (slide.titleFontType || lifestyleTextFontType);
 
     const sTitleFontColor = isMobile
-      ? (slide.mobileTitleFontColor || slide.titleFontColor || videoTitleFontColor)
-      : (slide.titleFontColor || videoTitleFontColor);
+      ? (slide.mobileTitleFontColor || slide.titleFontColor || lifestyleTextFontColor)
+      : (slide.titleFontColor || lifestyleTextFontColor);
 
     const sTitleFontSize = isMobile
-      ? (slide.mobileTitleFontSize || "2.5rem")
-      : (slide.titleFontSize || videoTitleFontSize || "3.5rem");
+      ? (slide.mobileTitleFontSize || "1.8rem")
+      : (slide.titleFontSize || lifestyleTextFontSize || "2.5rem");
 
     const sTitleFontAlignment = isMobile
-      ? (slide.mobileTitleFontAlignment || slide.titleFontAlignment || videoTitleFontAlignment || "center")
-      : (slide.titleFontAlignment || videoTitleFontAlignment || "center");
+      ? (slide.mobileTitleFontAlignment || slide.titleFontAlignment || lifestyleTextFontAlignment || "center")
+      : (slide.titleFontAlignment || lifestyleTextFontAlignment || "center");
 
     const sTitleFontWeight = isMobile
-      ? (slide.mobileTitleFontWeight || slide.titleFontWeight || videoTitleFontWeight)
-      : (slide.titleFontWeight || videoTitleFontWeight);
+      ? (slide.mobileTitleFontWeight || slide.titleFontWeight || lifestyleTextFontWeight)
+      : (slide.titleFontWeight || lifestyleTextFontWeight);
 
     const sShowTitle = isMobile
-      ? (slide.showMobileHeroTitle !== undefined ? slide.showMobileHeroTitle : (slide.showTitle !== undefined ? slide.showTitle : showVideoTitle))
-      : (slide.showTitle !== undefined ? slide.showTitle : showVideoTitle);
+      ? (slide.showMobileHeroTitle !== undefined ? slide.showMobileHeroTitle : (slide.showTitle !== undefined ? slide.showTitle : showLifestyleText))
+      : (slide.showTitle !== undefined ? slide.showTitle : showLifestyleText);
 
     const sManifesto = isMobile
       ? (slide.mobileManifestoText !== "" && slide.mobileManifestoText !== undefined ? slide.mobileManifestoText : slide.manifestoText)
       : slide.manifestoText;
 
     const sManifestoFontType = isMobile
-      ? (slide.mobileManifestoFontType || slide.manifestoFontType || videoSubtitleFontType)
-      : (slide.manifestoFontType || videoSubtitleFontType);
+      ? (slide.mobileManifestoFontType || slide.manifestoFontType || "Outfit")
+      : (slide.manifestoFontType || "Outfit");
 
     const sManifestoFontColor = isMobile
-      ? (slide.mobileManifestoFontColor || slide.manifestoFontColor || videoSubtitleFontColor)
-      : (slide.manifestoFontColor || videoSubtitleFontColor);
+      ? (slide.mobileManifestoFontColor || slide.manifestoFontColor || "#ffffff")
+      : (slide.manifestoFontColor || "#ffffff");
 
     const sManifestoFontSize = isMobile
       ? (slide.mobileManifestoFontSize || "0.85rem")
-      : (slide.manifestoFontSize || videoSubtitleFontSize || "1.1rem");
+      : (slide.manifestoFontSize || "1rem");
 
     const sManifestoFontAlignment = isMobile
-      ? (slide.mobileManifestoFontAlignment || slide.manifestoFontAlignment || videoSubtitleFontAlignment || "center")
-      : (slide.manifestoFontAlignment || videoSubtitleFontAlignment || "center");
+      ? (slide.mobileManifestoFontAlignment || slide.manifestoFontAlignment || "center")
+      : (slide.manifestoFontAlignment || "center");
 
     const sManifestoFontWeight = isMobile
-      ? (slide.mobileManifestoFontWeight || slide.manifestoFontWeight || videoSubtitleFontWeight)
-      : (slide.manifestoFontWeight || videoSubtitleFontWeight);
+      ? (slide.mobileManifestoFontWeight || slide.manifestoFontWeight || "500")
+      : (slide.manifestoFontWeight || "500");
 
     const sShowManifesto = isMobile
-      ? (slide.showMobileHeroManifesto !== undefined ? slide.showMobileHeroManifesto : (slide.showManifesto !== undefined ? slide.showManifesto : showVideoSubtitle))
-      : (slide.showManifesto !== undefined ? slide.showManifesto : showVideoSubtitle);
+      ? (slide.showMobileHeroManifesto !== undefined ? slide.showMobileHeroManifesto : (slide.showManifesto !== undefined ? slide.showManifesto : false))
+      : (slide.showManifesto !== undefined ? slide.showManifesto : false);
 
     const sButtonText = isMobile
-      ? (slide.mobileButtonText || slide.buttonText || videoButtonText)
-      : (slide.buttonText || videoButtonText);
+      ? (slide.mobileButtonText || slide.buttonText || lifestyleButtonText)
+      : (slide.buttonText || lifestyleButtonText);
 
     const sButtonStyle = isMobile
-      ? (slide.mobileButtonStyle || slide.buttonStyle || videoButtonStyle)
-      : (slide.buttonStyle || videoButtonStyle);
+      ? (slide.mobileButtonStyle || slide.buttonStyle || lifestyleButtonStyle)
+      : (slide.buttonStyle || lifestyleButtonStyle);
 
     const sButtonSize = isMobile
       ? (slide.mobileButtonSize || "sm")
-      : (slide.buttonSize || videoButtonSize);
+      : (slide.buttonSize || lifestyleButtonSize);
 
     const sButtonColor = isMobile
-      ? (slide.mobileButtonColor !== "" && slide.mobileButtonColor !== undefined ? slide.mobileButtonColor : videoButtonColor)
-      : videoButtonColor;
+      ? (slide.mobileButtonColor !== "" && slide.mobileButtonColor !== undefined ? slide.mobileButtonColor : lifestyleButtonColor)
+      : lifestyleButtonColor;
 
     const sButtonTextColor = isMobile
-      ? (slide.mobileButtonTextColor || slide.buttonTextColor || videoButtonTextColor)
-      : (slide.buttonTextColor || videoButtonTextColor);
+      ? (slide.mobileButtonTextColor || slide.buttonTextColor || lifestyleButtonTextColor)
+      : (slide.buttonTextColor || lifestyleButtonTextColor);
 
     const sShowButton = isMobile
-      ? (slide.showMobileHeroButton !== undefined ? slide.showMobileHeroButton : (slide.showButton !== undefined ? slide.showButton : showVideoButton))
-      : (slide.showButton !== undefined ? slide.showButton : showVideoButton);
+      ? (slide.showMobileHeroButton !== undefined ? slide.showMobileHeroButton : (slide.showButton !== undefined ? slide.showButton : showLifestyleButton))
+      : (slide.showButton !== undefined ? slide.showButton : showLifestyleButton);
 
     const animType = activeSlide.slideAnimation !== undefined ? activeSlide.slideAnimation : "fade";
     const duration = activeSlide.slideAnimationDuration || 0.5;
@@ -355,12 +320,12 @@ export default function VideoBanner({
             sTemplate === "center" || sTemplate.endsWith("center") ? "center" :
               sTemplate.startsWith("right") ? "flex-end" : "flex-start",
           padding:
-            sTemplate === "bottom-left" || sTemplate === "right-bottom" || sTemplate === "bottom-center" ? "100px 5vw 80px 5vw" :
-              sTemplate === "top-left" || sTemplate === "right-top" || sTemplate === "top-center" ? "100px 5vw" : "0 5vw",
+            sTemplate === "bottom-left" || sTemplate === "right-bottom" || sTemplate === "bottom-center" ? "80px 5vw 60px 5vw" :
+              sTemplate === "top-left" || sTemplate === "right-top" || sTemplate === "top-center" ? "80px 5vw" : "40px 5vw",
           textAlign:
             sTemplate === "center" || sTemplate.endsWith("center") ? "center" :
               sTemplate.startsWith("right") ? "right" : "left",
-          backgroundColor: sBgType === "color" ? sBgColor : (videoFallbackColor || "#121212"),
+          backgroundColor: sBgType === "color" ? sBgColor : (lifestyleBgColor || "#000000"),
           backgroundImage: sBgType === "image" && sBgImage ? `url("${sBgImage}")` : "none",
           backgroundSize: "cover",
           backgroundPosition: "center",
@@ -369,7 +334,6 @@ export default function VideoBanner({
       >
         {sBgType === "video" && sBgVideo && (
           <video
-            ref={videoRef}
             key={sBgVideo}
             src={sBgVideo}
             autoPlay
@@ -380,7 +344,7 @@ export default function VideoBanner({
             style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", zIndex: 1 }}
           />
         )}
-        {sBgType !== "color" && <div style={{ position: "absolute", inset: 0, backgroundColor: "rgba(0, 0, 0, 0.45)", zIndex: 1 }} />}
+        <div className={styles.lifestyleOverlay} style={{ position: "absolute", inset: 0, zIndex: 1 }} />
 
         {/* Slide Content */}
         {(() => {
@@ -443,7 +407,7 @@ export default function VideoBanner({
                 display: "flex",
                 flexDirection: "column",
                 gap: "20px",
-                maxWidth: "800px",
+                maxWidth: "900px",
                 width: "100%"
               }}
             >
@@ -473,18 +437,19 @@ export default function VideoBanner({
                             : `${animName} ${titleAnim.duration || 0.6}s cubic-bezier(0.16, 1, 0.3, 1) ${effectiveDelays.title || 0}s both`)
                         : "none"
                     }}>
-                      <h2
+                      <p
+                        className={styles.lifestyleText}
                         style={{
                           fontFamily: sTitleFontType ? `"${sTitleFontType}", sans-serif` : "inherit",
                           color: sTitleFontColor || "#ffffff",
-                          fontSize: sTitleFontSize || "3.5rem",
+                          fontSize: sTitleFontSize || "2.5rem",
                           fontWeight: Number(sTitleFontWeight) || 700,
                           textAlign: (sTitleFontAlignment as any) || "center",
                           margin: 0
                         }}
                       >
                         {sTitle}
-                      </h2>
+                      </p>
                     </div>
                   </div>
                 );
@@ -520,7 +485,7 @@ export default function VideoBanner({
                         style={{
                           fontFamily: sManifestoFontType ? `"${sManifestoFontType}", sans-serif` : "inherit",
                           color: sManifestoFontColor || "#ffffff",
-                          fontSize: sManifestoFontSize || "1.1rem",
+                          fontSize: sManifestoFontSize || "1rem",
                           fontWeight: Number(sManifestoFontWeight) || 500,
                           textAlign: (sManifestoFontAlignment as any) || "center",
                           margin: 0
@@ -534,12 +499,10 @@ export default function VideoBanner({
               })()}
 
               {sShowButton && (() => {
-                const btnColor = sButtonColor ? sButtonColor : (primaryColor || "#ffffff");
-                const isSolid = sButtonStyle === "solid";
-                const isOutline = sButtonStyle === "outline";
-
-                const paddings: Record<string, string> = { sm: "10px 24px", md: "14px 36px", lg: "18px 48px" };
-                const fontSizes: Record<string, string> = { sm: "0.75rem", md: "0.85rem", lg: "0.95rem" };
+                const btnPadding = sButtonSize === "sm" ? "8px 18px" : sButtonSize === "lg" ? "16px 36px" : "12px 28px";
+                const btnFontSize = sButtonSize === "sm" ? "0.82rem" : sButtonSize === "lg" ? "1.05rem" : "0.92rem";
+                const effectiveButtonBg = sButtonStyle === "outline" ? "transparent" : (sButtonColor || primaryColor || "#ffffff");
+                const effectiveButtonBorder = sButtonStyle === "outline" ? `2px solid ${sButtonColor || "#ffffff"}` : "none";
 
                 const animName = getAnimName(buttonAnim.type);
                 const isLoop = buttonAnim.type?.endsWith("-loop") || buttonAnim.type === "pulse-beat" || buttonAnim.type === "shimmer-gold" || buttonAnim.type === "subtle-shake";
@@ -566,24 +529,26 @@ export default function VideoBanner({
                             : `${animName} ${buttonAnim.duration || 0.6}s cubic-bezier(0.16, 1, 0.3, 1) ${effectiveDelays.button || 0}s both`)
                         : "none"
                     }}>
-                      <Link href={slide.buttonRedirectUrl || "/shop"} style={{ textDecoration: "none", display: "inline-block" }}>
-                        <button style={{
+                      <Link
+                        href={slide.buttonRedirectUrl || "/shop"}
+                        style={{
                           display: "inline-block",
-                          padding: paddings[sButtonSize] || paddings.md,
-                          fontSize: fontSizes[sButtonSize] || fontSizes.md,
+                          padding: btnPadding,
+                          fontSize: btnFontSize,
+                          fontFamily: `"${sTitleFontType}", sans-serif`,
                           fontWeight: 700,
-                          cursor: "pointer",
-                          borderRadius: "4px",
-                          transition: "all 0.3s ease",
-                          backgroundColor: isSolid ? btnColor : "transparent",
-                          color: isSolid ? (sButtonTextColor || "#121212") : (sButtonTextColor || btnColor),
-                          border: isSolid || isOutline ? `2px solid ${btnColor}` : "none",
-                          textDecoration: sButtonStyle === "minimal" ? "underline" : "none",
                           textTransform: "uppercase",
-                          letterSpacing: "0.08em"
-                        }}>
-                          {sButtonText || "Shop Now"}
-                        </button>
+                          letterSpacing: "0.08em",
+                          borderRadius: "4px",
+                          backgroundColor: effectiveButtonBg,
+                          color: sButtonTextColor || "#ffffff",
+                          border: effectiveButtonBorder,
+                          textDecoration: sButtonStyle === "minimal" ? "underline" : "none",
+                          cursor: "pointer",
+                          transition: "all 0.2s ease"
+                        }}
+                      >
+                        {sButtonText || "Explore Now"}
                       </Link>
                     </div>
                   </div>
@@ -598,13 +563,14 @@ export default function VideoBanner({
 
   return (
     <section
-      className={styles.videoSection}
+      className={styles.lifestyleBanner}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       style={{
         position: "relative",
-        minHeight: "100vh",
-        overflow: "hidden"
+        minHeight: "65vh",
+        overflow: "hidden",
+        padding: "0"
       }}
     >
       <style>{`
@@ -694,7 +660,7 @@ export default function VideoBanner({
         @keyframes elemShimmerGold {
           0% { filter: brightness(1) drop-shadow(0 0 0px rgba(245, 158, 11, 0)); }
           50% { filter: brightness(1.25) drop-shadow(0 0 12px rgba(245, 158, 11, 0.8)); }
-          100% { filter: brightness(1) drop-shadow(0 0 0px rgba(245, 158, 11, 0)); }
+          100% { filter: brightness(1) drop-shadow(0 0 0px rgba(245, 158, 11, 0.8)); }
         }
         @keyframes elemFloatLoop {
           0%, 100% { transform: translateY(0); }
@@ -703,16 +669,16 @@ export default function VideoBanner({
       `}</style>
 
       {/* Render Previous Slide if Transitioning */}
-      {prevSlideIndex !== null && slides[prevSlideIndex] && renderVideoSlide(slides[prevSlideIndex], true, `prev_video_slide_${prevSlideIndex}`)}
+      {prevSlideIndex !== null && slides[prevSlideIndex] && renderLifestyleSlide(slides[prevSlideIndex], true, `prev_lifestyle_slide_${prevSlideIndex}`)}
 
       {/* Render Active Slide */}
-      {activeSlide && renderVideoSlide(activeSlide, false, `active_video_slide_${currentSlideIndex}`)}
+      {activeSlide && renderLifestyleSlide(activeSlide, false, `active_lifestyle_slide_${currentSlideIndex}`)}
 
       {/* Left Carousel Prev Arrow */}
       {slides.length > 1 && (
         <button
           type="button"
-          aria-label="Previous Video Slide"
+          aria-label="Previous Lifestyle Slide"
           onClick={() => goToSlide((currentSlideIndex - 1 + slides.length) % slides.length)}
           style={{
             position: "absolute",
@@ -743,7 +709,7 @@ export default function VideoBanner({
       {slides.length > 1 && (
         <button
           type="button"
-          aria-label="Next Video Slide"
+          aria-label="Next Lifestyle Slide"
           onClick={() => goToSlide((currentSlideIndex + 1) % slides.length)}
           style={{
             position: "absolute",
@@ -786,7 +752,7 @@ export default function VideoBanner({
             <button
               key={idx}
               type="button"
-              aria-label={`Go to video slide ${idx + 1}`}
+              aria-label={`Go to lifestyle slide ${idx + 1}`}
               onClick={() => goToSlide(idx)}
               style={{
                 width: idx === currentSlideIndex ? "28px" : "8px",

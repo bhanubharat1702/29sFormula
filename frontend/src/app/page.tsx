@@ -20,6 +20,7 @@ import VideoBanner from "@/components/home/VideoBanner";
 import ArrivalsSection from "@/components/home/ArrivalsSection";
 import RecentlyViewedSection from "@/components/home/RecentlyViewedSection";
 import TrustIconBar from "@/components/home/TrustIconBar";
+import LifestyleBanner from "@/components/home/LifestyleBanner";
 import { useCart } from "@/context/CartContext";
 import { saveCart, clearCart, fetchAndSyncUserCart } from "@/utils/cartSync";
 
@@ -647,6 +648,12 @@ export default function Home() {
           if (data.heroSlides !== undefined && Array.isArray(data.heroSlides)) {
             localStorage.setItem("settings_heroSlides", JSON.stringify(data.heroSlides));
           }
+          if (data.videoSlides !== undefined && Array.isArray(data.videoSlides)) {
+            localStorage.setItem("settings_videoSlides", JSON.stringify(data.videoSlides));
+          }
+          if (data.lifestyleSlides !== undefined && Array.isArray(data.lifestyleSlides)) {
+            localStorage.setItem("settings_lifestyleSlides", JSON.stringify(data.lifestyleSlides));
+          }
           if (data.faqs !== undefined && Array.isArray(data.faqs)) setFaqs(data.faqs);
         }
       })
@@ -710,6 +717,26 @@ export default function Home() {
           const parsedSlides = JSON.parse(cachedHeroSlides);
           if (Array.isArray(parsedSlides) && parsedSlides.length > 0) {
             setGlobalSettings((prev: any) => ({ ...prev, heroSlides: parsedSlides }));
+          }
+        } catch (err) {}
+      }
+
+      const cachedVideoSlides = localStorage.getItem("settings_videoSlides");
+      if (cachedVideoSlides) {
+        try {
+          const parsedVideoSlides = JSON.parse(cachedVideoSlides);
+          if (Array.isArray(parsedVideoSlides) && parsedVideoSlides.length > 0) {
+            setGlobalSettings((prev: any) => ({ ...prev, videoSlides: parsedVideoSlides }));
+          }
+        } catch (err) {}
+      }
+
+      const cachedLifestyleSlides = localStorage.getItem("settings_lifestyleSlides");
+      if (cachedLifestyleSlides) {
+        try {
+          const parsedLifestyleSlides = JSON.parse(cachedLifestyleSlides);
+          if (Array.isArray(parsedLifestyleSlides) && parsedLifestyleSlides.length > 0) {
+            setGlobalSettings((prev: any) => ({ ...prev, lifestyleSlides: parsedLifestyleSlides }));
           }
         } catch (err) {}
       }
@@ -1038,6 +1065,9 @@ export default function Home() {
         videoUrl={videoUrl}
         videoRef={videoRef}
         primaryColor={primaryColor}
+        videoSlides={globalSettings?.videoSlides}
+        videoAutoPlay={globalSettings?.videoAutoPlay}
+        videoAutoPlaySpeed={globalSettings?.videoAutoPlaySpeed}
       />
 
       {/* 6. Latest Arrivals Products Section */}
@@ -1068,87 +1098,42 @@ export default function Home() {
       />
 
       {/* 7. Lifestyle Banner Section */}
-      {(() => {
-        const activeShowLifestyleText = isMobile ? (showMobileLifestyleText !== undefined ? showMobileLifestyleText : showLifestyleText) : showLifestyleText;
-        const activeLifestyleText = isMobile ? (mobileLifestyleText !== "" && mobileLifestyleText !== undefined ? mobileLifestyleText : lifestyleText) : lifestyleText;
-        const activeTextFontType = isMobile ? (mobileLifestyleTextFontType || lifestyleTextFontType) : lifestyleTextFontType;
-        const activeTextFontColor = isMobile ? (mobileLifestyleTextFontColor || lifestyleTextFontColor) : lifestyleTextFontColor;
-        const activeTextFontSize = isMobile ? (mobileLifestyleTextFontSize || "1.8rem") : lifestyleTextFontSize;
-        const activeTextFontAlignment = isMobile ? (mobileLifestyleTextFontAlignment || lifestyleTextFontAlignment || "center") : lifestyleTextFontAlignment;
-        const activeTextFontWeight = isMobile ? (mobileLifestyleTextFontWeight || lifestyleTextFontWeight) : lifestyleTextFontWeight;
-
-        const activeShowLifestyleButton = isMobile ? (showMobileLifestyleButton !== undefined ? showMobileLifestyleButton : showLifestyleButton) : showLifestyleButton;
-        const activeLifestyleButtonText = isMobile ? (mobileLifestyleButtonText || lifestyleButtonText) : lifestyleButtonText;
-        const activeLifestyleButtonStyle = isMobile ? (mobileLifestyleButtonStyle || lifestyleButtonStyle) : lifestyleButtonStyle;
-        const activeLifestyleButtonSize = isMobile ? (mobileLifestyleButtonSize || "sm") : lifestyleButtonSize;
-        const activeLifestyleButtonColor = isMobile ? (mobileLifestyleButtonColor !== undefined ? mobileLifestyleButtonColor : lifestyleButtonColor) : lifestyleButtonColor;
-        const activeLifestyleButtonTextColor = isMobile ? (mobileLifestyleButtonTextColor || lifestyleButtonTextColor) : lifestyleButtonTextColor;
-
-        if (!showLifestyle && !activeShowLifestyleText && !activeShowLifestyleButton) return null;
-
-        const buttonPadding = activeLifestyleButtonSize === "sm" ? "8px 18px" : activeLifestyleButtonSize === "lg" ? "16px 36px" : "12px 28px";
-        const buttonFontSize = activeLifestyleButtonSize === "sm" ? "0.82rem" : activeLifestyleButtonSize === "lg" ? "1.05rem" : "0.92rem";
-        const effectiveButtonBg = activeLifestyleButtonStyle === "outline" ? "transparent" : (activeLifestyleButtonColor || primaryColor || "#ffffff");
-        const effectiveButtonBorder = activeLifestyleButtonStyle === "outline" ? `2px solid ${activeLifestyleButtonColor || "#ffffff"}` : "none";
-
-        return (
-          <section
-            className={styles.lifestyleBanner}
-            style={{
-              backgroundImage: lifestyleImage ? `url(${lifestyleImage})` : "none",
-              backgroundColor: lifestyleBgColor || "#000000",
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              justifyContent: "center",
-              padding: "60px 20px"
-            }}
-          >
-            <div className={styles.lifestyleOverlay} />
-            <div style={{ position: "relative", zIndex: 2, display: "flex", flexDirection: "column", alignItems: "center", gap: "20px", maxWidth: "900px", width: "100%", textAlign: activeTextFontAlignment as any || "center" }}>
-              {activeShowLifestyleText && (
-                <p
-                  className={styles.lifestyleText}
-                  style={{
-                    fontFamily: activeTextFontType ? `"${activeTextFontType}", sans-serif` : "inherit",
-                    color: activeTextFontColor,
-                    fontSize: activeTextFontSize,
-                    fontWeight: Number(activeTextFontWeight) || 700,
-                    textAlign: (activeTextFontAlignment as any) || "center",
-                    margin: 0
-                  }}
-                >
-                  {activeLifestyleText}
-                </p>
-              )}
-
-              {activeShowLifestyleButton && (
-                <Link
-                  href="/shop"
-                  style={{
-                    display: "inline-block",
-                    padding: buttonPadding,
-                    fontSize: buttonFontSize,
-                    fontFamily: `"${activeTextFontType}", sans-serif`,
-                    fontWeight: 700,
-                    textTransform: "uppercase",
-                    letterSpacing: "0.08em",
-                    borderRadius: "4px",
-                    backgroundColor: effectiveButtonBg,
-                    color: activeLifestyleButtonTextColor || "#ffffff",
-                    border: effectiveButtonBorder,
-                    textDecoration: "none",
-                    cursor: "pointer",
-                    transition: "all 0.2s ease"
-                  }}
-                >
-                  {activeLifestyleButtonText}
-                </Link>
-              )}
-            </div>
-          </section>
-        );
-      })()}
+      <LifestyleBanner
+        showLifestyle={showLifestyle}
+        isMobile={isMobile}
+        lifestyleText={lifestyleText}
+        mobileLifestyleText={mobileLifestyleText}
+        lifestyleTextFontType={lifestyleTextFontType}
+        mobileLifestyleTextFontType={mobileLifestyleTextFontType}
+        lifestyleTextFontColor={lifestyleTextFontColor}
+        mobileLifestyleTextFontColor={mobileLifestyleTextFontColor}
+        lifestyleTextFontSize={lifestyleTextFontSize}
+        mobileLifestyleTextFontSize={mobileLifestyleTextFontSize}
+        lifestyleTextFontAlignment={lifestyleTextFontAlignment}
+        mobileLifestyleTextFontAlignment={mobileLifestyleTextFontAlignment}
+        lifestyleTextFontWeight={lifestyleTextFontWeight}
+        mobileLifestyleTextFontWeight={mobileLifestyleTextFontWeight}
+        showLifestyleText={showLifestyleText}
+        showMobileLifestyleText={showMobileLifestyleText}
+        lifestyleButtonText={lifestyleButtonText}
+        mobileLifestyleButtonText={mobileLifestyleButtonText}
+        lifestyleButtonStyle={lifestyleButtonStyle}
+        mobileLifestyleButtonStyle={mobileLifestyleButtonStyle}
+        lifestyleButtonSize={lifestyleButtonSize}
+        mobileLifestyleButtonSize={mobileLifestyleButtonSize}
+        lifestyleButtonColor={lifestyleButtonColor}
+        mobileLifestyleButtonColor={mobileLifestyleButtonColor}
+        lifestyleButtonTextColor={lifestyleButtonTextColor}
+        mobileLifestyleButtonTextColor={mobileLifestyleButtonTextColor}
+        showLifestyleButton={showLifestyleButton}
+        showMobileLifestyleButton={showMobileLifestyleButton}
+        lifestyleBgColor={lifestyleBgColor}
+        lifestyleImage={lifestyleImage}
+        primaryColor={primaryColor}
+        lifestyleSlides={globalSettings?.lifestyleSlides}
+        lifestyleAutoPlay={globalSettings?.lifestyleAutoPlay}
+        lifestyleAutoPlaySpeed={globalSettings?.lifestyleAutoPlaySpeed}
+      />
 
       {/* 8. Best Sellers Products Section */}
       <section className={styles.arrivalsSection}>

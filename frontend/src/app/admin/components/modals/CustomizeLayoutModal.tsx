@@ -28,145 +28,151 @@ export default function CustomizeLayoutModal({
   const buttonRef = useRef<HTMLDivElement>(null);
 
   // Default multi-slide hero dataset
+  const isHeroSection = sectionName === "Hero Section";
+  const defaultSingleSlide: HeroSlideItem = {
+    id: "slide_1",
+    titleText: initialConfig.titleText !== undefined ? initialConfig.titleText : (isHeroSection ? "WELCOME TO OUR STORE" : ""),
+    titleFontType: initialConfig.titleFontType || "Outfit",
+    titleFontColor: initialConfig.titleFontColor || "#ffffff",
+    titleFontSize: initialConfig.titleFontSize || "4.5rem",
+    titleFontAlignment: initialConfig.titleFontAlignment || "center",
+    titleFontWeight: initialConfig.titleFontWeight || "700",
+    showTitle: initialConfig.showTitle !== undefined ? initialConfig.showTitle : true,
+
+    manifestoText: initialConfig.manifestoText !== undefined ? initialConfig.manifestoText : (isHeroSection ? "PREMIUM QUALITY YOU CAN TRUST. EVERY PRODUCT IS CRAFTED WITH CARE AND DELIVERED WITH PASSION." : ""),
+    manifestoFontType: initialConfig.manifestoFontType || "Outfit",
+    manifestoFontColor: initialConfig.manifestoFontColor || "#ffffff",
+    manifestoFontSize: initialConfig.manifestoFontSize || "1.1rem",
+    manifestoFontAlignment: initialConfig.manifestoFontAlignment || "center",
+    manifestoFontWeight: initialConfig.manifestoFontWeight || "500",
+    showManifesto: initialConfig.showManifesto !== undefined ? initialConfig.showManifesto : true,
+
+    buttonText: initialConfig.buttonText || "Shop Now",
+    buttonStyle: initialConfig.buttonStyle || "solid",
+    buttonSize: initialConfig.buttonSize || "md",
+    buttonColor: initialConfig.buttonColor || "#ffffff",
+    buttonTextColor: initialConfig.buttonTextColor || "#000000",
+    showButton: initialConfig.showButton !== undefined ? initialConfig.showButton : true,
+
+    layoutTemplate: initialConfig.layoutTemplate || "center",
+    bgType: (initialConfig.bgType as any) || "color",
+    bgColor: initialConfig.bgColor || "#121212",
+    bgImage: initialConfig.bgImage || "",
+    bgVideo: initialConfig.bgVideo || "",
+
+    mobileLayoutTemplate: initialConfig.mobileLayoutTemplate || "center",
+    mobileTitleText: initialConfig.mobileTitleText || "",
+    mobileTitleFontType: initialConfig.mobileTitleFontType || "Outfit",
+    mobileTitleFontColor: initialConfig.mobileTitleFontColor || "#ffffff",
+    mobileTitleFontSize: initialConfig.mobileTitleFontSize || "2.5rem",
+    mobileTitleFontAlignment: initialConfig.mobileTitleFontAlignment || "center",
+    mobileTitleFontWeight: initialConfig.mobileTitleFontWeight || "700",
+    showMobileHeroTitle: initialConfig.showMobileHeroTitle !== undefined ? initialConfig.showMobileHeroTitle : true,
+
+    mobileManifestoText: initialConfig.mobileManifestoText || "",
+    mobileManifestoFontType: initialConfig.mobileManifestoFontType || "Outfit",
+    mobileManifestoFontColor: initialConfig.mobileManifestoFontColor || "#ffffff",
+    mobileManifestoFontSize: initialConfig.mobileManifestoFontSize || "0.85rem",
+    mobileManifestoFontAlignment: initialConfig.mobileManifestoFontAlignment || "center",
+    mobileManifestoFontWeight: initialConfig.mobileManifestoFontWeight || "500",
+    showMobileHeroManifesto: initialConfig.showMobileHeroManifesto !== undefined ? initialConfig.showMobileHeroManifesto : true,
+
+    mobileButtonText: initialConfig.mobileButtonText || "Shop Now",
+    mobileButtonStyle: initialConfig.mobileButtonStyle || "solid",
+    mobileButtonSize: initialConfig.mobileButtonSize || "sm",
+    mobileButtonColor: initialConfig.mobileButtonColor || "#ffffff",
+    mobileButtonTextColor: initialConfig.mobileButtonTextColor || "#000000",
+    showMobileHeroButton: initialConfig.showMobileHeroButton !== undefined ? initialConfig.showMobileHeroButton : true
+  };
+
   const initialSlides: HeroSlideItem[] = (initialConfig.heroSlides && initialConfig.heroSlides.length > 0)
     ? initialConfig.heroSlides
-    : [
-      {
-        id: "slide_1",
-        titleText: initialConfig.titleText || "WELCOME TO OUR STORE",
-        titleFontType: initialConfig.titleFontType || "Outfit",
-        titleFontColor: initialConfig.titleFontColor || "#ffffff",
-        titleFontSize: initialConfig.titleFontSize || "4.5rem",
-        titleFontAlignment: initialConfig.titleFontAlignment || "center",
-        titleFontWeight: initialConfig.titleFontWeight || "700",
-        showTitle: initialConfig.showTitle !== undefined ? initialConfig.showTitle : true,
+    : (isHeroSection
+      ? [
+          defaultSingleSlide,
+          {
+            id: "slide_2",
+            titleText: "SUMMER COLLECTION 2025",
+            titleFontType: "Outfit",
+            titleFontColor: "#f59e0b",
+            titleFontSize: "4.5rem",
+            titleFontAlignment: "center",
+            titleFontWeight: "700",
+            showTitle: true,
 
-        manifestoText: initialConfig.manifestoText || "PREMIUM QUALITY YOU CAN TRUST. EVERY PRODUCT IS CRAFTED WITH CARE AND DELIVERED WITH PASSION.",
-        manifestoFontType: initialConfig.manifestoFontType || "Outfit",
-        manifestoFontColor: initialConfig.manifestoFontColor || "#ffffff",
-        manifestoFontSize: initialConfig.manifestoFontSize || "1.1rem",
-        manifestoFontAlignment: initialConfig.manifestoFontAlignment || "center",
-        manifestoFontWeight: initialConfig.manifestoFontWeight || "500",
-        showManifesto: initialConfig.showManifesto !== undefined ? initialConfig.showManifesto : true,
+            manifestoText: "GET UP TO 50% OFF THIS WEEK ONLY. PREMIUM HAND-CRAFTED APPAREL FOR EVERY SEASON.",
+            manifestoFontType: "Outfit",
+            manifestoFontColor: "#ffffff",
+            manifestoFontSize: "1.1rem",
+            manifestoFontAlignment: "center",
+            manifestoFontWeight: "500",
+            showManifesto: true,
 
-        buttonText: initialConfig.buttonText || "Shop Now",
-        buttonStyle: initialConfig.buttonStyle || "solid",
-        buttonSize: initialConfig.buttonSize || "md",
-        buttonColor: initialConfig.buttonColor || "#ffffff",
-        buttonTextColor: initialConfig.buttonTextColor || "#000000",
-        showButton: initialConfig.showButton !== undefined ? initialConfig.showButton : true,
+            buttonText: "EXPLORE COLLECTION",
+            buttonRedirectUrl: "/category/offers",
+            buttonStyle: "solid",
+            buttonSize: "md",
+            buttonColor: "#f59e0b",
+            buttonTextColor: "#000000",
+            showButton: true,
 
-        layoutTemplate: initialConfig.layoutTemplate || "center",
-        bgType: (initialConfig.bgType as any) || "color",
-        bgColor: initialConfig.bgColor || "#121212",
-        bgImage: initialConfig.bgImage || "",
-        bgVideo: initialConfig.bgVideo || "",
+            layoutTemplate: "center",
+            bgType: "color",
+            bgColor: "#1e293b",
+            bgImage: "",
+            bgVideo: "",
+            slideAnimation: "none",
+            slideAnimationDuration: 0.5,
+            elementAnimation: "none",
+            elementAnimationDuration: 0.6,
+            elementAnimationDelay: 0.1,
+            titleAnimation: { type: "none", duration: 0.6, delay: 0.1, order: 1 },
+            manifestoAnimation: { type: "none", duration: 0.6, delay: 0.25, order: 2 },
+            buttonAnimation: { type: "none", duration: 0.6, delay: 0.4, order: 3 }
+          },
+          {
+            id: "slide_3",
+            titleText: "NEW ARRIVALS DROP",
+            titleFontType: "Outfit",
+            titleFontColor: "#38bdf8",
+            titleFontSize: "4.5rem",
+            titleFontAlignment: "center",
+            titleFontWeight: "700",
+            showTitle: true,
 
-        mobileLayoutTemplate: initialConfig.mobileLayoutTemplate || "center",
-        mobileTitleText: initialConfig.mobileTitleText || "",
-        mobileTitleFontType: initialConfig.mobileTitleFontType || "Outfit",
-        mobileTitleFontColor: initialConfig.mobileTitleFontColor || "#ffffff",
-        mobileTitleFontSize: initialConfig.mobileTitleFontSize || "2.5rem",
-        mobileTitleFontAlignment: initialConfig.mobileTitleFontAlignment || "center",
-        mobileTitleFontWeight: initialConfig.mobileTitleFontWeight || "700",
-        showMobileHeroTitle: initialConfig.showMobileHeroTitle !== undefined ? initialConfig.showMobileHeroTitle : true,
+            manifestoText: "DISCOVER MODERN LUXURY STYLES CRAFTED WITH UNCOMPROMISING PRECISION AND BEAUTY.",
+            manifestoFontType: "Outfit",
+            manifestoFontColor: "#ffffff",
+            manifestoFontSize: "1.1rem",
+            manifestoFontAlignment: "center",
+            manifestoFontWeight: "500",
+            showManifesto: true,
 
-        mobileManifestoText: initialConfig.mobileManifestoText || "",
-        mobileManifestoFontType: initialConfig.mobileManifestoFontType || "Outfit",
-        mobileManifestoFontColor: initialConfig.mobileManifestoFontColor || "#ffffff",
-        mobileManifestoFontSize: initialConfig.mobileManifestoFontSize || "0.85rem",
-        mobileManifestoFontAlignment: initialConfig.mobileManifestoFontAlignment || "center",
-        mobileManifestoFontWeight: initialConfig.mobileManifestoFontWeight || "500",
-        showMobileHeroManifesto: initialConfig.showMobileHeroManifesto !== undefined ? initialConfig.showMobileHeroManifesto : true,
+            buttonText: "DISCOVER NOW",
+            buttonRedirectUrl: "/category/new-arrivals",
+            buttonStyle: "outline",
+            buttonSize: "md",
+            buttonColor: "#38bdf8",
+            buttonTextColor: "#ffffff",
+            showButton: true,
 
-        mobileButtonText: initialConfig.mobileButtonText || "Shop Now",
-        mobileButtonStyle: initialConfig.mobileButtonStyle || "solid",
-        mobileButtonSize: initialConfig.mobileButtonSize || "sm",
-        mobileButtonColor: initialConfig.mobileButtonColor || "#ffffff",
-        mobileButtonTextColor: initialConfig.mobileButtonTextColor || "#000000",
-        showMobileHeroButton: initialConfig.showMobileHeroButton !== undefined ? initialConfig.showMobileHeroButton : true
-      },
-      {
-        id: "slide_2",
-        titleText: "SUMMER COLLECTION 2025",
-        titleFontType: "Outfit",
-        titleFontColor: "#f59e0b",
-        titleFontSize: "4.5rem",
-        titleFontAlignment: "center",
-        titleFontWeight: "700",
-        showTitle: true,
-
-        manifestoText: "GET UP TO 50% OFF THIS WEEK ONLY. PREMIUM HAND-CRAFTED APPAREL FOR EVERY SEASON.",
-        manifestoFontType: "Outfit",
-        manifestoFontColor: "#ffffff",
-        manifestoFontSize: "1.1rem",
-        manifestoFontAlignment: "center",
-        manifestoFontWeight: "500",
-        showManifesto: true,
-
-        buttonText: "EXPLORE COLLECTION",
-        buttonRedirectUrl: "/category/offers",
-        buttonStyle: "solid",
-        buttonSize: "md",
-        buttonColor: "#f59e0b",
-        buttonTextColor: "#000000",
-        showButton: true,
-
-        layoutTemplate: "center",
-        bgType: "color",
-        bgColor: "#1e293b",
-        bgImage: "",
-        bgVideo: "",
-        slideAnimation: "none",
-        slideAnimationDuration: 0.5,
-        elementAnimation: "none",
-        elementAnimationDuration: 0.6,
-        elementAnimationDelay: 0.1,
-        titleAnimation: { type: "none", duration: 0.6, delay: 0.1, order: 1 },
-        manifestoAnimation: { type: "none", duration: 0.6, delay: 0.25, order: 2 },
-        buttonAnimation: { type: "none", duration: 0.6, delay: 0.4, order: 3 }
-      },
-      {
-        id: "slide_3",
-        titleText: "NEW ARRIVALS DROP",
-        titleFontType: "Outfit",
-        titleFontColor: "#38bdf8",
-        titleFontSize: "4.5rem",
-        titleFontAlignment: "center",
-        titleFontWeight: "700",
-        showTitle: true,
-
-        manifestoText: "DISCOVER MODERN LUXURY STYLES CRAFTED WITH UNCOMPROMISING PRECISION AND BEAUTY.",
-        manifestoFontType: "Outfit",
-        manifestoFontColor: "#ffffff",
-        manifestoFontSize: "1.1rem",
-        manifestoFontAlignment: "center",
-        manifestoFontWeight: "500",
-        showManifesto: true,
-
-        buttonText: "DISCOVER NOW",
-        buttonRedirectUrl: "/category/new-arrivals",
-        buttonStyle: "outline",
-        buttonSize: "md",
-        buttonColor: "#38bdf8",
-        buttonTextColor: "#ffffff",
-        showButton: true,
-
-        layoutTemplate: "center",
-        bgType: "color",
-        bgColor: "#0f172a",
-        bgImage: "",
-        bgVideo: "",
-        slideAnimation: "none",
-        slideAnimationDuration: 0.5,
-        elementAnimation: "none",
-        elementAnimationDuration: 0.6,
-        elementAnimationDelay: 0.1,
-        titleAnimation: { type: "none", duration: 0.6, delay: 0.1, order: 1 },
-        manifestoAnimation: { type: "none", duration: 0.6, delay: 0.25, order: 2 },
-        buttonAnimation: { type: "none", duration: 0.6, delay: 0.4, order: 3 }
-      }
-    ];
+            layoutTemplate: "center",
+            bgType: "color",
+            bgColor: "#0f172a",
+            bgImage: "",
+            bgVideo: "",
+            slideAnimation: "none",
+            slideAnimationDuration: 0.5,
+            elementAnimation: "none",
+            elementAnimationDuration: 0.6,
+            elementAnimationDelay: 0.1,
+            titleAnimation: { type: "none", duration: 0.6, delay: 0.1, order: 1 },
+            manifestoAnimation: { type: "none", duration: 0.6, delay: 0.25, order: 2 },
+            buttonAnimation: { type: "none", duration: 0.6, delay: 0.4, order: 3 }
+          }
+        ]
+      : [defaultSingleSlide]
+    );
 
   const [slides, setSlides] = useState<HeroSlideItem[]>(initialSlides);
   const [activeSlideIndex, setActiveSlideIndex] = useState<number>(0);
@@ -1237,6 +1243,109 @@ export default function CustomizeLayoutModal({
       showMobileHeroButton: mobileShowButton,
     });
   };
+
+  // Compute whether any changes have been made compared to initial snapshot
+  const buildCurrentSlides = (): HeroSlideItem[] => {
+    const currentList = [...slides];
+    if (currentList[activeSlideIndex]) {
+      currentList[activeSlideIndex] = {
+        ...currentList[activeSlideIndex],
+        titleText,
+        showTitle,
+        titleFontType,
+        titleFontSize,
+        titleFontColor,
+        titleFontWeight,
+        titleFontAlignment,
+
+        manifestoText,
+        showManifesto,
+        manifestoFontType,
+        manifestoFontSize,
+        manifestoFontColor,
+        manifestoFontWeight,
+        manifestoFontAlignment,
+
+        buttonText,
+        buttonRedirectUrl,
+        showButton,
+        buttonStyle,
+        buttonSize,
+        buttonColor,
+        buttonTextColor,
+
+        layoutTemplate,
+        bgType: bgType as any,
+        bgColor,
+        bgImage,
+        bgVideo,
+
+        titleContainer,
+        manifestoContainer,
+        buttonContainer,
+
+        mobileLayoutTemplate,
+        mobileTitleText,
+        mobileTitleFontType,
+        mobileTitleFontColor,
+        mobileTitleFontSize,
+        mobileTitleFontAlignment,
+        mobileTitleFontWeight,
+        showMobileHeroTitle: mobileShowTitle,
+
+        mobileManifestoText,
+        mobileManifestoFontType,
+        mobileManifestoFontColor,
+        mobileManifestoFontSize,
+        mobileManifestoFontAlignment,
+        mobileManifestoFontWeight,
+        showMobileHeroManifesto: mobileShowManifesto,
+
+        mobileButtonText,
+        mobileButtonStyle,
+        mobileButtonSize,
+        mobileButtonColor,
+        mobileButtonTextColor,
+        showMobileHeroButton: mobileShowButton,
+
+        mobileTitleContainer,
+        mobileManifestoContainer,
+        mobileButtonContainer,
+
+        elementAnimation,
+        elementAnimationDuration,
+        elementAnimationDelay,
+        slideAnimation,
+        slideAnimationDuration,
+
+        titleAnimation: titleAnim,
+        manifestoAnimation: manifestoAnim,
+        buttonAnimation: buttonAnim,
+      };
+    }
+    return currentList;
+  };
+
+  const currentSnapshot = JSON.stringify({
+    slides: buildCurrentSlides(),
+    heroAutoPlay,
+    heroAutoPlaySpeed
+  });
+
+  // Snapshot captured when modal opens to accurately check for user changes
+  const initialSnapshotRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    if (!isOpen) {
+      initialSnapshotRef.current = null;
+    }
+  }, [isOpen]);
+
+  if (isOpen && initialSnapshotRef.current === null) {
+    initialSnapshotRef.current = currentSnapshot;
+  }
+
+  const hasModalChanges = isOpen && initialSnapshotRef.current !== null && currentSnapshot !== initialSnapshotRef.current;
 
   if (!isOpen) return null;
 
@@ -2467,15 +2576,12 @@ export default function CustomizeLayoutModal({
                 </div>
               )}
 
-              {/* 4. Element Animation (PowerPoint Entrance & Attention Effects) */}
+              {/* 4. Element Animation */}
               <div style={{ marginTop: "20px", paddingTop: "16px", borderTop: "1px solid #e2e8f0" }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "12px" }}>
                   <h4 style={{ fontSize: "0.85rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", color: "#374151", margin: 0 }}>
                     4. Element Animation
                   </h4>
-                  <span style={{ fontSize: "0.7rem", fontWeight: 700, backgroundColor: "#eff6ff", color: "#2563eb", padding: "2px 6px", borderRadius: "4px" }}>
-                    PowerPoint Sequence
-                  </span>
                 </div>
 
                 <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
@@ -2618,12 +2724,78 @@ export default function CustomizeLayoutModal({
                               key={item.value}
                               onMouseEnter={() => setHoveredElementAnimation(item.value)}
                               onClick={() => {
-                                if (selectedElement === "title") setTitleAnim(prev => ({ ...prev, type: item.value }));
-                                else if (selectedElement === "manifesto") setManifestoAnim(prev => ({ ...prev, type: item.value }));
-                                else if (selectedElement === "button") setButtonAnim(prev => ({ ...prev, type: item.value }));
+                                const newType = item.value;
+                                if (newType === "none") {
+                                  // Gather remaining active elements other than the one being turned off
+                                  const remaining: { elem: string; order: number }[] = [];
+                                  if (selectedElement !== "title" && titleAnim.type && titleAnim.type !== "none" && titleAnim.order) {
+                                    remaining.push({ elem: "title", order: titleAnim.order });
+                                  }
+                                  if (selectedElement !== "manifesto" && manifestoAnim.type && manifestoAnim.type !== "none" && manifestoAnim.order) {
+                                    remaining.push({ elem: "manifesto", order: manifestoAnim.order });
+                                  }
+                                  if (selectedElement !== "button" && buttonAnim.type && buttonAnim.type !== "none" && buttonAnim.order) {
+                                    remaining.push({ elem: "button", order: buttonAnim.order });
+                                  }
+
+                                  // Sort remaining elements by their previous order
+                                  remaining.sort((a, b) => a.order - b.order);
+
+                                  // Re-compact so that order numbers become 1, 2, ...
+                                  const updatedOrders: Record<string, number> = {};
+                                  remaining.forEach((item, idx) => {
+                                    updatedOrders[item.elem] = idx + 1;
+                                  });
+
+                                  // Apply cleared order to selected element and re-compacted orders to others
+                                  if (selectedElement === "title") {
+                                    setTitleAnim(prev => ({ ...prev, type: "none", order: undefined }));
+                                  } else if (updatedOrders["title"]) {
+                                    setTitleAnim(prev => ({ ...prev, order: updatedOrders["title"] }));
+                                  }
+
+                                  if (selectedElement === "manifesto") {
+                                    setManifestoAnim(prev => ({ ...prev, type: "none", order: undefined }));
+                                  } else if (updatedOrders["manifesto"]) {
+                                    setManifestoAnim(prev => ({ ...prev, order: updatedOrders["manifesto"] }));
+                                  }
+
+                                  if (selectedElement === "button") {
+                                    setButtonAnim(prev => ({ ...prev, type: "none", order: undefined }));
+                                  } else if (updatedOrders["button"]) {
+                                    setButtonAnim(prev => ({ ...prev, order: updatedOrders["button"] }));
+                                  }
+                                } else {
+                                  // Assign next available sequence order if not already ordered or if it was previously none
+                                  const currentActiveOrders: { elem: string; order: number }[] = [];
+                                  if (selectedElement !== "title" && titleAnim.type && titleAnim.type !== "none" && titleAnim.order) {
+                                    currentActiveOrders.push({ elem: "title", order: titleAnim.order });
+                                  }
+                                  if (selectedElement !== "manifesto" && manifestoAnim.type && manifestoAnim.type !== "none" && manifestoAnim.order) {
+                                    currentActiveOrders.push({ elem: "manifesto", order: manifestoAnim.order });
+                                  }
+                                  if (selectedElement !== "button" && buttonAnim.type && buttonAnim.type !== "none" && buttonAnim.order) {
+                                    currentActiveOrders.push({ elem: "button", order: buttonAnim.order });
+                                  }
+
+                                  const existingOrder = selectedElement === "title" ? titleAnim.order : selectedElement === "manifesto" ? manifestoAnim.order : buttonAnim.order;
+                                  const prevType = selectedElement === "title" ? titleAnim.type : selectedElement === "manifesto" ? manifestoAnim.type : buttonAnim.type;
+                                  
+                                  let assignedOrder = existingOrder;
+                                  if (!assignedOrder || prevType === "none") {
+                                    const maxOrder = currentActiveOrders.reduce((max, cur) => Math.max(max, cur.order), 0);
+                                    assignedOrder = maxOrder + 1;
+                                  }
+
+                                  if (selectedElement === "title") setTitleAnim(prev => ({ ...prev, type: newType, order: assignedOrder }));
+                                  else if (selectedElement === "manifesto") setManifestoAnim(prev => ({ ...prev, type: newType, order: assignedOrder }));
+                                  else if (selectedElement === "button") setButtonAnim(prev => ({ ...prev, type: newType, order: assignedOrder }));
+                                }
+
                                 setElementAnimation(item.value);
                                 setHoveredElementAnimation(null);
                                 setIsElemAnimDropdownOpen(false);
+                                setElemAnimPreviewKey(Date.now());
                               }}
                               style={{
                                 padding: "6px 10px",
@@ -2647,52 +2819,61 @@ export default function CustomizeLayoutModal({
                     )}
                   </div>
 
-                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" }}>
-                    <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
-                      <label style={{ fontSize: "0.75rem", fontWeight: 700, color: "#475569" }}>
-                        Duration ({selectedElement === "title" ? titleAnim.duration : selectedElement === "manifesto" ? manifestoAnim.duration : selectedElement === "button" ? buttonAnim.duration : elementAnimationDuration}s)
-                      </label>
-                      <input
-                        type="range"
-                        min="0.2"
-                        max="2.5"
-                        step="0.1"
-                        value={selectedElement === "title" ? titleAnim.duration : selectedElement === "manifesto" ? manifestoAnim.duration : selectedElement === "button" ? buttonAnim.duration : elementAnimationDuration}
-                        onChange={(e) => {
-                          const val = parseFloat(e.target.value);
-                          if (selectedElement === "title") setTitleAnim(prev => ({ ...prev, duration: val }));
-                          else if (selectedElement === "manifesto") setManifestoAnim(prev => ({ ...prev, duration: val }));
-                          else if (selectedElement === "button") setButtonAnim(prev => ({ ...prev, duration: val }));
-                          setElementAnimationDuration(val);
-                        }}
-                        onMouseUp={() => setElemAnimPreviewKey(Date.now())}
-                        onTouchEnd={() => setElemAnimPreviewKey(Date.now())}
-                        style={{ cursor: "pointer", accentColor: "#2563eb" }}
-                      />
-                    </div>
-                    <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
-                      <label style={{ fontSize: "0.75rem", fontWeight: 700, color: "#475569" }}>
-                        Delay ({selectedElement === "title" ? titleAnim.delay : selectedElement === "manifesto" ? manifestoAnim.delay : selectedElement === "button" ? buttonAnim.delay : elementAnimationDelay}s)
-                      </label>
-                      <input
-                        type="range"
-                        min="0"
-                        max="1.5"
-                        step="0.05"
-                        value={selectedElement === "title" ? titleAnim.delay : selectedElement === "manifesto" ? manifestoAnim.delay : selectedElement === "button" ? buttonAnim.delay : elementAnimationDelay}
-                        onChange={(e) => {
-                          const val = parseFloat(e.target.value);
-                          if (selectedElement === "title") setTitleAnim(prev => ({ ...prev, delay: val }));
-                          else if (selectedElement === "manifesto") setManifestoAnim(prev => ({ ...prev, delay: val }));
-                          else if (selectedElement === "button") setButtonAnim(prev => ({ ...prev, delay: val }));
-                          setElementAnimationDelay(val);
-                        }}
-                        onMouseUp={() => setElemAnimPreviewKey(Date.now())}
-                        onTouchEnd={() => setElemAnimPreviewKey(Date.now())}
-                        style={{ cursor: "pointer", accentColor: "#2563eb" }}
-                      />
-                    </div>
-                  </div>
+                  {(() => {
+                    const currentActiveAnim = selectedElement === "title" ? titleAnim.type : selectedElement === "manifesto" ? manifestoAnim.type : selectedElement === "button" ? buttonAnim.type : elementAnimation;
+                    const isElementAnimActive = currentActiveAnim && currentActiveAnim !== "none";
+
+                    return (
+                      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px", opacity: isElementAnimActive ? 1 : 0.45, pointerEvents: isElementAnimActive ? "auto" : "none", transition: "opacity 0.2s ease" }}>
+                        <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+                          <label style={{ fontSize: "0.75rem", fontWeight: 700, color: isElementAnimActive ? "#475569" : "#94a3b8" }}>
+                            Duration ({selectedElement === "title" ? titleAnim.duration : selectedElement === "manifesto" ? manifestoAnim.duration : selectedElement === "button" ? buttonAnim.duration : elementAnimationDuration}s)
+                          </label>
+                          <input
+                            type="range"
+                            min="0.2"
+                            max="2.5"
+                            step="0.1"
+                            disabled={!isElementAnimActive}
+                            value={selectedElement === "title" ? titleAnim.duration : selectedElement === "manifesto" ? manifestoAnim.duration : selectedElement === "button" ? buttonAnim.duration : elementAnimationDuration}
+                            onChange={(e) => {
+                              const val = parseFloat(e.target.value);
+                              if (selectedElement === "title") setTitleAnim(prev => ({ ...prev, duration: val }));
+                              else if (selectedElement === "manifesto") setManifestoAnim(prev => ({ ...prev, duration: val }));
+                              else if (selectedElement === "button") setButtonAnim(prev => ({ ...prev, duration: val }));
+                              setElementAnimationDuration(val);
+                            }}
+                            onMouseUp={() => setElemAnimPreviewKey(Date.now())}
+                            onTouchEnd={() => setElemAnimPreviewKey(Date.now())}
+                            style={{ cursor: isElementAnimActive ? "pointer" : "not-allowed", accentColor: "#d97706" }}
+                          />
+                        </div>
+                        <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+                          <label style={{ fontSize: "0.75rem", fontWeight: 700, color: isElementAnimActive ? "#475569" : "#94a3b8" }}>
+                            Delay ({selectedElement === "title" ? titleAnim.delay : selectedElement === "manifesto" ? manifestoAnim.delay : selectedElement === "button" ? buttonAnim.delay : elementAnimationDelay}s)
+                          </label>
+                          <input
+                            type="range"
+                            min="0"
+                            max="1.5"
+                            step="0.05"
+                            disabled={!isElementAnimActive}
+                            value={selectedElement === "title" ? titleAnim.delay : selectedElement === "manifesto" ? manifestoAnim.delay : selectedElement === "button" ? buttonAnim.delay : elementAnimationDelay}
+                            onChange={(e) => {
+                              const val = parseFloat(e.target.value);
+                              if (selectedElement === "title") setTitleAnim(prev => ({ ...prev, delay: val }));
+                              else if (selectedElement === "manifesto") setManifestoAnim(prev => ({ ...prev, delay: val }));
+                              else if (selectedElement === "button") setButtonAnim(prev => ({ ...prev, delay: val }));
+                              setElementAnimationDelay(val);
+                            }}
+                            onMouseUp={() => setElemAnimPreviewKey(Date.now())}
+                            onTouchEnd={() => setElemAnimPreviewKey(Date.now())}
+                            style={{ cursor: isElementAnimActive ? "pointer" : "not-allowed", accentColor: "#d97706" }}
+                          />
+                        </div>
+                      </div>
+                    );
+                  })()}
                 </div>
               </div>
 
@@ -2825,20 +3006,29 @@ export default function CustomizeLayoutModal({
                     )}
                   </div>
 
-                  <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
-                    <label style={{ fontSize: "0.75rem", fontWeight: 700, color: "#475569" }}>Transition Speed ({slideAnimationDuration}s)</label>
-                    <input
-                      type="range"
-                      min="0.2"
-                      max="2.0"
-                      step="0.1"
-                      value={slideAnimationDuration}
-                      onChange={(e) => setSlideAnimationDuration(parseFloat(e.target.value))}
-                      onMouseUp={() => setActiveSlideAnimPreview({ anim: slideAnimation || "push", key: Date.now() })}
-                      onTouchEnd={() => setActiveSlideAnimPreview({ anim: slideAnimation || "push", key: Date.now() })}
-                      style={{ cursor: "pointer", accentColor: "#d97706" }}
-                    />
-                  </div>
+                  {(() => {
+                    const isSlideAnimActive = slideAnimation && slideAnimation !== "none";
+
+                    return (
+                      <div style={{ display: "flex", flexDirection: "column", gap: "4px", opacity: isSlideAnimActive ? 1 : 0.45, pointerEvents: isSlideAnimActive ? "auto" : "none", transition: "opacity 0.2s ease" }}>
+                        <label style={{ fontSize: "0.75rem", fontWeight: 700, color: isSlideAnimActive ? "#475569" : "#94a3b8" }}>
+                          Transition Speed ({slideAnimationDuration}s)
+                        </label>
+                        <input
+                          type="range"
+                          min="0.2"
+                          max="2.0"
+                          step="0.1"
+                          disabled={!isSlideAnimActive}
+                          value={slideAnimationDuration}
+                          onChange={(e) => setSlideAnimationDuration(parseFloat(e.target.value))}
+                          onMouseUp={() => setActiveSlideAnimPreview({ anim: slideAnimation || "push", key: Date.now() })}
+                          onTouchEnd={() => setActiveSlideAnimPreview({ anim: slideAnimation || "push", key: Date.now() })}
+                          style={{ cursor: isSlideAnimActive ? "pointer" : "not-allowed", accentColor: "#d97706" }}
+                        />
+                      </div>
+                    );
+                  })()}
                 </div>
               </div>
 
@@ -3320,13 +3510,7 @@ export default function CustomizeLayoutModal({
                               boxSizing: "border-box",
                               display: "flex",
                               flexDirection: "column",
-                              justifyContent: "center",
-                              animation: getAnimationCss(
-                                effectiveTitleAnimType,
-                                titleAnim.duration ?? 0.6,
-                                effectiveDelays['title'] ?? 0,
-                                isTitleLoop
-                              )
+                              justifyContent: "center"
                             }}
                           >
                             {/* Sequence Order Number Badge (PowerPoint Style #1) */}
@@ -3398,25 +3582,39 @@ export default function CustomizeLayoutModal({
                                 ))}
                               </>
                             )}
-                            {currentShowTitle ? (
-                              <h1 style={{
-                                fontFamily: `"${(selectedElement === "title" && hoveredFontType) ? hoveredFontType : currentTitleFontType}", sans-serif`,
-                                color: currentTitleFontColor,
-                                fontSize: (selectedElement === "title" && hoveredFontSize) ? hoveredFontSize : currentTitleFontSize,
-                                fontWeight: Number((selectedElement === "title" && hoveredFontWeight) ? hoveredFontWeight : currentTitleFontWeight) || 700,
-                                textAlign: (currentTitleFontAlignment as any) || "center",
-                                margin: 0,
-                                lineHeight: "1.1",
-                                wordBreak: "break-word",
-                                transition: "font-family 0.15s ease, font-size 0.15s ease, font-weight 0.15s ease"
-                              }}>
-                                {currentTitleText || "WELCOME TO OUR STORE"}
-                              </h1>
-                            ) : (
-                              <span style={{ fontSize: "1rem", color: "#94a3b8", fontStyle: "italic" }}>
-                                [Title Element Hidden]
-                              </span>
-                            )}
+                            <div style={{
+                              width: "100%",
+                              height: "100%",
+                              display: "flex",
+                              flexDirection: "column",
+                              justifyContent: "center",
+                              animation: getAnimationCss(
+                                effectiveTitleAnimType,
+                                titleAnim.duration ?? 0.6,
+                                effectiveDelays['title'] ?? 0,
+                                isTitleLoop
+                              )
+                            }}>
+                              {currentShowTitle ? (
+                                <h1 style={{
+                                  fontFamily: `"${(selectedElement === "title" && hoveredFontType) ? hoveredFontType : currentTitleFontType}", sans-serif`,
+                                  color: currentTitleFontColor,
+                                  fontSize: (selectedElement === "title" && hoveredFontSize) ? hoveredFontSize : currentTitleFontSize,
+                                  fontWeight: Number((selectedElement === "title" && hoveredFontWeight) ? hoveredFontWeight : currentTitleFontWeight) || 700,
+                                  textAlign: (currentTitleFontAlignment as any) || "center",
+                                  margin: 0,
+                                  lineHeight: "1.1",
+                                  wordBreak: "break-word",
+                                  transition: "font-family 0.15s ease, font-size 0.15s ease, font-weight 0.15s ease"
+                                }}>
+                                  {currentTitleText || "WELCOME TO OUR STORE"}
+                                </h1>
+                              ) : (
+                                <span style={{ fontSize: "1rem", color: "#94a3b8", fontStyle: "italic", textAlign: "center" }}>
+                                  [Title Element Hidden]
+                                </span>
+                              )}
+                            </div>
                           </div>
 
                           {/* 2. Hero Manifesto Subtitle */}
@@ -3507,13 +3705,7 @@ export default function CustomizeLayoutModal({
                               boxSizing: "border-box",
                               display: "flex",
                               flexDirection: "column",
-                              justifyContent: "center",
-                              animation: getAnimationCss(
-                                effectiveManifestoAnimType,
-                                manifestoAnim.duration ?? 0.6,
-                                effectiveDelays['manifesto'] ?? 0.25,
-                                isManifestoLoop
-                              )
+                              justifyContent: "center"
                             }}
                           >
                             {/* Sequence Order Number Badge (PowerPoint Style #2) */}
@@ -3585,26 +3777,40 @@ export default function CustomizeLayoutModal({
                                 ))}
                               </>
                             )}
-                            {currentShowManifesto ? (
-                              <p style={{
-                                fontFamily: `"${(selectedElement === "manifesto" && hoveredFontType) ? hoveredFontType : currentManifestoFontType}", sans-serif`,
-                                color: currentManifestoFontColor,
-                                fontSize: (selectedElement === "manifesto" && hoveredFontSize) ? hoveredFontSize : currentManifestoFontSize,
-                                fontWeight: Number((selectedElement === "manifesto" && hoveredFontWeight) ? hoveredFontWeight : currentManifestoFontWeight) || 500,
-                                textAlign: (currentManifestoFontAlignment as any) || "center",
-                                margin: 0,
-                                lineHeight: "1.6",
-                                textTransform: "uppercase",
-                                letterSpacing: "0.03em",
-                                transition: "font-family 0.15s ease, font-size 0.15s ease, font-weight 0.15s ease"
-                              }}>
-                                {currentManifestoText || ""}
-                              </p>
-                            ) : (
-                              <span style={{ fontSize: "0.9rem", color: "#94a3b8", fontStyle: "italic" }}>
-                                [Subtitle Element Hidden]
-                              </span>
-                            )}
+                            <div style={{
+                              width: "100%",
+                              height: "100%",
+                              display: "flex",
+                              flexDirection: "column",
+                              justifyContent: "center",
+                              animation: getAnimationCss(
+                                effectiveManifestoAnimType,
+                                manifestoAnim.duration ?? 0.6,
+                                effectiveDelays['manifesto'] ?? 0.25,
+                                isManifestoLoop
+                              )
+                            }}>
+                              {currentShowManifesto ? (
+                                <p style={{
+                                  fontFamily: `"${(selectedElement === "manifesto" && hoveredFontType) ? hoveredFontType : currentManifestoFontType}", sans-serif`,
+                                  color: currentManifestoFontColor,
+                                  fontSize: (selectedElement === "manifesto" && hoveredFontSize) ? hoveredFontSize : currentManifestoFontSize,
+                                  fontWeight: Number((selectedElement === "manifesto" && hoveredFontWeight) ? hoveredFontWeight : currentManifestoFontWeight) || 500,
+                                  textAlign: (currentManifestoFontAlignment as any) || "center",
+                                  margin: 0,
+                                  lineHeight: "1.6",
+                                  textTransform: "uppercase",
+                                  letterSpacing: "0.03em",
+                                  transition: "font-family 0.15s ease, font-size 0.15s ease, font-weight 0.15s ease"
+                                }}>
+                                  {currentManifestoText || ""}
+                                </p>
+                              ) : (
+                                <span style={{ fontSize: "0.9rem", color: "#94a3b8", fontStyle: "italic", textAlign: "center" }}>
+                                  [Subtitle Element Hidden]
+                                </span>
+                              )}
+                            </div>
                           </div>
 
                           {/* 3. Hero Button */}
@@ -3695,13 +3901,7 @@ export default function CustomizeLayoutModal({
                               transform: `translate(${currentButtonContainer.offsetX}px, ${currentButtonContainer.offsetY}px)`,
                               alignSelf:
                                 currentLayoutTemplate === "center" || currentLayoutTemplate.endsWith("center") ? "center" :
-                                  currentLayoutTemplate.startsWith("right") ? "flex-end" : "flex-start",
-                              animation: getAnimationCss(
-                                effectiveButtonAnimType,
-                                buttonAnim.duration ?? 0.6,
-                                effectiveDelays['button'] ?? 0.4,
-                                isButtonLoop
-                              )
+                                  currentLayoutTemplate.startsWith("right") ? "flex-end" : "flex-start"
                             }}
                           >
                             {/* Sequence Order Number Badge (PowerPoint Style #3) */}
@@ -3773,25 +3973,37 @@ export default function CustomizeLayoutModal({
                           ))}
                         </>
                       )}
-                      {currentShowButton ? (
-                        <div style={{
-                          width: "100%",
-                          height: "100%",
-                          ...getButtonStyleStyles(
-                            (selectedElement === "button" && hoveredButtonStyle) ? hoveredButtonStyle : (currentButtonStyle || "solid"),
-                            currentButtonColor || primaryColor || "#ffffff",
-                            currentButtonTextColor || "#000000",
-                            currentButtonSize,
-                            Boolean(currentButtonContainer.width)
-                          )
-                        }}>
-                          {currentButtonText || "SHOP NOW"}
-                        </div>
-                      ) : (
-                        <span style={{ fontSize: "0.9rem", color: "#94a3b8", fontStyle: "italic" }}>
-                          [Button Element Hidden]
-                        </span>
-                      )}
+                      {/* 4 Corner Resize Dots end */}
+                      <div style={{
+                        width: "100%",
+                        height: "100%",
+                        animation: getAnimationCss(
+                          effectiveButtonAnimType,
+                          buttonAnim.duration ?? 0.6,
+                          effectiveDelays['button'] ?? 0.4,
+                          isButtonLoop
+                        )
+                      }}>
+                        {currentShowButton ? (
+                          <div style={{
+                            width: "100%",
+                            height: "100%",
+                            ...getButtonStyleStyles(
+                              (selectedElement === "button" && hoveredButtonStyle) ? hoveredButtonStyle : (currentButtonStyle || "solid"),
+                              currentButtonColor || primaryColor || "#ffffff",
+                              currentButtonTextColor || "#000000",
+                              currentButtonSize,
+                              Boolean(currentButtonContainer.width)
+                            )
+                          }}>
+                            {currentButtonText || "SHOP NOW"}
+                          </div>
+                        ) : (
+                          <span style={{ fontSize: "0.9rem", color: "#94a3b8", fontStyle: "italic" }}>
+                            [Button Element Hidden]
+                          </span>
+                        )}
+                      </div>
                           </div>
                         </div>
                       );
@@ -4378,8 +4590,16 @@ export default function CustomizeLayoutModal({
             <button
               type="button"
               onClick={handleApply}
+              disabled={!hasModalChanges}
               className={styles.primaryActionBtn}
-              style={{ padding: "8px 24px", fontSize: "0.85rem", fontWeight: 700 }}
+              style={{
+                padding: "8px 24px",
+                fontSize: "0.85rem",
+                fontWeight: 700,
+                opacity: !hasModalChanges ? 0.5 : 1,
+                cursor: !hasModalChanges ? "not-allowed" : "pointer",
+                backgroundColor: !hasModalChanges ? "#9ca3af" : undefined
+              }}
             >
               Apply Customization
             </button>

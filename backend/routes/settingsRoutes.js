@@ -431,6 +431,7 @@ router.post("/api/settings", optionalAuth, async (req, res) => {
     const oldVideoUrl = settings.videoUrl;
 
     if (tickerText !== undefined) settings.tickerText = tickerText;
+    if (req.body.tickerDirection !== undefined) settings.tickerDirection = req.body.tickerDirection;
     if (tickerSpeed !== undefined) settings.tickerSpeed = tickerSpeed;
     if (tickerBgColor !== undefined) settings.tickerBgColor = tickerBgColor;
     if (tickerTextColor !== undefined) settings.tickerTextColor = tickerTextColor;
@@ -577,6 +578,14 @@ router.post("/api/settings", optionalAuth, async (req, res) => {
     if (req.body.mobileLifestyleButtonSize !== undefined) settings.mobileLifestyleButtonSize = req.body.mobileLifestyleButtonSize;
     if (req.body.mobileLifestyleButtonColor !== undefined) settings.mobileLifestyleButtonColor = req.body.mobileLifestyleButtonColor;
     if (req.body.mobileLifestyleButtonTextColor !== undefined) settings.mobileLifestyleButtonTextColor = req.body.mobileLifestyleButtonTextColor;
+    if (req.body.videoSlides !== undefined) settings.videoSlides = req.body.videoSlides;
+    if (req.body.videoAutoPlay !== undefined) settings.videoAutoPlay = req.body.videoAutoPlay;
+    if (req.body.videoAutoPlaySpeed !== undefined) settings.videoAutoPlaySpeed = req.body.videoAutoPlaySpeed;
+
+    if (req.body.lifestyleSlides !== undefined) settings.lifestyleSlides = req.body.lifestyleSlides;
+    if (req.body.lifestyleAutoPlay !== undefined) settings.lifestyleAutoPlay = req.body.lifestyleAutoPlay;
+    if (req.body.lifestyleAutoPlaySpeed !== undefined) settings.lifestyleAutoPlaySpeed = req.body.lifestyleAutoPlaySpeed;
+
     if (req.body.primaryColor !== undefined) settings.primaryColor = req.body.primaryColor;
     if (req.body.brandLogoType !== undefined) settings.brandLogoType = req.body.brandLogoType;
     if (req.body.brandLogoValue !== undefined) settings.brandLogoValue = req.body.brandLogoValue;
@@ -696,6 +705,8 @@ router.post("/api/settings", optionalAuth, async (req, res) => {
     }
 
     settings.markModified('heroSlides');
+    settings.markModified('videoSlides');
+    settings.markModified('lifestyleSlides');
     await settings.save();
 
     // Sync store details back to Store model

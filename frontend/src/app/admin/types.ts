@@ -161,6 +161,12 @@ export interface LayoutCustomizationConfig {
   heroSlides?: HeroSlideItem[];
   heroAutoPlay?: boolean;
   heroAutoPlaySpeed?: number;
+  videoSlides?: HeroSlideItem[];
+  videoAutoPlay?: boolean;
+  videoAutoPlaySpeed?: number;
+  lifestyleSlides?: HeroSlideItem[];
+  lifestyleAutoPlay?: boolean;
+  lifestyleAutoPlaySpeed?: number;
 
   // Mobile-specific Layout Properties (Unlinked)
   mobileLayoutTemplate?: string;
