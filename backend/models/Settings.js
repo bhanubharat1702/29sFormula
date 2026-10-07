@@ -109,7 +109,17 @@ const settingsSchema = new mongoose.Schema({
       mobileButtonSize: { type: String, default: "sm" },
       mobileButtonColor: { type: String, default: "#ffffff" },
       mobileButtonTextColor: { type: String, default: "#000000" },
-      showMobileHeroButton: { type: Boolean, default: true }
+      showMobileHeroButton: { type: Boolean, default: true },
+
+      elementAnimation: { type: String, default: "none" },
+      elementAnimationDuration: { type: Number, default: 0.6 },
+      elementAnimationDelay: { type: Number, default: 0.1 },
+      slideAnimation: { type: String, default: "none" },
+      slideAnimationDuration: { type: Number, default: 0.5 },
+
+      titleAnimation: { type: Object, default: { type: "none", duration: 0.6, delay: 0.1, order: 1 } },
+      manifestoAnimation: { type: Object, default: { type: "none", duration: 0.6, delay: 0.25, order: 2 } },
+      buttonAnimation: { type: Object, default: { type: "none", duration: 0.6, delay: 0.4, order: 3 } }
     }],
     default: []
   },

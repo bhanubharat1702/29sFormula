@@ -113,6 +113,18 @@ export interface HeroSlideItem {
   mobileTitleContainer?: { width?: number; height?: number; bgColor?: string; padding?: number; offsetX: number; offsetY: number };
   mobileManifestoContainer?: { width?: number; height?: number; bgColor?: string; padding?: number; offsetX: number; offsetY: number };
   mobileButtonContainer?: { width?: number; height?: number; paddingX?: number; paddingY?: number; offsetX: number; offsetY: number };
+
+  // PowerPoint-style Animations (Global & Per-Element)
+  elementAnimation?: string;
+  elementAnimationDuration?: number;
+  elementAnimationDelay?: number;
+  slideAnimation?: string;
+  slideAnimationDuration?: number;
+
+  // Individual Per-Element Animations & Sequence Ordering
+  titleAnimation?: { type: string; duration: number; delay: number; order?: number };
+  manifestoAnimation?: { type: string; duration: number; delay: number; order?: number };
+  buttonAnimation?: { type: string; duration: number; delay: number; order?: number };
 }
 
 export interface LayoutCustomizationConfig {

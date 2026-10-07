@@ -10,6 +10,7 @@ import Footer from "@/components/Footer";
 import Navbar from "@/components/Navbar/Navbar";
 import Preloader from "@/components/Preloader";
 import PublicSuspendedStorefront from "./components/PublicSuspendedStorefront";
+import StorefrontConnectionError from "./components/StorefrontConnectionError";
 import CartDrawer from "@/components/CartDrawer";
 import CheckoutDrawer from "@/components/CheckoutDrawer";
 import OrderSuccessModal from "@/components/OrderSuccessModal";
@@ -643,6 +644,9 @@ export default function Home() {
             setShowLifestyle(data.showLifestyle);
             localStorage.setItem("settings_showLifestyle", String(data.showLifestyle));
           }
+          if (data.heroSlides !== undefined && Array.isArray(data.heroSlides)) {
+            localStorage.setItem("settings_heroSlides", JSON.stringify(data.heroSlides));
+          }
           if (data.faqs !== undefined && Array.isArray(data.faqs)) setFaqs(data.faqs);
         }
       })
@@ -699,6 +703,16 @@ export default function Home() {
       if (cachedShowVideo) setShowVideo(cachedShowVideo === "true");
       const cachedShowLifestyle = localStorage.getItem("settings_showLifestyle");
       if (cachedShowLifestyle) setShowLifestyle(cachedShowLifestyle === "true");
+
+      const cachedHeroSlides = localStorage.getItem("settings_heroSlides");
+      if (cachedHeroSlides) {
+        try {
+          const parsedSlides = JSON.parse(cachedHeroSlides);
+          if (Array.isArray(parsedSlides) && parsedSlides.length > 0) {
+            setGlobalSettings((prev: any) => ({ ...prev, heroSlides: parsedSlides }));
+          }
+        } catch (err) {}
+      }
 
       // Load cached arrays list to avoid slow loading layout shifts
       const cachedArrivals = localStorage.getItem("storefront_arrivals");
@@ -771,6 +785,22 @@ export default function Home() {
     return <PublicSuspendedStorefront storeName={suspendedStoreName} />;
   }
 
+  if (isStorefrontError && arrivals.length === 0 && bestSellers.length === 0) {
+    return (
+      <div suppressHydrationWarning className={styles.page}>
+        <Navbar onCartClick={() => setShowCartDrawer(true)} />
+        <StorefrontConnectionError
+          errorMessage={storefrontErrorMessage}
+          isLoading={isStorefrontLoading}
+          onRetry={loadData}
+          storeName="29sFormula"
+          isFullPage={true}
+        />
+        <Footer />
+      </div>
+    );
+  }
+
   return (
     <div suppressHydrationWarning className={styles.page}>
       <Preloader />
@@ -812,12 +842,12 @@ export default function Home() {
       {/* 3. Navigation Header */}
       <Navbar onCartClick={() => setShowCartDrawer(true)} />
 
-      {/* 3.5 Storefront Error Alert & Retry Bar */}
+      {/* 3.5 Storefront Error Alert & Retry Bar (When cached catalog is showing) */}
       {isStorefrontError && (
         <div style={{
-          backgroundColor: "#1f2937",
+          backgroundColor: "#111827",
           color: "#f9fafb",
-          padding: "12px 24px",
+          padding: "10px 24px",
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
@@ -829,13 +859,19 @@ export default function Home() {
           zIndex: 99
         }}>
           <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-            <span style={{ display: "inline-flex", padding: "4px", backgroundColor: "rgba(239, 68, 68, 0.15)", borderRadius: "50%", color: "#ef4444" }}>
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" style={{ width: "18px", height: "18px" }}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
-              </svg>
-            </span>
+            <img
+              src="/images/sad_dog.jpg"
+              alt="Offline status"
+              style={{
+                width: "28px",
+                height: "28px",
+                borderRadius: "50%",
+                objectFit: "cover",
+                border: "2px solid #ef4444"
+              }}
+            />
             <span>
-              <strong>Server Connection Alert:</strong> Unable to reach live server ({storefrontErrorMessage}). {arrivals.length > 0 ? "Showing cached catalog." : "Please check backend server."}
+              <strong>Connection Notice:</strong> Unable to connect to live server ({storefrontErrorMessage}). Showing offline cached catalog. Please check your internet connection.
             </span>
           </div>
           <button

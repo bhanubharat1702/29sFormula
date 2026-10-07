@@ -807,7 +807,8 @@ export default function AdminDashboard() {
       storeAddress2: data.storeDetails?.address2 || data.storeAddress2 || "",
       storeCity: data.storeDetails?.city || data.storeCity || "",
       storeState: data.storeDetails?.state || data.storeState || "",
-      storePostalCode: data.storeDetails?.postalCode || data.storePostalCode || ""
+      storePostalCode: data.storeDetails?.postalCode || data.storePostalCode || "",
+      heroSlides: data.heroSlides || []
     };
   };
 
@@ -970,6 +971,7 @@ export default function AdminDashboard() {
     contactUsText !== originalSettings.contactUsText ||
     returnPolicyText !== originalSettings.returnPolicyText ||
     shippingPolicyText !== originalSettings.shippingPolicyText ||
+    JSON.stringify(heroSlides) !== JSON.stringify(originalSettings.heroSlides || []) ||
     JSON.stringify(cleanFaqs(faqs)) !== JSON.stringify(cleanFaqs(originalSettings.faqs || []))
   ) : false;
 

@@ -15,6 +15,7 @@ import NewtonsCradleLoader from "@/components/NewtonsCradleLoader";
 import { StorefrontGridSkeleton } from "@/components/Skeletons/Skeletons";
 import QuickViewDrawer from "@/components/QuickViewDrawer";
 import PublicSuspendedStorefront from "../components/PublicSuspendedStorefront";
+import StorefrontConnectionError from "../components/StorefrontConnectionError";
 import { useCart } from "@/context/CartContext";
 import { saveCart, clearCart, fetchAndSyncUserCart } from "@/utils/cartSync";
 
@@ -45,6 +46,8 @@ export default function Shop() {
   const [products, setProducts] = useState<Product[]>([]);
   const [settings, setSettings] = useState<any>(null);
   const [loading, setLoading] = useState<boolean>(true);
+  const [isFetchError, setIsFetchError] = useState<boolean>(false);
+  const [fetchErrorMessage, setFetchErrorMessage] = useState<string>("");
   const [categoryFilter, setCategoryFilter] = useState<string>("All");
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [primaryColor, setPrimaryColor] = useState<string>(
@@ -212,11 +215,12 @@ export default function Shop() {
             return null;
           }
         }
-        if (!res.ok) throw new Error("Failed to fetch shop data");
+        if (!res.ok) throw new Error(`Server returned status ${res.status}`);
         return res.json();
       })
       .then(data => {
         if (!data) return;
+        setIsFetchError(false);
         if (data.products && Array.isArray(data.products)) {
           setProducts(data.products);
           localStorage.setItem("storefront_products", JSON.stringify(data.products));
@@ -231,8 +235,9 @@ export default function Shop() {
         }
       })
       .catch(err => {
-        console.warn("Quietly catching shop data fetch error:", err.message || err);
-        setProducts(defaultProducts);
+        console.warn("Shop data fetch error:", err.message || err);
+        setIsFetchError(true);
+        setFetchErrorMessage(err.message || "Failed to connect to store servers");
       })
       .finally(() => setLoading(false));
 
@@ -367,6 +372,39 @@ export default function Shop() {
 
   if (isStoreSuspended) {
     return <PublicSuspendedStorefront storeName={suspendedStoreName} />;
+  }
+
+  if (isFetchError && products.length === 0) {
+    return (
+      <div suppressHydrationWarning className={styles.page}>
+        <Navbar onCartClick={() => setShowCartDrawer(true)} />
+        <StorefrontConnectionError
+          errorMessage={fetchErrorMessage}
+          isLoading={loading}
+          onRetry={() => {
+            setLoading(true);
+            setIsFetchError(false);
+            fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:5001'}/api/storefront/shop`, { cache: "no-store" })
+              .then(res => {
+                if (!res.ok) throw new Error(`Server returned status ${res.status}`);
+                return res.json();
+              })
+              .then(data => {
+                if (data.products && Array.isArray(data.products)) setProducts(data.products);
+                setIsFetchError(false);
+              })
+              .catch(err => {
+                setIsFetchError(true);
+                setFetchErrorMessage(err.message || "Failed to load shop catalog");
+              })
+              .finally(() => setLoading(false));
+          }}
+          storeName="29sFormula"
+          isFullPage={true}
+        />
+        <Footer />
+      </div>
+    );
   }
 
   return (

@@ -16,6 +16,7 @@ import OrderSuccessModal from "@/components/OrderSuccessModal";
 import QuickViewDrawer from "@/components/QuickViewDrawer";
 import Navbar from "@/components/Navbar/Navbar";
 import PublicSuspendedStorefront from "@/app/components/PublicSuspendedStorefront";
+import StorefrontConnectionError from "@/app/components/StorefrontConnectionError";
 import { useCart } from "@/context/CartContext";
 import { saveCart, clearCart, fetchAndSyncUserCart } from "@/utils/cartSync";
 import { saveRecentlyViewed } from "@/utils/recentlyViewed";
@@ -45,6 +46,8 @@ export default function ProductDetailPage() {
   
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
+  const [isConnectionError, setIsConnectionError] = useState<boolean>(false);
+  const [connectionErrorMessage, setConnectionErrorMessage] = useState<string>("");
   const [primaryColor, setPrimaryColor] = useState<string>(
     "#ffffff"
   );
@@ -561,11 +564,12 @@ export default function ProductDetailPage() {
     // Load product details
     fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:5001'}/api/products/${id}`, { cache: "no-store" })
       .then(res => {
-        if (!res.ok) throw new Error("Product fetch failed");
+        if (!res.ok) throw new Error(`Server returned status ${res.status}`);
         return res.json();
       })
       .then((data: Product) => {
         if (data) {
+          setIsConnectionError(false);
           setProduct(data);
           saveRecentlyViewed(data as any);
           initializeMedia(data);
@@ -587,8 +591,7 @@ export default function ProductDetailPage() {
         setLoading(false);
       })
       .catch((err) => {
-        console.warn("API load failed, trying default list match:", err);
-        // Fallback to local default product match
+        console.warn("API load failed, checking fallback:", err);
         const found = defaultProducts.find(p => p._id === id);
         if (found) {
           setProduct(found);
@@ -599,6 +602,9 @@ export default function ProductDetailPage() {
           if (fallbackSizes.length > 0) {
             setSelectedVolume(fallbackSizes[0]);
           }
+        } else {
+          setIsConnectionError(true);
+          setConnectionErrorMessage(err.message || "Failed to connect to product server");
         }
         setLoading(false);
       });
@@ -677,6 +683,24 @@ export default function ProductDetailPage() {
       <div suppressHydrationWarning className={styles.page}>
         <Navbar onCartClick={() => setShowCartDrawer(true)} />
         <ProductDetailSkeleton />
+        <Footer />
+      </div>
+    );
+  }
+
+  if (isConnectionError && !product) {
+    return (
+      <div suppressHydrationWarning className={styles.page}>
+        <Navbar onCartClick={() => setShowCartDrawer(true)} />
+        <StorefrontConnectionError
+          errorMessage={connectionErrorMessage}
+          isLoading={loading}
+          onRetry={() => {
+            if (typeof window !== "undefined") window.location.reload();
+          }}
+          storeName="29sFormula"
+          isFullPage={true}
+        />
         <Footer />
       </div>
     );

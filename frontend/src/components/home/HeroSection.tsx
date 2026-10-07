@@ -122,6 +122,7 @@ export default function HeroSection({
   heroAutoPlaySpeed = 5
 }: HeroSectionProps) {
   const [currentSlideIndex, setCurrentSlideIndex] = useState<number>(0);
+  const [prevSlideIndex, setPrevSlideIndex] = useState<number | null>(null);
   const [isHovered, setIsHovered] = useState<boolean>(false);
 
   // Construct active slides array (fallback to props if heroSlides is empty)
@@ -185,107 +186,334 @@ export default function HeroSection({
         }
       ];
 
+  const goToSlide = (newIndex: number) => {
+    if (newIndex === currentSlideIndex || slides.length <= 1) return;
+    setPrevSlideIndex(currentSlideIndex);
+    setCurrentSlideIndex(newIndex);
+  };
+
   // Auto-play Timer Effect
   useEffect(() => {
     if (!heroAutoPlay || slides.length <= 1 || isHovered) return;
     const intervalMs = (heroAutoPlaySpeed || 5) * 1000;
     const timer = setInterval(() => {
-      setCurrentSlideIndex((prev) => (prev + 1) % slides.length);
+      setCurrentSlideIndex((prev) => {
+        setPrevSlideIndex(prev);
+        return (prev + 1) % slides.length;
+      });
     }, intervalMs);
     return () => clearInterval(timer);
   }, [heroAutoPlay, heroAutoPlaySpeed, slides.length, isHovered]);
 
   const activeSlide = slides[currentSlideIndex] || slides[0];
 
-  // Derive active properties per viewport
-  const activeHeroTemplate = isMobile
-    ? (activeSlide.mobileLayoutTemplate || activeSlide.layoutTemplate || heroTemplate || "center")
-    : (activeSlide.layoutTemplate || heroTemplate || "center");
+  // Cleanup prevSlideIndex when transition finishes
+  useEffect(() => {
+    if (prevSlideIndex !== null) {
+      const activeDuration = ((activeSlide.slideAnimationDuration || 0.5) * 1000) + 50;
+      const timer = setTimeout(() => {
+        setPrevSlideIndex(null);
+      }, activeDuration);
+      return () => clearTimeout(timer);
+    }
+  }, [currentSlideIndex, prevSlideIndex, activeSlide.slideAnimationDuration]);
 
-  const activeHeroTitle = isMobile
-    ? (activeSlide.mobileTitleText !== "" && activeSlide.mobileTitleText !== undefined ? activeSlide.mobileTitleText : activeSlide.titleText)
-    : activeSlide.titleText;
+  const renderHeroSlide = (
+    slide: HeroSlideItem,
+    isPrevious: boolean,
+    keyStr: string
+  ) => {
+    const sBgType = slide.bgType || heroBgType || "color";
+    const sBgColor = slide.bgColor || heroBgColor || "#121212";
+    const sBgImage = slide.bgImage || heroBgImage;
+    const sBgVideo = slide.bgVideo || heroBgVideo;
 
-  const activeHeroTitleFontType = isMobile
-    ? (activeSlide.mobileTitleFontType || activeSlide.titleFontType || heroTitleFontType)
-    : (activeSlide.titleFontType || heroTitleFontType);
+    const sTemplate = isMobile
+      ? (slide.mobileLayoutTemplate || slide.layoutTemplate || heroTemplate || "center")
+      : (slide.layoutTemplate || heroTemplate || "center");
 
-  const activeHeroTitleFontColor = isMobile
-    ? (activeSlide.mobileTitleFontColor || activeSlide.titleFontColor || heroTitleFontColor)
-    : (activeSlide.titleFontColor || heroTitleFontColor);
+    const sTitle = isMobile
+      ? (slide.mobileTitleText !== "" && slide.mobileTitleText !== undefined ? slide.mobileTitleText : slide.titleText)
+      : slide.titleText;
 
-  const activeHeroTitleFontSize = isMobile
-    ? (activeSlide.mobileTitleFontSize || "2.5rem")
-    : (activeSlide.titleFontSize || heroTitleFontSize);
+    const sTitleFontType = isMobile
+      ? (slide.mobileTitleFontType || slide.titleFontType || heroTitleFontType)
+      : (slide.titleFontType || heroTitleFontType);
 
-  const activeHeroTitleFontAlignment = isMobile
-    ? (activeSlide.mobileTitleFontAlignment || activeSlide.titleFontAlignment || "center")
-    : (activeSlide.titleFontAlignment || "center");
+    const sTitleFontColor = isMobile
+      ? (slide.mobileTitleFontColor || slide.titleFontColor || heroTitleFontColor)
+      : (slide.titleFontColor || heroTitleFontColor);
 
-  const activeHeroTitleFontWeight = isMobile
-    ? (activeSlide.mobileTitleFontWeight || activeSlide.titleFontWeight || heroTitleFontWeight)
-    : (activeSlide.titleFontWeight || heroTitleFontWeight);
+    const sTitleFontSize = isMobile
+      ? (slide.mobileTitleFontSize || "2.5rem")
+      : (slide.titleFontSize || heroTitleFontSize);
 
-  const activeShowHeroTitle = isMobile
-    ? (activeSlide.showMobileHeroTitle !== undefined ? activeSlide.showMobileHeroTitle : activeSlide.showTitle)
-    : activeSlide.showTitle;
+    const sTitleFontAlignment = isMobile
+      ? (slide.mobileTitleFontAlignment || slide.titleFontAlignment || "center")
+      : (slide.titleFontAlignment || "center");
 
-  const activeHeroManifesto = isMobile
-    ? (activeSlide.mobileManifestoText !== "" && activeSlide.mobileManifestoText !== undefined ? activeSlide.mobileManifestoText : activeSlide.manifestoText)
-    : activeSlide.manifestoText;
+    const sTitleFontWeight = isMobile
+      ? (slide.mobileTitleFontWeight || slide.titleFontWeight || heroTitleFontWeight)
+      : (slide.titleFontWeight || heroTitleFontWeight);
 
-  const activeHeroManifestoFontType = isMobile
-    ? (activeSlide.mobileManifestoFontType || activeSlide.manifestoFontType || heroManifestoFontType)
-    : (activeSlide.manifestoFontType || heroManifestoFontType);
+    const sShowTitle = isMobile
+      ? (slide.showMobileHeroTitle !== undefined ? slide.showMobileHeroTitle : slide.showTitle)
+      : slide.showTitle;
 
-  const activeHeroManifestoFontColor = isMobile
-    ? (activeSlide.mobileManifestoFontColor || activeSlide.manifestoFontColor || heroManifestoFontColor)
-    : (activeSlide.manifestoFontColor || heroManifestoFontColor);
+    const sManifesto = isMobile
+      ? (slide.mobileManifestoText !== "" && slide.mobileManifestoText !== undefined ? slide.mobileManifestoText : slide.manifestoText)
+      : slide.manifestoText;
 
-  const activeHeroManifestoFontSize = isMobile
-    ? (activeSlide.mobileManifestoFontSize || "0.85rem")
-    : (activeSlide.manifestoFontSize || heroManifestoFontSize);
+    const sManifestoFontType = isMobile
+      ? (slide.mobileManifestoFontType || slide.manifestoFontType || heroManifestoFontType)
+      : (slide.manifestoFontType || heroManifestoFontType);
 
-  const activeHeroManifestoFontAlignment = isMobile
-    ? (activeSlide.mobileManifestoFontAlignment || activeSlide.manifestoFontAlignment || "center")
-    : (activeSlide.manifestoFontAlignment || "center");
+    const sManifestoFontColor = isMobile
+      ? (slide.mobileManifestoFontColor || slide.manifestoFontColor || heroManifestoFontColor)
+      : (slide.manifestoFontColor || heroManifestoFontColor);
 
-  const activeHeroManifestoFontWeight = isMobile
-    ? (activeSlide.mobileManifestoFontWeight || activeSlide.manifestoFontWeight || heroManifestoFontWeight)
-    : (activeSlide.manifestoFontWeight || heroManifestoFontWeight);
+    const sManifestoFontSize = isMobile
+      ? (slide.mobileManifestoFontSize || "0.85rem")
+      : (slide.manifestoFontSize || heroManifestoFontSize);
 
-  const activeShowHeroManifesto = isMobile
-    ? (activeSlide.showMobileHeroManifesto !== undefined ? activeSlide.showMobileHeroManifesto : activeSlide.showManifesto)
-    : activeSlide.showManifesto;
+    const sManifestoFontAlignment = isMobile
+      ? (slide.mobileManifestoFontAlignment || slide.manifestoFontAlignment || "center")
+      : (slide.manifestoFontAlignment || "center");
 
-  const activeHeroButtonText = isMobile
-    ? (activeSlide.mobileButtonText || activeSlide.buttonText || heroButtonText)
-    : (activeSlide.buttonText || heroButtonText);
+    const sManifestoFontWeight = isMobile
+      ? (slide.mobileManifestoFontWeight || slide.manifestoFontWeight || heroManifestoFontWeight)
+      : (slide.manifestoFontWeight || heroManifestoFontWeight);
 
-  const activeHeroButtonStyle = isMobile
-    ? (activeSlide.mobileButtonStyle || activeSlide.buttonStyle || heroButtonStyle)
-    : (activeSlide.buttonStyle || heroButtonStyle);
+    const sShowManifesto = isMobile
+      ? (slide.showMobileHeroManifesto !== undefined ? slide.showMobileHeroManifesto : slide.showManifesto)
+      : slide.showManifesto;
 
-  const activeHeroButtonSize = isMobile
-    ? (activeSlide.mobileButtonSize || "sm")
-    : (activeSlide.buttonSize || heroButtonSize);
+    const sButtonText = isMobile
+      ? (slide.mobileButtonText || slide.buttonText || heroButtonText)
+      : (slide.buttonText || heroButtonText);
 
-  const activeHeroButtonColor = isMobile
-    ? (activeSlide.mobileButtonColor !== "" && activeSlide.mobileButtonColor !== undefined ? activeSlide.mobileButtonColor : activeSlide.buttonColor)
-    : activeSlide.buttonColor;
+    const sButtonStyle = isMobile
+      ? (slide.mobileButtonStyle || slide.buttonStyle || heroButtonStyle)
+      : (slide.buttonStyle || heroButtonStyle);
 
-  const activeHeroButtonTextColor = isMobile
-    ? (activeSlide.mobileButtonTextColor || activeSlide.buttonTextColor || heroButtonTextColor)
-    : (activeSlide.buttonTextColor || heroButtonTextColor);
+    const sButtonSize = isMobile
+      ? (slide.mobileButtonSize || "sm")
+      : (slide.buttonSize || heroButtonSize);
 
-  const activeShowHeroButton = isMobile
-    ? (activeSlide.showMobileHeroButton !== undefined ? activeSlide.showMobileHeroButton : activeSlide.showButton)
-    : activeSlide.showButton;
+    const sButtonColor = isMobile
+      ? (slide.mobileButtonColor !== "" && slide.mobileButtonColor !== undefined ? slide.mobileButtonColor : slide.buttonColor)
+      : slide.buttonColor;
 
-  const slideBgType = activeSlide.bgType || heroBgType || "color";
-  const slideBgColor = activeSlide.bgColor || heroBgColor || "#121212";
-  const slideBgImage = activeSlide.bgImage || heroBgImage;
-  const slideBgVideo = activeSlide.bgVideo || heroBgVideo;
+    const sButtonTextColor = isMobile
+      ? (slide.mobileButtonTextColor || slide.buttonTextColor || heroButtonTextColor)
+      : (slide.buttonTextColor || heroButtonTextColor);
+
+    const sShowButton = isMobile
+      ? (slide.showMobileHeroButton !== undefined ? slide.showMobileHeroButton : slide.showButton)
+      : slide.showButton;
+
+    const animType = activeSlide.slideAnimation !== undefined ? activeSlide.slideAnimation : "fade";
+    const duration = activeSlide.slideAnimationDuration || 0.5;
+    const isPush = animType?.startsWith("push");
+
+    const containerAnimation = isPrevious
+      ? (isPush
+          ? `heroSlidePushOutLeft ${duration}s cubic-bezier(0.16, 1, 0.3, 1) forwards`
+          : `heroSlideFadeOut ${duration}s ease forwards`)
+      : (prevSlideIndex === null
+          ? "none"
+          : (animType === "none"
+              ? "none"
+              : animType === "morph"
+                ? `heroSlideMorphIn ${duration}s cubic-bezier(0.16, 1, 0.3, 1) forwards`
+                : isPush
+                  ? `heroSlidePush ${duration}s cubic-bezier(0.16, 1, 0.3, 1) forwards`
+                  : `heroSlideFadeIn ${duration}s ease forwards`));
+
+    return (
+      <div
+        key={keyStr}
+        style={{
+          position: "absolute",
+          inset: 0,
+          zIndex: isPrevious ? 1 : 2,
+          overflow: "hidden",
+          display: "flex",
+          flexDirection: "column",
+          justifyContent:
+            sTemplate === "top-left" || sTemplate === "right-top" || sTemplate === "top-center" ? "flex-start" :
+              sTemplate === "bottom-left" || sTemplate === "right-bottom" || sTemplate === "bottom-center" ? "flex-end" : "center",
+          alignItems:
+            sTemplate === "center" || sTemplate.endsWith("center") ? "center" :
+              sTemplate.startsWith("right") ? "flex-end" : "flex-start",
+          padding:
+            sTemplate === "bottom-left" || sTemplate === "right-bottom" || sTemplate === "bottom-center" ? "100px 5vw 80px 5vw" :
+              sTemplate === "top-left" || sTemplate === "right-top" || sTemplate === "top-center" ? "100px 5vw" : "0 5vw",
+          textAlign:
+            sTemplate === "center" || sTemplate.endsWith("center") ? "center" :
+              sTemplate.startsWith("right") ? "right" : "left",
+          backgroundColor: sBgType === "color" ? (sBgColor || "var(--primary-brand-color, #ffffff)") : "#121212",
+          backgroundImage: sBgType === "image" && sBgImage ? `url("${sBgImage}")` : "none",
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          animation: containerAnimation
+        }}
+      >
+        {sBgType === "video" && sBgVideo && (
+          <video key={sBgVideo} src={sBgVideo} autoPlay muted loop playsInline style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", zIndex: 1 }} />
+        )}
+        {sBgType !== "color" && <div style={{ position: "absolute", inset: 0, backgroundColor: "rgba(0, 0, 0, 0.45)", zIndex: 1 }} />}
+
+        {/* Slide Content */}
+        {(() => {
+          const titleAnim = slide.titleAnimation || { type: "none", duration: 0.6, delay: 0, order: 1 };
+          const manifestoAnim = slide.manifestoAnimation || { type: "none", duration: 0.6, delay: 0, order: 2 };
+          const buttonAnim = slide.buttonAnimation || { type: "none", duration: 0.6, delay: 0, order: 3 };
+
+          const animItems = [
+            { id: "title", type: sShowTitle ? (titleAnim.type || "none") : "none", duration: titleAnim.duration || 0.6, delay: titleAnim.delay || 0, order: titleAnim.order || 1 },
+            { id: "manifesto", type: sShowManifesto ? (manifestoAnim.type || "none") : "none", duration: manifestoAnim.duration || 0.6, delay: manifestoAnim.delay || 0, order: manifestoAnim.order || 2 },
+            { id: "button", type: sShowButton ? (buttonAnim.type || "none") : "none", duration: buttonAnim.duration || 0.6, delay: buttonAnim.delay || 0, order: buttonAnim.order || 3 }
+          ].sort((a, b) => a.order - b.order);
+
+          const effectiveDelays: Record<string, number> = {};
+          let seqTime = 0;
+          for (const item of animItems) {
+            const isEntrance = item.type && item.type !== "none" && !item.type.endsWith("-loop") && item.type !== "pulse-beat" && item.type !== "shimmer-gold" && item.type !== "subtle-shake";
+            if (!isEntrance) {
+              effectiveDelays[item.id] = item.delay;
+            } else {
+              const startTime = seqTime + item.delay;
+              effectiveDelays[item.id] = parseFloat(startTime.toFixed(2));
+              seqTime = startTime + item.duration;
+            }
+          }
+
+          const getAnimName = (type: string | undefined) => {
+            switch (type) {
+              case "fly-in-up": return "elemFlyInUp";
+              case "fly-in-left": return "elemFlyInLeft";
+              case "fly-in-right": return "elemFlyInRight";
+              case "float-up": return "elemFloatUp";
+              case "zoom-in": return "elemZoomIn";
+              case "zoom-out": return "elemZoomOut";
+              case "bounce-in": return "elemBounceIn";
+              case "spin-in": return "elemSpinIn";
+              case "flip-x": return "elemFlipX";
+              case "blur-reveal": return "elemBlurReveal";
+              case "wipe": return "elemWipe";
+              case "split": return "elemSplit";
+              case "fade-in": return "elemFadeIn";
+              case "pulse-beat": return "elemPulseBeat 2s infinite ease-in-out";
+              case "shimmer-gold": return "elemShimmerGold 2.5s infinite ease-in-out";
+              case "float-loop": return "elemFloatLoop 3s infinite ease-in-out";
+              case "subtle-shake": return "elemSubtleShake 1.5s infinite ease-in-out";
+              case "none": return "none";
+              default: return type ? "elemFadeIn" : "none";
+            }
+          };
+
+          return (
+            <div
+              style={{
+                position: "relative",
+                zIndex: 2,
+                display: "flex",
+                flexDirection: "column",
+                gap: "20px",
+                maxWidth: "800px",
+                width: "100%"
+              }}
+            >
+              {sShowTitle && (() => {
+                const animName = getAnimName(titleAnim.type);
+                const isLoop = titleAnim.type?.endsWith("-loop") || titleAnim.type === "pulse-beat" || titleAnim.type === "shimmer-gold" || titleAnim.type === "subtle-shake";
+
+                return (
+                  <h1 style={{
+                    fontFamily: sTitleFontType ? `"${sTitleFontType}", sans-serif` : "inherit",
+                    color: sTitleFontColor || "#ffffff",
+                    fontSize: sTitleFontSize || "4.5rem",
+                    fontWeight: Number(sTitleFontWeight) || (sTitleFontWeight as any) || 700,
+                    textAlign: (sTitleFontAlignment as any) || "inherit",
+                    margin: 0,
+                    lineHeight: "1.1",
+                    wordBreak: "break-word",
+                    overflowWrap: "break-word",
+                    animation: isPrevious ? "none" : (animName === "none" ? "none" : `${animName} ${titleAnim.duration || 0.6}s cubic-bezier(0.16, 1, 0.3, 1) ${effectiveDelays["title"] ?? 0}s ${isLoop ? "" : "both"}`)
+                  }}>
+                    {sTitle || ""}
+                  </h1>
+                );
+              })()}
+
+              {sShowManifesto && (() => {
+                const animName = getAnimName(manifestoAnim.type);
+                const isLoop = manifestoAnim.type?.endsWith("-loop") || manifestoAnim.type === "pulse-beat" || manifestoAnim.type === "shimmer-gold" || manifestoAnim.type === "subtle-shake";
+
+                return (
+                  <p style={{
+                    fontFamily: sManifestoFontType ? `"${sManifestoFontType}", sans-serif` : "inherit",
+                    color: sManifestoFontColor || "#ffffff",
+                    fontSize: sManifestoFontSize || "1.1rem",
+                    fontWeight: Number(sManifestoFontWeight) || (sManifestoFontWeight as any) || 500,
+                    textAlign: (sManifestoFontAlignment as any) || "inherit",
+                    margin: 0,
+                    lineHeight: "1.6",
+                    textTransform: "uppercase",
+                    letterSpacing: "0.03em",
+                    wordBreak: "break-word",
+                    overflowWrap: "break-word",
+                    animation: isPrevious ? "none" : (animName === "none" ? "none" : `${animName} ${manifestoAnim.duration || 0.6}s cubic-bezier(0.16, 1, 0.3, 1) ${effectiveDelays["manifesto"] ?? 0}s ${isLoop ? "" : "both"}`)
+                  }}>
+                    {sManifesto || ""}
+                  </p>
+                );
+              })()}
+
+              {sShowButton && (() => {
+                const btnColor = sButtonColor ? sButtonColor : (primaryColor || "#ffffff");
+                const isSolid = sButtonStyle === "solid";
+                const isOutline = sButtonStyle === "outline";
+
+                const paddings: Record<string, string> = { sm: "10px 24px", md: "14px 36px", lg: "18px 48px" };
+                const fontSizes: Record<string, string> = { sm: "0.75rem", md: "0.85rem", lg: "0.95rem" };
+
+                const animName = getAnimName(buttonAnim.type);
+                const isLoop = buttonAnim.type?.endsWith("-loop") || buttonAnim.type === "pulse-beat" || buttonAnim.type === "shimmer-gold" || buttonAnim.type === "subtle-shake";
+
+                return (
+                  <div style={{
+                    marginTop: "10px",
+                    alignSelf:
+                      sTemplate === "center" || sTemplate.endsWith("center") ? "center" :
+                        sTemplate.startsWith("right") ? "flex-end" : "flex-start",
+                    animation: isPrevious ? "none" : (animName === "none" ? "none" : `${animName} ${buttonAnim.duration || 0.6}s cubic-bezier(0.16, 1, 0.3, 1) ${effectiveDelays["button"] ?? 0}s ${isLoop ? "" : "both"}`)
+                  }}>
+                    <Link href={slide.buttonRedirectUrl || "/shop"} style={{
+                      display: "inline-block",
+                      padding: paddings[sButtonSize] || paddings.md,
+                      fontSize: fontSizes[sButtonSize] || fontSizes.md,
+                      backgroundColor: isSolid ? btnColor : "transparent",
+                      color: isSolid ? (sButtonTextColor || "#000000") : (sButtonTextColor || btnColor),
+                      border: isSolid || isOutline ? `2px solid ${btnColor}` : "none",
+                      textDecoration: sButtonStyle === "minimal" ? "underline" : "none",
+                      fontWeight: 700,
+                      textTransform: "uppercase",
+                      letterSpacing: "0.1em",
+                      textAlign: "center"
+                    }}>
+                      {sButtonText || "Shop Now"}
+                    </Link>
+                  </div>
+                );
+              })()}
+            </div>
+          );
+        })()}
+      </div>
+    );
+  };
 
   return (
     <section
@@ -293,41 +521,124 @@ export default function HeroSection({
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       style={{
-        backgroundColor: slideBgType === "color" ? (slideBgColor || "var(--primary-brand-color, #ffffff)") : "#121212",
-        backgroundImage: slideBgType === "image" && slideBgImage ? `url("${slideBgImage}")` : "none",
-        backgroundSize: "cover",
-        backgroundPosition: "center",
         position: "relative",
         overflow: "hidden",
-        display: "flex",
-        flexDirection: "column",
-        justifyContent:
-          activeHeroTemplate === "top-left" || activeHeroTemplate === "right-top" || activeHeroTemplate === "top-center" ? "flex-start" :
-            activeHeroTemplate === "bottom-left" || activeHeroTemplate === "right-bottom" || activeHeroTemplate === "bottom-center" ? "flex-end" : "center",
-        alignItems:
-          activeHeroTemplate === "center" || activeHeroTemplate.endsWith("center") ? "center" :
-            activeHeroTemplate.startsWith("right") ? "flex-end" : "flex-start",
-        padding:
-          activeHeroTemplate === "bottom-left" || activeHeroTemplate === "right-bottom" || activeHeroTemplate === "bottom-center" ? "100px 5vw 80px 5vw" :
-            activeHeroTemplate === "top-left" || activeHeroTemplate === "right-top" || activeHeroTemplate === "top-center" ? "100px 5vw" : "0 5vw",
-        textAlign:
-          activeHeroTemplate === "center" || activeHeroTemplate.endsWith("center") ? "center" :
-            activeHeroTemplate.startsWith("right") ? "right" : "left",
         minHeight: "82vh",
-        transition: "background-image 0.5s ease-in-out, background-color 0.5s ease-in-out"
+        backgroundColor: "#121212"
       }}
     >
-      {slideBgType === "video" && slideBgVideo && (
-        <video key={slideBgVideo} src={slideBgVideo} autoPlay muted loop playsInline style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", zIndex: 1 }} />
-      )}
-      {slideBgType !== "color" && <div style={{ position: "absolute", inset: 0, backgroundColor: "rgba(0, 0, 0, 0.45)", zIndex: 1 }} />}
+      <style>{`
+        /* PowerPoint Slide Transitions (Morph, Fade, Push) */
+        @keyframes heroSlideMorphIn {
+          0% { opacity: 0.15; transform: scale(0.96) translateY(14px); filter: blur(8px); }
+          60% { opacity: 0.95; transform: scale(1.008) translateY(-2px); filter: blur(0px); }
+          100% { opacity: 1; transform: scale(1) translateY(0px); filter: blur(0px); }
+        }
+        @keyframes heroSlideFadeIn {
+          0% { opacity: 0; }
+          100% { opacity: 1; }
+        }
+        @keyframes heroSlideFadeOut {
+          0% { opacity: 1; }
+          100% { opacity: 0; }
+        }
+        @keyframes heroSlidePush {
+          0% { transform: translate3d(100%, 0, 0); opacity: 1; }
+          100% { transform: translate3d(0, 0, 0); opacity: 1; }
+        }
+        @keyframes heroSlidePushOutLeft {
+          0% { transform: translate3d(0, 0, 0); opacity: 1; }
+          100% { transform: translate3d(-100%, 0, 0); opacity: 1; }
+        }
+
+        /* PowerPoint Element Entrance Animations */
+        @keyframes elemFadeIn {
+          0% { opacity: 0; }
+          100% { opacity: 1; }
+        }
+        @keyframes elemFlyInUp {
+          0% { opacity: 0; transform: translateY(40px); }
+          100% { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes elemFlyInLeft {
+          0% { opacity: 0; transform: translateX(-50px); }
+          100% { opacity: 1; transform: translateX(0); }
+        }
+        @keyframes elemFlyInRight {
+          0% { opacity: 0; transform: translateX(50px); }
+          100% { opacity: 1; transform: translateX(0); }
+        }
+        @keyframes elemFloatUp {
+          0% { opacity: 0; transform: translateY(24px); filter: blur(4px); }
+          100% { opacity: 1; transform: translateY(0); filter: blur(0); }
+        }
+        @keyframes elemZoomIn {
+          0% { opacity: 0; transform: scale(0.5); }
+          70% { transform: scale(1.05); }
+          100% { opacity: 1; transform: scale(1); }
+        }
+        @keyframes elemZoomOut {
+          0% { opacity: 0; transform: scale(1.4); }
+          100% { opacity: 1; transform: scale(1); }
+        }
+        @keyframes elemBounceIn {
+          0% { opacity: 0; transform: scale(0.3); }
+          50% { opacity: 1; transform: scale(1.1); }
+          70% { transform: scale(0.9); }
+          100% { transform: scale(1); }
+        }
+        @keyframes elemSpinIn {
+          0% { opacity: 0; transform: rotate(-180deg) scale(0.3); }
+          100% { opacity: 1; transform: rotate(0deg) scale(1); }
+        }
+        @keyframes elemFlipX {
+          0% { opacity: 0; transform: perspective(400px) rotateX(90deg); }
+          100% { opacity: 1; transform: perspective(400px) rotateX(0deg); }
+        }
+        @keyframes elemBlurReveal {
+          0% { opacity: 0; filter: blur(16px); transform: scale(0.95); }
+          100% { opacity: 1; filter: blur(0px); transform: scale(1); }
+        }
+        @keyframes elemWipe {
+          0% { opacity: 0; clip-path: inset(0 100% 0 0); }
+          100% { opacity: 1; clip-path: inset(0 0 0 0); }
+        }
+        @keyframes elemSplit {
+          0% { opacity: 0; transform: scaleX(0.4); }
+          100% { opacity: 1; transform: scaleX(1); }
+        }
+        @keyframes elemSubtleShake {
+          0%, 100% { transform: translateX(0); }
+          20%, 60% { transform: translateX(-4px); }
+          40%, 80% { transform: translateX(4px); }
+        }
+        @keyframes elemPulseBeat {
+          0%, 100% { transform: scale(1); }
+          50% { transform: scale(1.04); }
+        }
+        @keyframes elemShimmerGold {
+          0% { filter: brightness(1) drop-shadow(0 0 0px rgba(245, 158, 11, 0)); }
+          50% { filter: brightness(1.25) drop-shadow(0 0 12px rgba(245, 158, 11, 0.8)); }
+          100% { filter: brightness(1) drop-shadow(0 0 0px rgba(245, 158, 11, 0)); }
+        }
+        @keyframes elemFloatLoop {
+          0%, 100% { transform: translateY(0); }
+          50% { transform: translateY(-8px); }
+        }
+      `}</style>
+
+      {/* Render Previous Slide if Transitioning */}
+      {prevSlideIndex !== null && slides[prevSlideIndex] && renderHeroSlide(slides[prevSlideIndex], true, `prev_slide_${prevSlideIndex}`)}
+
+      {/* Render Active Slide */}
+      {activeSlide && renderHeroSlide(activeSlide, false, `active_slide_${currentSlideIndex}`)}
 
       {/* Left Carousel Prev Arrow */}
       {slides.length > 1 && (
         <button
           type="button"
           aria-label="Previous Hero Slide"
-          onClick={() => setCurrentSlideIndex((prev) => (prev - 1 + slides.length) % slides.length)}
+          onClick={() => goToSlide((currentSlideIndex - 1 + slides.length) % slides.length)}
           style={{
             position: "absolute",
             left: "20px",
@@ -358,7 +669,7 @@ export default function HeroSection({
         <button
           type="button"
           aria-label="Next Hero Slide"
-          onClick={() => setCurrentSlideIndex((prev) => (prev + 1) % slides.length)}
+          onClick={() => goToSlide((currentSlideIndex + 1) % slides.length)}
           style={{
             position: "absolute",
             right: "20px",
@@ -384,75 +695,6 @@ export default function HeroSection({
         </button>
       )}
 
-      {/* Main Slide Content */}
-      <div style={{ position: "relative", zIndex: 2, display: "flex", flexDirection: "column", gap: "20px", maxWidth: "800px", width: "100%" }}>
-        {activeShowHeroTitle && (
-          <h1 style={{
-            fontFamily: activeHeroTitleFontType ? `"${activeHeroTitleFontType}", sans-serif` : "inherit",
-            color: activeHeroTitleFontColor || "#ffffff",
-            fontSize: activeHeroTitleFontSize || "4.5rem",
-            fontWeight: Number(activeHeroTitleFontWeight) || (activeHeroTitleFontWeight as any) || 700,
-            textAlign: (activeHeroTitleFontAlignment as any) || "inherit",
-            margin: 0,
-            lineHeight: "1.1",
-            wordBreak: "break-word",
-            overflowWrap: "break-word"
-          }}>
-            {activeHeroTitle || ""}
-          </h1>
-        )}
-        {activeShowHeroManifesto && (
-          <p style={{
-            fontFamily: activeHeroManifestoFontType ? `"${activeHeroManifestoFontType}", sans-serif` : "inherit",
-            color: activeHeroManifestoFontColor || "#ffffff",
-            fontSize: activeHeroManifestoFontSize || "1.1rem",
-            fontWeight: Number(activeHeroManifestoFontWeight) || (activeHeroManifestoFontWeight as any) || 500,
-            textAlign: (activeHeroManifestoFontAlignment as any) || "inherit",
-            margin: 0,
-            lineHeight: "1.6",
-            textTransform: "uppercase",
-            letterSpacing: "0.03em",
-            wordBreak: "break-word",
-            overflowWrap: "break-word"
-          }}>
-            {activeHeroManifesto || ""}
-          </p>
-        )}
-        {activeShowHeroButton && (() => {
-          const btnColor = activeHeroButtonColor ? activeHeroButtonColor : (primaryColor || "#ffffff");
-          const isSolid = activeHeroButtonStyle === "solid";
-          const isOutline = activeHeroButtonStyle === "outline";
-
-          const paddings: Record<string, string> = { sm: "10px 24px", md: "14px 36px", lg: "18px 48px" };
-          const fontSizes: Record<string, string> = { sm: "0.75rem", md: "0.85rem", lg: "0.95rem" };
-
-          return (
-            <div style={{
-              marginTop: "10px",
-              alignSelf:
-                activeHeroTemplate === "center" || activeHeroTemplate.endsWith("center") ? "center" :
-                  activeHeroTemplate.startsWith("right") ? "flex-end" : "flex-start"
-            }}>
-              <Link href={activeSlide.buttonRedirectUrl || "/shop"} style={{
-                display: "inline-block",
-                padding: paddings[activeHeroButtonSize] || paddings.md,
-                fontSize: fontSizes[activeHeroButtonSize] || fontSizes.md,
-                backgroundColor: isSolid ? btnColor : "transparent",
-                color: isSolid ? (activeHeroButtonTextColor || "#000000") : (activeHeroButtonTextColor || btnColor),
-                border: isSolid || isOutline ? `2px solid ${btnColor}` : "none",
-                textDecoration: activeHeroButtonStyle === "minimal" ? "underline" : "none",
-                fontWeight: 700,
-                textTransform: "uppercase",
-                letterSpacing: "0.1em",
-                textAlign: "center"
-              }}>
-                {activeHeroButtonText || "Shop Now"}
-              </Link>
-            </div>
-          );
-        })()}
-      </div>
-
       {/* Pagination Dots at Bottom */}
       {slides.length > 1 && (
         <div style={{
@@ -470,7 +712,7 @@ export default function HeroSection({
               key={idx}
               type="button"
               aria-label={`Go to slide ${idx + 1}`}
-              onClick={() => setCurrentSlideIndex(idx)}
+              onClick={() => goToSlide(idx)}
               style={{
                 width: idx === currentSlideIndex ? "28px" : "8px",
                 height: "8px",
@@ -488,3 +730,4 @@ export default function HeroSection({
     </section>
   );
 }
+

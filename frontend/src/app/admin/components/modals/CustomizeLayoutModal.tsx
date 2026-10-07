@@ -116,7 +116,15 @@ export default function CustomizeLayoutModal({
         bgType: "color",
         bgColor: "#1e293b",
         bgImage: "",
-        bgVideo: ""
+        bgVideo: "",
+        slideAnimation: "none",
+        slideAnimationDuration: 0.5,
+        elementAnimation: "none",
+        elementAnimationDuration: 0.6,
+        elementAnimationDelay: 0.1,
+        titleAnimation: { type: "none", duration: 0.6, delay: 0.1, order: 1 },
+        manifestoAnimation: { type: "none", duration: 0.6, delay: 0.25, order: 2 },
+        buttonAnimation: { type: "none", duration: 0.6, delay: 0.4, order: 3 }
       },
       {
         id: "slide_3",
@@ -148,7 +156,15 @@ export default function CustomizeLayoutModal({
         bgType: "color",
         bgColor: "#0f172a",
         bgImage: "",
-        bgVideo: ""
+        bgVideo: "",
+        slideAnimation: "none",
+        slideAnimationDuration: 0.5,
+        elementAnimation: "none",
+        elementAnimationDuration: 0.6,
+        elementAnimationDelay: 0.1,
+        titleAnimation: { type: "none", duration: 0.6, delay: 0.1, order: 1 },
+        manifestoAnimation: { type: "none", duration: 0.6, delay: 0.25, order: 2 },
+        buttonAnimation: { type: "none", duration: 0.6, delay: 0.4, order: 3 }
       }
     ];
 
@@ -253,6 +269,33 @@ export default function CustomizeLayoutModal({
   const defaultMobileManifestoContainer = { width: 290, height: 55, padding: 6, offsetX: 0, offsetY: 0 };
   const defaultMobileButtonContainer = { width: 160, height: 44, offsetX: 0, offsetY: 0 };
 
+  // PowerPoint-style Animations State (Global & Per-Element)
+  const [elementAnimation, setElementAnimation] = useState<string>(activeSlide.elementAnimation !== undefined ? activeSlide.elementAnimation : "fade-in");
+  const [elementAnimationDuration, setElementAnimationDuration] = useState<number>(activeSlide.elementAnimationDuration || 0.6);
+  const [elementAnimationDelay, setElementAnimationDelay] = useState<number>(activeSlide.elementAnimationDelay || 0.1);
+  const [slideAnimation, setSlideAnimation] = useState<string>(activeSlide.slideAnimation !== undefined ? activeSlide.slideAnimation : "fade");
+  const [slideAnimationDuration, setSlideAnimationDuration] = useState<number>(activeSlide.slideAnimationDuration || 0.5);
+
+  // Individual Element Animations State
+  const [titleAnim, setTitleAnim] = useState<{ type: string; duration: number; delay: number; order?: number }>(
+    activeSlide.titleAnimation || { type: "fly-in-up", duration: 0.6, delay: 0.1, order: 1 }
+  );
+  const [manifestoAnim, setManifestoAnim] = useState<{ type: string; duration: number; delay: number; order?: number }>(
+    activeSlide.manifestoAnimation || { type: "float-up", duration: 0.6, delay: 0.25, order: 2 }
+  );
+  const [buttonAnim, setButtonAnim] = useState<{ type: string; duration: number; delay: number; order?: number }>(
+    activeSlide.buttonAnimation || { type: "zoom-in", duration: 0.6, delay: 0.4, order: 3 }
+  );
+
+  // Animation Dropdowns UI state
+  const [isElemAnimDropdownOpen, setIsElemAnimDropdownOpen] = useState<boolean>(false);
+  const [isSlideAnimDropdownOpen, setIsSlideAnimDropdownOpen] = useState<boolean>(false);
+  const [hoveredElementAnimation, setHoveredElementAnimation] = useState<string | null>(null);
+  const [hoveredSlideAnimation, setHoveredSlideAnimation] = useState<string | null>(null);
+  const [activeSlideAnimPreview, setActiveSlideAnimPreview] = useState<{ anim: string; key: number } | null>(null);
+  const [elemAnimPreviewKey, setElemAnimPreviewKey] = useState<number>(Date.now());
+  const slideHoverTimerRef = useRef<NodeJS.Timeout | null>(null);
+
   // Sync state when active slide switches
   const loadSlideToState = (slide: HeroSlideItem) => {
     setTitleText(slide.titleText || "");
@@ -288,6 +331,16 @@ export default function CustomizeLayoutModal({
     setTitleContainer(slide.titleContainer ? { ...slide.titleContainer } : { ...defaultDesktopTitleContainer });
     setManifestoContainer(slide.manifestoContainer ? { ...slide.manifestoContainer } : { ...defaultDesktopManifestoContainer });
     setButtonContainer(slide.buttonContainer ? { ...slide.buttonContainer } : { ...defaultDesktopButtonContainer });
+
+    setElementAnimation(slide.elementAnimation !== undefined ? slide.elementAnimation : "fade-in");
+    setElementAnimationDuration(slide.elementAnimationDuration || 0.6);
+    setElementAnimationDelay(slide.elementAnimationDelay || 0.1);
+    setSlideAnimation(slide.slideAnimation !== undefined ? slide.slideAnimation : "fade");
+    setSlideAnimationDuration(slide.slideAnimationDuration || 0.5);
+
+    setTitleAnim(slide.titleAnimation || { type: "fly-in-up", duration: 0.6, delay: 0.1, order: 1 });
+    setManifestoAnim(slide.manifestoAnimation || { type: "float-up", duration: 0.6, delay: 0.25, order: 2 });
+    setButtonAnim(slide.buttonAnimation || { type: "zoom-in", duration: 0.6, delay: 0.4, order: 3 });
 
     setMobileLayoutTemplate(slide.mobileLayoutTemplate || slide.layoutTemplate || "center");
     setMobileTitleText(slide.mobileTitleText || "");
@@ -385,6 +438,16 @@ export default function CustomizeLayoutModal({
           mobileTitleContainer,
           mobileManifestoContainer,
           mobileButtonContainer,
+
+          elementAnimation,
+          elementAnimationDuration,
+          elementAnimationDelay,
+          slideAnimation,
+          slideAnimationDuration,
+
+          titleAnimation: titleAnim,
+          manifestoAnimation: manifestoAnim,
+          buttonAnimation: buttonAnim,
           ...overrides
         };
       }
@@ -400,6 +463,8 @@ export default function CustomizeLayoutModal({
     manifestoText, showManifesto, manifestoFontType, manifestoFontSize, manifestoFontColor, manifestoFontWeight, manifestoFontAlignment,
     buttonText, buttonRedirectUrl, showButton, buttonStyle, buttonSize, buttonColor, buttonTextColor,
     layoutTemplate, bgType, bgColor, bgImage, bgVideo, titleContainer, manifestoContainer, buttonContainer,
+    elementAnimation, elementAnimationDuration, elementAnimationDelay, slideAnimation, slideAnimationDuration,
+    titleAnim, manifestoAnim, buttonAnim,
     mobileLayoutTemplate, mobileTitleText, mobileTitleFontType, mobileTitleFontColor, mobileTitleFontSize, mobileTitleFontAlignment, mobileTitleFontWeight, mobileShowTitle,
     mobileManifestoText, mobileManifestoFontType, mobileManifestoFontColor, mobileManifestoFontSize, mobileManifestoFontAlignment, mobileManifestoFontWeight, mobileShowManifesto,
     mobileButtonText, mobileButtonStyle, mobileButtonSize, mobileButtonColor, mobileButtonTextColor, mobileShowButton,
@@ -412,6 +477,10 @@ export default function CustomizeLayoutModal({
     setActiveSlideIndex(index);
     if (slides[index]) {
       loadSlideToState(slides[index]);
+      const anim = slides[index].slideAnimation !== undefined ? slides[index].slideAnimation : "push";
+      if (anim !== "none") {
+        setActiveSlideAnimPreview({ anim, key: Date.now() });
+      }
     }
   };
 
@@ -459,7 +528,17 @@ export default function CustomizeLayoutModal({
 
       mobileTitleContainer: { width: 320, height: 75, padding: 8, offsetX: 0, offsetY: 0 },
       mobileManifestoContainer: { width: 290, height: 55, padding: 6, offsetX: 0, offsetY: 0 },
-      mobileButtonContainer: { width: 160, height: 44, offsetX: 0, offsetY: 0 }
+      mobileButtonContainer: { width: 160, height: 44, offsetX: 0, offsetY: 0 },
+
+      // Default animation values for new slides set to none
+      slideAnimation: "none",
+      slideAnimationDuration: 0.5,
+      elementAnimation: "none",
+      elementAnimationDuration: 0.6,
+      elementAnimationDelay: 0.1,
+      titleAnimation: { type: "none", duration: 0.6, delay: 0.1, order: 1 },
+      manifestoAnimation: { type: "none", duration: 0.6, delay: 0.25, order: 2 },
+      buttonAnimation: { type: "none", duration: 0.6, delay: 0.4, order: 3 }
     };
     const newSlides = [...slides, newSlide];
     setSlides(newSlides);
@@ -786,10 +865,10 @@ export default function CustomizeLayoutModal({
       padding: hasCustomWidth
         ? "0 12px"
         : sizeStr === "sm"
-        ? "8px 20px"
-        : sizeStr === "lg"
-        ? "18px 48px"
-        : "14px 36px",
+          ? "8px 20px"
+          : sizeStr === "lg"
+            ? "18px 48px"
+            : "14px 36px",
       fontSize:
         sizeStr === "sm" ? "0.75rem" : sizeStr === "lg" ? "1.0rem" : "0.85rem",
       borderTopWidth: "0px",
@@ -1084,6 +1163,16 @@ export default function CustomizeLayoutModal({
         mobileButtonColor,
         mobileButtonTextColor,
         showMobileHeroButton: mobileShowButton,
+
+        elementAnimation,
+        elementAnimationDuration,
+        elementAnimationDelay,
+        slideAnimation,
+        slideAnimationDuration,
+
+        titleAnimation: titleAnim,
+        manifestoAnimation: manifestoAnim,
+        buttonAnimation: buttonAnim,
       };
     }
 
@@ -2371,12 +2460,387 @@ export default function CustomizeLayoutModal({
 
                 </div>
               ) : (
-                <div style={{ padding: "20px 10px", textAlign: "center", color: "#64748b", border: "1px dashed #e2e8f0", borderRadius: "8px" }}>
+                <div style={{ padding: "16px 10px", textAlign: "center", color: "#64748b", border: "1px dashed #cbd5e1", borderRadius: "8px", backgroundColor: "#f8fafc" }}>
                   <span style={{ fontSize: "0.82rem", fontWeight: 600 }}>
                     Click any title, subtitle or button in the live preview canvas to customize it.
                   </span>
                 </div>
               )}
+
+              {/* 4. Element Animation (PowerPoint Entrance & Attention Effects) */}
+              <div style={{ marginTop: "20px", paddingTop: "16px", borderTop: "1px solid #e2e8f0" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "12px" }}>
+                  <h4 style={{ fontSize: "0.85rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", color: "#374151", margin: 0 }}>
+                    4. Element Animation
+                  </h4>
+                  <span style={{ fontSize: "0.7rem", fontWeight: 700, backgroundColor: "#eff6ff", color: "#2563eb", padding: "2px 6px", borderRadius: "4px" }}>
+                    PowerPoint Sequence
+                  </span>
+                </div>
+
+                <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+
+                  {/* Individual Element Selection Indicator & Sequence Order Selector */}
+                  {selectedElement ? (
+                    <div style={{ backgroundColor: "#eff6ff", padding: "10px 12px", borderRadius: "6px", border: "1px solid #bfdbfe", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                        <span style={{ backgroundColor: "#2563eb", color: "#fff", width: "22px", height: "22px", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "0.75rem", fontWeight: 800 }}>
+                          {selectedElement === "title" ? (titleAnim.order || 1) : selectedElement === "manifesto" ? (manifestoAnim.order || 2) : (buttonAnim.order || 3)}
+                        </span>
+                        <span style={{ fontSize: "0.82rem", fontWeight: 700, color: "#1e40af", textTransform: "capitalize" }}>
+                          {selectedElement === "title" ? "Heading Title" : selectedElement === "manifesto" ? "Subtitle / Manifesto" : "CTA Button"}
+                        </span>
+                      </div>
+                      <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                        <label style={{ fontSize: "0.72rem", fontWeight: 700, color: "#475569" }}>Sequence:</label>
+                        <select
+                          value={selectedElement === "title" ? (titleAnim.order || 1) : selectedElement === "manifesto" ? (manifestoAnim.order || 2) : (buttonAnim.order || 3)}
+                          onChange={(e) => {
+                            const ord = parseInt(e.target.value, 10);
+                            if (selectedElement === "title") setTitleAnim(prev => ({ ...prev, order: ord }));
+                            else if (selectedElement === "manifesto") setManifestoAnim(prev => ({ ...prev, order: ord }));
+                            else if (selectedElement === "button") setButtonAnim(prev => ({ ...prev, order: ord }));
+                            setElemAnimPreviewKey(Date.now());
+                          }}
+                          style={{
+                            padding: "3px 8px",
+                            borderRadius: "4px",
+                            border: "1px solid #93c5fd",
+                            backgroundColor: "#ffffff",
+                            color: "#1e40af",
+                            fontSize: "0.75rem",
+                            fontWeight: 700,
+                            cursor: "pointer"
+                          }}
+                        >
+                          <option value={1}>1st (Start)</option>
+                          <option value={2}>2nd (After 1st)</option>
+                          <option value={3}>3rd (After 2nd)</option>
+                        </select>
+                      </div>
+                    </div>
+                  ) : (
+                    <div style={{ backgroundColor: "#f8fafc", padding: "8px 10px", borderRadius: "6px", border: "1px dashed #cbd5e1", fontSize: "0.75rem", color: "#64748b" }}>
+                      Select an element in canvas to edit its sequence animation effect.
+                    </div>
+                  )}
+
+                  {/* Motion Effect Custom Dropdown */}
+                  <div style={{ display: "flex", flexDirection: "column", gap: "4px", position: "relative" }}>
+                    <label style={{ fontSize: "0.78rem", fontWeight: 700, color: "#475569" }}>Entrance / Motion Effect</label>
+                    <button
+                      type="button"
+                      onClick={() => setIsElemAnimDropdownOpen(!isElemAnimDropdownOpen)}
+                      style={{
+                        padding: "8px 10px",
+                        borderRadius: "6px",
+                        border: "1px solid #cbd5e1",
+                        fontSize: "0.82rem",
+                        backgroundColor: "#ffffff",
+                        color: "#0f172a",
+                        fontWeight: 600,
+                        textAlign: "left",
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                        cursor: "pointer"
+                      }}
+                    >
+                      <span>
+                        {[
+                          { value: "none", label: "None (Static No Animation)" },
+                          { value: "fade-in", label: "Fade In (Classic Clean)" },
+                          { value: "fly-in-up", label: "Fly In from Bottom (Upward Lift)" },
+                          { value: "fly-in-left", label: "Fly In from Left (Slide Entrance)" },
+                          { value: "fly-in-right", label: "Fly In from Right" },
+                          { value: "float-up", label: "Float Up (Smooth Soft Slide)" },
+                          { value: "zoom-in", label: "Zoom In (Pop Out Reveal)" },
+                          { value: "zoom-out", label: "Zoom Out Drop (Deep Entrance)" },
+                          { value: "bounce-in", label: "Bounce In (Playful Elastic Drop)" },
+                          { value: "spin-in", label: "Swivel / Spin In (3D Rotation)" },
+                          { value: "wipe", label: "Wipe Reveal (Linear Gradient Wipe)" },
+                          { value: "split", label: "Split Expand (Horizontal Stretch)" },
+                          { value: "flip-x", label: "Flip In 3D (X-Axis Flip)" },
+                          { value: "blur-reveal", label: "Glass Blur Defocus Reveal" },
+                          { value: "pulse-beat", label: "Pulse Heartbeat (Gentle Pump)" },
+                          { value: "shimmer-gold", label: "Gold & Platinum Light Shimmer" },
+                          { value: "float-loop", label: "Levitate Float Loop (Continuous Smooth)" },
+                          { value: "subtle-shake", label: "Subtle Warning Shake" }
+                        ].find(e => e.value === (hoveredElementAnimation || (selectedElement === "title" ? titleAnim.type : selectedElement === "manifesto" ? manifestoAnim.type : selectedElement === "button" ? buttonAnim.type : elementAnimation)))?.label || "None (Static No Animation)"}
+                      </span>
+                      <span style={{ fontSize: "0.7rem", color: "#64748b" }}>▼</span>
+                    </button>
+
+                    {isElemAnimDropdownOpen && (
+                      <div
+                        onMouseLeave={() => setHoveredElementAnimation(null)}
+                        style={{
+                          position: "absolute",
+                          top: "100%",
+                          left: 0,
+                          right: 0,
+                          zIndex: 100,
+                          marginTop: "4px",
+                          maxHeight: "220px",
+                          overflowY: "auto",
+                          backgroundColor: "#ffffff",
+                          borderRadius: "8px",
+                          border: "1px solid #cbd5e1",
+                          boxShadow: "0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05)",
+                          padding: "4px"
+                        }}
+                      >
+                        {[
+                          { value: "none", label: "None (Static No Animation)" },
+                          { value: "fade-in", label: "Fade In (Classic Clean)" },
+                          { value: "fly-in-up", label: "Fly In from Bottom (Upward Lift)" },
+                          { value: "fly-in-left", label: "Fly In from Left (Slide Entrance)" },
+                          { value: "fly-in-right", label: "Fly In from Right" },
+                          { value: "float-up", label: "Float Up (Smooth Soft Slide)" },
+                          { value: "zoom-in", label: "Zoom In (Pop Out Reveal)" },
+                          { value: "zoom-out", label: "Zoom Out Drop (Deep Entrance)" },
+                          { value: "bounce-in", label: "Bounce In (Playful Elastic Drop)" },
+                          { value: "spin-in", label: "Swivel / Spin In (3D Rotation)" },
+                          { value: "wipe", label: "Wipe Reveal (Linear Gradient Wipe)" },
+                          { value: "split", label: "Split Expand (Horizontal Stretch)" },
+                          { value: "flip-x", label: "Flip In 3D (X-Axis Flip)" },
+                          { value: "blur-reveal", label: "Glass Blur Defocus Reveal" },
+                          { value: "pulse-beat", label: "Pulse Heartbeat (Gentle Pump)" },
+                          { value: "shimmer-gold", label: "Gold & Platinum Light Shimmer" },
+                          { value: "float-loop", label: "Levitate Float Loop (Continuous Smooth)" },
+                          { value: "subtle-shake", label: "Subtle Warning Shake" }
+                        ].map((item) => {
+                          const currentVal = selectedElement === "title" ? titleAnim.type : selectedElement === "manifesto" ? manifestoAnim.type : selectedElement === "button" ? buttonAnim.type : elementAnimation;
+                          const isSelected = currentVal === item.value;
+                          const isHovered = hoveredElementAnimation === item.value;
+                          return (
+                            <div
+                              key={item.value}
+                              onMouseEnter={() => setHoveredElementAnimation(item.value)}
+                              onClick={() => {
+                                if (selectedElement === "title") setTitleAnim(prev => ({ ...prev, type: item.value }));
+                                else if (selectedElement === "manifesto") setManifestoAnim(prev => ({ ...prev, type: item.value }));
+                                else if (selectedElement === "button") setButtonAnim(prev => ({ ...prev, type: item.value }));
+                                setElementAnimation(item.value);
+                                setHoveredElementAnimation(null);
+                                setIsElemAnimDropdownOpen(false);
+                              }}
+                              style={{
+                                padding: "6px 10px",
+                                borderRadius: "4px",
+                                fontSize: "0.82rem",
+                                cursor: "pointer",
+                                backgroundColor: isHovered ? "#f1f5f9" : isSelected ? "#eff6ff" : "transparent",
+                                color: isSelected ? "#2563eb" : "#1e293b",
+                                fontWeight: isSelected ? 700 : 500,
+                                display: "flex",
+                                justifyContent: "space-between",
+                                alignItems: "center"
+                              }}
+                            >
+                              <span>{item.label}</span>
+                              {isSelected && <span style={{ fontSize: "0.75rem" }}>✓</span>}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" }}>
+                    <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+                      <label style={{ fontSize: "0.75rem", fontWeight: 700, color: "#475569" }}>
+                        Duration ({selectedElement === "title" ? titleAnim.duration : selectedElement === "manifesto" ? manifestoAnim.duration : selectedElement === "button" ? buttonAnim.duration : elementAnimationDuration}s)
+                      </label>
+                      <input
+                        type="range"
+                        min="0.2"
+                        max="2.5"
+                        step="0.1"
+                        value={selectedElement === "title" ? titleAnim.duration : selectedElement === "manifesto" ? manifestoAnim.duration : selectedElement === "button" ? buttonAnim.duration : elementAnimationDuration}
+                        onChange={(e) => {
+                          const val = parseFloat(e.target.value);
+                          if (selectedElement === "title") setTitleAnim(prev => ({ ...prev, duration: val }));
+                          else if (selectedElement === "manifesto") setManifestoAnim(prev => ({ ...prev, duration: val }));
+                          else if (selectedElement === "button") setButtonAnim(prev => ({ ...prev, duration: val }));
+                          setElementAnimationDuration(val);
+                        }}
+                        onMouseUp={() => setElemAnimPreviewKey(Date.now())}
+                        onTouchEnd={() => setElemAnimPreviewKey(Date.now())}
+                        style={{ cursor: "pointer", accentColor: "#2563eb" }}
+                      />
+                    </div>
+                    <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+                      <label style={{ fontSize: "0.75rem", fontWeight: 700, color: "#475569" }}>
+                        Delay ({selectedElement === "title" ? titleAnim.delay : selectedElement === "manifesto" ? manifestoAnim.delay : selectedElement === "button" ? buttonAnim.delay : elementAnimationDelay}s)
+                      </label>
+                      <input
+                        type="range"
+                        min="0"
+                        max="1.5"
+                        step="0.05"
+                        value={selectedElement === "title" ? titleAnim.delay : selectedElement === "manifesto" ? manifestoAnim.delay : selectedElement === "button" ? buttonAnim.delay : elementAnimationDelay}
+                        onChange={(e) => {
+                          const val = parseFloat(e.target.value);
+                          if (selectedElement === "title") setTitleAnim(prev => ({ ...prev, delay: val }));
+                          else if (selectedElement === "manifesto") setManifestoAnim(prev => ({ ...prev, delay: val }));
+                          else if (selectedElement === "button") setButtonAnim(prev => ({ ...prev, delay: val }));
+                          setElementAnimationDelay(val);
+                        }}
+                        onMouseUp={() => setElemAnimPreviewKey(Date.now())}
+                        onTouchEnd={() => setElemAnimPreviewKey(Date.now())}
+                        style={{ cursor: "pointer", accentColor: "#2563eb" }}
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* 5. Slide Animation (PowerPoint Transitions) */}
+              <div style={{ marginTop: "20px", paddingTop: "16px", borderTop: "1px solid #e2e8f0" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "12px" }}>
+                  <h4 style={{ fontSize: "0.85rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em", color: "#374151", margin: 0 }}>
+                    5. Slide Animation
+                  </h4>
+                  <span style={{ fontSize: "0.7rem", fontWeight: 700, backgroundColor: "#fef3c7", color: "#d97706", padding: "2px 6px", borderRadius: "4px" }}>
+                    Slide Transition
+                  </span>
+                </div>
+
+                <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+                  <div style={{ display: "flex", flexDirection: "column", gap: "4px", position: "relative" }}>
+                    <label style={{ fontSize: "0.78rem", fontWeight: 700, color: "#475569" }}>Transition Preset</label>
+                    <button
+                      type="button"
+                      onClick={() => setIsSlideAnimDropdownOpen(!isSlideAnimDropdownOpen)}
+                      style={{
+                        padding: "8px 10px",
+                        borderRadius: "6px",
+                        border: "1px solid #cbd5e1",
+                        fontSize: "0.82rem",
+                        backgroundColor: "#ffffff",
+                        color: "#0f172a",
+                        fontWeight: 600,
+                        textAlign: "left",
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                        cursor: "pointer"
+                      }}
+                    >
+                      <span>
+                        {(() => {
+                          const curAnim = hoveredSlideAnimation || slideAnimation;
+                          return [
+                            { value: "none", label: "None" },
+                            { value: "morph", label: "Morph" },
+                            { value: "fade", label: "Fade" },
+                            { value: "push", label: "Push" }
+                          ].find(s => s.value === curAnim)?.label || (curAnim?.startsWith("push") ? "Push" : "None");
+                        })()}
+                      </span>
+                      <span style={{ fontSize: "0.7rem", color: "#64748b" }}>▼</span>
+                    </button>
+
+                    {isSlideAnimDropdownOpen && (
+                      <div
+                        onMouseLeave={() => {
+                          if (slideHoverTimerRef.current) {
+                            clearTimeout(slideHoverTimerRef.current);
+                            slideHoverTimerRef.current = null;
+                          }
+                          setHoveredSlideAnimation(null);
+                        }}
+                        style={{
+                          position: "absolute",
+                          top: "100%",
+                          left: 0,
+                          right: 0,
+                          zIndex: 100,
+                          marginTop: "4px",
+                          maxHeight: "200px",
+                          overflowY: "auto",
+                          backgroundColor: "#ffffff",
+                          borderRadius: "8px",
+                          border: "1px solid #cbd5e1",
+                          boxShadow: "0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05)",
+                          padding: "4px"
+                        }}
+                      >
+                        {[
+                          { value: "none", label: "None" },
+                          { value: "morph", label: "Morph" },
+                          { value: "fade", label: "Fade" },
+                          { value: "push", label: "Push" }
+                        ].map((item) => {
+                          const isSelected = slideAnimation === item.value || (item.value === "push" && slideAnimation?.startsWith("push"));
+                          const isHovered = hoveredSlideAnimation === item.value;
+                          return (
+                            <div
+                              key={item.value}
+                              onMouseEnter={() => {
+                                setHoveredSlideAnimation(item.value);
+                                if (slideHoverTimerRef.current) {
+                                  clearTimeout(slideHoverTimerRef.current);
+                                }
+                                slideHoverTimerRef.current = setTimeout(() => {
+                                  setActiveSlideAnimPreview({ anim: item.value, key: Date.now() });
+                                }, 500);
+                              }}
+                              onMouseLeave={() => {
+                                if (slideHoverTimerRef.current) {
+                                  clearTimeout(slideHoverTimerRef.current);
+                                  slideHoverTimerRef.current = null;
+                                }
+                              }}
+                              onClick={() => {
+                                if (slideHoverTimerRef.current) {
+                                  clearTimeout(slideHoverTimerRef.current);
+                                  slideHoverTimerRef.current = null;
+                                }
+                                setSlideAnimation(item.value);
+                                setActiveSlideAnimPreview({ anim: item.value, key: Date.now() });
+                                setHoveredSlideAnimation(null);
+                                setIsSlideAnimDropdownOpen(false);
+                              }}
+                              style={{
+                                padding: "6px 10px",
+                                borderRadius: "4px",
+                                fontSize: "0.82rem",
+                                cursor: "pointer",
+                                backgroundColor: isHovered ? "#f1f5f9" : isSelected ? "#eff6ff" : "transparent",
+                                color: isSelected ? "#d97706" : "#1e293b",
+                                fontWeight: isSelected ? 700 : 500,
+                                display: "flex",
+                                justifyContent: "space-between",
+                                alignItems: "center"
+                              }}
+                            >
+                              <span>{item.label}</span>
+                              {isSelected && <span style={{ fontSize: "0.75rem" }}>✓</span>}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+
+                  <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+                    <label style={{ fontSize: "0.75rem", fontWeight: 700, color: "#475569" }}>Transition Speed ({slideAnimationDuration}s)</label>
+                    <input
+                      type="range"
+                      min="0.2"
+                      max="2.0"
+                      step="0.1"
+                      value={slideAnimationDuration}
+                      onChange={(e) => setSlideAnimationDuration(parseFloat(e.target.value))}
+                      onMouseUp={() => setActiveSlideAnimPreview({ anim: slideAnimation || "push", key: Date.now() })}
+                      onTouchEnd={() => setActiveSlideAnimPreview({ anim: slideAnimation || "push", key: Date.now() })}
+                      style={{ cursor: "pointer", accentColor: "#d97706" }}
+                    />
+                  </div>
+                </div>
+              </div>
 
             </div>
 
@@ -2481,599 +2945,783 @@ export default function CustomizeLayoutModal({
                     height: previewDevice === 'desktop' ? "720px" : "852px",
                     transform: previewDevice === 'desktop' ? "translate(-50%, -50%) scale(0.60)" : "translate(-50%, -50%) scale(0.50)",
                     transformOrigin: "center center",
-                    backgroundColor: bgType === "color" ? (bgColor || "#121212") : "#121212",
-                    backgroundImage: bgType === "image" && bgImage ? `url("${bgImage}")` : "none",
-                    backgroundSize: "cover",
-                    backgroundPosition: "center",
+                    backgroundColor: "#0b0f19",
                     overflow: "hidden",
-                    display: "flex",
-                    flexDirection: "column",
-                    justifyContent:
-                      currentLayoutTemplate === "top-left" || currentLayoutTemplate === "right-top" || currentLayoutTemplate === "top-center" ? "flex-start" :
-                        currentLayoutTemplate === "bottom-left" || currentLayoutTemplate === "right-bottom" || currentLayoutTemplate === "bottom-center" ? "flex-end" : "center",
-                    alignItems:
-                      currentLayoutTemplate === "center" || currentLayoutTemplate.endsWith("center") ? "center" :
-                        currentLayoutTemplate.startsWith("right") ? "flex-end" : "flex-start",
-                    padding: previewDevice === 'desktop' ? "80px 5%" : "60px 24px",
-                    textAlign:
-                      currentLayoutTemplate === "center" || currentLayoutTemplate.endsWith("center") ? "center" :
-                        currentLayoutTemplate.startsWith("right") ? "right" : "left",
-                    transition: "all 0.3s ease",
                     boxSizing: "border-box",
                     borderRadius: previewDevice === 'desktop' ? "12px" : "44px",
                     border: previewDevice === 'desktop' ? "1px solid #cbd5e1" : "12px solid #1c1c1e"
                   }}
                 >
-                  {bgType === "video" && bgVideo && (
-                    <video src={bgVideo} autoPlay muted loop playsInline style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", zIndex: 1 }} />
-                  )}
-                  {bgType !== "color" && <div style={{ position: "absolute", inset: 0, backgroundColor: "rgba(0, 0, 0, 0.45)", zIndex: 1 }} />}
+                  <style>{`
+                    /* PowerPoint Slide Transitions (Morph, Fade, Push) */
+                    @keyframes heroSlideMorphIn {
+                      0% { opacity: 0.15; transform: scale(0.96) translateY(14px); filter: blur(8px); }
+                      60% { opacity: 0.95; transform: scale(1.008) translateY(-2px); filter: blur(0px); }
+                      100% { opacity: 1; transform: scale(1) translateY(0px); filter: blur(0px); }
+                    }
+                    @keyframes heroSlideFadeIn {
+                      0% { opacity: 0; }
+                      100% { opacity: 1; }
+                    }
+                    @keyframes heroSlideFadeOut {
+                      0% { opacity: 1; }
+                      100% { opacity: 0; }
+                    }
+                    @keyframes heroSlidePush {
+                      0% { transform: translate3d(100%, 0, 0); opacity: 1; }
+                      100% { transform: translate3d(0, 0, 0); opacity: 1; }
+                    }
+                    @keyframes heroSlidePushOutLeft {
+                      0% { transform: translate3d(0, 0, 0); opacity: 1; }
+                      100% { transform: translate3d(-100%, 0, 0); opacity: 1; }
+                    }
+                    @keyframes heroSlidePopIn {
+                      0% { opacity: 0; transform: scale(0.75); }
+                      100% { opacity: 1; transform: scale(1); }
+                    }
 
-                  {/* Dynamic Vertical Alignment Guide Line (Canvas Geometric X-Axis Center) */}
-                  {showVerticalGuide && (
-                    <div style={{
-                      position: "absolute",
-                      left: "50%",
-                      top: 0,
-                      bottom: 0,
-                      width: "2px",
-                      backgroundColor: "#3b82f6",
-                      opacity: 0.85,
-                      boxShadow: "0 0 10px #3b82f6",
-                      zIndex: 25,
-                      pointerEvents: "none"
-                    }}>
-                      <div style={{ position: "absolute", top: "16px", left: "50%", transform: "translateX(-50%)", fontSize: "0.7rem", fontWeight: 800, backgroundColor: "#2563eb", color: "#fff", padding: "3px 8px", borderRadius: "4px", textTransform: "uppercase", letterSpacing: "0.05em", boxShadow: "0 2px 6px rgba(0,0,0,0.3)" }}>
-                        X CENTER
+                    /* PowerPoint Element Entrance Animations */
+                    @keyframes elemFadeIn {
+                      0% { opacity: 0; }
+                      100% { opacity: 1; }
+                    }
+                    @keyframes elemFlyInUp {
+                      0% { opacity: 0; transform: translateY(40px); }
+                      100% { opacity: 1; transform: translateY(0); }
+                    }
+                    @keyframes elemFlyInLeft {
+                      0% { opacity: 0; transform: translateX(-50px); }
+                      100% { opacity: 1; transform: translateX(0); }
+                    }
+                    @keyframes elemFlyInRight {
+                      0% { opacity: 0; transform: translateX(50px); }
+                      100% { opacity: 1; transform: translateX(0); }
+                    }
+                    @keyframes elemFloatUp {
+                      0% { opacity: 0; transform: translateY(24px); filter: blur(4px); }
+                      100% { opacity: 1; transform: translateY(0); filter: blur(0); }
+                    }
+                    @keyframes elemZoomIn {
+                      0% { opacity: 0; transform: scale(0.5); }
+                      70% { transform: scale(1.05); }
+                      100% { opacity: 1; transform: scale(1); }
+                    }
+                    @keyframes elemZoomOut {
+                      0% { opacity: 0; transform: scale(1.4); }
+                      100% { opacity: 1; transform: scale(1); }
+                    }
+                    @keyframes elemBounceIn {
+                      0% { opacity: 0; transform: scale(0.3); }
+                      50% { opacity: 1; transform: scale(1.1); }
+                      70% { transform: scale(0.9); }
+                      100% { transform: scale(1); }
+                    }
+                    @keyframes elemSpinIn {
+                      0% { opacity: 0; transform: rotate(-180deg) scale(0.3); }
+                      100% { opacity: 1; transform: rotate(0deg) scale(1); }
+                    }
+                    @keyframes elemFlipX {
+                      0% { opacity: 0; transform: perspective(400px) rotateX(90deg); }
+                      100% { opacity: 1; transform: perspective(400px) rotateX(0deg); }
+                    }
+                    @keyframes elemBlurReveal {
+                      0% { opacity: 0; filter: blur(16px); transform: scale(0.95); }
+                      100% { opacity: 1; filter: blur(0px); transform: scale(1); }
+                    }
+                    @keyframes elemPulseBeat {
+                      0%, 100% { transform: scale(1); }
+                      50% { transform: scale(1.04); }
+                    }
+                    @keyframes elemShimmerGold {
+                      0% { filter: brightness(1) drop-shadow(0 0 0px rgba(245, 158, 11, 0)); }
+                      50% { filter: brightness(1.25) drop-shadow(0 0 12px rgba(245, 158, 11, 0.8)); }
+                      100% { filter: brightness(1) drop-shadow(0 0 0px rgba(245, 158, 11, 0)); }
+                    }
+                    @keyframes elemFloatLoop {
+                      0%, 100% { transform: translateY(0); }
+                      50% { transform: translateY(-8px); }
+                    }
+                    @keyframes elemWipe {
+                      0% { opacity: 0; clip-path: inset(0 100% 0 0); }
+                      100% { opacity: 1; clip-path: inset(0 0 0 0); }
+                    }
+                    @keyframes elemSplit {
+                      0% { opacity: 0; transform: scaleX(0); }
+                      100% { opacity: 1; transform: scaleX(1); }
+                    }
+                    @keyframes elemSubtleShake {
+                      0%, 100% { transform: translateX(0); }
+                      20%, 60% { transform: translateX(-4px); }
+                      40%, 80% { transform: translateX(4px); }
+                    }
+                  `}</style>
+
+                  {/* Previous/Last Slide Layer during Hover / Switching Transition Preview */}
+                  {activeSlideAnimPreview && slides.length > 0 && (() => {
+                    const prevSlideIdx = (activeSlideIndex - 1 + slides.length) % slides.length;
+                    const prevSlide = slides[prevSlideIdx];
+                    if (!prevSlide) return null;
+                    const isPush = (activeSlideAnimPreview?.anim || slideAnimation)?.startsWith("push");
+                    const prevTemplate = previewDevice === 'desktop'
+                      ? (prevSlide.layoutTemplate || "center")
+                      : (prevSlide.mobileLayoutTemplate || prevSlide.layoutTemplate || "center");
+
+                    return (
+                      <div
+                        key={`prev_slide_layer_${activeSlideAnimPreview.key}`}
+                        style={{
+                          position: "absolute",
+                          inset: 0,
+                          zIndex: 1,
+                          overflow: "hidden",
+                          display: "flex",
+                          flexDirection: "column",
+                          justifyContent:
+                            prevTemplate === "top-left" || prevTemplate === "right-top" || prevTemplate === "top-center" ? "flex-start" :
+                            prevTemplate === "bottom-left" || prevTemplate === "right-bottom" || prevTemplate === "bottom-center" ? "flex-end" : "center",
+                          alignItems:
+                            prevTemplate === "center" || prevTemplate.endsWith("center") ? "center" :
+                            prevTemplate.startsWith("right") ? "flex-end" : "flex-start",
+                          padding: previewDevice === 'desktop' ? "80px 5%" : "60px 24px",
+                          textAlign:
+                            prevTemplate === "center" || prevTemplate.endsWith("center") ? "center" :
+                            prevTemplate.startsWith("right") ? "right" : "left",
+                          backgroundColor: prevSlide.bgType === "color" ? (prevSlide.bgColor || "#121212") : "#121212",
+                          backgroundImage: prevSlide.bgType === "image" && prevSlide.bgImage ? `url("${prevSlide.bgImage}")` : "none",
+                          backgroundSize: "cover",
+                          backgroundPosition: "center",
+                          animation: isPush
+                            ? `${(activeSlideAnimPreview?.anim || slideAnimation) === "none" ? "none" : "heroSlidePushOutLeft"} ${slideAnimationDuration || 0.5}s cubic-bezier(0.16, 1, 0.3, 1) forwards`
+                            : `heroSlideFadeOut ${slideAnimationDuration || 0.5}s ease forwards`
+                        }}
+                      >
+                        {prevSlide.bgType === "video" && prevSlide.bgVideo && (
+                          <video src={prevSlide.bgVideo} autoPlay muted loop playsInline style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", zIndex: 1 }} />
+                        )}
+                        {prevSlide.bgType !== "color" && <div style={{ position: "absolute", inset: 0, backgroundColor: "rgba(0, 0, 0, 0.45)", zIndex: 1 }} />}
+
+                        <div style={{ position: "relative", zIndex: 2, display: "flex", flexDirection: "column", gap: "20px", maxWidth: "800px", width: "100%", opacity: 0.85 }}>
+                          {prevSlide.showTitle && (
+                            <div style={{ fontSize: "2.5rem", fontWeight: 700, color: prevSlide.titleFontColor || "#ffffff" }}>
+                              {prevSlide.titleText || ""}
+                            </div>
+                          )}
+                          {prevSlide.showManifesto && (
+                            <div style={{ fontSize: "1rem", color: prevSlide.manifestoFontColor || "#ffffff" }}>
+                              {prevSlide.manifestoText || ""}
+                            </div>
+                          )}
+                        </div>
                       </div>
-                    </div>
-                  )}
+                    );
+                  })()}
 
-                  {/* Dynamic Horizontal Alignment Guide Line (Canvas Geometric Y-Axis Center) */}
-                  {showHorizontalGuide && (
-                    <div style={{
-                      position: "absolute",
-                      top: "50%",
-                      left: 0,
-                      right: 0,
-                      height: "2px",
-                      backgroundColor: "#3b82f6",
-                      opacity: 0.85,
-                      boxShadow: "0 0 10px #3b82f6",
-                      zIndex: 25,
-                      pointerEvents: "none"
-                    }}>
-                      <div style={{ position: "absolute", left: "16px", top: "50%", transform: "translateY(-50%)", fontSize: "0.7rem", fontWeight: 800, backgroundColor: "#2563eb", color: "#fff", padding: "3px 8px", borderRadius: "4px", textTransform: "uppercase", letterSpacing: "0.05em", boxShadow: "0 2px 6px rgba(0,0,0,0.3)" }}>
-                        Y CENTER
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Left Carousel Prev Arrow */}
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      const prevIdx = (activeSlideIndex - 1 + slides.length) % slides.length;
-                      selectSlide(prevIdx);
-                    }}
+                  {/* Active Slide Layer with Background + Content Encapsulation */}
+                  <div
+                    key={`active_slide_layer_${activeSlideIndex}_${activeSlideAnimPreview ? activeSlideAnimPreview.key : 'static'}`}
                     style={{
                       position: "absolute",
-                      left: "24px",
-                      top: "50%",
-                      transform: "translateY(-50%)",
-                      zIndex: 20,
-                      width: "54px",
-                      height: "54px",
-                      borderRadius: "50%",
-                      backgroundColor: "rgba(255,255,255,0.2)",
-                      color: "#fff",
-                      border: "none",
-                      cursor: "pointer",
-                      fontSize: "1.6rem",
+                      inset: 0,
+                      zIndex: 2,
+                      overflow: "hidden",
+                      backgroundColor: bgType === "color" ? (bgColor || "#121212") : "#121212",
+                      backgroundImage: bgType === "image" && bgImage ? `url("${bgImage}")` : "none",
+                      backgroundSize: "cover",
+                      backgroundPosition: "center",
                       display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      backdropFilter: "blur(4px)"
+                      flexDirection: "column",
+                      justifyContent:
+                        currentLayoutTemplate === "top-left" || currentLayoutTemplate === "right-top" || currentLayoutTemplate === "top-center" ? "flex-start" :
+                          currentLayoutTemplate === "bottom-left" || currentLayoutTemplate === "right-bottom" || currentLayoutTemplate === "bottom-center" ? "flex-end" : "center",
+                      alignItems:
+                        currentLayoutTemplate === "center" || currentLayoutTemplate.endsWith("center") ? "center" :
+                          currentLayoutTemplate.startsWith("right") ? "flex-end" : "flex-start",
+                      padding: previewDevice === 'desktop' ? "80px 5%" : "60px 24px",
+                      textAlign:
+                        currentLayoutTemplate === "center" || currentLayoutTemplate.endsWith("center") ? "center" :
+                          currentLayoutTemplate.startsWith("right") ? "right" : "left",
+                      animation: activeSlideAnimPreview ? (
+                        (activeSlideAnimPreview.anim === "none") ? "none" :
+                        (activeSlideAnimPreview.anim === "morph") ? `heroSlideMorphIn ${slideAnimationDuration || 0.5}s cubic-bezier(0.16, 1, 0.3, 1) forwards` :
+                        (activeSlideAnimPreview.anim?.startsWith("push")) ? `heroSlidePush ${slideAnimationDuration || 0.5}s cubic-bezier(0.16, 1, 0.3, 1) forwards` :
+                        `heroSlideFadeIn ${slideAnimationDuration || 0.5}s ease forwards`
+                      ) : "none"
                     }}
                   >
-                    ‹
-                  </button>
+                    {bgType === "video" && bgVideo && (
+                      <video src={bgVideo} autoPlay muted loop playsInline style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", zIndex: 1 }} />
+                    )}
+                    {bgType !== "color" && <div style={{ position: "absolute", inset: 0, backgroundColor: "rgba(0, 0, 0, 0.45)", zIndex: 1 }} />}
 
-                  {/* Right Carousel Next Arrow */}
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      const nextIdx = (activeSlideIndex + 1) % slides.length;
-                      selectSlide(nextIdx);
-                    }}
-                    style={{
-                      position: "absolute",
-                      right: "24px",
-                      top: "50%",
-                      transform: "translateY(-50%)",
-                      zIndex: 20,
-                      width: "54px",
-                      height: "54px",
-                      borderRadius: "50%",
-                      backgroundColor: "rgba(255,255,255,0.2)",
-                      color: "#fff",
-                      border: "none",
-                      cursor: "pointer",
-                      fontSize: "1.6rem",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      backdropFilter: "blur(4px)"
-                    }}
-                  >
-                    ›
-                  </button>
+                    {/* Main Slide Interactive Elements Container */}
+                    {(() => {
+                      const effectiveTitleAnimType = (selectedElement === "title" && hoveredElementAnimation) ? hoveredElementAnimation : (titleAnim.type || "fade-in");
+                      const effectiveManifestoAnimType = (selectedElement === "manifesto" && hoveredElementAnimation) ? hoveredElementAnimation : (manifestoAnim.type || "fade-in");
+                      const effectiveButtonAnimType = (selectedElement === "button" && hoveredElementAnimation) ? hoveredElementAnimation : (buttonAnim.type || "fade-in");
 
-                  <div style={{ position: "relative", zIndex: 2, display: "flex", flexDirection: "column", gap: "20px", maxWidth: "800px", width: "100%" }}>
-                    {/* Helper component or inline rendering for selection & interactive handles */}
-                    {/* 1. Hero Title Element */}
-                    <div
-                      ref={titleRef}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setSelectedElement("title");
-                      }}
-                      onMouseDown={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        setSelectedElement("title");
-                        const startX = e.clientX;
-                        const startY = e.clientY;
-                        const initialOffsetX = currentTitleContainer.offsetX;
-                        const initialOffsetY = currentTitleContainer.offsetY;
+                      const isTitleLoop = effectiveTitleAnimType.endsWith("-loop") || effectiveTitleAnimType === "pulse-beat" || effectiveTitleAnimType === "shimmer-gold";
+                      const isManifestoLoop = effectiveManifestoAnimType.endsWith("-loop") || effectiveManifestoAnimType === "pulse-beat" || effectiveManifestoAnimType === "shimmer-gold";
+                      const isButtonLoop = effectiveButtonAnimType.endsWith("-loop") || effectiveButtonAnimType === "pulse-beat" || effectiveButtonAnimType === "shimmer-gold";
 
-                        // Capture base un-transformed element center relative to canvas center
-                        const scale = previewDevice === 'desktop' ? 0.60 : 0.50;
-                        let baseCenterX = 0;
-                        let baseCenterY = 0;
-                        if (titleRef.current && canvasFrameRef.current) {
-                          const elemRect = titleRef.current.getBoundingClientRect();
-                          const canvasRect = canvasFrameRef.current.getBoundingClientRect();
-                          const currentElemCenterX = elemRect.left + elemRect.width / 2;
-                          const canvasCenterX = canvasRect.left + canvasRect.width / 2;
-                          baseCenterX = (currentElemCenterX - canvasCenterX) / scale - initialOffsetX;
+                      const items = [
+                        { id: 'title', order: titleAnim.order || 1, duration: titleAnim.duration ?? 0.6, delay: titleAnim.delay ?? 0, type: effectiveTitleAnimType, isLoop: isTitleLoop },
+                        { id: 'manifesto', order: manifestoAnim.order || 2, duration: manifestoAnim.duration ?? 0.6, delay: manifestoAnim.delay ?? 0.25, type: effectiveManifestoAnimType, isLoop: isManifestoLoop },
+                        { id: 'button', order: buttonAnim.order || 3, duration: buttonAnim.duration ?? 0.6, delay: buttonAnim.delay ?? 0.4, type: effectiveButtonAnimType, isLoop: isButtonLoop }
+                      ].sort((a, b) => a.order - b.order);
 
-                          const currentElemCenterY = elemRect.top + elemRect.height / 2;
-                          const canvasCenterY = canvasRect.top + canvasRect.height / 2;
-                          baseCenterY = (currentElemCenterY - canvasCenterY) / scale - initialOffsetY;
+                      let accumulatedTime = 0;
+                      const effectiveDelays: Record<string, number> = {};
+
+                      items.forEach(item => {
+                        if (item.type === 'none') {
+                          effectiveDelays[item.id] = 0;
+                          return;
                         }
-
-                        const handleMouseMove = (moveEvent: MouseEvent) => {
-                          const dx = (moveEvent.clientX - startX) / scale;
-                          const dy = (moveEvent.clientY - startY) / scale;
-                          let nextX = initialOffsetX + dx;
-                          let nextY = initialOffsetY + dy;
-
-                          const projectedCenterX = baseCenterX + nextX;
-                          const projectedCenterY = baseCenterY + nextY;
-
-                          const snapThreshold = 20; // scale-independent canvas px threshold
-
-                          if (Math.abs(projectedCenterX) < snapThreshold) {
-                            nextX = -baseCenterX;
-                            setShowVerticalGuide(true);
-                          } else {
-                            setShowVerticalGuide(false);
-                          }
-
-                          if (Math.abs(projectedCenterY) < snapThreshold) {
-                            nextY = -baseCenterY;
-                            setShowHorizontalGuide(true);
-                          } else {
-                            setShowHorizontalGuide(false);
-                          }
-
-                          setCurrentTitleContainer((prev) => ({
-                            ...prev,
-                            offsetX: nextX,
-                            offsetY: nextY
-                          }));
-                        };
-
-                        const handleMouseUp = () => {
-                          setShowVerticalGuide(false);
-                          setShowHorizontalGuide(false);
-                          window.removeEventListener("mousemove", handleMouseMove);
-                          window.removeEventListener("mouseup", handleMouseUp);
-                        };
-
-                        window.addEventListener("mousemove", handleMouseMove);
-                        window.addEventListener("mouseup", handleMouseUp);
-                      }}
-                      style={{
-                        cursor: selectedElement === "title" ? "move" : "pointer",
-                        border: selectedElement === "title" ? "2px dashed #3b82f6" : "1px dashed transparent",
-                        padding: `${currentTitleContainer.padding ?? 12}px`,
-                        borderRadius: "8px",
-                        backgroundColor: currentTitleContainer.bgColor || (selectedElement === "title" ? "rgba(59, 130, 246, 0.12)" : "transparent"),
-                        width: currentTitleContainer.width ? `${currentTitleContainer.width}px` : "auto",
-                        height: currentTitleContainer.height ? `${currentTitleContainer.height}px` : "auto",
-                        transform: `translate(${currentTitleContainer.offsetX}px, ${currentTitleContainer.offsetY}px)`,
-                        position: "relative",
-                        userSelect: "none",
-                        boxSizing: "border-box",
-                        display: "flex",
-                        flexDirection: "column",
-                        justifyContent: "center"
-                      }}
-                    >
-                      {selectedElement === "title" && (
-                        <>
-                          <div style={{ position: "absolute", top: "-24px", left: "0", fontSize: "0.7rem", fontWeight: 800, backgroundColor: "#2563eb", color: "#fff", padding: "2px 8px", borderRadius: "4px", textTransform: "uppercase", whiteSpace: "nowrap", pointerEvents: "none" }}>
-                            TITLE BOX (DRAG DOTS TO RESIZE BOX, DRAG BOX TO REPOSITION)
-                          </div>
-                          {/* 4 Corner Resize Dots */}
-                          {[
-                            { pos: { top: "-6px", left: "-6px" }, cursor: "nwse-resize", type: "tl" },
-                            { pos: { top: "-6px", right: "-6px" }, cursor: "nesw-resize", type: "tr" },
-                            { pos: { bottom: "-6px", left: "-6px" }, cursor: "nesw-resize", type: "bl" },
-                            { pos: { bottom: "-6px", right: "-6px" }, cursor: "nwse-resize", type: "br" }
-                          ].map((handle, idx) => (
-                            <div
-                              key={idx}
-                              onMouseDown={(e) => {
-                                e.stopPropagation();
-                                e.preventDefault();
-                                const startX = e.clientX;
-                                const startY = e.clientY;
-                                const initialWidth = currentTitleContainer.width || e.currentTarget.parentElement?.clientWidth || 400;
-                                const initialHeight = currentTitleContainer.height || e.currentTarget.parentElement?.clientHeight || 80;
-
-                                const handleMouseMove = (moveEvent: MouseEvent) => {
-                                  const scale = previewDevice === 'desktop' ? 0.60 : 0.50;
-                                  const dx = (moveEvent.clientX - startX) / scale;
-                                  const dy = (moveEvent.clientY - startY) / scale;
-
-                                  let newWidth = initialWidth;
-                                  let newHeight = initialHeight;
-
-                                  if (handle.type.includes("r")) newWidth = initialWidth + dx;
-                                  if (handle.type.includes("l")) newWidth = initialWidth - dx;
-                                  if (handle.type.includes("b")) newHeight = initialHeight + dy;
-                                  if (handle.type.includes("t")) newHeight = initialHeight - dy;
-
-                                  setCurrentTitleContainer((prev) => ({
-                                    ...prev,
-                                    width: Math.max(120, newWidth),
-                                    height: Math.max(40, newHeight)
-                                  }));
-                                };
-
-                                const handleMouseUp = () => {
-                                  window.removeEventListener("mousemove", handleMouseMove);
-                                  window.removeEventListener("mouseup", handleMouseUp);
-                                };
-
-                                window.addEventListener("mousemove", handleMouseMove);
-                                window.addEventListener("mouseup", handleMouseUp);
-                              }}
-                              style={{
-                                position: "absolute",
-                                width: "12px",
-                                height: "12px",
-                                backgroundColor: "#2563eb",
-                                border: "2px solid #ffffff",
-                                borderRadius: "50%",
-                                cursor: handle.cursor,
-                                zIndex: 10,
-                                boxShadow: "0 2px 4px rgba(0,0,0,0.2)",
-                                ...handle.pos
-                              }}
-                            />
-                          ))}
-                        </>
-                      )}
-                      {currentShowTitle ? (
-                        <h1 style={{
-                          fontFamily: `"${(selectedElement === "title" && hoveredFontType) ? hoveredFontType : currentTitleFontType}", sans-serif`,
-                          color: currentTitleFontColor,
-                          fontSize: (selectedElement === "title" && hoveredFontSize) ? hoveredFontSize : currentTitleFontSize,
-                          fontWeight: Number((selectedElement === "title" && hoveredFontWeight) ? hoveredFontWeight : currentTitleFontWeight) || 700,
-                          textAlign: (currentTitleFontAlignment as any) || "center",
-                          margin: 0,
-                          lineHeight: "1.1",
-                          wordBreak: "break-word",
-                          transition: "font-family 0.15s ease, font-size 0.15s ease, font-weight 0.15s ease"
-                        }}>
-                          {currentTitleText || "WELCOME TO OUR STORE"}
-                        </h1>
-                      ) : (
-                        <span style={{ fontSize: "1rem", color: "#94a3b8", fontStyle: "italic" }}>
-                          [Title Element Hidden]
-                        </span>
-                      )}
-                    </div>
-
-                    {/* 2. Hero Manifesto Subtitle */}
-                    <div
-                      ref={manifestoRef}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setSelectedElement("manifesto");
-                      }}
-                      onMouseDown={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        setSelectedElement("manifesto");
-                        const startX = e.clientX;
-                        const startY = e.clientY;
-                        const initialOffsetX = currentManifestoContainer.offsetX;
-                        const initialOffsetY = currentManifestoContainer.offsetY;
-
-                        const scale = previewDevice === 'desktop' ? 0.60 : 0.50;
-                        let baseCenterX = 0;
-                        let baseCenterY = 0;
-                        if (manifestoRef.current && canvasFrameRef.current) {
-                          const elemRect = manifestoRef.current.getBoundingClientRect();
-                          const canvasRect = canvasFrameRef.current.getBoundingClientRect();
-                          const currentElemCenterX = elemRect.left + elemRect.width / 2;
-                          const canvasCenterX = canvasRect.left + canvasRect.width / 2;
-                          baseCenterX = (currentElemCenterX - canvasCenterX) / scale - initialOffsetX;
-
-                          const currentElemCenterY = elemRect.top + elemRect.height / 2;
-                          const canvasCenterY = canvasRect.top + canvasRect.height / 2;
-                          baseCenterY = (currentElemCenterY - canvasCenterY) / scale - initialOffsetY;
+                        if (item.isLoop) {
+                          effectiveDelays[item.id] = item.delay;
+                          return;
                         }
+                        const itemStart = accumulatedTime + item.delay;
+                        effectiveDelays[item.id] = itemStart;
+                        accumulatedTime = itemStart + item.duration;
+                      });
 
-                        const handleMouseMove = (moveEvent: MouseEvent) => {
-                          const dx = (moveEvent.clientX - startX) / scale;
-                          const dy = (moveEvent.clientY - startY) / scale;
-                          let nextX = initialOffsetX + dx;
-                          let nextY = initialOffsetY + dy;
-
-                          const projectedCenterX = baseCenterX + nextX;
-                          const projectedCenterY = baseCenterY + nextY;
-
-                          const snapThreshold = 20;
-
-                          if (Math.abs(projectedCenterX) < snapThreshold) {
-                            nextX = -baseCenterX;
-                            setShowVerticalGuide(true);
-                          } else {
-                            setShowVerticalGuide(false);
-                          }
-
-                          if (Math.abs(projectedCenterY) < snapThreshold) {
-                            nextY = -baseCenterY;
-                            setShowHorizontalGuide(true);
-                          } else {
-                            setShowHorizontalGuide(false);
-                          }
-
-                          setCurrentManifestoContainer((prev) => ({
-                            ...prev,
-                            offsetX: nextX,
-                            offsetY: nextY
-                          }));
-                        };
-
-                        const handleMouseUp = () => {
-                          setShowVerticalGuide(false);
-                          setShowHorizontalGuide(false);
-                          window.removeEventListener("mousemove", handleMouseMove);
-                          window.removeEventListener("mouseup", handleMouseUp);
-                        };
-
-                        window.addEventListener("mousemove", handleMouseMove);
-                        window.addEventListener("mouseup", handleMouseUp);
-                      }}
-                      style={{
-                        cursor: selectedElement === "manifesto" ? "move" : "pointer",
-                        border: selectedElement === "manifesto" ? "2px dashed #3b82f6" : "1px dashed transparent",
-                        padding: `${currentManifestoContainer.padding ?? 10}px`,
-                        borderRadius: "8px",
-                        backgroundColor: currentManifestoContainer.bgColor || (selectedElement === "manifesto" ? "rgba(59, 130, 246, 0.12)" : "transparent"),
-                        width: currentManifestoContainer.width ? `${currentManifestoContainer.width}px` : "auto",
-                        height: currentManifestoContainer.height ? `${currentManifestoContainer.height}px` : "auto",
-                        transform: `translate(${currentManifestoContainer.offsetX}px, ${currentManifestoContainer.offsetY}px)`,
-                        position: "relative",
-                        userSelect: "none",
-                        boxSizing: "border-box",
-                        display: "flex",
-                        flexDirection: "column",
-                        justifyContent: "center"
-                      }}
-                    >
-                      {selectedElement === "manifesto" && (
-                        <>
-                          <div style={{ position: "absolute", top: "-24px", left: "0", fontSize: "0.7rem", fontWeight: 800, backgroundColor: "#2563eb", color: "#fff", padding: "2px 8px", borderRadius: "4px", textTransform: "uppercase", whiteSpace: "nowrap", pointerEvents: "none" }}>
-                            SUBTITLE BOX (DRAG DOTS TO RESIZE BOX, DRAG BOX TO REPOSITION)
-                          </div>
-                          {/* 4 Corner Resize Dots */}
-                          {[
-                            { pos: { top: "-6px", left: "-6px" }, cursor: "nwse-resize", type: "tl" },
-                            { pos: { top: "-6px", right: "-6px" }, cursor: "nesw-resize", type: "tr" },
-                            { pos: { bottom: "-6px", left: "-6px" }, cursor: "nesw-resize", type: "bl" },
-                            { pos: { bottom: "-6px", right: "-6px" }, cursor: "nwse-resize", type: "br" }
-                          ].map((handle, idx) => (
-                            <div
-                              key={idx}
-                              onMouseDown={(e) => {
-                                e.stopPropagation();
-                                e.preventDefault();
-                                const startX = e.clientX;
-                                const startY = e.clientY;
-                                const initialWidth = currentManifestoContainer.width || e.currentTarget.parentElement?.clientWidth || 350;
-                                const initialHeight = currentManifestoContainer.height || e.currentTarget.parentElement?.clientHeight || 60;
-
-                                const handleMouseMove = (moveEvent: MouseEvent) => {
-                                  const scale = previewDevice === 'desktop' ? 0.60 : 0.50;
-                                  const dx = (moveEvent.clientX - startX) / scale;
-                                  const dy = (moveEvent.clientY - startY) / scale;
-
-                                  let newWidth = initialWidth;
-                                  let newHeight = initialHeight;
-
-                                  if (handle.type.includes("r")) newWidth = initialWidth + dx;
-                                  if (handle.type.includes("l")) newWidth = initialWidth - dx;
-                                  if (handle.type.includes("b")) newHeight = initialHeight + dy;
-                                  if (handle.type.includes("t")) newHeight = initialHeight - dy;
-
-                                  setCurrentManifestoContainer((prev) => ({
-                                    ...prev,
-                                    width: Math.max(100, newWidth),
-                                    height: Math.max(30, newHeight)
-                                  }));
-                                };
-
-                                const handleMouseUp = () => {
-                                  window.removeEventListener("mousemove", handleMouseMove);
-                                  window.removeEventListener("mouseup", handleMouseUp);
-                                };
-
-                                window.addEventListener("mousemove", handleMouseMove);
-                                window.addEventListener("mouseup", handleMouseUp);
-                              }}
-                              style={{
-                                position: "absolute",
-                                width: "12px",
-                                height: "12px",
-                                backgroundColor: "#2563eb",
-                                border: "2px solid #ffffff",
-                                borderRadius: "50%",
-                                cursor: handle.cursor,
-                                zIndex: 10,
-                                boxShadow: "0 2px 4px rgba(0,0,0,0.2)",
-                                ...handle.pos
-                              }}
-                            />
-                          ))}
-                        </>
-                      )}
-                      {currentShowManifesto ? (
-                        <p style={{
-                          fontFamily: `"${(selectedElement === "manifesto" && hoveredFontType) ? hoveredFontType : currentManifestoFontType}", sans-serif`,
-                          color: currentManifestoFontColor,
-                          fontSize: (selectedElement === "manifesto" && hoveredFontSize) ? hoveredFontSize : currentManifestoFontSize,
-                          fontWeight: Number((selectedElement === "manifesto" && hoveredFontWeight) ? hoveredFontWeight : currentManifestoFontWeight) || 500,
-                          textAlign: (currentManifestoFontAlignment as any) || "center",
-                          margin: 0,
-                          lineHeight: "1.6",
-                          textTransform: "uppercase",
-                          letterSpacing: "0.03em",
-                          transition: "font-family 0.15s ease, font-size 0.15s ease, font-weight 0.15s ease"
-                        }}>
-                          {currentManifestoText || ""}
-                        </p>
-                      ) : (
-                        <span style={{ fontSize: "0.9rem", color: "#94a3b8", fontStyle: "italic" }}>
-                          [Subtitle Element Hidden]
-                        </span>
-                      )}
-                    </div>
-
-                    {/* 3. Hero Button */}
-                    <div
-                      ref={buttonRef}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setSelectedElement("button");
-                      }}
-                      onMouseDown={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        setSelectedElement("button");
-                        const startX = e.clientX;
-                        const startY = e.clientY;
-                        const initialOffsetX = currentButtonContainer.offsetX;
-                        const initialOffsetY = currentButtonContainer.offsetY;
-
-                        const scale = previewDevice === 'desktop' ? 0.60 : 0.50;
-                        let baseCenterX = 0;
-                        let baseCenterY = 0;
-                        if (buttonRef.current && canvasFrameRef.current) {
-                          const elemRect = buttonRef.current.getBoundingClientRect();
-                          const canvasRect = canvasFrameRef.current.getBoundingClientRect();
-                          const currentElemCenterX = elemRect.left + elemRect.width / 2;
-                          const canvasCenterX = canvasRect.left + canvasRect.width / 2;
-                          baseCenterX = (currentElemCenterX - canvasCenterX) / scale - initialOffsetX;
-
-                          const currentElemCenterY = elemRect.top + elemRect.height / 2;
-                          const canvasCenterY = canvasRect.top + canvasRect.height / 2;
-                          baseCenterY = (currentElemCenterY - canvasCenterY) / scale - initialOffsetY;
+                      const getAnimKeyframe = (animType: string) => {
+                        switch (animType) {
+                          case 'fly-in-up': return 'elemFlyInUp';
+                          case 'fly-in-left': return 'elemFlyInLeft';
+                          case 'fly-in-right': return 'elemFlyInRight';
+                          case 'float-up': return 'elemFloatUp';
+                          case 'zoom-in': return 'elemZoomIn';
+                          case 'zoom-out': return 'elemZoomOut';
+                          case 'bounce-in': return 'elemBounceIn';
+                          case 'spin-in': return 'elemSpinIn';
+                          case 'wipe': return 'elemWipe';
+                          case 'split': return 'elemSplit';
+                          case 'flip-x': return 'elemFlipX';
+                          case 'blur-reveal': return 'elemBlurReveal';
+                          case 'pulse-beat': return 'elemPulseBeat 2s infinite ease-in-out';
+                          case 'shimmer-gold': return 'elemShimmerGold 2.5s infinite ease-in-out';
+                          case 'float-loop': return 'elemFloatLoop 3s infinite ease-in-out';
+                          case 'subtle-shake': return 'elemSubtleShake 1.5s infinite ease-in-out';
+                          case 'none': return 'none';
+                          default: return 'elemFadeIn';
                         }
+                      };
 
-                        const handleMouseMove = (moveEvent: MouseEvent) => {
-                          const dx = (moveEvent.clientX - startX) / scale;
-                          const dy = (moveEvent.clientY - startY) / scale;
-                          let nextX = initialOffsetX + dx;
-                          let nextY = initialOffsetY + dy;
+                      const getAnimationCss = (animType: string, duration: number, delay: number, isLoop: boolean) => {
+                        if (animType === 'none') return 'none';
+                        const kf = getAnimKeyframe(animType);
+                        if (isLoop) {
+                          return `${kf} ${delay}s`;
+                        }
+                        return `${kf} ${duration}s cubic-bezier(0.16, 1, 0.3, 1) ${delay}s both`;
+                      };
 
-                          const projectedCenterX = baseCenterX + nextX;
-                          const projectedCenterY = baseCenterY + nextY;
+                      return (
+                        <div
+                          style={{
+                            position: "relative",
+                            zIndex: 2,
+                            display: "flex",
+                            flexDirection: "column",
+                            gap: "20px",
+                            maxWidth: "800px",
+                            width: "100%"
+                          }}
+                        >
+                          {/* Helper component or inline rendering for selection & interactive handles */}
+                          {/* 1. Hero Title Element */}
+                          <div
+                            key={`preview_elem_title_${elemAnimPreviewKey}`}
+                            ref={titleRef}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setSelectedElement("title");
+                            }}
+                            onMouseDown={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              setSelectedElement("title");
+                              const startX = e.clientX;
+                              const startY = e.clientY;
+                              const initialOffsetX = currentTitleContainer.offsetX;
+                              const initialOffsetY = currentTitleContainer.offsetY;
 
-                          const snapThreshold = 20;
+                              // Capture base un-transformed element center relative to canvas center
+                              const scale = previewDevice === 'desktop' ? 0.60 : 0.50;
+                              let baseCenterX = 0;
+                              let baseCenterY = 0;
+                              if (titleRef.current && canvasFrameRef.current) {
+                                const elemRect = titleRef.current.getBoundingClientRect();
+                                const canvasRect = canvasFrameRef.current.getBoundingClientRect();
+                                const currentElemCenterX = elemRect.left + elemRect.width / 2;
+                                const canvasCenterX = canvasRect.left + canvasRect.width / 2;
+                                baseCenterX = (currentElemCenterX - canvasCenterX) / scale - initialOffsetX;
 
-                          if (Math.abs(projectedCenterX) < snapThreshold) {
-                            nextX = -baseCenterX;
-                            setShowVerticalGuide(true);
-                          } else {
-                            setShowVerticalGuide(false);
-                          }
+                                const currentElemCenterY = elemRect.top + elemRect.height / 2;
+                                const canvasCenterY = canvasRect.top + canvasRect.height / 2;
+                                baseCenterY = (currentElemCenterY - canvasCenterY) / scale - initialOffsetY;
+                              }
 
-                          if (Math.abs(projectedCenterY) < snapThreshold) {
-                            nextY = -baseCenterY;
-                            setShowHorizontalGuide(true);
-                          } else {
-                            setShowHorizontalGuide(false);
-                          }
+                              const handleMouseMove = (moveEvent: MouseEvent) => {
+                                const dx = (moveEvent.clientX - startX) / scale;
+                                const dy = (moveEvent.clientY - startY) / scale;
+                                let nextX = initialOffsetX + dx;
+                                let nextY = initialOffsetY + dy;
 
-                          setCurrentButtonContainer((prev) => ({
-                            ...prev,
-                            offsetX: nextX,
-                            offsetY: nextY
-                          }));
-                        };
+                                const projectedCenterX = baseCenterX + nextX;
+                                const projectedCenterY = baseCenterY + nextY;
 
-                        const handleMouseUp = () => {
-                          setShowVerticalGuide(false);
-                          setShowHorizontalGuide(false);
-                          window.removeEventListener("mousemove", handleMouseMove);
-                          window.removeEventListener("mouseup", handleMouseUp);
-                        };
+                                const snapThreshold = 20; // scale-independent canvas px threshold
 
-                        window.addEventListener("mousemove", handleMouseMove);
-                        window.addEventListener("mouseup", handleMouseUp);
-                      }}
-                      style={{
-                        cursor: selectedElement === "button" ? "move" : "pointer",
-                        border: selectedElement === "button" ? "2px dashed #3b82f6" : "1px dashed transparent",
-                        padding: "4px",
-                        borderRadius: "8px",
-                        backgroundColor: selectedElement === "button" ? "rgba(59, 130, 246, 0.12)" : "transparent",
-                        display: "inline-block",
-                        position: "relative",
-                        userSelect: "none",
-                        width: currentButtonContainer.width ? `${currentButtonContainer.width}px` : "auto",
-                        height: currentButtonContainer.height ? `${currentButtonContainer.height}px` : "auto",
-                        transform: `translate(${currentButtonContainer.offsetX}px, ${currentButtonContainer.offsetY}px)`,
-                        alignSelf:
-                          currentLayoutTemplate === "center" || currentLayoutTemplate.endsWith("center") ? "center" :
-                            currentLayoutTemplate.startsWith("right") ? "flex-end" : "flex-start"
-                      }}
-                    >
-                      {selectedElement === "button" && (
-                        <>
-                          <div style={{ position: "absolute", top: "-24px", left: "0", fontSize: "0.7rem", fontWeight: 800, backgroundColor: "#2563eb", color: "#fff", padding: "2px 8px", borderRadius: "4px", textTransform: "uppercase", whiteSpace: "nowrap", pointerEvents: "none" }}>
-                            BUTTON BOX (DRAG DOTS TO RESIZE BOX, DRAG BOX TO REPOSITION)
+                                if (Math.abs(projectedCenterX) < snapThreshold) {
+                                  nextX = -baseCenterX;
+                                  setShowVerticalGuide(true);
+                                } else {
+                                  setShowVerticalGuide(false);
+                                }
+
+                                if (Math.abs(projectedCenterY) < snapThreshold) {
+                                  nextY = -baseCenterY;
+                                  setShowHorizontalGuide(true);
+                                } else {
+                                  setShowHorizontalGuide(false);
+                                }
+
+                                setCurrentTitleContainer((prev) => ({
+                                  ...prev,
+                                  offsetX: nextX,
+                                  offsetY: nextY
+                                }));
+                              };
+
+                              const handleMouseUp = () => {
+                                setShowVerticalGuide(false);
+                                setShowHorizontalGuide(false);
+                                window.removeEventListener("mousemove", handleMouseMove);
+                                window.removeEventListener("mouseup", handleMouseUp);
+                              };
+
+                              window.addEventListener("mousemove", handleMouseMove);
+                              window.addEventListener("mouseup", handleMouseUp);
+                            }}
+                            style={{
+                              cursor: selectedElement === "title" ? "move" : "pointer",
+                              border: selectedElement === "title" ? "2px dashed #3b82f6" : "1px dashed transparent",
+                              padding: `${currentTitleContainer.padding ?? 12}px`,
+                              borderRadius: "8px",
+                              backgroundColor: currentTitleContainer.bgColor || (selectedElement === "title" ? "rgba(59, 130, 246, 0.12)" : "transparent"),
+                              width: currentTitleContainer.width ? `${currentTitleContainer.width}px` : "auto",
+                              height: currentTitleContainer.height ? `${currentTitleContainer.height}px` : "auto",
+                              transform: `translate(${currentTitleContainer.offsetX}px, ${currentTitleContainer.offsetY}px)`,
+                              position: "relative",
+                              userSelect: "none",
+                              boxSizing: "border-box",
+                              display: "flex",
+                              flexDirection: "column",
+                              justifyContent: "center",
+                              animation: getAnimationCss(
+                                effectiveTitleAnimType,
+                                titleAnim.duration ?? 0.6,
+                                effectiveDelays['title'] ?? 0,
+                                isTitleLoop
+                              )
+                            }}
+                          >
+                            {/* Sequence Order Number Badge (PowerPoint Style #1) */}
+                            {titleAnim.type && titleAnim.type !== "none" && (
+                              <div style={{ position: "absolute", top: "-12px", left: "-12px", backgroundColor: "#2563eb", color: "#ffffff", width: "22px", height: "22px", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "0.72rem", fontWeight: 800, border: "2px solid #ffffff", boxShadow: "0 2px 6px rgba(0,0,0,0.3)", zIndex: 12 }}>
+                                {titleAnim.order || 1}
+                              </div>
+                            )}
+                            {selectedElement === "title" && (
+                              <>
+                                {/* 4 Corner Resize Dots */}
+                                {[
+                                  { pos: { top: "-6px", left: "-6px" }, cursor: "nwse-resize", type: "tl" },
+                                  { pos: { top: "-6px", right: "-6px" }, cursor: "nesw-resize", type: "tr" },
+                                  { pos: { bottom: "-6px", left: "-6px" }, cursor: "nesw-resize", type: "bl" },
+                                  { pos: { bottom: "-6px", right: "-6px" }, cursor: "nwse-resize", type: "br" }
+                                ].map((handle, idx) => (
+                                  <div
+                                    key={idx}
+                                    onMouseDown={(e) => {
+                                      e.stopPropagation();
+                                      e.preventDefault();
+                                      const startX = e.clientX;
+                                      const startY = e.clientY;
+                                      const initialWidth = currentTitleContainer.width || e.currentTarget.parentElement?.clientWidth || 400;
+                                      const initialHeight = currentTitleContainer.height || e.currentTarget.parentElement?.clientHeight || 80;
+
+                                      const handleMouseMove = (moveEvent: MouseEvent) => {
+                                        const scale = previewDevice === 'desktop' ? 0.60 : 0.50;
+                                        const dx = (moveEvent.clientX - startX) / scale;
+                                        const dy = (moveEvent.clientY - startY) / scale;
+
+                                        let newWidth = initialWidth;
+                                        let newHeight = initialHeight;
+
+                                        if (handle.type.includes("r")) newWidth = initialWidth + dx;
+                                        if (handle.type.includes("l")) newWidth = initialWidth - dx;
+                                        if (handle.type.includes("b")) newHeight = initialHeight + dy;
+                                        if (handle.type.includes("t")) newHeight = initialHeight - dy;
+
+                                        setCurrentTitleContainer((prev) => ({
+                                          ...prev,
+                                          width: Math.max(120, newWidth),
+                                          height: Math.max(40, newHeight)
+                                        }));
+                                      };
+
+                                      const handleMouseUp = () => {
+                                        window.removeEventListener("mousemove", handleMouseMove);
+                                        window.removeEventListener("mouseup", handleMouseUp);
+                                      };
+
+                                      window.addEventListener("mousemove", handleMouseMove);
+                                      window.addEventListener("mouseup", handleMouseUp);
+                                    }}
+                                    style={{
+                                      position: "absolute",
+                                      width: "12px",
+                                      height: "12px",
+                                      backgroundColor: "#2563eb",
+                                      border: "2px solid #ffffff",
+                                      borderRadius: "50%",
+                                      cursor: handle.cursor,
+                                      zIndex: 10,
+                                      boxShadow: "0 2px 4px rgba(0,0,0,0.2)",
+                                      ...handle.pos
+                                    }}
+                                  />
+                                ))}
+                              </>
+                            )}
+                            {currentShowTitle ? (
+                              <h1 style={{
+                                fontFamily: `"${(selectedElement === "title" && hoveredFontType) ? hoveredFontType : currentTitleFontType}", sans-serif`,
+                                color: currentTitleFontColor,
+                                fontSize: (selectedElement === "title" && hoveredFontSize) ? hoveredFontSize : currentTitleFontSize,
+                                fontWeight: Number((selectedElement === "title" && hoveredFontWeight) ? hoveredFontWeight : currentTitleFontWeight) || 700,
+                                textAlign: (currentTitleFontAlignment as any) || "center",
+                                margin: 0,
+                                lineHeight: "1.1",
+                                wordBreak: "break-word",
+                                transition: "font-family 0.15s ease, font-size 0.15s ease, font-weight 0.15s ease"
+                              }}>
+                                {currentTitleText || "WELCOME TO OUR STORE"}
+                              </h1>
+                            ) : (
+                              <span style={{ fontSize: "1rem", color: "#94a3b8", fontStyle: "italic" }}>
+                                [Title Element Hidden]
+                              </span>
+                            )}
                           </div>
-                          {/* 4 Corner Resize Dots */}
-                          {[
-                            { pos: { top: "-6px", left: "-6px" }, cursor: "nwse-resize", type: "tl" },
-                            { pos: { top: "-6px", right: "-6px" }, cursor: "nesw-resize", type: "tr" },
-                            { pos: { bottom: "-6px", left: "-6px" }, cursor: "nesw-resize", type: "bl" },
-                            { pos: { bottom: "-6px", right: "-6px" }, cursor: "nwse-resize", type: "br" }
-                          ].map((handle, idx) => (
-                            <div
-                              key={idx}
-                              onMouseDown={(e) => {
+
+                          {/* 2. Hero Manifesto Subtitle */}
+                          <div
+                            key={`preview_elem_manifesto_${elemAnimPreviewKey}`}
+                            ref={manifestoRef}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setSelectedElement("manifesto");
+                            }}
+                            onMouseDown={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              setSelectedElement("manifesto");
+                              const startX = e.clientX;
+                              const startY = e.clientY;
+                              const initialOffsetX = currentManifestoContainer.offsetX;
+                              const initialOffsetY = currentManifestoContainer.offsetY;
+
+                              const scale = previewDevice === 'desktop' ? 0.60 : 0.50;
+                              let baseCenterX = 0;
+                              let baseCenterY = 0;
+                              if (manifestoRef.current && canvasFrameRef.current) {
+                                const elemRect = manifestoRef.current.getBoundingClientRect();
+                                const canvasRect = canvasFrameRef.current.getBoundingClientRect();
+                                const currentElemCenterX = elemRect.left + elemRect.width / 2;
+                                const canvasCenterX = canvasRect.left + canvasRect.width / 2;
+                                baseCenterX = (currentElemCenterX - canvasCenterX) / scale - initialOffsetX;
+
+                                const currentElemCenterY = elemRect.top + elemRect.height / 2;
+                                const canvasCenterY = canvasRect.top + canvasRect.height / 2;
+                                baseCenterY = (currentElemCenterY - canvasCenterY) / scale - initialOffsetY;
+                              }
+
+                              const handleMouseMove = (moveEvent: MouseEvent) => {
+                                const dx = (moveEvent.clientX - startX) / scale;
+                                const dy = (moveEvent.clientY - startY) / scale;
+                                let nextX = initialOffsetX + dx;
+                                let nextY = initialOffsetY + dy;
+
+                                const projectedCenterX = baseCenterX + nextX;
+                                const projectedCenterY = baseCenterY + nextY;
+
+                                const snapThreshold = 20;
+
+                                if (Math.abs(projectedCenterX) < snapThreshold) {
+                                  nextX = -baseCenterX;
+                                  setShowVerticalGuide(true);
+                                } else {
+                                  setShowVerticalGuide(false);
+                                }
+
+                                if (Math.abs(projectedCenterY) < snapThreshold) {
+                                  nextY = -baseCenterY;
+                                  setShowHorizontalGuide(true);
+                                } else {
+                                  setShowHorizontalGuide(false);
+                                }
+
+                                setCurrentManifestoContainer((prev) => ({
+                                  ...prev,
+                                  offsetX: nextX,
+                                  offsetY: nextY
+                                }));
+                              };
+
+                              const handleMouseUp = () => {
+                                setShowVerticalGuide(false);
+                                setShowHorizontalGuide(false);
+                                window.removeEventListener("mousemove", handleMouseMove);
+                                window.removeEventListener("mouseup", handleMouseUp);
+                              };
+
+                              window.addEventListener("mousemove", handleMouseMove);
+                              window.addEventListener("mouseup", handleMouseUp);
+                            }}
+                            style={{
+                              cursor: selectedElement === "manifesto" ? "move" : "pointer",
+                              border: selectedElement === "manifesto" ? "2px dashed #3b82f6" : "1px dashed transparent",
+                              padding: `${currentManifestoContainer.padding ?? 10}px`,
+                              borderRadius: "8px",
+                              backgroundColor: currentManifestoContainer.bgColor || (selectedElement === "manifesto" ? "rgba(59, 130, 246, 0.12)" : "transparent"),
+                              width: currentManifestoContainer.width ? `${currentManifestoContainer.width}px` : "auto",
+                              height: currentManifestoContainer.height ? `${currentManifestoContainer.height}px` : "auto",
+                              transform: `translate(${currentManifestoContainer.offsetX}px, ${currentManifestoContainer.offsetY}px)`,
+                              position: "relative",
+                              userSelect: "none",
+                              boxSizing: "border-box",
+                              display: "flex",
+                              flexDirection: "column",
+                              justifyContent: "center",
+                              animation: getAnimationCss(
+                                effectiveManifestoAnimType,
+                                manifestoAnim.duration ?? 0.6,
+                                effectiveDelays['manifesto'] ?? 0.25,
+                                isManifestoLoop
+                              )
+                            }}
+                          >
+                            {/* Sequence Order Number Badge (PowerPoint Style #2) */}
+                            {manifestoAnim.type && manifestoAnim.type !== "none" && (
+                              <div style={{ position: "absolute", top: "-12px", left: "-12px", backgroundColor: "#2563eb", color: "#ffffff", width: "22px", height: "22px", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "0.72rem", fontWeight: 800, border: "2px solid #ffffff", boxShadow: "0 2px 6px rgba(0,0,0,0.3)", zIndex: 12 }}>
+                                {manifestoAnim.order || 2}
+                              </div>
+                            )}
+                            {selectedElement === "manifesto" && (
+                              <>
+                                {/* 4 Corner Resize Dots */}
+                                {[
+                                  { pos: { top: "-6px", left: "-6px" }, cursor: "nwse-resize", type: "tl" },
+                                  { pos: { top: "-6px", right: "-6px" }, cursor: "nesw-resize", type: "tr" },
+                                  { pos: { bottom: "-6px", left: "-6px" }, cursor: "nesw-resize", type: "bl" },
+                                  { pos: { bottom: "-6px", right: "-6px" }, cursor: "nwse-resize", type: "br" }
+                                ].map((handle, idx) => (
+                                  <div
+                                    key={idx}
+                                    onMouseDown={(e) => {
+                                      e.stopPropagation();
+                                      e.preventDefault();
+                                      const startX = e.clientX;
+                                      const startY = e.clientY;
+                                      const initialWidth = currentManifestoContainer.width || e.currentTarget.parentElement?.clientWidth || 350;
+                                      const initialHeight = currentManifestoContainer.height || e.currentTarget.parentElement?.clientHeight || 60;
+
+                                      const handleMouseMove = (moveEvent: MouseEvent) => {
+                                        const scale = previewDevice === 'desktop' ? 0.60 : 0.50;
+                                        const dx = (moveEvent.clientX - startX) / scale;
+                                        const dy = (moveEvent.clientY - startY) / scale;
+
+                                        let newWidth = initialWidth;
+                                        let newHeight = initialHeight;
+
+                                        if (handle.type.includes("r")) newWidth = initialWidth + dx;
+                                        if (handle.type.includes("l")) newWidth = initialWidth - dx;
+                                        if (handle.type.includes("b")) newHeight = initialHeight + dy;
+                                        if (handle.type.includes("t")) newHeight = initialHeight - dy;
+
+                                        setCurrentManifestoContainer((prev) => ({
+                                          ...prev,
+                                          width: Math.max(100, newWidth),
+                                          height: Math.max(30, newHeight)
+                                        }));
+                                      };
+
+                                      const handleMouseUp = () => {
+                                        window.removeEventListener("mousemove", handleMouseMove);
+                                        window.removeEventListener("mouseup", handleMouseUp);
+                                      };
+
+                                      window.addEventListener("mousemove", handleMouseMove);
+                                      window.addEventListener("mouseup", handleMouseUp);
+                                    }}
+                                    style={{
+                                      position: "absolute",
+                                      width: "12px",
+                                      height: "12px",
+                                      backgroundColor: "#2563eb",
+                                      border: "2px solid #ffffff",
+                                      borderRadius: "50%",
+                                      cursor: handle.cursor,
+                                      zIndex: 10,
+                                      boxShadow: "0 2px 4px rgba(0,0,0,0.2)",
+                                      ...handle.pos
+                                    }}
+                                  />
+                                ))}
+                              </>
+                            )}
+                            {currentShowManifesto ? (
+                              <p style={{
+                                fontFamily: `"${(selectedElement === "manifesto" && hoveredFontType) ? hoveredFontType : currentManifestoFontType}", sans-serif`,
+                                color: currentManifestoFontColor,
+                                fontSize: (selectedElement === "manifesto" && hoveredFontSize) ? hoveredFontSize : currentManifestoFontSize,
+                                fontWeight: Number((selectedElement === "manifesto" && hoveredFontWeight) ? hoveredFontWeight : currentManifestoFontWeight) || 500,
+                                textAlign: (currentManifestoFontAlignment as any) || "center",
+                                margin: 0,
+                                lineHeight: "1.6",
+                                textTransform: "uppercase",
+                                letterSpacing: "0.03em",
+                                transition: "font-family 0.15s ease, font-size 0.15s ease, font-weight 0.15s ease"
+                              }}>
+                                {currentManifestoText || ""}
+                              </p>
+                            ) : (
+                              <span style={{ fontSize: "0.9rem", color: "#94a3b8", fontStyle: "italic" }}>
+                                [Subtitle Element Hidden]
+                              </span>
+                            )}
+                          </div>
+
+                          {/* 3. Hero Button */}
+                          <div
+                            key={`preview_elem_button_${elemAnimPreviewKey}`}
+                            ref={buttonRef}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setSelectedElement("button");
+                            }}
+                            onMouseDown={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              setSelectedElement("button");
+                              const startX = e.clientX;
+                              const startY = e.clientY;
+                              const initialOffsetX = currentButtonContainer.offsetX;
+                              const initialOffsetY = currentButtonContainer.offsetY;
+
+                              const scale = previewDevice === 'desktop' ? 0.60 : 0.50;
+                              let baseCenterX = 0;
+                              let baseCenterY = 0;
+                              if (buttonRef.current && canvasFrameRef.current) {
+                                const elemRect = buttonRef.current.getBoundingClientRect();
+                                const canvasRect = canvasFrameRef.current.getBoundingClientRect();
+                                const currentElemCenterX = elemRect.left + elemRect.width / 2;
+                                const canvasCenterX = canvasRect.left + canvasRect.width / 2;
+                                baseCenterX = (currentElemCenterX - canvasCenterX) / scale - initialOffsetX;
+
+                                const currentElemCenterY = elemRect.top + elemRect.height / 2;
+                                const canvasCenterY = canvasRect.top + canvasRect.height / 2;
+                                baseCenterY = (currentElemCenterY - canvasCenterY) / scale - initialOffsetY;
+                              }
+
+                              const handleMouseMove = (moveEvent: MouseEvent) => {
+                                const dx = (moveEvent.clientX - startX) / scale;
+                                const dy = (moveEvent.clientY - startY) / scale;
+                                let nextX = initialOffsetX + dx;
+                                let nextY = initialOffsetY + dy;
+
+                                const projectedCenterX = baseCenterX + nextX;
+                                const projectedCenterY = baseCenterY + nextY;
+
+                                const snapThreshold = 20;
+
+                                if (Math.abs(projectedCenterX) < snapThreshold) {
+                                  nextX = -baseCenterX;
+                                  setShowVerticalGuide(true);
+                                } else {
+                                  setShowVerticalGuide(false);
+                                }
+
+                                if (Math.abs(projectedCenterY) < snapThreshold) {
+                                  nextY = -baseCenterY;
+                                  setShowHorizontalGuide(true);
+                                } else {
+                                  setShowHorizontalGuide(false);
+                                }
+
+                                setCurrentButtonContainer((prev) => ({
+                                  ...prev,
+                                  offsetX: nextX,
+                                  offsetY: nextY
+                                }));
+                              };
+
+                              const handleMouseUp = () => {
+                                setShowVerticalGuide(false);
+                                setShowHorizontalGuide(false);
+                                window.removeEventListener("mousemove", handleMouseMove);
+                                window.removeEventListener("mouseup", handleMouseUp);
+                              };
+
+                              window.addEventListener("mousemove", handleMouseMove);
+                              window.addEventListener("mouseup", handleMouseUp);
+                            }}
+                            style={{
+                              cursor: selectedElement === "button" ? "move" : "pointer",
+                              border: selectedElement === "button" ? "2px dashed #3b82f6" : "1px dashed transparent",
+                              padding: "4px",
+                              borderRadius: "8px",
+                              backgroundColor: selectedElement === "button" ? "rgba(59, 130, 246, 0.12)" : "transparent",
+                              display: "inline-block",
+                              position: "relative",
+                              userSelect: "none",
+                              width: currentButtonContainer.width ? `${currentButtonContainer.width}px` : "auto",
+                              height: currentButtonContainer.height ? `${currentButtonContainer.height}px` : "auto",
+                              transform: `translate(${currentButtonContainer.offsetX}px, ${currentButtonContainer.offsetY}px)`,
+                              alignSelf:
+                                currentLayoutTemplate === "center" || currentLayoutTemplate.endsWith("center") ? "center" :
+                                  currentLayoutTemplate.startsWith("right") ? "flex-end" : "flex-start",
+                              animation: getAnimationCss(
+                                effectiveButtonAnimType,
+                                buttonAnim.duration ?? 0.6,
+                                effectiveDelays['button'] ?? 0.4,
+                                isButtonLoop
+                              )
+                            }}
+                          >
+                            {/* Sequence Order Number Badge (PowerPoint Style #3) */}
+                            {buttonAnim.type && buttonAnim.type !== "none" && (
+                              <div style={{ position: "absolute", top: "-12px", left: "-12px", backgroundColor: "#2563eb", color: "#ffffff", width: "22px", height: "22px", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "0.72rem", fontWeight: 800, border: "2px solid #ffffff", boxShadow: "0 2px 6px rgba(0,0,0,0.3)", zIndex: 12 }}>
+                                {buttonAnim.order || 3}
+                              </div>
+                            )}
+                            {selectedElement === "button" && (
+                              <>
+                                {/* 4 Corner Resize Dots */}
+                                {[
+                                  { pos: { top: "-6px", left: "-6px" }, cursor: "nwse-resize", type: "tl" },
+                                  { pos: { top: "-6px", right: "-6px" }, cursor: "nesw-resize", type: "tr" },
+                                  { pos: { bottom: "-6px", left: "-6px" }, cursor: "nesw-resize", type: "bl" },
+                                  { pos: { bottom: "-6px", right: "-6px" }, cursor: "nwse-resize", type: "br" }
+                                ].map((handle, idx) => (
+                                  <div
+                                    key={idx}
+                                    onMouseDown={(e) => {
                                 e.stopPropagation();
                                 e.preventDefault();
                                 const startX = e.clientX;
@@ -3144,38 +3792,149 @@ export default function CustomizeLayoutModal({
                           [Button Element Hidden]
                         </span>
                       )}
-                    </div>
+                          </div>
+                        </div>
+                      );
+                    })()}
                   </div>
 
+                  {/* Dynamic Vertical Alignment Guide Line (Canvas Geometric X-Axis Center) */}
+                  {showVerticalGuide && (
+                    <div style={{
+                      position: "absolute",
+                      left: "50%",
+                      top: 0,
+                      bottom: 0,
+                      width: "2px",
+                      backgroundColor: "#3b82f6",
+                      opacity: 0.85,
+                      boxShadow: "0 0 10px #3b82f6",
+                      zIndex: 25,
+                      pointerEvents: "none"
+                    }}>
+                      <div style={{ position: "absolute", top: "16px", left: "50%", transform: "translateX(-50%)", fontSize: "0.7rem", fontWeight: 800, backgroundColor: "#2563eb", color: "#fff", padding: "3px 8px", borderRadius: "4px", textTransform: "uppercase", letterSpacing: "0.05em", boxShadow: "0 2px 6px rgba(0,0,0,0.3)" }}>
+                        X CENTER
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Dynamic Horizontal Alignment Guide Line (Canvas Geometric Y-Axis Center) */}
+                  {showHorizontalGuide && (
+                    <div style={{
+                      position: "absolute",
+                      top: "50%",
+                      left: 0,
+                      right: 0,
+                      height: "2px",
+                      backgroundColor: "#3b82f6",
+                      opacity: 0.85,
+                      boxShadow: "0 0 10px #3b82f6",
+                      zIndex: 25,
+                      pointerEvents: "none"
+                    }}>
+                      <div style={{ position: "absolute", left: "16px", top: "50%", transform: "translateY(-50%)", fontSize: "0.7rem", fontWeight: 800, backgroundColor: "#2563eb", color: "#fff", padding: "3px 8px", borderRadius: "4px", textTransform: "uppercase", letterSpacing: "0.05em", boxShadow: "0 2px 6px rgba(0,0,0,0.3)" }}>
+                        Y CENTER
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Left Carousel Prev Arrow */}
+                  {slides.length > 1 && (
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        const prevIdx = (activeSlideIndex - 1 + slides.length) % slides.length;
+                        selectSlide(prevIdx);
+                      }}
+                      style={{
+                        position: "absolute",
+                        left: "24px",
+                        top: "50%",
+                        transform: "translateY(-50%)",
+                        zIndex: 20,
+                        width: "54px",
+                        height: "54px",
+                        borderRadius: "50%",
+                        backgroundColor: "rgba(255,255,255,0.2)",
+                        color: "#fff",
+                        border: "none",
+                        cursor: "pointer",
+                        fontSize: "1.6rem",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        backdropFilter: "blur(4px)"
+                      }}
+                    >
+                      ‹
+                    </button>
+                  )}
+
+                  {/* Right Carousel Next Arrow */}
+                  {slides.length > 1 && (
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        const nextIdx = (activeSlideIndex + 1) % slides.length;
+                        selectSlide(nextIdx);
+                      }}
+                      style={{
+                        position: "absolute",
+                        right: "24px",
+                        top: "50%",
+                        transform: "translateY(-50%)",
+                        zIndex: 20,
+                        width: "54px",
+                        height: "54px",
+                        borderRadius: "50%",
+                        backgroundColor: "rgba(255,255,255,0.2)",
+                        color: "#fff",
+                        border: "none",
+                        cursor: "pointer",
+                        fontSize: "1.6rem",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        backdropFilter: "blur(4px)"
+                      }}
+                    >
+                      ›
+                    </button>
+                  )}
+
                   {/* Canvas Pagination Dots */}
-                  <div style={{
-                    position: "absolute",
-                    bottom: "20px",
-                    left: "50%",
-                    transform: "translateX(-50%)",
-                    zIndex: 20,
-                    display: "flex",
-                    gap: "8px",
-                    alignItems: "center"
-                  }}>
-                    {slides.map((_, idx) => (
-                      <div
-                        key={idx}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          selectSlide(idx);
-                        }}
-                        style={{
-                          width: idx === activeSlideIndex ? "24px" : "8px",
-                          height: "8px",
-                          borderRadius: "4px",
-                          backgroundColor: idx === activeSlideIndex ? "#ffffff" : "rgba(255,255,255,0.4)",
-                          cursor: "pointer",
-                          transition: "all 0.3s ease"
-                        }}
-                      />
-                    ))}
-                  </div>
+                  {slides.length > 1 && (
+                    <div style={{
+                      position: "absolute",
+                      bottom: "20px",
+                      left: "50%",
+                      transform: "translateX(-50%)",
+                      zIndex: 20,
+                      display: "flex",
+                      gap: "8px",
+                      alignItems: "center"
+                    }}>
+                      {slides.map((_, idx) => (
+                        <div
+                          key={idx}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            selectSlide(idx);
+                          }}
+                          style={{
+                            width: idx === activeSlideIndex ? "24px" : "8px",
+                            height: "8px",
+                            borderRadius: "4px",
+                            backgroundColor: idx === activeSlideIndex ? "#ffffff" : "rgba(255,255,255,0.4)",
+                            cursor: "pointer",
+                            transition: "all 0.3s ease"
+                          }}
+                        />
+                      ))}
+                    </div>
+                  )}
 
                 </div>
               </div>
