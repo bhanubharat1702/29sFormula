@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { getAuthHeaders } from '../../../hooks/useDashboardData';
+import { COUNTRIES } from '../../../constants/storeOptions';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:5001';
 
@@ -18,27 +19,11 @@ export interface MarketItem {
   updatedAt?: string;
 }
 
-const COUNTRY_OPTIONS = [
-  { code: 'US', name: 'United States', currency: 'USD' },
-  { code: 'CA', name: 'Canada', currency: 'CAD' },
-  { code: 'GB', name: 'United Kingdom', currency: 'GBP' },
-  { code: 'AU', name: 'Australia', currency: 'AUD' },
-  { code: 'DE', name: 'Germany', currency: 'EUR' },
-  { code: 'FR', name: 'France', currency: 'EUR' },
-  { code: 'AE', name: 'United Arab Emirates', currency: 'AED' },
-  { code: 'SG', name: 'Singapore', currency: 'SGD' },
-  { code: 'JP', name: 'Japan', currency: 'JPY' },
-  { code: 'IN', name: 'India', currency: 'INR' },
-  { code: 'BR', name: 'Brazil', currency: 'BRL' },
-  { code: 'MX', name: 'Mexico', currency: 'MXN' },
-  { code: 'NL', name: 'Netherlands', currency: 'EUR' },
-  { code: 'ES', name: 'Spain', currency: 'EUR' },
-  { code: 'IT', name: 'Italy', currency: 'EUR' },
-  { code: 'SE', name: 'Sweden', currency: 'SEK' },
-  { code: 'CH', name: 'Switzerland', currency: 'CHF' },
-  { code: 'NZ', name: 'New Zealand', currency: 'NZD' },
-  { code: 'ZA', name: 'South Africa', currency: 'ZAR' }
-];
+const COUNTRY_OPTIONS = COUNTRIES.map(c => ({
+  code: c.code,
+  name: c.name,
+  currency: c.currencyCode
+}));
 
 const inputStyle: React.CSSProperties = {
   width: "100%",

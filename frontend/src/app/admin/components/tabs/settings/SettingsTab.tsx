@@ -1,5 +1,5 @@
-import React, { useState, useRef } from 'react';
-import { COUNTRIES, BUSINESS_CATEGORIES, CURRENCIES, TIMEZONES } from '../../../constants/storeOptions';
+import React, { useState, useRef, useEffect } from 'react';
+import { COUNTRIES, BUSINESS_CATEGORIES, CURRENCIES, TIMEZONES, getCountryFlag } from '../../../constants/storeOptions';
 import styles from '../../../page.module.css';
 import { getAuthHeaders } from '../../../hooks/useDashboardData';
 import DomainIssueModal, { DomainIssueModalConfig } from '../../modals/DomainIssueModal';
@@ -269,6 +269,423 @@ export function SettingsSubTabFooter({ handleSaveSettings, getChanges }: Setting
 }
 
 /* ==========================================
+ * COUNTRY SELECT DROPDOWN COMPONENT WITH FLAGS
+ * ========================================== */
+export function CountrySelectDropdown({
+  value,
+  onChange,
+  countries
+}: {
+  value: string;
+  onChange: (countryName: string) => void;
+  countries: any[];
+}) {
+  const [isOpen, setIsOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  const selectedCountry = countries.find(c => c.name.toLowerCase() === (value || 'India').toLowerCase()) || countries[0];
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const filteredCountries = countries.filter(c => 
+    c.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+    c.code.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  return (
+    <div ref={dropdownRef} style={{ position: 'relative', width: '100%' }}>
+      {/* Trigger Button */}
+      <button
+        type="button"
+        onClick={() => setIsOpen(!isOpen)}
+        style={{
+          width: '100%',
+          height: '42px',
+          padding: '0 12px',
+          border: '1px solid #d1d5db',
+          borderRadius: '8px',
+          fontSize: '0.88rem',
+          fontWeight: 400,
+          color: '#1f2937',
+          backgroundColor: '#ffffff',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          cursor: 'pointer',
+          outline: 'none',
+          boxSizing: 'border-box'
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <img
+            src={`https://flagcdn.com/w80/${(selectedCountry?.code || 'in').toLowerCase()}.png`}
+            alt={selectedCountry?.name || 'Country'}
+            style={{ width: '22px', height: '22px', borderRadius: '50%', objectFit: 'cover', boxShadow: '0 1px 2px rgba(0,0,0,0.15)', flexShrink: 0 }}
+          />
+          <span style={{ fontWeight: 500, color: '#111827' }}>{selectedCountry?.name || value || 'India'}</span>
+        </div>
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="#374151" style={{ width: '16px', height: '16px', transform: isOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.15s ease' }}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
+        </svg>
+      </button>
+
+      {/* Popover Menu matching Screenshot Design */}
+      {isOpen && (
+        <div style={{
+          position: 'absolute',
+          top: 'calc(100% + 6px)',
+          left: 0,
+          right: 0,
+          backgroundColor: '#ffffff',
+          border: '1px solid #e2e8f0',
+          borderRadius: '16px',
+          boxShadow: '0 12px 32px -4px rgba(0, 0, 0, 0.12), 0 4px 12px -2px rgba(0, 0, 0, 0.08)',
+          zIndex: 999,
+          maxHeight: '340px',
+          display: 'flex',
+          flexDirection: 'column',
+          overflow: 'hidden',
+          padding: '8px'
+        }}>
+          {/* Search Bar with Magnifying Glass Icon */}
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '10px',
+            backgroundColor: '#f8fafc',
+            borderRadius: '12px',
+            padding: '10px 14px',
+            marginBottom: '8px'
+          }}>
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="#475569" style={{ width: '18px', height: '18px', flexShrink: 0 }}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
+            </svg>
+            <input
+              type="text"
+              placeholder="Search"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              autoFocus
+              style={{
+                width: '100%',
+                border: 'none',
+                outline: 'none',
+                backgroundColor: 'transparent',
+                fontSize: '0.94rem',
+                fontWeight: 400,
+                color: '#1e293b'
+              }}
+            />
+          </div>
+
+          {/* List of Countries */}
+          <div style={{ overflowY: 'auto', flex: 1, paddingRight: '2px' }}>
+            {filteredCountries.length === 0 ? (
+              <div style={{ padding: '16px', fontSize: '0.86rem', color: '#94a3b8', textAlign: 'center' }}>
+                No country found
+              </div>
+            ) : (
+              filteredCountries.map((c) => {
+                const isSelected = c.name.toLowerCase() === (selectedCountry?.name || '').toLowerCase();
+                return (
+                  <div
+                    key={c.code}
+                    onClick={() => {
+                      onChange(c.name);
+                      setIsOpen(false);
+                      setSearchQuery('');
+                    }}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      padding: '10px 12px',
+                      borderRadius: '10px',
+                      cursor: 'pointer',
+                      backgroundColor: isSelected ? '#f1f5f9' : 'transparent',
+                      transition: 'background-color 0.12s ease'
+                    }}
+                    onMouseEnter={(e) => {
+                      if (!isSelected) e.currentTarget.style.backgroundColor = '#f8fafc';
+                    }}
+                    onMouseLeave={(e) => {
+                      if (!isSelected) e.currentTarget.style.backgroundColor = 'transparent';
+                    }}
+                  >
+                    {/* Left: Circular Country Flag Logo + Country Name */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                      <img
+                        src={`https://flagcdn.com/w80/${c.code.toLowerCase()}.png`}
+                        alt={c.name}
+                        style={{
+                          width: '28px',
+                          height: '28px',
+                          borderRadius: '50%',
+                          objectFit: 'cover',
+                          boxShadow: '0 1px 2px rgba(0,0,0,0.1)',
+                          flexShrink: 0
+                        }}
+                      />
+                      <span style={{ fontSize: '0.94rem', fontWeight: 500, color: '#1e293b' }}>
+                        {c.name}
+                      </span>
+                    </div>
+
+                    {/* Right: Country 2-Letter Code */}
+                    <span style={{ fontSize: '0.84rem', fontWeight: 600, color: '#94a3b8', letterSpacing: '0.04em' }}>
+                      {c.code}
+                    </span>
+                  </div>
+                );
+              })
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ==========================================
+ * GENERIC REUSABLE CUSTOM SELECT DROPDOWN
+ * ========================================== */
+export interface SelectOption {
+  value: string;
+  label: string;
+  subLabel?: string;
+  badge?: string;
+  symbol?: string;
+  iconUrl?: string;
+}
+
+export function CustomSelectDropdown({
+  value,
+  onChange,
+  options,
+  placeholder = "Select...",
+  showSearch = true,
+  searchPlaceholder = "Search..."
+}: {
+  value: string;
+  onChange: (val: string) => void;
+  options: SelectOption[];
+  placeholder?: string;
+  showSearch?: boolean;
+  searchPlaceholder?: string;
+}) {
+  const [isOpen, setIsOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  const selectedOption = options.find(o => o.value === value) || options[0];
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const filteredOptions = options.filter(o =>
+    o.label.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    (o.subLabel && o.subLabel.toLowerCase().includes(searchQuery.toLowerCase())) ||
+    (o.badge && o.badge.toLowerCase().includes(searchQuery.toLowerCase())) ||
+    (o.value && o.value.toLowerCase().includes(searchQuery.toLowerCase()))
+  );
+
+  return (
+    <div ref={dropdownRef} style={{ position: 'relative', width: '100%' }}>
+      {/* Trigger Button */}
+      <button
+        type="button"
+        onClick={() => setIsOpen(!isOpen)}
+        style={{
+          width: '100%',
+          height: '42px',
+          padding: '0 12px',
+          border: '1px solid #d1d5db',
+          borderRadius: '8px',
+          fontSize: '0.88rem',
+          fontWeight: 400,
+          color: '#1f2937',
+          backgroundColor: '#ffffff',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          cursor: 'pointer',
+          outline: 'none',
+          boxSizing: 'border-box'
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flex: 1, marginRight: '8px', overflow: 'hidden' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', overflow: 'hidden' }}>
+            {selectedOption?.iconUrl && (
+              <img
+                src={selectedOption.iconUrl}
+                alt=""
+                style={{ width: '22px', height: '22px', borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }}
+              />
+            )}
+            <span style={{ fontWeight: 500, color: '#111827', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+              {selectedOption?.label || placeholder} {selectedOption?.symbol ? `(${selectedOption.symbol})` : ''} {selectedOption?.subLabel ? `- ${selectedOption.subLabel}` : ''}
+            </span>
+          </div>
+          {selectedOption?.badge && !selectedOption?.symbol && (
+            <span style={{ fontSize: '0.84rem', fontWeight: 600, color: '#475569', letterSpacing: '0.02em', flexShrink: 0, marginLeft: '8px' }}>
+              {selectedOption.badge}
+            </span>
+          )}
+        </div>
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="#374151" style={{ width: '16px', height: '16px', transform: isOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.15s ease', flexShrink: 0 }}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
+        </svg>
+      </button>
+
+      {/* Popover Menu */}
+      {isOpen && (
+        <div style={{
+          position: 'absolute',
+          top: 'calc(100% + 6px)',
+          left: 0,
+          right: 0,
+          backgroundColor: '#ffffff',
+          border: '1px solid #e2e8f0',
+          borderRadius: '16px',
+          boxShadow: '0 12px 32px -4px rgba(0, 0, 0, 0.12), 0 4px 12px -2px rgba(0, 0, 0, 0.08)',
+          zIndex: 999,
+          maxHeight: '300px',
+          display: 'flex',
+          flexDirection: 'column',
+          overflow: 'hidden',
+          padding: '8px'
+        }}>
+          {/* Search Bar */}
+          {showSearch && options.length > 5 && (
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '10px',
+              backgroundColor: '#f8fafc',
+              borderRadius: '12px',
+              padding: '10px 14px',
+              marginBottom: '8px'
+            }}>
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="#475569" style={{ width: '18px', height: '18px', flexShrink: 0 }}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
+              </svg>
+              <input
+                type="text"
+                placeholder={searchPlaceholder}
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                autoFocus
+                style={{
+                  width: '100%',
+                  border: 'none',
+                  outline: 'none',
+                  backgroundColor: 'transparent',
+                  fontSize: '0.94rem',
+                  fontWeight: 400,
+                  color: '#1e293b'
+                }}
+              />
+            </div>
+          )}
+
+          {/* List of Options */}
+          <div style={{ overflowY: 'auto', flex: 1, paddingRight: '2px' }}>
+            {filteredOptions.length === 0 ? (
+              <div style={{ padding: '16px', fontSize: '0.86rem', color: '#94a3b8', textAlign: 'center' }}>
+                No options found
+              </div>
+            ) : (
+              filteredOptions.map((opt) => {
+                const isSelected = opt.value === selectedOption?.value;
+                return (
+                  <div
+                    key={opt.value}
+                    onClick={() => {
+                      onChange(opt.value);
+                      setIsOpen(false);
+                      setSearchQuery('');
+                    }}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      padding: '10px 12px',
+                      borderRadius: '10px',
+                      cursor: 'pointer',
+                      backgroundColor: isSelected ? '#f1f5f9' : 'transparent',
+                      transition: 'background-color 0.12s ease'
+                    }}
+                    onMouseEnter={(e) => {
+                      if (!isSelected) e.currentTarget.style.backgroundColor = '#f8fafc';
+                    }}
+                    onMouseLeave={(e) => {
+                      if (!isSelected) e.currentTarget.style.backgroundColor = 'transparent';
+                    }}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', overflow: 'hidden' }}>
+                      {opt.iconUrl && (
+                        <img
+                          src={opt.iconUrl}
+                          alt=""
+                          style={{
+                            width: '28px',
+                            height: '28px',
+                            borderRadius: '50%',
+                            objectFit: 'cover',
+                            boxShadow: '0 1px 2px rgba(0,0,0,0.1)',
+                            flexShrink: 0
+                          }}
+                        />
+                      )}
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '1px' }}>
+                        <span style={{ fontSize: '0.92rem', fontWeight: 600, color: '#1e293b' }}>
+                          {opt.label}
+                        </span>
+                        {opt.subLabel && (
+                          <span style={{ fontSize: '0.78rem', fontWeight: 400, color: '#64748b' }}>
+                            {opt.subLabel}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+
+                    {opt.symbol ? (
+                      <span style={{ fontSize: '0.96rem', fontWeight: 500, color: '#334155', marginLeft: '12px' }}>
+                        {opt.symbol}
+                      </span>
+                    ) : opt.badge ? (
+                      <span style={{ fontSize: '0.84rem', fontWeight: 600, color: '#94a3b8', letterSpacing: '0.04em' }}>
+                        {opt.badge}
+                      </span>
+                    ) : null}
+                  </div>
+                );
+              })
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ==========================================
  * TAB 1: GENERAL SUBTAB
  * ========================================== */
 export function GeneralSubTab(props: any) {
@@ -294,6 +711,64 @@ export function GeneralSubTab(props: any) {
     primaryColor, setPrimaryColor,
     handleSaveSettings
   } = props;
+
+  const [isFetchingLocation, setIsFetchingLocation] = useState(false);
+
+  const handleCountryChange = (countryName: string) => {
+    if (setStoreCountry) setStoreCountry(countryName);
+    const found = COUNTRIES.find((c: any) => c.name.toLowerCase() === countryName.toLowerCase());
+    if (found) {
+      if (setStoreCurrency && found.currencyCode) {
+        setStoreCurrency(found.currencyCode);
+      }
+      if (setStoreTimezone && found.timezone) {
+        setStoreTimezone(found.timezone);
+      }
+    }
+  };
+
+  const handleAutoFetchLocation = () => {
+    if (!navigator.geolocation) {
+      alert("Geolocation is not supported by your browser");
+      return;
+    }
+    setIsFetchingLocation(true);
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        try {
+          const { latitude, longitude } = position.coords;
+          const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`);
+          const data = await res.json();
+          if (data && data.address) {
+            const addr = data.address;
+            const road = addr.road || addr.pedestrian || addr.suburb || addr.neighbourhood || '';
+            const houseNumber = addr.house_number || '';
+            const fullAddress1 = [houseNumber, road].filter(Boolean).join(' ') || data.display_name?.split(',')[0] || '';
+
+            if (fullAddress1 && setStoreAddress1) setStoreAddress1(fullAddress1);
+            const cityName = addr.city || addr.town || addr.village || addr.county || '';
+            if (cityName && setStoreCity) setStoreCity(cityName);
+            if (addr.state && setStoreState) setStoreState(addr.state);
+            if (addr.postcode && setStorePostalCode) setStorePostalCode(addr.postcode);
+            if (addr.country) {
+              handleCountryChange(addr.country);
+            }
+          }
+        } catch (err) {
+          console.error("Failed to fetch address:", err);
+          alert("Could not automatically resolve address from your coordinates.");
+        } finally {
+          setIsFetchingLocation(false);
+        }
+      },
+      (error) => {
+        console.error("Geolocation error:", error);
+        alert("Location access denied or unavailable. Please enable browser location permissions.");
+        setIsFetchingLocation(false);
+      },
+      { enableHighAccuracy: true, timeout: 10000 }
+    );
+  };
 
   const initialRef = useRef({
     storeBusinessName, storeBusinessType, storeCountry, storeCurrency, storeTimezone,
@@ -362,15 +837,12 @@ export function GeneralSubTab(props: any) {
           </div>
           <div>
             <label style={{ ...labelStyle, marginBottom: '6px' }}>Business Category</label>
-            <select
+            <CustomSelectDropdown
               value={storeBusinessType || 'retail'}
-              onChange={(e) => setStoreBusinessType && setStoreBusinessType(e.target.value)}
-              style={selectStyle}
-            >
-              {BUSINESS_CATEGORIES.map((cat: any) => (
-                <option key={cat.value} value={cat.value}>{cat.label}</option>
-              ))}
-            </select>
+              onChange={(val) => setStoreBusinessType && setStoreBusinessType(val)}
+              options={BUSINESS_CATEGORIES.map((cat: any) => ({ value: cat.value, label: cat.label }))}
+              searchPlaceholder="Search category..."
+            />
           </div>
         </div>
 
@@ -612,8 +1084,48 @@ export function GeneralSubTab(props: any) {
 
       {/* Store Address Card */}
       <div style={cardStyle}>
-        <div style={cardHeaderStyle}>
-          <h3 style={cardTitleStyle}>Store Location</h3>
+        <div style={{ ...cardHeaderStyle, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div>
+            <h3 style={cardTitleStyle}>Store Location</h3>
+          </div>
+          <button
+            type="button"
+            onClick={handleAutoFetchLocation}
+            disabled={isFetchingLocation}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              padding: '6px 14px',
+              borderRadius: '8px',
+              border: '1px solid #d1d5db',
+              backgroundColor: '#ffffff',
+              color: '#374151',
+              fontSize: '0.82rem',
+              fontWeight: 600,
+              cursor: isFetchingLocation ? 'not-allowed' : 'pointer',
+              boxShadow: '0 1px 2px rgba(0,0,0,0.03)',
+              transition: 'all 0.15s ease'
+            }}
+          >
+            {isFetchingLocation ? (
+              <>
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" style={{ width: '14px', height: '14px', animation: 'spin 1s linear infinite' }}>
+                  <circle style={{ opacity: 0.25 }} cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path style={{ opacity: 0.75 }} fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                <span>Fetching Location...</span>
+              </>
+            ) : (
+              <>
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.8} stroke="currentColor" style={{ width: '15px', height: '15px', color: '#2563eb' }}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z" />
+                </svg>
+                <span>Auto Fetch Location</span>
+              </>
+            )}
+          </button>
         </div>
 
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
@@ -644,33 +1156,34 @@ export function GeneralSubTab(props: any) {
       <div style={cardStyle}>
         <div style={cardHeaderStyle}>
           <h3 style={cardTitleStyle}>Regional Standards & Currency</h3>
-          <p style={cardSubTitleStyle}>Locale preferences, primary operating currency, and time zone.</p>
         </div>
 
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '16px' }}>
           <div>
             <label style={labelStyle}>Operating Country</label>
-            <select value={storeCountry || 'India'} onChange={(e) => setStoreCountry && setStoreCountry(e.target.value)} style={selectStyle}>
-              {COUNTRIES.map((c: any) => (
-                <option key={c.code} value={c.name}>{c.name}</option>
-              ))}
-            </select>
+            <CountrySelectDropdown
+              value={storeCountry || 'India'}
+              onChange={handleCountryChange}
+              countries={COUNTRIES}
+            />
           </div>
           <div>
             <label style={labelStyle}>Default Currency</label>
-            <select value={storeCurrency || 'INR'} onChange={(e) => setStoreCurrency && setStoreCurrency(e.target.value)} style={selectStyle}>
-              {CURRENCIES.map((curr: any) => (
-                <option key={curr.value} value={curr.value}>{curr.label}</option>
-              ))}
-            </select>
+            <CustomSelectDropdown
+              value={storeCurrency || 'INR'}
+              onChange={(val) => setStoreCurrency && setStoreCurrency(val)}
+              options={CURRENCIES}
+              searchPlaceholder="Search currency..."
+            />
           </div>
           <div>
             <label style={labelStyle}>Timezone</label>
-            <select value={storeTimezone || 'Asia/Kolkata'} onChange={(e) => setStoreTimezone && setStoreTimezone(e.target.value)} style={selectStyle}>
-              {TIMEZONES.map((tz: any) => (
-                <option key={tz.value} value={tz.value}>{tz.label}</option>
-              ))}
-            </select>
+            <CustomSelectDropdown
+              value={storeTimezone || 'Asia/Kolkata'}
+              onChange={(val) => setStoreTimezone && setStoreTimezone(val)}
+              options={TIMEZONES.map((tz: any) => ({ value: tz.value, label: tz.label }))}
+              searchPlaceholder="Search timezone..."
+            />
           </div>
         </div>
       </div>
@@ -1772,10 +2285,15 @@ export function PaymentsSubTab(props: any) {
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
             <div>
               <label style={labelStyle}>Gateway Environment Mode</label>
-              <select value={razorpayMode || 'test'} onChange={(e) => setRazorpayMode && setRazorpayMode(e.target.value)} style={selectStyle}>
-                <option value="test">Test / Sandbox Mode</option>
-                <option value="live">Live / Production Mode</option>
-              </select>
+              <CustomSelectDropdown
+                value={razorpayMode || 'test'}
+                onChange={(val) => setRazorpayMode && setRazorpayMode(val)}
+                options={[
+                  { value: 'test', label: 'Test / Sandbox Mode' },
+                  { value: 'live', label: 'Live / Production Mode' }
+                ]}
+                showSearch={false}
+              />
             </div>
             <div>
               <label style={labelStyle}>Razorpay Key ID</label>
@@ -1827,10 +2345,15 @@ export function PaymentsSubTab(props: any) {
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
             <div>
               <label style={labelStyle}>Environment Mode</label>
-              <select value={stripeMode || 'test'} onChange={(e) => setStripeMode && setStripeMode(e.target.value)} style={selectStyle}>
-                <option value="test">Test / Sandbox Mode</option>
-                <option value="live">Live / Production Mode</option>
-              </select>
+              <CustomSelectDropdown
+                value={stripeMode || 'test'}
+                onChange={(val) => setStripeMode && setStripeMode(val)}
+                options={[
+                  { value: 'test', label: 'Test / Sandbox Mode' },
+                  { value: 'live', label: 'Live / Production Mode' }
+                ]}
+                showSearch={false}
+              />
             </div>
             <div>
               <label style={labelStyle}>Stripe Publishable Key</label>
@@ -1882,10 +2405,15 @@ export function PaymentsSubTab(props: any) {
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
             <div>
               <label style={labelStyle}>PayPal Environment Mode</label>
-              <select value={paypalMode || 'sandbox'} onChange={(e) => setPaypalMode && setPaypalMode(e.target.value)} style={selectStyle}>
-                <option value="sandbox">Sandbox / Testing Mode</option>
-                <option value="live">Live / Production Mode</option>
-              </select>
+              <CustomSelectDropdown
+                value={paypalMode || 'sandbox'}
+                onChange={(val) => setPaypalMode && setPaypalMode(val)}
+                options={[
+                  { value: 'sandbox', label: 'Sandbox / Testing Mode' },
+                  { value: 'live', label: 'Live / Production Mode' }
+                ]}
+                showSearch={false}
+              />
             </div>
             <div>
               <label style={labelStyle}>PayPal Client ID</label>
