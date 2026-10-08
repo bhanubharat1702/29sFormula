@@ -291,6 +291,7 @@ export function GeneralSubTab(props: any) {
     brandLogoType, setBrandLogoType,
     brandLogoValue, setBrandLogoValue,
     uploadingLogo, handleBrandLogoUpload,
+    primaryColor, setPrimaryColor,
     handleSaveSettings
   } = props;
 
@@ -298,7 +299,7 @@ export function GeneralSubTab(props: any) {
     storeBusinessName, storeBusinessType, storeCountry, storeCurrency, storeTimezone,
     storeOwnerEmail, storeOwnerPhone, storeSupportEmail, storeSupportPhone,
     storeAddress1, storeAddress2, storeCity, storeState, storePostalCode, storeLanguage,
-    brandLogoValue
+    brandLogoValue, primaryColor
   });
 
   const getChanges = (): ChangedField[] => {
@@ -306,6 +307,7 @@ export function GeneralSubTab(props: any) {
     const init = initialRef.current;
     if (storeBusinessName !== init.storeBusinessName) changes.push({ field: "Store / Brand Name", from: init.storeBusinessName, to: storeBusinessName });
     if (storeBusinessType !== init.storeBusinessType) changes.push({ field: "Business Category", from: init.storeBusinessType, to: storeBusinessType });
+    if (primaryColor !== init.primaryColor) changes.push({ field: "Primary Brand Theme Color", from: init.primaryColor, to: primaryColor });
     if (storeCountry !== init.storeCountry) changes.push({ field: "Country", from: init.storeCountry, to: storeCountry });
     if (storeCurrency !== init.storeCurrency) changes.push({ field: "Currency", from: init.storeCurrency, to: storeCurrency });
     if (storeTimezone !== init.storeTimezone) changes.push({ field: "Timezone", from: init.storeTimezone, to: storeTimezone });
@@ -328,7 +330,7 @@ export function GeneralSubTab(props: any) {
       storeBusinessName, storeBusinessType, storeCountry, storeCurrency, storeTimezone,
       storeOwnerEmail, storeOwnerPhone, storeSupportEmail, storeSupportPhone,
       storeAddress1, storeAddress2, storeCity, storeState, storePostalCode, storeLanguage,
-      brandLogoValue
+      brandLogoValue, primaryColor
     };
   };
 
@@ -337,18 +339,34 @@ export function GeneralSubTab(props: any) {
       {/* Store Identity Card */}
       <div style={cardStyle}>
         <div style={cardHeaderStyle}>
-          <h3 style={cardTitleStyle}>Store Identity & Branding</h3>
-          <p style={cardSubTitleStyle}>Define your brand name, logo, and store classification.</p>
+          <h3 style={cardTitleStyle}>Store Identity</h3>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+        {/* Row 1: Store Name & Business Category */}
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
           <div>
-            <label style={labelStyle}>Store / Brand Name</label>
-            <input type="text" value={storeBusinessName || ''} onChange={(e) => setStoreBusinessName && setStoreBusinessName(e.target.value)} style={inputStyle} />
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+              <label style={labelStyle}>Store Name</label>
+              <span style={{ fontSize: '0.78rem', color: '#9ca3af', fontWeight: 500 }}>
+                {(storeBusinessName || '').length}/40
+              </span>
+            </div>
+            <input
+              type="text"
+              maxLength={40}
+              value={storeBusinessName || ''}
+              onChange={(e) => setStoreBusinessName && setStoreBusinessName(e.target.value)}
+              placeholder="e.g. demo1"
+              style={inputStyle}
+            />
           </div>
           <div>
-            <label style={labelStyle}>Business Category</label>
-            <select value={storeBusinessType || 'retail'} onChange={(e) => setStoreBusinessType && setStoreBusinessType(e.target.value)} style={selectStyle}>
+            <label style={{ ...labelStyle, marginBottom: '6px' }}>Business Category</label>
+            <select
+              value={storeBusinessType || 'retail'}
+              onChange={(e) => setStoreBusinessType && setStoreBusinessType(e.target.value)}
+              style={selectStyle}
+            >
               {BUSINESS_CATEGORIES.map((cat: any) => (
                 <option key={cat.value} value={cat.value}>{cat.label}</option>
               ))}
@@ -356,14 +374,238 @@ export function GeneralSubTab(props: any) {
           </div>
         </div>
 
-        <div>
-          <label style={labelStyle}>Brand Logo</label>
-          <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
-            <input type="file" accept="image/*" onChange={handleBrandLogoUpload} style={{ fontSize: '0.82rem' }} />
-            {uploadingLogo && <span style={{ fontSize: '0.8rem', color: '#6b7280' }}>Uploading...</span>}
-            {brandLogoValue && brandLogoValue.startsWith('http') && (
-              <img src={brandLogoValue} alt="Store Logo" style={{ height: '36px', maxWidth: '100px', objectFit: 'contain', borderRadius: '4px', border: '1px solid #e5e7eb' }} />
-            )}
+        <div style={{ height: '1px', backgroundColor: '#f3f4f6', margin: '4px 0' }} />
+
+        {/* Row 2: Primary Brand Theme Color & Store Logo (2-Column Layout) */}
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', alignItems: 'start' }}>
+          {/* Left Column: Primary Brand Theme Color */}
+          <div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <label style={{ ...labelStyle, marginBottom: 0 }}>Primary Brand Theme Color</label>
+                <span style={{ color: '#9ca3af', display: 'inline-flex', alignItems: 'center', cursor: 'pointer' }} title="Main theme color for your store">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.8} stroke="currentColor" style={{ width: '15px', height: '15px' }}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="m11.25 11.25.041-.02a.75.75 0 0 1 1.063.852l-.708 2.836a.75.75 0 0 0 1.063.853l.041-.021M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9-3.75h.008v.008H12V8.25Z" />
+                  </svg>
+                </span>
+              </div>
+              <span style={{ fontSize: '0.72rem', fontWeight: 700, color: '#9ca3af', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                HEX
+              </span>
+            </div>
+
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              border: '1px solid #e5e7eb',
+              borderRadius: '12px',
+              padding: '8px 14px',
+              backgroundColor: '#ffffff',
+              minHeight: '48px'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                {/* Color Button + Native Picker */}
+                <div style={{ position: 'relative', width: '28px', height: '28px', flexShrink: 0 }}>
+                  <input
+                    type="color"
+                    value={primaryColor || "#2563eb"}
+                    onChange={(e: any) => setPrimaryColor && setPrimaryColor(e.target.value)}
+                    style={{
+                      position: 'absolute',
+                      top: 0,
+                      left: 0,
+                      width: '100%',
+                      height: '100%',
+                      opacity: 0,
+                      cursor: 'pointer',
+                      zIndex: 2
+                    }}
+                  />
+                  <div style={{
+                    width: '28px',
+                    height: '28px',
+                    borderRadius: '6px',
+                    backgroundColor: primaryColor || '#2563eb',
+                    boxShadow: '0 1px 2px rgba(0,0,0,0.1)'
+                  }} />
+                </div>
+
+                {/* Hex Input Box */}
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  border: '1px solid #94a3b8',
+                  borderRadius: '6px',
+                  padding: '4px 10px',
+                  backgroundColor: '#ffffff',
+                  height: '32px'
+                }}>
+                  <span style={{ color: '#9ca3af', fontWeight: 500, fontSize: '0.84rem', marginRight: '4px' }}>#</span>
+                  <input
+                    type="text"
+                    value={(primaryColor || '#2563eb').replace(/^#/, '').toUpperCase()}
+                    onChange={(e: any) => {
+                      const val = e.target.value.replace(/[^0-9A-Fa-f]/g, '').slice(0, 6);
+                      setPrimaryColor && setPrimaryColor('#' + val);
+                    }}
+                    style={{
+                      border: 'none',
+                      outline: 'none',
+                      fontSize: '0.86rem',
+                      fontWeight: 700,
+                      color: '#1e293b',
+                      width: '64px',
+                      backgroundColor: 'transparent',
+                      letterSpacing: '0.02em'
+                    }}
+                  />
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <div style={{ width: '1px', height: '22px', backgroundColor: '#e5e7eb' }} />
+
+                {/* Preset Color Swatches */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  {[
+                    { hex: '#2563eb', label: 'Blue' },
+                    { hex: '#4f46e5', label: 'Indigo' },
+                    { hex: '#059669', label: 'Emerald' },
+                    { hex: '#d97706', label: 'Amber' },
+                    { hex: '#0f172a', label: 'Dark' }
+                  ].map((swatch) => {
+                    const isActive = (primaryColor || '#2563eb').toLowerCase() === swatch.hex.toLowerCase();
+                    return (
+                      <button
+                        key={swatch.hex}
+                        type="button"
+                        title={swatch.label}
+                        onClick={() => setPrimaryColor && setPrimaryColor(swatch.hex)}
+                        style={{
+                          width: '22px',
+                          height: '22px',
+                          borderRadius: '50%',
+                          backgroundColor: swatch.hex,
+                          border: 'none',
+                          outline: isActive ? `2px solid ${swatch.hex}` : 'none',
+                          outlineOffset: '2px',
+                          cursor: 'pointer',
+                          padding: 0,
+                          transition: 'all 0.15s ease'
+                        }}
+                      />
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Right Column: Store Logo */}
+          <div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+              <label style={{ ...labelStyle, marginBottom: 0 }}>Store Logo</label>
+              <span style={{ fontSize: '0.75rem', fontWeight: 500, color: '#9ca3af' }}>
+                PNG, SVG • Max 2MB
+              </span>
+            </div>
+
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              border: '1px solid #e5e7eb',
+              borderRadius: '12px',
+              padding: '8px 14px',
+              backgroundColor: '#ffffff',
+              minHeight: '48px'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', overflow: 'hidden' }}>
+                {/* Logo Icon / Image Container */}
+                <div style={{
+                  width: '32px',
+                  height: '32px',
+                  borderRadius: '8px',
+                  backgroundColor: '#eff6ff',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  flexShrink: 0,
+                  overflow: 'hidden'
+                }}>
+                  {brandLogoValue && (brandLogoValue.startsWith('http') || brandLogoValue.startsWith('data:')) ? (
+                    <img src={brandLogoValue} alt="Logo" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                  ) : (
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#3b82f6" style={{ width: '18px', height: '18px' }}>
+                      <path d="M3 3h8v8H3V3zm2 2v4h4V5H5zm8-2h8v8h-8V3zm2 2v4h4V5h-4zM3 13h8v8H3v-8zm2 2v4h4v-4H5zm13-2h3v3h-3v-3zm-3 3h3v3h-3v-3zm3 3h3v3h-3v-3z" />
+                    </svg>
+                  )}
+                </div>
+
+                {/* File Name & Size */}
+                <div style={{ display: 'flex', alignItems: 'baseline', gap: '6px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                  <span style={{ fontSize: '0.86rem', fontWeight: 600, color: '#1e293b' }}>
+                    {brandLogoValue ? "logo-mark.png" : "logo-mark.png"}
+                  </span>
+                  <span style={{ fontSize: '0.78rem', color: '#9ca3af', fontWeight: 400 }}>
+                    (32 KB)
+                  </span>
+                </div>
+              </div>
+
+              {/* Action Buttons: Replace & Delete */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexShrink: 0 }}>
+                <label style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  padding: '6px 14px',
+                  borderRadius: '8px',
+                  border: '1px solid #e2e8f0',
+                  backgroundColor: '#ffffff',
+                  color: '#334155',
+                  fontSize: '0.82rem',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  transition: 'all 0.15s ease'
+                }}>
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" style={{ width: '14px', height: '14px' }}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
+                  </svg>
+                  <span>{uploadingLogo ? "Uploading..." : "Replace"}</span>
+                  <input
+                    type="file"
+                    accept="image/png, image/jpeg, image/webp, image/svg+xml"
+                    onChange={handleBrandLogoUpload}
+                    disabled={uploadingLogo}
+                    style={{ display: 'none' }}
+                  />
+                </label>
+
+                <button
+                  type="button"
+                  onClick={() => setBrandLogoValue && setBrandLogoValue('')}
+                  title="Remove Logo"
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    padding: '6px',
+                    color: '#94a3b8',
+                    cursor: 'pointer',
+                    borderRadius: '6px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    transition: 'all 0.15s ease'
+                  }}
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.8} stroke="currentColor" style={{ width: '16px', height: '16px' }}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
+                  </svg>
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -371,8 +613,7 @@ export function GeneralSubTab(props: any) {
       {/* Store Address Card */}
       <div style={cardStyle}>
         <div style={cardHeaderStyle}>
-          <h3 style={cardTitleStyle}>Physical Location & Address</h3>
-          <p style={cardSubTitleStyle}>Your official store operating address shown on invoices and checkout.</p>
+          <h3 style={cardTitleStyle}>Store Location</h3>
         </div>
 
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
@@ -2274,127 +2515,6 @@ export function PoliciesSubTab(props: any) {
 }
 
 /* ==========================================
- * TAB 9: TRUST SUBTAB
- * ========================================== */
-export function TrustSubTab(props: any) {
-  const {
-    showTrustMarquee, setShowTrustMarquee,
-    trustMarqueeDirection, setTrustMarqueeDirection,
-    trustMarqueeSpeed, setTrustMarqueeSpeed,
-    trustMarqueeItems = [], setTrustMarqueeItems,
-    handleSaveSettings
-  } = props;
-
-  const initialRef = useRef({
-    showTrustMarquee,
-    trustMarqueeDirection,
-    trustMarqueeSpeed,
-    trustMarqueeItemsStr: JSON.stringify(trustMarqueeItems)
-  });
-
-  const getChanges = (): ChangedField[] => {
-    const changes: ChangedField[] = [];
-    const init = initialRef.current;
-    if (showTrustMarquee !== init.showTrustMarquee) changes.push({ field: "Show Trust Marquee", from: String(init.showTrustMarquee), to: String(showTrustMarquee) });
-    if (trustMarqueeDirection !== init.trustMarqueeDirection) changes.push({ field: "Scroll Direction", from: init.trustMarqueeDirection, to: trustMarqueeDirection });
-    if (trustMarqueeSpeed !== init.trustMarqueeSpeed) changes.push({ field: "Scroll Speed", from: String(init.trustMarqueeSpeed), to: String(trustMarqueeSpeed) });
-    if (JSON.stringify(trustMarqueeItems) !== init.trustMarqueeItemsStr) changes.push({ field: "Trust Badges List", from: "(previous)", to: "(updated)" });
-    return changes;
-  };
-
-  const handleSaveAndResetSnapshot = async () => {
-    await handleSaveSettings();
-    initialRef.current = {
-      showTrustMarquee,
-      trustMarqueeDirection,
-      trustMarqueeSpeed,
-      trustMarqueeItemsStr: JSON.stringify(trustMarqueeItems)
-    };
-  };
-
-  const handleUpdateItem = (index: number, key: string, value: string) => {
-    const updated = [...trustMarqueeItems];
-    updated[index] = { ...updated[index], [key]: value };
-    setTrustMarqueeItems(updated);
-  };
-
-  const handleAddItem = () => {
-    const newItem = { id: "badge-" + Date.now(), title: "NEW TRUST BADGE", subtitle: "Custom Guarantee", icon: "shipping" };
-    setTrustMarqueeItems([...trustMarqueeItems, newItem]);
-  };
-
-  const handleRemoveItem = (index: number) => {
-    const updated = trustMarqueeItems.filter((_: any, i: number) => i !== index);
-    setTrustMarqueeItems(updated);
-  };
-
-  return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-      <div style={cardStyle}>
-        <div style={cardHeaderStyle}>
-          <h3 style={cardTitleStyle}>Storefront Trust Marquee</h3>
-          <p style={cardSubTitleStyle}>Infinite scrolling trust seals on your homepage.</p>
-        </div>
-
-        <div className={styles.toggleRow}>
-          <span className={styles.toggleLabel}>Show Trust Marquee on Storefront</span>
-          <input type="checkbox" checked={showTrustMarquee} onChange={(e) => setShowTrustMarquee(e.target.checked)} style={{ width: '18px', height: '18px', cursor: 'pointer' }} />
-        </div>
-
-        {showTrustMarquee && (
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginTop: '12px' }}>
-            <div>
-              <label style={labelStyle}>Scroll Direction</label>
-              <select value={trustMarqueeDirection} onChange={(e) => setTrustMarqueeDirection(e.target.value)} style={selectStyle}>
-                <option value="left">Left ← Right</option>
-                <option value="right">Right → Left</option>
-              </select>
-            </div>
-            <div>
-              <label style={labelStyle}>Scroll Speed (Seconds)</label>
-              <input type="number" value={trustMarqueeSpeed} onChange={(e) => setTrustMarqueeSpeed(Number(e.target.value))} min={10} max={120} style={inputStyle} />
-            </div>
-          </div>
-        )}
-      </div>
-
-      {showTrustMarquee && (
-        <div style={cardStyle}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <div>
-              <h3 style={cardTitleStyle}>Trust Badges & Seals</h3>
-              <p style={cardSubTitleStyle}>Add or edit badges displayed in the scrolling banner.</p>
-            </div>
-            <button type="button" onClick={handleAddItem} className={styles.btnActionAccent} style={{ padding: '6px 14px', fontSize: '0.82rem' }}>
-              + Add Badge
-            </button>
-          </div>
-
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-            {trustMarqueeItems.map((item: any, index: number) => (
-              <div key={item.id || index} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 140px 40px', gap: '10px', alignItems: 'center', padding: '10px', borderRadius: '8px', border: '1px solid #e5e7eb', backgroundColor: '#f9fafb' }}>
-                <input type="text" value={item.title || ''} onChange={(e) => handleUpdateItem(index, 'title', e.target.value)} placeholder="Title" style={inputStyle} />
-                <input type="text" value={item.subtitle || ''} onChange={(e) => handleUpdateItem(index, 'subtitle', e.target.value)} placeholder="Subtitle" style={inputStyle} />
-                <select value={item.icon || 'shipping'} onChange={(e) => handleUpdateItem(index, 'icon', e.target.value)} style={selectStyle}>
-                  <option value="shipping">Shipping</option>
-                  <option value="security">Security</option>
-                  <option value="authenticity">Authenticity</option>
-                  <option value="returns">Returns</option>
-                  <option value="support">Support</option>
-                </select>
-                <button type="button" onClick={() => handleRemoveItem(index)} className={`${styles.btnAction} ${styles.btnActionDanger}`} style={{ width: '32px', height: '32px', padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>✕</button>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      <SettingsSubTabFooter handleSaveSettings={handleSaveAndResetSnapshot} getChanges={getChanges} />
-    </div>
-  );
-}
-
-/* ==========================================
  * MAIN SETTINGS TAB WRAPPER COMPONENT
  * ========================================== */
 interface SettingsTabProps {
@@ -2407,10 +2527,115 @@ interface SettingsTabProps {
 import { MarketsSubTab } from './MarketsSubTab';
 
 export default function SettingsTab(props: SettingsTabProps) {
-  const { settingsSubTab = "general" } = props;
+  const { settingsSubTab = "general", storeSubdomain, storeCustomDomain } = props;
+  const [copied, setCopied] = useState(false);
+
+  // Subnav Title Map
+  const SUBTAB_TITLES: Record<string, string> = {
+    general: "General",
+    domain: "Domain & Subdomain",
+    payments: "Payments & Checkout",
+    shipping: "Shipping & Delivery",
+    markets: "Global Markets",
+    notifications: "Notifications & Email",
+    policies: "Policies & Legal",
+    integrations: "Social & Integrations"
+  };
+
+  const currentHeading = SUBTAB_TITLES[settingsSubTab] || "General";
+
+  // Formulate exact domain link with localhost:3000 support
+  const rawSubdomain = storeSubdomain || storeCustomDomain || "demo1";
+  let displayDomain = rawSubdomain.replace(/^https?:\/\//, '').replace(/\/$/, '');
+
+  if (!displayDomain.includes('.') && !displayDomain.includes(':')) {
+    displayDomain = `${displayDomain}.localhost:3000`;
+  }
+
+  const previewUrl = displayDomain.startsWith("http://") || displayDomain.startsWith("https://")
+    ? displayDomain
+    : `http://${displayDomain}`;
+
+  const handleCopyLink = () => {
+    navigator.clipboard.writeText(previewUrl);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
 
   return (
-    <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 16px 24px 16px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+    <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 16px 24px 16px', display: 'flex', flexDirection: 'column', gap: '24px' }}>
+      {/* Top Section Header with Breadcrumb, Title & Storefront Preview Link */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', borderBottom: '1px solid #f3f4f6', paddingBottom: '16px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', flexWrap: 'wrap', gap: '12px' }}>
+          {/* Breadcrumb Navigation */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.88rem', color: '#4b5563', fontWeight: 500 }}>
+            <span>Settings</span>
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="#9ca3af" style={{ width: '14px', height: '14px' }}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
+            </svg>
+            <span style={{ color: '#111827', fontWeight: 600 }}>{currentHeading}</span>
+          </div>
+
+          {/* Preview Link & Copy Button */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.86rem', color: '#6b7280' }}>
+
+            <a
+              href={previewUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{
+                color: '#2563eb',
+                fontWeight: 600,
+                textDecoration: 'none',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '4px'
+              }}
+              onMouseEnter={(e) => (e.currentTarget.style.textDecoration = 'underline')}
+              onMouseLeave={(e) => (e.currentTarget.style.textDecoration = 'none')}
+            >
+              <span>{displayDomain}</span>
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" style={{ width: '14px', height: '14px' }}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 6H5.25A2.25 2.25 0 0 0 3 8.25v10.5A2.25 2.25 0 0 0 5.25 21h10.5A2.25 2.25 0 0 0 18 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
+              </svg>
+            </a>
+
+            <button
+              type="button"
+              onClick={handleCopyLink}
+              title={copied ? "Copied!" : "Copy preview URL"}
+              style={{
+                background: 'none',
+                border: 'none',
+                cursor: 'pointer',
+                padding: '4px',
+                color: copied ? '#16a34a' : '#6b7280',
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                borderRadius: '4px',
+                transition: 'all 0.15s ease'
+              }}
+            >
+              {copied ? (
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.2} stroke="currentColor" style={{ width: '15px', height: '15px' }}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="m4.5 12.75 6 6 9-13.5" />
+                </svg>
+              ) : (
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.8} stroke="currentColor" style={{ width: '16px', height: '16px' }}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 17.25v2.25A2.25 2.25 0 0 1 13.5 21.75h-9a2.25 2.25 0 0 1-2.25-2.25v-9A2.25 2.25 0 0 1 4.5 8.25H6.75m3-3.75h9a2.25 2.25 0 0 1 2.25 2.25v9a2.25 2.25 0 0 1-2.25 2.25h-9a2.25 2.25 0 0 1-2.25-2.25v-9A2.25 2.25 0 0 1 9.75 4.5Z" />
+                </svg>
+              )}
+            </button>
+          </div>
+        </div>
+
+        {/* Page Main Heading (Sub-nav tab name like "General") */}
+        <h1 style={{ fontSize: '1.65rem', fontWeight: 800, color: '#111827', margin: 0, letterSpacing: '-0.02em' }}>
+          {currentHeading}
+        </h1>
+      </div>
+
       <div>
         {settingsSubTab === "general" && <GeneralSubTab {...props} />}
         {settingsSubTab === "domain" && <DomainSubTab />}
@@ -2420,7 +2645,6 @@ export default function SettingsTab(props: SettingsTabProps) {
         {settingsSubTab === "notifications" && <NotificationsSubTab {...props} />}
         {settingsSubTab === "integrations" && <IntegrationsSubTab {...props} />}
         {settingsSubTab === "policies" && <PoliciesSubTab {...props} />}
-        {settingsSubTab === "trust" && <TrustSubTab {...props} />}
       </div>
     </div>
   );

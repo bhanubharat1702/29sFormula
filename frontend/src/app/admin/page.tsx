@@ -3743,20 +3743,8 @@ export default function AdminDashboard() {
             loadingSettings={loadingSettings}
             hasUnsavedChanges={hasUnsavedChanges}
             setShowResetConfirmModal={setShowResetConfirmModal}
-
-          />
-          <CustomersTab
-            activeTab={activeTab}
-            customers={customers}
-            setSelectedCustomer={setSelectedCustomer}
-            setDeleteCustomerTargetId={setDeleteCustomerTargetId}
-          />
-          <MarketingTab
-            activeTab={activeTab}
-            customizeSubTab={customizeSubTab}
             showTicker={showTicker}
             setShowTicker={setShowTicker}
-            saveSettingsSilent={saveSettingsSilent}
             tickerText={tickerText}
             setTickerText={setTickerText}
             tickerDirection={tickerDirection}
@@ -3775,6 +3763,16 @@ export default function AdminDashboard() {
             setTrustMarqueeSpeed={setTrustMarqueeSpeed}
             trustMarqueeItems={trustMarqueeItems}
             setTrustMarqueeItems={setTrustMarqueeItems}
+          />
+          <CustomersTab
+            activeTab={activeTab}
+            customers={customers}
+            setSelectedCustomer={setSelectedCustomer}
+            setDeleteCustomerTargetId={setDeleteCustomerTargetId}
+          />
+          <MarketingTab
+            activeTab={activeTab}
+            customizeSubTab={customizeSubTab}
             setSuccessMessage={setSuccessMessage}
             hasUnsavedChanges={hasUnsavedChanges}
           />
@@ -3837,6 +3835,8 @@ export default function AdminDashboard() {
               setBrandLogoType={setBrandLogoType}
               brandLogoValue={brandLogoValue}
               setBrandLogoValue={setBrandLogoValue}
+              primaryColor={primaryColor}
+              setPrimaryColor={setPrimaryColor}
               uploadingLogo={uploadingLogo}
               logoProgress={logoProgress}
               handleBrandLogoUpload={handleBrandLogoUpload}
