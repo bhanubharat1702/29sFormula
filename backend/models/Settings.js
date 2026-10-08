@@ -434,8 +434,10 @@ const settingsSchema = new mongoose.Schema({
 
   // Contact Info
   ownerEmail: { type: String, default: "" },
+  ownerEmailVerified: { type: Boolean, default: false },
   ownerPhone: { type: String, default: "" },
   supportEmail: { type: String, default: "" },
+  supportEmailVerified: { type: Boolean, default: false },
   supportPhone: { type: String, default: "" },
 
   // Shipping

@@ -1,13 +1,13 @@
 import rateLimit from "express-rate-limit";
 
-// Moderate limits on general API: 100 req/min per IP
+// Moderate limits on general API: 300 req/min per IP
 export const generalLimiter = rateLimit({
   windowMs: 1 * 60 * 1000, // 1 minute
-  max: 100,
+  max: 300,
   standardHeaders: true, // Return rate limit info in `RateLimit-*` headers
   legacyHeaders: false, // Disable `X-RateLimit-*` headers
   validate: false,
-  skip: () => process.env.NODE_ENV === "test",
+  skip: (req) => process.env.NODE_ENV === "test" || req.ip === "127.0.0.1" || req.ip === "::1" || req.ip === "::ffff:127.0.0.1",
   message: {
     error: "Too many requests, please try again after a minute."
   },

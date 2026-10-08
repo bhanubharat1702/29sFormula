@@ -296,8 +296,8 @@ export function CountrySelectDropdown({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const filteredCountries = countries.filter(c => 
-    c.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+  const filteredCountries = countries.filter(c =>
+    c.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     c.code.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
@@ -696,8 +696,10 @@ export function GeneralSubTab(props: any) {
     storeCurrency, setStoreCurrency,
     storeTimezone, setStoreTimezone,
     storeOwnerEmail, setStoreOwnerEmail,
+    ownerEmailVerified, setOwnerEmailVerified,
     storeOwnerPhone, setStoreOwnerPhone,
     storeSupportEmail, setStoreSupportEmail,
+    supportEmailVerified, setSupportEmailVerified,
     storeSupportPhone, setStoreSupportPhone,
     storeAddress1, setStoreAddress1,
     storeAddress2, setStoreAddress2,
@@ -713,6 +715,94 @@ export function GeneralSubTab(props: any) {
   } = props;
 
   const [isFetchingLocation, setIsFetchingLocation] = useState(false);
+  const [verifyingModal, setVerifyingModal] = useState<{ open: boolean; emailType: 'ownerEmail' | 'supportEmail'; email: string } | null>(null);
+  const [sendingOtpType, setSendingOtpType] = useState<'ownerEmail' | 'supportEmail' | null>(null);
+  const [otpInput, setOtpInput] = useState<string>('');
+  const [otpVerifying, setOtpVerifying] = useState<boolean>(false);
+  const [otpError, setOtpError] = useState<string | null>(null);
+  const [otpSuccess, setOtpSuccess] = useState<string | null>(null);
+  const [resendCooldown, setResendCooldown] = useState<number>(0);
+
+  useEffect(() => {
+    let timer: any;
+    if (resendCooldown > 0) {
+      timer = setInterval(() => {
+        setResendCooldown((prev) => prev - 1);
+      }, 1000);
+    }
+    return () => clearInterval(timer);
+  }, [resendCooldown]);
+
+  const handleSendOtp = async (emailType: 'ownerEmail' | 'supportEmail', email: string) => {
+    if (!email || !email.trim()) {
+      alert("Please enter a valid email address first.");
+      return;
+    }
+    setSendingOtpType(emailType);
+    setOtpError(null);
+    setOtpSuccess(null);
+    setOtpInput('');
+
+    try {
+      const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:5001";
+      const res = await fetch(`${API_BASE}/api/settings/email-verification/send-otp`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ emailType, email: email.trim() })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Failed to send verification email");
+
+      setVerifyingModal({ open: true, emailType, email: email.trim() });
+      setResendCooldown(60);
+      setOtpSuccess(`Verification OTP sent to ${email.trim()}`);
+    } catch (err: any) {
+      alert(err.message || "Could not send verification OTP");
+    } finally {
+      setSendingOtpType(null);
+    }
+  };
+
+  const handleVerifyOtpSubmit = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    if (!verifyingModal || !otpInput.trim()) return;
+
+    setOtpVerifying(true);
+    setOtpError(null);
+    setOtpSuccess(null);
+
+    try {
+      const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:5001";
+      const res = await fetch(`${API_BASE}/api/settings/email-verification/verify-otp`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          emailType: verifyingModal.emailType,
+          email: verifyingModal.email,
+          otp: otpInput.trim()
+        })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "OTP Verification failed");
+
+      if (verifyingModal.emailType === 'ownerEmail') {
+        if (setOwnerEmailVerified) setOwnerEmailVerified(true);
+      } else if (verifyingModal.emailType === 'supportEmail') {
+        if (setSupportEmailVerified) setSupportEmailVerified(true);
+      }
+
+      setOtpSuccess(data.message || "Email verified successfully!");
+      setTimeout(() => {
+        setVerifyingModal(null);
+        setOtpInput('');
+        setOtpSuccess(null);
+      }, 1500);
+    } catch (err: any) {
+      setOtpError(err.message || "Invalid OTP code");
+    } finally {
+      setOtpVerifying(false);
+    }
+  };
 
   const handleCountryChange = (countryName: string) => {
     if (setStoreCountry) setStoreCountry(countryName);
@@ -1192,21 +1282,113 @@ export function GeneralSubTab(props: any) {
       <div style={cardStyle}>
         <div style={cardHeaderStyle}>
           <h3 style={cardTitleStyle}>Contact Information</h3>
-          <p style={cardSubTitleStyle}>Owner contacts and customer support details.</p>
+
         </div>
 
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
           <div>
-            <label style={labelStyle}>Owner Email</label>
-            <input type="email" value={storeOwnerEmail || ''} onChange={(e) => setStoreOwnerEmail && setStoreOwnerEmail(e.target.value)} style={inputStyle} />
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
+              <label style={{ ...labelStyle, marginBottom: 0 }}>Owner Email</label>
+              {ownerEmailVerified ? (
+                <span style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                  fontSize: '0.72rem',
+                  fontWeight: '600',
+                  color: '#16a34a',
+                  backgroundColor: '#f0fdf4',
+                  border: '1px solid #bbf7d0',
+                  padding: '2px 8px',
+                  borderRadius: '12px'
+                }}>
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>
+                  Verified
+                </span>
+              ) : storeOwnerEmail ? (
+                <button
+                  type="button"
+                  onClick={() => handleSendOtp('ownerEmail', storeOwnerEmail)}
+                  disabled={sendingOtpType === 'ownerEmail'}
+                  style={{
+                    fontSize: '0.72rem',
+                    fontWeight: '600',
+                    color: '#2563eb',
+                    backgroundColor: '#eff6ff',
+                    border: '1px solid #bfdbfe',
+                    padding: '3px 10px',
+                    borderRadius: '6px',
+                    cursor: 'pointer',
+                    transition: 'all 0.15s ease'
+                  }}
+                >
+                  {sendingOtpType === 'ownerEmail' ? 'Sending Code...' : 'Verify Email'}
+                </button>
+              ) : null}
+            </div>
+            <input
+              type="email"
+              value={storeOwnerEmail || ''}
+              onChange={(e) => {
+                if (setStoreOwnerEmail) setStoreOwnerEmail(e.target.value);
+                if (ownerEmailVerified && setOwnerEmailVerified) setOwnerEmailVerified(false);
+              }}
+              style={inputStyle}
+            />
           </div>
           <div>
             <label style={labelStyle}>Owner Phone</label>
             <input type="text" value={storeOwnerPhone || ''} onChange={(e) => setStoreOwnerPhone && setStoreOwnerPhone(e.target.value)} style={inputStyle} />
           </div>
           <div>
-            <label style={labelStyle}>Support Email (Public)</label>
-            <input type="email" value={storeSupportEmail || ''} onChange={(e) => setStoreSupportEmail && setStoreSupportEmail(e.target.value)} style={inputStyle} />
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
+              <label style={{ ...labelStyle, marginBottom: 0 }}>Support Email (Public)</label>
+              {supportEmailVerified ? (
+                <span style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                  fontSize: '0.72rem',
+                  fontWeight: '600',
+                  color: '#16a34a',
+                  backgroundColor: '#f0fdf4',
+                  border: '1px solid #bbf7d0',
+                  padding: '2px 8px',
+                  borderRadius: '12px'
+                }}>
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>
+                  Verified
+                </span>
+              ) : storeSupportEmail ? (
+                <button
+                  type="button"
+                  onClick={() => handleSendOtp('supportEmail', storeSupportEmail)}
+                  disabled={sendingOtpType === 'supportEmail'}
+                  style={{
+                    fontSize: '0.72rem',
+                    fontWeight: '600',
+                    color: '#2563eb',
+                    backgroundColor: '#eff6ff',
+                    border: '1px solid #bfdbfe',
+                    padding: '3px 10px',
+                    borderRadius: '6px',
+                    cursor: 'pointer',
+                    transition: 'all 0.15s ease'
+                  }}
+                >
+                  {sendingOtpType === 'supportEmail' ? 'Sending Code...' : 'Verify Email'}
+                </button>
+              ) : null}
+            </div>
+            <input
+              type="email"
+              value={storeSupportEmail || ''}
+              onChange={(e) => {
+                if (setStoreSupportEmail) setStoreSupportEmail(e.target.value);
+                if (supportEmailVerified && setSupportEmailVerified) setSupportEmailVerified(false);
+              }}
+              style={inputStyle}
+            />
           </div>
           <div>
             <label style={labelStyle}>Support Phone (Public)</label>
@@ -1214,6 +1396,171 @@ export function GeneralSubTab(props: any) {
           </div>
         </div>
       </div>
+
+      {/* OTP Verification Modal */}
+      {verifyingModal?.open && (
+        <div style={{
+          position: 'fixed',
+          inset: 0,
+          backgroundColor: 'rgba(0, 0, 0, 0.55)',
+          backdropFilter: 'blur(4px)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 9999,
+          padding: '16px'
+        }}>
+          <div style={{
+            backgroundColor: '#ffffff',
+            borderRadius: '16px',
+            maxWidth: '420px',
+            width: '100%',
+            padding: '28px',
+            boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
+            position: 'relative'
+          }}>
+            <button
+              type="button"
+              onClick={() => { setVerifyingModal(null); setOtpInput(''); setOtpError(null); setOtpSuccess(null); }}
+              style={{
+                position: 'absolute',
+                top: '16px',
+                right: '16px',
+                background: 'none',
+                border: 'none',
+                fontSize: '1.2rem',
+                color: '#9ca3af',
+                cursor: 'pointer'
+              }}
+            >
+              ✕
+            </button>
+
+            <div style={{ textAlign: 'center', marginBottom: '20px' }}>
+              <div style={{
+                width: '48px',
+                height: '48px',
+                borderRadius: '50%',
+                backgroundColor: '#eff6ff',
+                color: '#2563eb',
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                marginBottom: '12px'
+              }}>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                  <polyline points="22,6 12,13 2,6"></polyline>
+                </svg>
+              </div>
+              <h3 style={{ fontSize: '1.25rem', fontWeight: '700', color: '#111827', margin: '0 0 6px 0' }}>Verify Your Email</h3>
+              <p style={{ fontSize: '0.875rem', color: '#6b7280', margin: 0, wordBreak: 'break-all' }}>
+                Enter the 6-digit OTP code sent to <strong>{verifyingModal.email}</strong>
+              </p>
+            </div>
+
+            {otpSuccess && (
+              <div style={{
+                backgroundColor: '#f0fdf4',
+                border: '1px solid #bbf7d0',
+                color: '#15803d',
+                fontSize: '0.85rem',
+                padding: '10px 14px',
+                borderRadius: '8px',
+                marginBottom: '16px',
+                textAlign: 'center',
+                fontWeight: '500'
+              }}>
+                {otpSuccess}
+              </div>
+            )}
+
+            {otpError && (
+              <div style={{
+                backgroundColor: '#fef2f2',
+                border: '1px solid #fecaca',
+                color: '#b91c1c',
+                fontSize: '0.85rem',
+                padding: '10px 14px',
+                borderRadius: '8px',
+                marginBottom: '16px',
+                textAlign: 'center',
+                fontWeight: '500'
+              }}>
+                {otpError}
+              </div>
+            )}
+
+            <form onSubmit={handleVerifyOtpSubmit}>
+              <div style={{ marginBottom: '20px' }}>
+                <input
+                  type="text"
+                  maxLength={6}
+                  value={otpInput}
+                  onChange={(e) => setOtpInput(e.target.value.replace(/\D/g, ''))}
+                  placeholder="0 0 0 0 0 0"
+                  autoFocus
+                  style={{
+                    width: '100%',
+                    textAlign: 'center',
+                    letterSpacing: '8px',
+                    fontSize: '1.5rem',
+                    fontWeight: '700',
+                    padding: '12px',
+                    borderRadius: '10px',
+                    border: '2px solid #e5e7eb',
+                    outline: 'none',
+                    boxSizing: 'border-box'
+                  }}
+                />
+              </div>
+
+              <button
+                type="submit"
+                disabled={otpVerifying || otpInput.trim().length !== 6}
+                style={{
+                  width: '100%',
+                  padding: '12px',
+                  backgroundColor: otpInput.trim().length === 6 ? '#2563eb' : '#93c5fd',
+                  color: '#ffffff',
+                  border: 'none',
+                  borderRadius: '10px',
+                  fontWeight: '600',
+                  fontSize: '0.95rem',
+                  cursor: otpInput.trim().length === 6 ? 'pointer' : 'not-allowed',
+                  transition: 'background-color 0.2s ease',
+                  marginBottom: '16px'
+                }}
+              >
+                {otpVerifying ? 'Verifying Code...' : 'Verify OTP'}
+              </button>
+            </form>
+
+            <div style={{ textAlign: 'center', fontSize: '0.85rem', color: '#6b7280' }}>
+              Didn't receive code?{' '}
+              {resendCooldown > 0 ? (
+                <span style={{ color: '#9ca3af', fontWeight: '500' }}>Resend in {resendCooldown}s</span>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => handleSendOtp(verifyingModal.emailType, verifyingModal.email)}
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    color: '#2563eb',
+                    fontWeight: '600',
+                    cursor: 'pointer',
+                    padding: 0,
+                    textDecoration: 'underline'
+                  }}
+                >
+                  Resend OTP
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Account Security / Change Password */}
       <ChangePasswordCard />
@@ -1230,8 +1577,23 @@ export function ChangePasswordCard() {
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+
+  const [showCurrent, setShowCurrent] = useState(false);
+  const [showNew, setShowNew] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
+
   const [passwordMsg, setPasswordMsg] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const [isUpdatingPassword, setIsUpdatingPassword] = useState(false);
+
+  // Strength calculation
+  const getPasswordStrength = (pass: string) => {
+    if (!pass) return null;
+    if (pass.length < 6) return { label: 'WEAK', color: '#ef4444' };
+    if (pass.length < 8) return { label: 'MEDIUM', color: '#f59e0b' };
+    return { label: 'STRONG', color: '#10b981' };
+  };
+
+  const strength = getPasswordStrength(newPassword);
 
   const handlePasswordChange = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -1276,47 +1638,189 @@ export function ChangePasswordCard() {
     }
   };
 
+  const fieldInputStyle: React.CSSProperties = {
+    ...inputStyle,
+    width: '100%',
+    paddingRight: '40px',
+    borderRadius: '10px',
+    border: '1px solid #cbd5e1',
+    backgroundColor: '#ffffff',
+    fontSize: '0.9rem',
+    color: '#0f172a',
+    boxSizing: 'border-box'
+  };
+
   return (
     <div style={cardStyle}>
       <div style={cardHeaderStyle}>
         <h3 style={cardTitleStyle}>Change Account Password</h3>
-        <p style={cardSubTitleStyle}>Update your administrator password for security.</p>
+        <p style={cardSubTitleStyle}>Update your account password to maintain store security.</p>
       </div>
 
       {passwordMsg && (
         <div style={{
           padding: '10px 14px',
-          borderRadius: '6px',
-          fontSize: '0.83rem',
+          borderRadius: '8px',
+          fontSize: '0.85rem',
           backgroundColor: passwordMsg.type === 'success' ? '#ecfdf5' : '#fef2f2',
           color: passwordMsg.type === 'success' ? '#047857' : '#dc2626',
-          border: `1px solid ${passwordMsg.type === 'success' ? '#a7f3d0' : '#fecaca'}`
+          border: `1px solid ${passwordMsg.type === 'success' ? '#a7f3d0' : '#fecaca'}`,
+          marginBottom: '16px'
         }}>
           {passwordMsg.text}
         </div>
       )}
 
-      <form onSubmit={handlePasswordChange} style={{ display: 'flex', flexDirection: 'column', gap: '14px', maxWidth: '480px' }}>
-        <div>
-          <label style={labelStyle}>Current Password</label>
-          <input type="password" value={currentPassword} onChange={(e) => setCurrentPassword(e.target.value)} required style={inputStyle} />
-        </div>
-        <div>
-          <label style={labelStyle}>New Password</label>
-          <input type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} required style={inputStyle} />
-        </div>
-        <div>
-          <label style={labelStyle}>Confirm New Password</label>
-          <input type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} required style={inputStyle} />
+      <form onSubmit={handlePasswordChange} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px' }}>
+          {/* Current Password */}
+          <div>
+            <label style={{ ...labelStyle, marginBottom: '6px', fontSize: '0.85rem', fontWeight: '600', color: '#334155' }}>Current Password</label>
+            <div style={{ position: 'relative' }}>
+              <input
+                type={showCurrent ? "text" : "password"}
+                value={currentPassword}
+                onChange={(e) => setCurrentPassword(e.target.value)}
+                placeholder="•••••••••••••••••"
+                required
+                style={fieldInputStyle}
+              />
+              <button
+                type="button"
+                onClick={() => setShowCurrent(!showCurrent)}
+                style={{
+                  position: 'absolute',
+                  right: '12px',
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  background: 'none',
+                  border: 'none',
+                  color: '#94a3b8',
+                  cursor: 'pointer',
+                  padding: '2px',
+                  display: 'flex',
+                  alignItems: 'center'
+                }}
+              >
+                {showCurrent ? (
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>
+                ) : (
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                )}
+              </button>
+            </div>
+          </div>
+
+          {/* New Password */}
+          <div>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
+              <label style={{ ...labelStyle, marginBottom: 0, fontSize: '0.85rem', fontWeight: '600', color: '#334155' }}>New Password</label>
+              {strength && (
+                <span style={{ fontSize: '0.72rem', fontWeight: '700', color: strength.color, letterSpacing: '0.5px' }}>
+                  {strength.label}
+                </span>
+              )}
+            </div>
+            <div style={{ position: 'relative' }}>
+              <input
+                type={showNew ? "text" : "password"}
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                placeholder="Min. 8 characters"
+                required
+                style={fieldInputStyle}
+              />
+              <button
+                type="button"
+                onClick={() => setShowNew(!showNew)}
+                style={{
+                  position: 'absolute',
+                  right: '12px',
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  background: 'none',
+                  border: 'none',
+                  color: '#94a3b8',
+                  cursor: 'pointer',
+                  padding: '2px',
+                  display: 'flex',
+                  alignItems: 'center'
+                }}
+              >
+                {showNew ? (
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>
+                ) : (
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                )}
+              </button>
+            </div>
+          </div>
+
+          {/* Confirm New Password */}
+          <div>
+            <label style={{ ...labelStyle, marginBottom: '6px', fontSize: '0.85rem', fontWeight: '600', color: '#334155' }}>Confirm New Password</label>
+            <div style={{ position: 'relative' }}>
+              <input
+                type={showConfirm ? "text" : "password"}
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                placeholder="Re-enter password"
+                required
+                style={fieldInputStyle}
+              />
+              <button
+                type="button"
+                onClick={() => setShowConfirm(!showConfirm)}
+                style={{
+                  position: 'absolute',
+                  right: '12px',
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  background: 'none',
+                  border: 'none',
+                  color: '#94a3b8',
+                  cursor: 'pointer',
+                  padding: '2px',
+                  display: 'flex',
+                  alignItems: 'center'
+                }}
+              >
+                {showConfirm ? (
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>
+                ) : (
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                )}
+              </button>
+            </div>
+          </div>
         </div>
 
-        <div style={{ display: 'flex', justifyContent: 'flex-start', marginTop: '6px' }}>
+        {/* Action Button */}
+        <div style={{ display: 'flex', justifyContent: 'flex-start', marginTop: '4px' }}>
           <button
             type="submit"
             disabled={isUpdatingPassword}
-            className={styles.btnActionAccent}
-            style={{ padding: '8px 18px', fontSize: '0.85rem' }}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '8px',
+              padding: '10px 18px',
+              backgroundColor: '#090d16',
+              color: '#ffffff',
+              border: 'none',
+              borderRadius: '8px',
+              fontWeight: '600',
+              fontSize: '0.88rem',
+              cursor: isUpdatingPassword ? 'not-allowed' : 'pointer',
+              boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
+              transition: 'all 0.15s ease'
+            }}
           >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="7.5" cy="15.5" r="5.5"></circle>
+              <path d="m21 2-9.6 9.6"></path>
+              <path d="m15.5 7.5 3 3"></path>
+            </svg>
             {isUpdatingPassword ? "Updating..." : "Update Password"}
           </button>
         </div>
@@ -3080,90 +3584,8 @@ export default function SettingsTab(props: SettingsTabProps) {
     displayDomain = `${displayDomain}.localhost:3000`;
   }
 
-  const previewUrl = displayDomain.startsWith("http://") || displayDomain.startsWith("https://")
-    ? displayDomain
-    : `http://${displayDomain}`;
-
-  const handleCopyLink = () => {
-    navigator.clipboard.writeText(previewUrl);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
-
   return (
     <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 16px 24px 16px', display: 'flex', flexDirection: 'column', gap: '24px' }}>
-      {/* Top Section Header with Breadcrumb, Title & Storefront Preview Link */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', borderBottom: '1px solid #f3f4f6', paddingBottom: '16px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', flexWrap: 'wrap', gap: '12px' }}>
-          {/* Breadcrumb Navigation */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.88rem', color: '#4b5563', fontWeight: 500 }}>
-            <span>Settings</span>
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="#9ca3af" style={{ width: '14px', height: '14px' }}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
-            </svg>
-            <span style={{ color: '#111827', fontWeight: 600 }}>{currentHeading}</span>
-          </div>
-
-          {/* Preview Link & Copy Button */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.86rem', color: '#6b7280' }}>
-
-            <a
-              href={previewUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              style={{
-                color: '#2563eb',
-                fontWeight: 600,
-                textDecoration: 'none',
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '4px'
-              }}
-              onMouseEnter={(e) => (e.currentTarget.style.textDecoration = 'underline')}
-              onMouseLeave={(e) => (e.currentTarget.style.textDecoration = 'none')}
-            >
-              <span>{displayDomain}</span>
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" style={{ width: '14px', height: '14px' }}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 6H5.25A2.25 2.25 0 0 0 3 8.25v10.5A2.25 2.25 0 0 0 5.25 21h10.5A2.25 2.25 0 0 0 18 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
-              </svg>
-            </a>
-
-            <button
-              type="button"
-              onClick={handleCopyLink}
-              title={copied ? "Copied!" : "Copy preview URL"}
-              style={{
-                background: 'none',
-                border: 'none',
-                cursor: 'pointer',
-                padding: '4px',
-                color: copied ? '#16a34a' : '#6b7280',
-                display: 'inline-flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                borderRadius: '4px',
-                transition: 'all 0.15s ease'
-              }}
-            >
-              {copied ? (
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.2} stroke="currentColor" style={{ width: '15px', height: '15px' }}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="m4.5 12.75 6 6 9-13.5" />
-                </svg>
-              ) : (
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.8} stroke="currentColor" style={{ width: '16px', height: '16px' }}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 17.25v2.25A2.25 2.25 0 0 1 13.5 21.75h-9a2.25 2.25 0 0 1-2.25-2.25v-9A2.25 2.25 0 0 1 4.5 8.25H6.75m3-3.75h9a2.25 2.25 0 0 1 2.25 2.25v9a2.25 2.25 0 0 1-2.25 2.25h-9a2.25 2.25 0 0 1-2.25-2.25v-9A2.25 2.25 0 0 1 9.75 4.5Z" />
-                </svg>
-              )}
-            </button>
-          </div>
-        </div>
-
-        {/* Page Main Heading (Sub-nav tab name like "General") */}
-        <h1 style={{ fontSize: '1.65rem', fontWeight: 800, color: '#111827', margin: 0, letterSpacing: '-0.02em' }}>
-          {currentHeading}
-        </h1>
-      </div>
-
       <div>
         {settingsSubTab === "general" && <GeneralSubTab {...props} />}
         {settingsSubTab === "domain" && <DomainSubTab />}

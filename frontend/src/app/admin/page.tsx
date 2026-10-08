@@ -20,6 +20,7 @@ import { clearAuthSession } from "@/utils/auth";
 import AdminModals from "./components/modals/AdminModals";
 import CustomizeLayoutModal from "./components/modals/CustomizeLayoutModal";
 import MerchantSuspendedDashboard from "./components/MerchantSuspendedDashboard";
+import AdminTopHeader from "./components/layout/AdminTopHeader";
 
 
 
@@ -61,7 +62,9 @@ export default function AdminDashboard() {
   const [storeCountry, setStoreCountry] = useState<string>("India");
   const [storeOwnerPhone, setStoreOwnerPhone] = useState<string>("");
   const [storeOwnerEmail, setStoreOwnerEmail] = useState<string>("");
+  const [ownerEmailVerified, setOwnerEmailVerified] = useState<boolean>(false);
   const [storeSupportEmail, setStoreSupportEmail] = useState<string>("");
+  const [supportEmailVerified, setSupportEmailVerified] = useState<boolean>(false);
   const [storeSupportPhone, setStoreSupportPhone] = useState<string>("");
   const [storeSubdomain, setStoreSubdomain] = useState<string>("");
   const [storeCustomDomain, setStoreCustomDomain] = useState<string>("");
@@ -1359,7 +1362,9 @@ export default function AdminDashboard() {
           setStoreCountry(data.storeDetails.country || data.country || "India");
           setStoreOwnerPhone(data.storeDetails.ownerPhone || data.ownerPhone || "");
           setStoreOwnerEmail(data.storeDetails.ownerEmail || data.ownerEmail || "");
+          setOwnerEmailVerified(!!(data.storeDetails.ownerEmailVerified ?? data.ownerEmailVerified));
           setStoreSupportEmail(data.storeDetails.supportEmail || data.supportEmail || "");
+          setSupportEmailVerified(!!(data.storeDetails.supportEmailVerified ?? data.supportEmailVerified));
           setStoreSupportPhone(data.storeDetails.supportPhone || data.supportPhone || "");
           setStoreSubdomain(data.storeDetails.subdomain || "");
           setStoreCustomDomain(data.storeDetails.customDomain || "");
@@ -1376,7 +1381,9 @@ export default function AdminDashboard() {
           if (data.country !== undefined) setStoreCountry(data.country);
           if (data.ownerPhone !== undefined) setStoreOwnerPhone(data.ownerPhone);
           if (data.ownerEmail !== undefined) setStoreOwnerEmail(data.ownerEmail);
+          if (data.ownerEmailVerified !== undefined) setOwnerEmailVerified(!!data.ownerEmailVerified);
           if (data.supportEmail !== undefined) setStoreSupportEmail(data.supportEmail);
+          if (data.supportEmailVerified !== undefined) setSupportEmailVerified(!!data.supportEmailVerified);
           if (data.supportPhone !== undefined) setStoreSupportPhone(data.supportPhone);
           if (data.storeAddress1 !== undefined) setStoreAddress1(data.storeAddress1);
           if (data.storeAddress2 !== undefined) setStoreAddress2(data.storeAddress2);
@@ -2178,7 +2185,9 @@ export default function AdminDashboard() {
           country: storeCountry,
           ownerPhone: storeOwnerPhone,
           ownerEmail: storeOwnerEmail,
+          ownerEmailVerified,
           supportEmail: storeSupportEmail,
+          supportEmailVerified,
           supportPhone: storeSupportPhone,
           storeAddress1,
           storeAddress2,
@@ -2196,6 +2205,7 @@ export default function AdminDashboard() {
         if (brandLogoType) localStorage.setItem("settings_brandLogoType", brandLogoType);
         if (brandLogoValue) localStorage.setItem("settings_brandLogoValue", brandLogoValue);
         if (storeBusinessName) localStorage.setItem("settings_storeBusinessName", storeBusinessName);
+        window.dispatchEvent(new Event("settingsUpdated"));
       }
 
       setSuccessMessage("Homepage layout customized successfully!");
@@ -3547,6 +3557,14 @@ export default function AdminDashboard() {
             userSelect: effectiveIsSuspended ? 'none' : 'auto',
             transition: 'all 0.3s ease'
           }}>
+          <AdminTopHeader
+            activeTab={activeTab}
+            activeSubTab={activeSubTab}
+            settingsSubTab={settingsSubTab}
+            customizeSubTab={customizeSubTab}
+            storeSubdomain={storeSubdomain}
+            storeCustomDomain={storeCustomDomain}
+          />
           {activeTab === "home" && (
             <HomeTab
               dashboardStats={dashboardStats}
@@ -3810,10 +3828,14 @@ export default function AdminDashboard() {
               setStoreOwnerPhone={setStoreOwnerPhone}
               storeOwnerEmail={storeOwnerEmail}
               setStoreOwnerEmail={setStoreOwnerEmail}
+              ownerEmailVerified={ownerEmailVerified}
+              setOwnerEmailVerified={setOwnerEmailVerified}
               storeSupportPhone={storeSupportPhone}
               setStoreSupportPhone={setStoreSupportPhone}
               storeSupportEmail={storeSupportEmail}
               setStoreSupportEmail={setStoreSupportEmail}
+              supportEmailVerified={supportEmailVerified}
+              setSupportEmailVerified={setSupportEmailVerified}
               storeSubdomain={storeSubdomain}
               storeCustomDomain={storeCustomDomain}
               setStoreCustomDomain={setStoreCustomDomain}

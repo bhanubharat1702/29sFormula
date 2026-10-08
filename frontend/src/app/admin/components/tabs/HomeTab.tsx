@@ -167,7 +167,6 @@ export default function HomeTab({
 
   return (
     <div className={styles.viewContainer}>
-      <h1 className={styles.pageHeading}>Dashboard</h1>
 
       {/* Stats widgets layout row */}
       <section className={styles.statsRow}>

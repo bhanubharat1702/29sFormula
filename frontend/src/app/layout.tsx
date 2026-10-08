@@ -8,6 +8,8 @@ import { MarketProvider } from "@/context/MarketContext";
 import { GeoblockGuard } from "@/components/GeoblockGuard";
 import Script from "next/script";
 
+import DynamicStoreHead from "@/components/DynamicStoreHead";
+
 const outfit = Outfit({
   variable: "--font-outfit",
   subsets: ["latin"],
@@ -109,6 +111,7 @@ export default function RootLayout({
             <GeoblockGuard>
               <SmoothScroll>
                 <SessionTracker />
+                <DynamicStoreHead />
                 {children}
               </SmoothScroll>
             </GeoblockGuard>

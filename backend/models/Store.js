@@ -102,8 +102,10 @@ const StoreSchema = new mongoose.Schema({
   // Denormalized for fast lookups without User populate
   ownerName: { type: String, default: '' },
   ownerEmail: { type: String, default: '', lowercase: true, trim: true },
+  ownerEmailVerified: { type: Boolean, default: false },
   ownerPhone: { type: String, default: '' },
   supportEmail: { type: String, default: '', lowercase: true, trim: true },
+  supportEmailVerified: { type: Boolean, default: false },
   supportPhone: { type: String, default: '' },
 
   // ── Business Details ─────────────────────────────────────────

@@ -1,6 +1,8 @@
 import express from "express";
 import Settings from "../models/Settings.js";
 import Store from "../models/Store.js";
+import Otp from "../models/Otp.js";
+import { queueEmail } from "../utils/emailQueue.js";
 import { setCachedSettingsForStore, invalidateSettingsCache } from "../utils/cache.js";
 import { invalidateTenantCache } from "../middleware/tenantResolver.js";
 import { redisCache } from "../middleware/cacheMiddleware.js";
@@ -351,8 +353,10 @@ router.get("/api/settings", optionalAuth, async (req, res) => {
           postalCode: store.postalCode || settings.storePostalCode || "",
           ownerName: store.ownerName || "",
           ownerEmail: store.ownerEmail || "",
+          ownerEmailVerified: store.ownerEmailVerified ?? settings.ownerEmailVerified ?? false,
           ownerPhone: store.ownerPhone || "",
           supportEmail: store.supportEmail || "",
+          supportEmailVerified: store.supportEmailVerified ?? settings.supportEmailVerified ?? false,
           supportPhone: store.supportPhone || "",
           domains: store.domains || [],
           plan: store.plan || "starter",
@@ -360,8 +364,10 @@ router.get("/api/settings", optionalAuth, async (req, res) => {
         };
 
         if (!responseObj.ownerEmail) responseObj.ownerEmail = store.ownerEmail || "";
+        if (responseObj.ownerEmailVerified === undefined) responseObj.ownerEmailVerified = settings.ownerEmailVerified ?? store.ownerEmailVerified ?? false;
         if (!responseObj.ownerPhone) responseObj.ownerPhone = store.ownerPhone || "";
         if (!responseObj.supportEmail) responseObj.supportEmail = store.supportEmail || "";
+        if (responseObj.supportEmailVerified === undefined) responseObj.supportEmailVerified = settings.supportEmailVerified ?? store.supportEmailVerified ?? false;
         if (!responseObj.supportPhone) responseObj.supportPhone = store.supportPhone || "";
         if (!responseObj.businessName) responseObj.businessName = store.businessName || store.name || "";
         if (!responseObj.storeAddress1) responseObj.storeAddress1 = settings.storeAddress1 || store.address1 || "";
@@ -376,6 +382,122 @@ router.get("/api/settings", optionalAuth, async (req, res) => {
   } catch (error) {
     console.error("Fetch Settings Error:", error);
     res.status(500).json({ error: "Failed to fetch settings" });
+  }
+});
+
+// --- EMAIL VERIFICATION OTP ENDPOINTS ---
+router.post("/api/settings/email-verification/send-otp", optionalAuth, async (req, res) => {
+  try {
+    const { emailType, email } = req.body;
+    if (!emailType || !email) {
+      return res.status(400).json({ error: "Email type and target email are required" });
+    }
+    const cleanEmail = email.trim().toLowerCase();
+
+    // Generate 6-digit numeric OTP
+    const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
+
+    // Delete previous OTPs for this email
+    await Otp.deleteMany({ email: cleanEmail });
+
+    await Otp.create({
+      email: cleanEmail,
+      otp: otpCode
+    });
+
+    let storeId = await getTenantStoreIdAsync(req);
+    let brandName = "Store Engine Merchant";
+    if (storeId) {
+      const store = await Store.findById(storeId).lean();
+      if (store) brandName = store.businessName || store.name || brandName;
+    }
+
+    const fieldLabel = emailType === "ownerEmail" ? "Owner Contact Email" : "Support Email";
+
+    await queueEmail({
+      to: cleanEmail,
+      subject: `[${brandName}] Email Verification Code: ${otpCode}`,
+      text: `Hello,\n\nYour 6-digit verification code for ${fieldLabel} (${cleanEmail}) is: ${otpCode}\n\nThis code will expire in 5 minutes.\nIf you did not request this, please ignore this email.`,
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 24px; border: 1px solid #e5e7eb; border-radius: 12px; background-color: #ffffff;">
+          <h2 style="color: #111827; text-align: center; margin-top: 0; font-size: 22px;">Verify Your Email Address</h2>
+          <p style="color: #4b5563; font-size: 15px; line-height: 1.5;">Hello,</p>
+          <p style="color: #4b5563; font-size: 15px; line-height: 1.5;">You requested to verify the <strong>${fieldLabel}</strong> for <strong>${brandName}</strong>.</p>
+          <div style="background-color: #f3f4f6; border-radius: 10px; padding: 24px; text-align: center; margin: 24px 0;">
+            <span style="font-size: 34px; font-weight: 800; letter-spacing: 8px; color: #111827; font-family: monospace;">${otpCode}</span>
+          </div>
+          <p style="color: #6b7280; font-size: 13px; text-align: center; margin-bottom: 0;">This code will expire in 5 minutes. If you didn't request this code, you can safely ignore this email.</p>
+        </div>
+      `
+    });
+
+    res.json({ success: true, message: `Verification OTP sent to ${cleanEmail}` });
+  } catch (error) {
+    console.error("Error sending email verification OTP:", error);
+    res.status(500).json({ error: error.message || "Failed to send verification OTP email" });
+  }
+});
+
+router.post("/api/settings/email-verification/verify-otp", optionalAuth, async (req, res) => {
+  try {
+    const { emailType, email, otp } = req.body;
+    if (!emailType || !email || !otp) {
+      return res.status(400).json({ error: "Email type, email, and OTP are required" });
+    }
+    const cleanEmail = email.trim().toLowerCase();
+
+    const otpRecord = await Otp.findOne({ email: cleanEmail, otp: otp.trim() });
+    if (!otpRecord) {
+      return res.status(400).json({ error: "Invalid or expired OTP code. Please check and try again." });
+    }
+
+    // Clear used OTP
+    await Otp.deleteOne({ _id: otpRecord._id });
+
+    // Update settings & store
+    let storeId = await getTenantStoreIdAsync(req);
+    if (!storeId) {
+      const activeStore = await Store.findOne({ status: "active" }).lean() || await Store.findOne().lean();
+      if (activeStore) storeId = activeStore._id;
+    }
+    const filter = storeId ? { storeId } : {};
+
+    let settings = await Settings.findOne(filter);
+    if (!settings) {
+      settings = new Settings({ storeId: storeId || undefined });
+    }
+
+    if (emailType === "ownerEmail") {
+      settings.ownerEmail = cleanEmail;
+      settings.ownerEmailVerified = true;
+    } else if (emailType === "supportEmail") {
+      settings.supportEmail = cleanEmail;
+      settings.supportEmailVerified = true;
+    }
+
+    await settings.save();
+
+    if (storeId) {
+      const storeUpdate = {};
+      if (emailType === "ownerEmail") {
+        storeUpdate.ownerEmail = cleanEmail;
+        storeUpdate.ownerEmailVerified = true;
+      } else if (emailType === "supportEmail") {
+        storeUpdate.supportEmail = cleanEmail;
+        storeUpdate.supportEmailVerified = true;
+      }
+      await Store.findByIdAndUpdate(storeId, storeUpdate);
+    }
+
+    res.json({
+      success: true,
+      message: `${emailType === "ownerEmail" ? "Owner Email" : "Support Email"} verified successfully!`,
+      ownerEmailVerified: settings.ownerEmailVerified,
+      supportEmailVerified: settings.supportEmailVerified
+    });
+  } catch (error) {
+    console.error("Error verifying email OTP:", error);
+    res.status(500).json({ error: error.message || "Failed to verify OTP" });
   }
 });
 
@@ -685,6 +807,33 @@ router.post("/api/settings", optionalAuth, async (req, res) => {
     if (req.body.notifyOrderDelivered !== undefined) settings.notifyOrderDelivered = req.body.notifyOrderDelivered;
     if (req.body.notifyOrderRefund !== undefined) settings.notifyOrderRefund = req.body.notifyOrderRefund;
 
+    // Contact Information & Verification logic
+    if (req.body.ownerEmail !== undefined) {
+      const newOwnerEmail = (req.body.ownerEmail || "").trim().toLowerCase();
+      const currentOwnerEmail = (settings.ownerEmail || "").trim().toLowerCase();
+      if (newOwnerEmail !== currentOwnerEmail) {
+        settings.ownerEmail = newOwnerEmail;
+        settings.ownerEmailVerified = false;
+      }
+    }
+    if (req.body.ownerEmailVerified !== undefined) {
+      settings.ownerEmailVerified = req.body.ownerEmailVerified;
+    }
+    if (req.body.ownerPhone !== undefined) settings.ownerPhone = req.body.ownerPhone;
+
+    if (req.body.supportEmail !== undefined) {
+      const newSupportEmail = (req.body.supportEmail || "").trim().toLowerCase();
+      const currentSupportEmail = (settings.supportEmail || "").trim().toLowerCase();
+      if (newSupportEmail !== currentSupportEmail) {
+        settings.supportEmail = newSupportEmail;
+        settings.supportEmailVerified = false;
+      }
+    }
+    if (req.body.supportEmailVerified !== undefined) {
+      settings.supportEmailVerified = req.body.supportEmailVerified;
+    }
+    if (req.body.supportPhone !== undefined) settings.supportPhone = req.body.supportPhone;
+
     // Integrations & Cloudinary / OAuth / SEO
     if (req.body.googleClientSecret !== undefined) settings.googleClientSecret = req.body.googleClientSecret;
     if (req.body.cloudinaryCloudName !== undefined) settings.cloudinaryCloudName = req.body.cloudinaryCloudName;
@@ -724,9 +873,15 @@ router.post("/api/settings", optionalAuth, async (req, res) => {
       if (req.body.country !== undefined) storeUpdates.country = req.body.country;
       if (req.body.businessType !== undefined) storeUpdates.businessType = req.body.businessType;
       if (req.body.ownerPhone !== undefined) storeUpdates.ownerPhone = req.body.ownerPhone;
-      if (req.body.ownerEmail !== undefined) storeUpdates.ownerEmail = req.body.ownerEmail;
+      if (req.body.ownerEmail !== undefined) {
+        storeUpdates.ownerEmail = settings.ownerEmail;
+        storeUpdates.ownerEmailVerified = settings.ownerEmailVerified;
+      }
       if (req.body.supportPhone !== undefined) storeUpdates.supportPhone = req.body.supportPhone;
-      if (req.body.supportEmail !== undefined) storeUpdates.supportEmail = req.body.supportEmail;
+      if (req.body.supportEmail !== undefined) {
+        storeUpdates.supportEmail = settings.supportEmail;
+        storeUpdates.supportEmailVerified = settings.supportEmailVerified;
+      }
       if (req.body.storeAddress1 !== undefined) storeUpdates.address1 = req.body.storeAddress1;
       if (req.body.storeAddress2 !== undefined) storeUpdates.address2 = req.body.storeAddress2;
       if (req.body.storeCity !== undefined) storeUpdates.city = req.body.storeCity;
