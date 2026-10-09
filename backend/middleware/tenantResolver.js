@@ -1,5 +1,6 @@
+import mongoose from "mongoose";
 import Store from "../models/Store.js";
-import { runWithTenant } from "../utils/tenantContext.js";
+import { runWithTenant, runWithoutTenant } from "../utils/tenantContext.js";
 import jwt from "jsonwebtoken";
 
 // Cache in-memory for fast domain -> storeId resolution
@@ -50,6 +51,15 @@ const extractCandidateHosts = (req) => {
 
 export const tenantResolver = async (req, res, next) => {
   try {
+    if (req.headers["x-tenant-id"] === "superadmin" || req.headers["x-superadmin"] === "true") {
+      req.storeId = null;
+      req.store = null;
+      req.isStoreSuspended = false;
+      return runWithoutTenant(() => {
+        next();
+      });
+    }
+
     let store = null;
     const candidateHosts = extractCandidateHosts(req);
 
@@ -116,7 +126,7 @@ export const tenantResolver = async (req, res, next) => {
       if (storeId) {
         if (domainStoreCache.has(String(storeId))) {
           store = domainStoreCache.get(String(storeId));
-        } else {
+        } else if (mongoose.Types.ObjectId.isValid(storeId)) {
           store = await Store.findById(storeId).lean();
           if (store) domainStoreCache.set(String(storeId), store);
         }
