@@ -400,6 +400,10 @@ export default function AdminSidebar({
                     <path d="M 12 0 L 12 14 A 4 4 0 0 0 16 18 L 24 18" strokeLinecap="round" strokeLinejoin="round" />
                     <path d="M 20 14 L 24 18 L 20 22" strokeLinecap="round" strokeLinejoin="round" />
                   </svg>
+                ) : activeTab === "online-store" && (customizeSubTab === "product" || customizeSubTab === "reviews") ? (
+                  <svg style={{ display: "block", minWidth: "28px", width: "28px", height: "36px", marginRight: "8px", color: "#d1d5db" }} viewBox="0 0 28 36" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M 12 0 L 12 36" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
                 ) : (
                   <div style={{ minWidth: "28px", width: "28px", height: "36px", marginRight: "8px" }} />
                 )}
@@ -514,7 +518,7 @@ export default function AdminSidebar({
                       <path d="M 12 0 L 12 14 A 4 4 0 0 0 16 18 L 24 18" strokeLinecap="round" strokeLinejoin="round" />
                       <path d="M 20 14 L 24 18 L 20 22" strokeLinecap="round" strokeLinejoin="round" />
                     </svg>
-                  ) : activeTab === "settings" && (settingsSubTab === "domain" || settingsSubTab === "payments" || settingsSubTab === "shipping" || settingsSubTab === "policies" || settingsSubTab === "integrations" || settingsSubTab === "trust") ? (
+                  ) : activeTab === "settings" && (settingsSubTab === "domain" || settingsSubTab === "payments" || settingsSubTab === "shipping" || settingsSubTab === "markets" || settingsSubTab === "notifications" || settingsSubTab === "policies" || settingsSubTab === "integrations" || settingsSubTab === "trust") ? (
                     <svg style={{ display: "block", minWidth: "28px", width: "28px", height: "36px", marginRight: "8px", color: "#d1d5db" }} viewBox="0 0 28 36" fill="none" stroke="currentColor" strokeWidth="2">
                       <path d="M 12 0 L 12 36" strokeLinecap="round" strokeLinejoin="round" />
                     </svg>
@@ -545,7 +549,7 @@ export default function AdminSidebar({
                       <path d="M 12 0 L 12 14 A 4 4 0 0 0 16 18 L 24 18" strokeLinecap="round" strokeLinejoin="round" />
                       <path d="M 20 14 L 24 18 L 20 22" strokeLinecap="round" strokeLinejoin="round" />
                     </svg>
-                  ) : activeTab === "settings" && (settingsSubTab === "payments" || settingsSubTab === "shipping" || settingsSubTab === "policies" || settingsSubTab === "integrations" || settingsSubTab === "trust") ? (
+                  ) : activeTab === "settings" && (settingsSubTab === "payments" || settingsSubTab === "shipping" || settingsSubTab === "markets" || settingsSubTab === "notifications" || settingsSubTab === "policies" || settingsSubTab === "integrations" || settingsSubTab === "trust") ? (
                     <svg style={{ display: "block", minWidth: "28px", width: "28px", height: "36px", marginRight: "8px", color: "#d1d5db" }} viewBox="0 0 28 36" fill="none" stroke="currentColor" strokeWidth="2">
                       <path d="M 12 0 L 12 36" strokeLinecap="round" strokeLinejoin="round" />
                     </svg>
@@ -576,7 +580,7 @@ export default function AdminSidebar({
                       <path d="M 12 0 L 12 14 A 4 4 0 0 0 16 18 L 24 18" strokeLinecap="round" strokeLinejoin="round" />
                       <path d="M 20 14 L 24 18 L 20 22" strokeLinecap="round" strokeLinejoin="round" />
                     </svg>
-                  ) : activeTab === "settings" && (settingsSubTab === "shipping" || settingsSubTab === "policies" || settingsSubTab === "integrations" || settingsSubTab === "trust") ? (
+                  ) : activeTab === "settings" && (settingsSubTab === "shipping" || settingsSubTab === "markets" || settingsSubTab === "notifications" || settingsSubTab === "policies" || settingsSubTab === "integrations" || settingsSubTab === "trust") ? (
                     <svg style={{ display: "block", minWidth: "28px", width: "28px", height: "36px", marginRight: "8px", color: "#d1d5db" }} viewBox="0 0 28 36" fill="none" stroke="currentColor" strokeWidth="2">
                       <path d="M 12 0 L 12 36" strokeLinecap="round" strokeLinejoin="round" />
                     </svg>
@@ -607,7 +611,7 @@ export default function AdminSidebar({
                       <path d="M 12 0 L 12 14 A 4 4 0 0 0 16 18 L 24 18" strokeLinecap="round" strokeLinejoin="round" />
                       <path d="M 20 14 L 24 18 L 20 22" strokeLinecap="round" strokeLinejoin="round" />
                     </svg>
-                  ) : activeTab === "settings" && (settingsSubTab === "policies" || settingsSubTab === "integrations" || settingsSubTab === "trust") ? (
+                  ) : activeTab === "settings" && (settingsSubTab === "markets" || settingsSubTab === "notifications" || settingsSubTab === "policies" || settingsSubTab === "integrations" || settingsSubTab === "trust") ? (
                     <svg style={{ display: "block", minWidth: "28px", width: "28px", height: "36px", marginRight: "8px", color: "#d1d5db" }} viewBox="0 0 28 36" fill="none" stroke="currentColor" strokeWidth="2">
                       <path d="M 12 0 L 12 36" strokeLinecap="round" strokeLinejoin="round" />
                     </svg>

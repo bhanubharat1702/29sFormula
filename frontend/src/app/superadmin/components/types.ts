@@ -12,13 +12,27 @@ export interface StoreItem {
   supportPhone?: string;
   businessName?: string;
   businessType?: string;
+  domains?: {
+    domain: string;
+    type?: "subdomain" | "custom";
+    isPrimary?: boolean;
+    dnsStatus?: string;
+    sslStatus?: string;
+  }[];
   country?: string;
+  state?: string;
+  city?: string;
   currency?: string;
   timezone?: string;
   productCount?: number;
   orderCount?: number;
   plan?: string;
   status?: string;
+  billing?: {
+    billingCycle?: "monthly" | "annual";
+    subscriptionId?: string;
+    paymentMethod?: string;
+  };
   isActive?: boolean;
   internalNotes?: string;
   createdAt?: string;

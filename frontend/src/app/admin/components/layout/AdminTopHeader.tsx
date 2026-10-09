@@ -63,7 +63,7 @@ const SUBTAB_LABELS: Record<string, Record<string, string>> = {
     general: "General Settings",
     markets: "Global Markets",
     domains: "Custom Domains",
-    payments: "Payment Gateways",
+    payments: "Payment Settings",
     checkout: "Checkout Configuration",
     shipping: "Shipping & Delivery",
     taxes: "Taxes & Duties",

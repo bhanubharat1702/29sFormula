@@ -541,12 +541,15 @@ router.post("/api/settings", optionalAuth, async (req, res) => {
       const activeStore = await Store.findOne({ status: "active" }).lean() || await Store.findOne().lean();
       if (activeStore) storeId = activeStore._id;
     }
-    const filter = storeId ? { storeId } : {};
+    if (!storeId) {
+      return res.status(400).json({ error: "Store context is missing or invalid." });
+    }
+    const filter = { storeId };
 
     let settings = await Settings.findOne(filter);
     if (!settings) {
-      settings = new Settings({ storeId: storeId || undefined });
-    } else if (storeId && !settings.storeId) {
+      settings = new Settings({ storeId });
+    } else if (!settings.storeId) {
       settings.storeId = storeId;
     }
 
@@ -848,6 +851,13 @@ router.post("/api/settings", optionalAuth, async (req, res) => {
 
     if (req.body.privacyPolicyText !== undefined) settings.privacyPolicyText = req.body.privacyPolicyText;
     if (req.body.termsOfServiceText !== undefined) settings.termsOfServiceText = req.body.termsOfServiceText;
+    if (req.body.returnPolicyText !== undefined) settings.returnPolicyText = req.body.returnPolicyText;
+    if (req.body.shippingPolicyText !== undefined) settings.shippingPolicyText = req.body.shippingPolicyText;
+    if (req.body.contactUsText !== undefined) settings.contactUsText = req.body.contactUsText;
+    if (req.body.supportText !== undefined) settings.supportText = req.body.supportText;
+    if (req.body.careersText !== undefined) settings.careersText = req.body.careersText;
+    if (req.body.tradeEnquiryText !== undefined) settings.tradeEnquiryText = req.body.tradeEnquiryText;
+    if (req.body.aboutUsText !== undefined) settings.aboutUsText = req.body.aboutUsText;
 
     if (req.body.businessName !== undefined && req.body.businessName.trim() && settings.brandLogoType === "text" && (!req.body.brandLogoValue || req.body.brandLogoValue === "MY STORE")) {
       settings.brandLogoValue = req.body.businessName.trim();
@@ -865,8 +875,20 @@ router.post("/api/settings", optionalAuth, async (req, res) => {
         storeUpdates.businessName = req.body.businessName.trim();
         storeUpdates.name = req.body.businessName.trim();
       }
-      if (settings.brandLogoType === "image" && settings.brandLogoValue) {
+      // Persist the merchant's logo onto Store whenever the settings logo value
+      // is an image URL (uploaded asset or pasted link), regardless of whether
+      // brandLogoType was explicitly flipped to "image". Also clear the Store
+      // logo when the merchant switches back to a text wordmark so the two
+      // models never drift apart.
+      const brandLogoIsUrl =
+        settings.brandLogoValue &&
+        (settings.brandLogoValue.startsWith("http") ||
+          settings.brandLogoValue.startsWith("/") ||
+          settings.brandLogoValue.startsWith("data:"));
+      if (brandLogoIsUrl) {
         storeUpdates.businessLogo = settings.brandLogoValue;
+      } else if (settings.brandLogoType === "text") {
+        storeUpdates.businessLogo = "";
       }
       if (req.body.currency !== undefined) storeUpdates.currency = req.body.currency;
       if (req.body.timezone !== undefined) storeUpdates.timezone = req.body.timezone;

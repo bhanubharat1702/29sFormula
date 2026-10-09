@@ -12,13 +12,20 @@ import Discount from "../../models/Discount.js";
 import ReturnRequest from "../../models/ReturnRequest.js";
 import Review from "../../models/Review.js";
 import { DomainItem, DomainSettings, ReservedSubdomain, RESERVED_SUBDOMAINS } from "../../models/Domain.js";
-import { DeliveryLog, InAppNotification } from "../../models/Communication.js";
-import { BillingInvoice } from "../../models/Billing.js";
+import { DeliveryLog, InAppNotification, SupportTicket } from "../../models/Communication.js";
+import { BillingInvoice, PaymentLog } from "../../models/Billing.js";
+import StoreMarket from "../../models/StoreMarket.js";
+import TaxZone from "../../models/TaxZone.js";
+import Asset from "../../models/Asset.js";
+import AuditLog from "../../models/AuditLog.js";
+import Otp from "../../models/Otp.js";
 import { recordAuditLog } from "../../services/auditLogService.js";
 import { dispatchCommunicationEvent } from "../../routes/superadmin/communications.js";
 
 import { invalidateSettingsCache } from "../../utils/cache.js";
 import { invalidateTenantCache } from "../../middleware/tenantResolver.js";
+import { runWithoutTenant } from "../../utils/tenantContext.js";
+import { cloudinary, getCloudinaryPublicId } from "../../utils/cloudinary.js";
 import { subdomainBloomFilter, customDomainBloomFilter, reservedSubdomainBloomFilter } from "../../utils/bloomFilter.js";
 
 const getJwtSecret = () => process.env.JWT_SECRET || "ecommerce_secret_jwt_key_2026";
@@ -57,41 +64,123 @@ export const calculateStoreHealthScore = async (storeId) => {
 };
 
 /**
- * Cascading purge of all tenant data across all platform subsystems
+ * Removes every uploaded media asset belonging to a tenant from Cloudinary.
+ * Best-effort: individual failures are logged and never abort the DB purge,
+ * because the database is the source of truth that must be cleared completely.
+ */
+const purgeTenantCloudinaryAssets = async (storeId) => {
+  const sId = new mongoose.Types.ObjectId(String(storeId));
+
+  try {
+    const assets = await runWithoutTenant(() =>
+      Asset.find({ storeId: sId }).select("publicId url").lean()
+    );
+
+    const publicIds = (assets || [])
+      .map((a) => a.publicId || getCloudinaryPublicId(a.url))
+      .filter(Boolean)
+      .filter((id, idx, arr) => arr.indexOf(id) === idx);
+
+    // Cloudinary destroy accepts up to 100 public IDs per call. Resource type
+    // is inferred per-id below so videos and images are both removed.
+    const chunkSize = 100;
+    for (let i = 0; i < publicIds.length; i += chunkSize) {
+      const batch = publicIds.slice(i, i + chunkSize);
+      await Promise.all(
+        batch.map((publicId) =>
+          cloudinary.uploader
+            .destroy(publicId, { resource_type: "image", invalidate: true })
+            .catch(() =>
+              cloudinary.uploader
+                .destroy(publicId, { resource_type: "video", invalidate: true })
+                .catch(() => null)
+            )
+        )
+      );
+    }
+  } catch (err) {
+    console.error("Cloudinary asset purge warning:", err);
+  }
+
+  // Remove the asset DB records regardless of external deletion outcome.
+  await runWithoutTenant(() => Asset.deleteMany({ storeId: sId }));
+};
+
+/**
+ * Cascading purge of ALL tenant data across every subsystem.
+ * Runs inside a tenant-bypassed context so nothing is missed by the tenant
+ * isolation plugin, and also removes uploaded media from the system (Cloudinary).
  */
 export const purgeTenantData = async (storeId) => {
-  const store = await Store.findById(storeId);
+  const sId = new mongoose.Types.ObjectId(String(storeId));
+
+  // Read the store in a bypassed context so the lookup succeeds even without an
+  // active tenant context (e.g. scheduled/background purge).
+  const store = await runWithoutTenant(() => Store.findById(sId));
   if (!store) return null;
 
   if (store.subdomain === "default") {
     throw new Error("Cannot delete the Default Store.");
   }
 
-  const sId = store._id;
-
-  const userDeleteQuery = {
-    $or: [{ storeId: sId }]
-  };
+  const userDeleteQuery = { $or: [{ storeId: sId }] };
   if (store.ownerId) userDeleteQuery.$or.push({ _id: store.ownerId });
   if (store.ownerEmail) userDeleteQuery.$or.push({ email: store.ownerEmail });
 
-  // Delete across all 12 subsystems
-  await Promise.all([
-    Settings.deleteMany({ storeId: sId }),
-    Product.deleteMany({ storeId: sId }),
-    Order.deleteMany({ storeId: sId }),
-    User.deleteMany(userDeleteQuery),
-    Customer.deleteMany({ storeId: sId }),
-    Discount.deleteMany({ storeId: sId }),
-    ReturnRequest.deleteMany({ storeId: sId }),
-    Review.deleteMany({ storeId: sId }),
-    DomainItem.deleteMany({ storeId: sId }),
-    DeliveryLog.deleteMany({ storeId: sId }),
-    InAppNotification.deleteMany({ storeId: sId }),
-    BillingInvoice.deleteMany({ storeId: sId }),
-    store.demoRequestId ? DemoRequest.findByIdAndDelete(store.demoRequestId) : Promise.resolve(),
-    Store.findByIdAndDelete(sId)
-  ]);
+  // Collect the owner's emails so ancillary records (OTP codes, unsubscribe
+  // entries) tied only to the merchant identity are also removed.
+  const relatedEmails = [store.ownerEmail, store.supportEmail]
+    .filter(Boolean)
+    .map((e) => String(e).toLowerCase().trim());
+
+  // Remove tenant-owned media from Cloudinary + its Asset records.
+  await purgeTenantCloudinaryAssets(sId);
+
+  // Every collection that can hold tenant-scoped data. Wrapped in a single
+  // tenant-bypassed context so the isolation plugin injects no storeId filter.
+  await runWithoutTenant(() =>
+    Promise.all([
+      // Core commerce data
+      Settings.deleteMany({ storeId: sId }),
+      Product.deleteMany({ storeId: sId }),
+      Order.deleteMany({ storeId: sId }),
+      Customer.deleteMany({ storeId: sId }),
+      Discount.deleteMany({ storeId: sId }),
+      ReturnRequest.deleteMany({ storeId: sId }),
+      Review.deleteMany({ storeId: sId }),
+
+      // Identity & access
+      User.deleteMany(userDeleteQuery),
+
+      // Domain configuration
+      DomainItem.deleteMany({ storeId: sId }),
+
+      // Communications
+      DeliveryLog.deleteMany({ storeId: sId }),
+      InAppNotification.deleteMany({ storeId: sId }),
+      SupportTicket.deleteMany({ storeId: sId }),
+
+      // Billing
+      BillingInvoice.deleteMany({ storeId: sId }),
+      PaymentLog.deleteMany({ storeId: sId }),
+
+      // Markets & tax configuration
+      StoreMarket.deleteMany({ storeId: sId }),
+      TaxZone.deleteMany({ storeId: sId }),
+
+      // Audit trail
+      AuditLog.deleteMany({ storeId: sId }),
+
+      // Primary OTP records (transactional log for the merchant identity)
+      relatedEmails.length ? Otp.deleteMany({ email: { $in: relatedEmails } }) : Promise.resolve(),
+
+      // Converted CRM lead linked to this store
+      store.demoRequestId ? DemoRequest.findByIdAndDelete(store.demoRequestId) : Promise.resolve(),
+
+      // The store itself (last)
+      Store.findByIdAndDelete(sId)
+    ])
+  );
 
   return store;
 };
@@ -160,6 +249,22 @@ export const getStoresHandler = async (req, res) => {
       Store.countDocuments(filter)
     ]);
 
+    // Merchants manage their logo through Settings (brandLogoType/brandLogoValue),
+    // while Store.businessLogo can lag behind those edits. Read the Settings docs
+    // for this page of stores and treat the Settings image URL as authoritative so
+    // the superadmin table always renders the real merchant logo.
+    const settingsDocs = stores.length
+      ? await Settings.find({ storeId: { $in: stores.map((s) => s._id) } })
+        .select("storeId brandLogoType brandLogoValue")
+        .lean()
+      : [];
+    const settingsByStore = new Map(settingsDocs.map((s) => [String(s.storeId), s]));
+
+    const resolveLogoUrl = (value) =>
+      value && (value.startsWith("http") || value.startsWith("/") || value.startsWith("data:"))
+        ? value
+        : "";
+
     // Enrich stores with counts and health scores
     const enrichedStores = await Promise.all(
       stores.map(async (store) => {
@@ -168,11 +273,18 @@ export const getStoresHandler = async (req, res) => {
           Order.countDocuments({ storeId: store._id }),
           calculateStoreHealthScore(store._id)
         ]);
+        const settings = settingsByStore.get(String(store._id));
+        const settingsLogo =
+          settings &&
+            (settings.brandLogoType === "image" || resolveLogoUrl(settings.brandLogoValue))
+            ? resolveLogoUrl(settings.brandLogoValue)
+            : "";
         return {
           ...store,
           productCount,
           orderCount,
-          healthScore
+          healthScore,
+          businessLogo: settingsLogo || store.businessLogo || ""
         };
       })
     );
@@ -813,12 +925,15 @@ export const impersonateStoreHandler = async (req, res) => {
   }
 };
 
-// DELETE /api/superadmin/stores/:id & /api/superadmin/tenants/:id — Soft-delete (48h grace) or Purge
+// DELETE /api/superadmin/stores/:id & /api/superadmin/tenants/:id
+// Permanent purge by default (all merchant data removed from the DB + system).
+// Pass softDelete=true to schedule a 48h grace period instead.
 export const deleteStoreHandler = async (req, res) => {
   try {
     const { id } = req.params;
     const { password } = req.body;
     const forcePurge = req.query.forcePurge === "true" || req.body?.forcePurge === true;
+    const softDelete = req.query.softDelete === "true" || req.body?.softDelete === true;
 
     const SUPER_ADMIN_PASS = process.env.SUPER_ADMIN_PASS || "SuperAdmin@2026";
     if (!password || (password !== SUPER_ADMIN_PASS && password !== "superadmin123")) {
@@ -834,21 +949,35 @@ export const deleteStoreHandler = async (req, res) => {
 
     const clientMeta = getClientMeta(req);
 
-    if (forcePurge) {
+    // Default behaviour: permanent, irreversible purge of every tenant record
+    // (products, orders, customers, users, billing, domains, communications,
+    // tax/markets, audit trail, CRM lead) plus uploaded Cloudinary media.
+    if (forcePurge || !softDelete) {
+      const storeName = store.name;
       const deletedStore = await purgeTenantData(id);
+
+      // Remove the tenant from platform caches so no stale resolver entry or
+      // settings snapshot can outlive the purge.
+      invalidateSettingsCache(null);
+      invalidateTenantCache(store._id);
+
       await recordAuditLog({
         ...clientMeta,
-        action: "Force Purge Merchant Store",
+        action: "Purge Merchant Store",
         actionCategory: "tenant",
-        target: store.name,
+        target: storeName,
         targetId: id,
         storeId: store._id,
-        storeName: store.name,
-        beforeValue: { name: store.name, subdomain: store.subdomain, status: store.status },
+        storeName,
+        beforeValue: { name: storeName, subdomain: store.subdomain, status: store.status },
         afterValue: null,
-        reason: req.body?.reason || req.query?.reason || "Immediate compliance purge"
+        reason: req.body?.reason || req.query?.reason || "Permanent merchant account deletion"
       });
-      return res.json({ message: `Store '${deletedStore.name}' and all subsystem data purged permanently.` });
+
+      return res.json({
+        message: `Store '${deletedStore?.name || storeName}' and all associated merchant data were permanently deleted from the system.`,
+        purged: true
+      });
     }
 
     const beforeStatus = { status: store.status, isActive: store.isActive };

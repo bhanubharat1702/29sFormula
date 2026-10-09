@@ -711,6 +711,10 @@ export function GeneralSubTab(props: any) {
     brandLogoValue, setBrandLogoValue,
     uploadingLogo, handleBrandLogoUpload,
     primaryColor, setPrimaryColor,
+    instagramLink, setInstagramLink,
+    facebookLink, setFacebookLink,
+    contactLink, setContactLink,
+    twitterLink, setTwitterLink,
     handleSaveSettings
   } = props;
 
@@ -864,7 +868,7 @@ export function GeneralSubTab(props: any) {
     storeBusinessName, storeBusinessType, storeCountry, storeCurrency, storeTimezone,
     storeOwnerEmail, storeOwnerPhone, storeSupportEmail, storeSupportPhone,
     storeAddress1, storeAddress2, storeCity, storeState, storePostalCode, storeLanguage,
-    brandLogoValue, primaryColor
+    brandLogoValue, primaryColor, instagramLink, facebookLink, contactLink, twitterLink
   });
 
   const getChanges = (): ChangedField[] => {
@@ -886,6 +890,10 @@ export function GeneralSubTab(props: any) {
     if (storeState !== init.storeState) changes.push({ field: "State", from: init.storeState, to: storeState });
     if (storePostalCode !== init.storePostalCode) changes.push({ field: "Postal Code", from: init.storePostalCode, to: storePostalCode });
     if (brandLogoValue !== init.brandLogoValue) changes.push({ field: "Brand Logo", from: init.brandLogoValue, to: brandLogoValue });
+    if (instagramLink !== init.instagramLink) changes.push({ field: "Instagram URL", from: init.instagramLink, to: instagramLink });
+    if (facebookLink !== init.facebookLink) changes.push({ field: "Facebook URL", from: init.facebookLink, to: facebookLink });
+    if (contactLink !== init.contactLink) changes.push({ field: "WhatsApp Chat Link", from: init.contactLink, to: contactLink });
+    if (twitterLink !== init.twitterLink) changes.push({ field: "Twitter / X URL", from: init.twitterLink, to: twitterLink });
     return changes;
   };
 
@@ -895,7 +903,7 @@ export function GeneralSubTab(props: any) {
       storeBusinessName, storeBusinessType, storeCountry, storeCurrency, storeTimezone,
       storeOwnerEmail, storeOwnerPhone, storeSupportEmail, storeSupportPhone,
       storeAddress1, storeAddress2, storeCity, storeState, storePostalCode, storeLanguage,
-      brandLogoValue, primaryColor
+      brandLogoValue, primaryColor, instagramLink, facebookLink, contactLink, twitterLink
     };
   };
 
@@ -1397,6 +1405,33 @@ export function GeneralSubTab(props: any) {
         </div>
       </div>
 
+      {/* Social Media Handles */}
+      <div style={cardStyle}>
+        <div style={cardHeaderStyle}>
+          <h3 style={cardTitleStyle}>Social Media Handles</h3>
+
+        </div>
+
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+          <div>
+            <label style={labelStyle}>Instagram Profile URL</label>
+            <input type="text" value={instagramLink || ''} onChange={(e) => setInstagramLink && setInstagramLink(e.target.value)} style={inputStyle} />
+          </div>
+          <div>
+            <label style={labelStyle}>Facebook Page URL</label>
+            <input type="text" value={facebookLink || ''} onChange={(e) => setFacebookLink && setFacebookLink(e.target.value)} style={inputStyle} />
+          </div>
+          <div>
+            <label style={labelStyle}>WhatsApp Support Chat Link</label>
+            <input type="text" value={contactLink || ''} onChange={(e) => setContactLink && setContactLink(e.target.value)} style={inputStyle} />
+          </div>
+          <div>
+            <label style={labelStyle}>Twitter / X Profile URL</label>
+            <input type="text" value={twitterLink || ''} onChange={(e) => setTwitterLink && setTwitterLink(e.target.value)} style={inputStyle} />
+          </div>
+        </div>
+      </div>
+
       {/* OTP Verification Modal */}
       {verifyingModal?.open && (
         <div style={{
@@ -1654,7 +1689,7 @@ export function ChangePasswordCard() {
     <div style={cardStyle}>
       <div style={cardHeaderStyle}>
         <h3 style={cardTitleStyle}>Change Account Password</h3>
-        <p style={cardSubTitleStyle}>Update your account password to maintain store security.</p>
+
       </div>
 
       {passwordMsg && (
@@ -2213,7 +2248,7 @@ export function DomainSubTab() {
       {loading ? (
         <div style={{ ...cardStyle, alignItems: 'center', color: '#6b7280', fontSize: '0.85rem' }}>Loading domain settings…</div>
       ) : error ? (
-        <div style={{ ...cardStyle, borderColor: '#fecaca' }}>
+        <div style={{ ...cardStyle, border: '1px solid #fecaca' }}>
           <span style={{ color: '#b91c1c', fontSize: '0.85rem' }}>{error}</span>
           <button onClick={loadDomains} style={{ ...secondaryBtn, alignSelf: 'flex-start' }}>Retry</button>
         </div>
@@ -2377,7 +2412,7 @@ export function DomainSubTab() {
                         </button>
                         <button onClick={() => setDnsInstructions(buildLocalDns(d))} style={secondaryBtn}>View DNS Records</button>
                         {!d.isPrimary && !isLegacy && <button onClick={() => handleSetPrimary(d.domain)} style={secondaryBtn}>Make Primary</button>}
-                        <button onClick={() => handleRemove(d.domain)} style={{ ...secondaryBtn, color: '#b91c1c', borderColor: '#fecaca' }}>Remove</button>
+                        <button onClick={() => handleRemove(d.domain)} style={{ ...secondaryBtn, color: '#b91c1c', border: '1px solid #fecaca' }}>Remove</button>
                       </div>
                     </div>
                   );
@@ -2697,41 +2732,6 @@ export function PaymentsSubTab(props: any) {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-
-      {/* Encryption & Security Notice Header */}
-      <div style={{
-        backgroundColor: '#f8fafc',
-        border: '1px solid #e2e8f0',
-        borderRadius: '10px',
-        padding: '16px 20px',
-        display: 'flex',
-        alignItems: 'center',
-        gap: '14px'
-      }}>
-        <div style={{
-          width: '38px',
-          height: '38px',
-          borderRadius: '50%',
-          backgroundColor: '#0c0a09',
-          color: '#ffffff',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          fontSize: '18px',
-          flexShrink: 0
-        }}>
-          🔐
-        </div>
-        <div>
-          <h4 style={{ margin: 0, fontSize: '0.95rem', fontWeight: 700, color: '#0f172a' }}>
-            Multi-Gateway Enterprise Encryption Enabled
-          </h4>
-          <p style={{ margin: '2px 0 0 0', fontSize: '0.82rem', color: '#64748b' }}>
-            All payment gateway secret keys and salt keys are encrypted at rest using high-grade AES-256-GCM hardware encryption. Your store customers will automatically use the active gateway selected below.
-          </p>
-        </div>
-      </div>
-
       {/* Select Active Primary Payment Gateway */}
       <div style={cardStyle}>
         <div style={cardHeaderStyle}>
@@ -3366,34 +3366,6 @@ export function IntegrationsSubTab(props: any) {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-      {/* Cloudinary Media Credentials */}
-      <div style={cardStyle}>
-        <div style={cardHeaderStyle}>
-          <h3 style={cardTitleStyle}>Cloudinary Media Credentials</h3>
-          <p style={cardSubTitleStyle}>Connect your custom Cloudinary account for store product images and video uploads.</p>
-        </div>
-
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
-          <div>
-            <label style={labelStyle}>Cloud Name</label>
-            <input type="text" value={cloudinaryCloudName || ''} onChange={(e) => setCloudinaryCloudName && setCloudinaryCloudName(e.target.value)} style={inputStyle} />
-          </div>
-          <div>
-            <label style={labelStyle}>API Key</label>
-            <input type="text" value={cloudinaryApiKey || ''} onChange={(e) => setCloudinaryApiKey && setCloudinaryApiKey(e.target.value)} style={inputStyle} />
-          </div>
-          <div style={{ gridColumn: '1 / -1' }}>
-            <label style={labelStyle}>API Secret</label>
-            <div style={{ display: 'flex', gap: '8px' }}>
-              <input type={showCloudinarySecret ? "text" : "password"} value={cloudinaryApiSecret || ''} onChange={(e) => setCloudinaryApiSecret && setCloudinaryApiSecret(e.target.value)} style={inputStyle} />
-              <button type="button" className={styles.btnAction} onClick={() => setShowCloudinarySecret(!showCloudinarySecret)} style={{ whiteSpace: 'nowrap' }}>
-                {showCloudinarySecret ? "Hide" : "Show"}
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-
       {/* Google OAuth Login Credentials */}
       <div style={cardStyle}>
         <div style={cardHeaderStyle}>
@@ -3445,33 +3417,6 @@ export function IntegrationsSubTab(props: any) {
         </div>
       </div>
 
-      {/* Social Handles */}
-      <div style={cardStyle}>
-        <div style={cardHeaderStyle}>
-          <h3 style={cardTitleStyle}>Social Media Handles</h3>
-          <p style={cardSubTitleStyle}>Public social media profiles shown in storefront footer.</p>
-        </div>
-
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
-          <div>
-            <label style={labelStyle}>Instagram Profile URL</label>
-            <input type="text" value={instagramLink || ''} onChange={(e) => setInstagramLink && setInstagramLink(e.target.value)} style={inputStyle} />
-          </div>
-          <div>
-            <label style={labelStyle}>Facebook Page URL</label>
-            <input type="text" value={facebookLink || ''} onChange={(e) => setFacebookLink && setFacebookLink(e.target.value)} style={inputStyle} />
-          </div>
-          <div>
-            <label style={labelStyle}>WhatsApp Support Chat Link</label>
-            <input type="text" value={contactLink || ''} onChange={(e) => setContactLink && setContactLink(e.target.value)} style={inputStyle} />
-          </div>
-          <div>
-            <label style={labelStyle}>Twitter / X Profile URL</label>
-            <input type="text" value={twitterLink || ''} onChange={(e) => setTwitterLink && setTwitterLink(e.target.value)} style={inputStyle} />
-          </div>
-        </div>
-      </div>
-
       <SettingsSubTabFooter handleSaveSettings={handleSaveAndResetSnapshot} getChanges={getChanges} />
     </div>
   );
@@ -3501,8 +3446,13 @@ export function PoliciesSubTab(props: any) {
     const changes: ChangedField[] = [];
     const init = initialRef.current;
     if (returnPolicyText !== init.returnPolicyText) changes.push({ field: "Return Policy", from: "(previous)", to: "(updated)" });
+    if (shippingPolicyText !== init.shippingPolicyText) changes.push({ field: "Shipping Policy", from: "(previous)", to: "(updated)" });
     if (privacyPolicyText !== init.privacyPolicyText) changes.push({ field: "Privacy Policy", from: "(previous)", to: "(updated)" });
     if (termsOfServiceText !== init.termsOfServiceText) changes.push({ field: "Terms of Service", from: "(previous)", to: "(updated)" });
+    if (contactUsText !== init.contactUsText) changes.push({ field: "Contact Us Text", from: "(previous)", to: "(updated)" });
+    if (aboutUsText !== init.aboutUsText) changes.push({ field: "About Us Story", from: "(previous)", to: "(updated)" });
+    if (careersText !== init.careersText) changes.push({ field: "Careers Text", from: "(previous)", to: "(updated)" });
+    if (tradeEnquiryText !== init.tradeEnquiryText) changes.push({ field: "Trade Enquiry Text", from: "(previous)", to: "(updated)" });
     return changes;
   };
 
@@ -3518,13 +3468,17 @@ export function PoliciesSubTab(props: any) {
       <div style={cardStyle}>
         <div style={cardHeaderStyle}>
           <h3 style={cardTitleStyle}>Storefront Legal Policies & Content</h3>
-          <p style={cardSubTitleStyle}>Text content shown on footer popups and policy links.</p>
+          <p style={cardSubTitleStyle}>Text content shown on footer popups and policy links for this store.</p>
         </div>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
           <div>
             <label style={labelStyle}>Return & Refund Policy</label>
             <textarea rows={4} value={returnPolicyText || ''} onChange={(e) => setReturnPolicyText && setReturnPolicyText(e.target.value)} style={textareaStyle} />
+          </div>
+          <div>
+            <label style={labelStyle}>Shipping Policy</label>
+            <textarea rows={4} value={shippingPolicyText || ''} onChange={(e) => setShippingPolicyText && setShippingPolicyText(e.target.value)} style={textareaStyle} />
           </div>
           <div>
             <label style={labelStyle}>Privacy Policy</label>
@@ -3535,8 +3489,20 @@ export function PoliciesSubTab(props: any) {
             <textarea rows={4} value={termsOfServiceText || ''} onChange={(e) => setTermsOfServiceText && setTermsOfServiceText(e.target.value)} style={textareaStyle} />
           </div>
           <div>
+            <label style={labelStyle}>Contact Us Text</label>
+            <textarea rows={3} value={contactUsText || ''} onChange={(e) => setContactUsText && setContactUsText(e.target.value)} style={textareaStyle} />
+          </div>
+          <div>
             <label style={labelStyle}>About Us Story</label>
             <textarea rows={3} value={aboutUsText || ''} onChange={(e) => setAboutUsText && setAboutUsText(e.target.value)} style={textareaStyle} />
+          </div>
+          <div>
+            <label style={labelStyle}>Careers Text</label>
+            <textarea rows={3} value={careersText || ''} onChange={(e) => setCareersText && setCareersText(e.target.value)} style={textareaStyle} />
+          </div>
+          <div>
+            <label style={labelStyle}>Trade & B2B Inquiry Text</label>
+            <textarea rows={3} value={tradeEnquiryText || ''} onChange={(e) => setTradeEnquiryText && setTradeEnquiryText(e.target.value)} style={textareaStyle} />
           </div>
         </div>
       </div>

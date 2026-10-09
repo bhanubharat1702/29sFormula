@@ -775,19 +775,32 @@ export default function SuperAdminPage() {
   const executeDeleteStore = async (password: string) => {
     if (!deleteStoreModalStore) return;
     const token = localStorage.getItem("superAdminToken");
+    const targetStoreId = deleteStoreModalStore._id;
+    const targetSubdomain = deleteStoreModalStore.subdomain;
     try {
-      const res = await fetch(`http://localhost:5001/api/superadmin/stores/${deleteStoreModalStore._id}`, {
+      const apiBase = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001";
+      const res = await fetch(`${apiBase}/api/superadmin/stores/${targetStoreId}`, {
         method: "DELETE",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`
         },
-        body: JSON.stringify({ password }),
+        // forcePurge: permanently delete every merchant record and uploaded media.
+        body: JSON.stringify({
+          password,
+          forcePurge: true,
+          reason: "Super admin permanent account deletion"
+        }),
       });
       const data = await res.json();
       if (res.ok) {
-        triggerToast(`Store ${deleteStoreModalStore.subdomain} deleted.`);
+        triggerToast(
+          data?.message ||
+          `Store ${targetSubdomain} and all associated merchant data were permanently deleted.`
+        );
         setDeleteStoreModalStore(null);
+        // Close any open detail view for the store that was just purged.
+        setSelectedDetailStore((prev) => (prev && prev._id === targetStoreId ? null : prev));
         fetchData();
       } else {
         alert(data.error || "Failed to delete store.");
@@ -825,8 +838,8 @@ export default function SuperAdminPage() {
       storeStatusFilter === "all"
         ? true
         : storeStatusFilter === "active"
-        ? Boolean(store.isActive)
-        : !store.isActive;
+          ? Boolean(store.isActive)
+          : !store.isActive;
 
     return matchesSearch && matchesStatus;
   });
