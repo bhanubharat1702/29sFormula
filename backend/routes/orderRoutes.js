@@ -8,6 +8,7 @@ import Customer from "../models/Customer.js";
 import User from "../models/User.js";
 import Store from "../models/Store.js";
 import Settings from "../models/Settings.js";
+import { getEffectiveSettings } from "../utils/settingsHelper.js";
 import { decrypt } from "../utils/encryptionHelper.js";
 import { Product, ProductVariant } from "../models/Product.js";
 import { invalidateProductsCache } from "../utils/cache.js";
@@ -1210,7 +1211,7 @@ const getStoreGatewayConfig = async (req) => {
     const activeStore = await Store.findOne({ status: "active" }).lean() || await Store.findOne().lean();
     if (activeStore) storeId = activeStore._id;
   }
-  const settings = await Settings.findOne(storeId ? { storeId } : {}).lean();
+  const settings = await getEffectiveSettings(storeId);
   
   const activeGateway = settings?.activePaymentGateway || "razorpay";
 

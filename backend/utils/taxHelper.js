@@ -1,5 +1,5 @@
 import TaxZone from "../models/TaxZone.js";
-import Settings from "../models/Settings.js";
+import { getEffectiveSettings } from "./settingsHelper.js";
 
 /**
  * Resolves the matching TaxZone for a given store and shipping address.
@@ -73,7 +73,7 @@ export async function resolveTaxZone({ storeId, country, state, postalCode }) {
 
   // 3. Fallback to Store Settings global tax default if configured
   try {
-    const settings = await Settings.findOne({ storeId }).lean();
+    const settings = await getEffectiveSettings(storeId);
     if (settings && (settings.taxRate > 0 || settings.taxInclusive)) {
       return {
         taxRate: settings.taxRate || 0,

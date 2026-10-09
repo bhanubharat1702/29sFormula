@@ -1,23 +1,12 @@
 import Settings from "../models/Settings.js";
 import Store from "../models/Store.js";
-import { getCachedSettingsForStore, setCachedSettingsForStore } from "./cache.js";
 import { getTenantStoreIdFromContext } from "./tenantContext.js";
+import { getEffectiveSettings } from "./settingsHelper.js";
 
 export const getBrandInfo = async (storeId = null) => {
   try {
     const activeStoreId = storeId || getTenantStoreIdFromContext();
-    let settings = getCachedSettingsForStore(activeStoreId);
-    if (!settings) {
-      if (activeStoreId) {
-        settings = await Settings.findOne({ storeId: activeStoreId }).lean();
-      }
-      if (!settings) {
-        settings = await Settings.findOne({}).lean();
-      }
-      if (settings && activeStoreId) {
-        setCachedSettingsForStore(activeStoreId, settings);
-      }
-    }
+    const settings = await getEffectiveSettings(activeStoreId);
 
     // Fetch store model to get exact businessName
     let storeNameFromModel = "";

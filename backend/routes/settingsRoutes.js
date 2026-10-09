@@ -9,6 +9,7 @@ import { redisCache } from "../middleware/cacheMiddleware.js";
 import { getTenantStoreId, getTenantStoreIdAsync } from "../utils/tenantHelper.js";
 import { optionalAuth } from "../middleware/authMiddleware.js";
 import { encrypt, decrypt, maskSecret, isEncrypted } from "../utils/encryptionHelper.js";
+import { getEffectiveSettings, updateTenantSettings, getGlobalSettings } from "../utils/settingsHelper.js";
 import Razorpay from "razorpay";
 import axios from "axios";
 import crypto from "crypto";
@@ -316,22 +317,9 @@ router.get("/api/settings", optionalAuth, async (req, res) => {
       if (activeStore) storeId = activeStore._id;
     }
 
-    const filter = storeId ? { storeId } : {};
-
-    let settings = await Settings.findOne(filter);
+    let settings = await getEffectiveSettings(storeId);
     const targetStoreId = storeId || settings?.storeId;
     const store = targetStoreId ? await Store.findById(targetStoreId).lean() : null;
-
-    if (!settings) {
-      const brandName = store ? (store.businessName || store.name) : "MY STORE";
-      settings = new Settings({
-        storeId: storeId || undefined,
-        brandLogoValue: brandName
-      });
-      await settings.save();
-    } else {
-      await cleanLegacySettings(settings, store);
-    }
 
     const responseObj = sanitizeSettingsResponse(settings);
 
@@ -544,11 +532,11 @@ router.post("/api/settings", optionalAuth, async (req, res) => {
     if (!storeId) {
       return res.status(400).json({ error: "Store context is missing or invalid." });
     }
-    const filter = { storeId };
+    const filter = { storeId, isGlobal: false };
 
     let settings = await Settings.findOne(filter);
     if (!settings) {
-      settings = new Settings({ storeId });
+      settings = new Settings({ storeId, isGlobal: false });
     } else if (!settings.storeId) {
       settings.storeId = storeId;
     }
@@ -951,7 +939,8 @@ router.post("/api/settings", optionalAuth, async (req, res) => {
       await deleteFromCloudinary(oldVideoUrl);
     }
 
-    const responseObj = sanitizeSettingsResponse(settings);
+    const effectiveSettings = await getEffectiveSettings(storeId || settings.storeId);
+    const responseObj = sanitizeSettingsResponse(effectiveSettings);
     const targetStoreId = storeId || settings.storeId;
     if (targetStoreId) {
       const updatedStore = await Store.findById(targetStoreId).lean();

@@ -4,6 +4,9 @@ import { encrypt, isEncrypted } from "../utils/encryptionHelper.js";
 // Define Settings Schema
 const settingsSchema = new mongoose.Schema({
   storeId: { type: mongoose.Schema.Types.ObjectId, ref: "Store", index: true },
+  isGlobal: { type: Boolean, default: false, index: true },
+  overriddenKeys: { type: [String], default: [] },
+  defaultPaymentGatewayFee: { type: Number, default: 2.0 },
   tickerText: {
     type: String,
     default: "7-DAY EASY RETURNS & EXCHANGES | FREE SHIPPING ACROSS INDIA | 7-DAY EASY RETURNS & EXCHANGES | FREE SHIPPING ACROSS INDIA | 7-DAY EASY RETURNS & EXCHANGES | FREE SHIPPING ACROSS INDIA | "
@@ -456,6 +459,27 @@ const settingsSchema = new mongoose.Schema({
   notifyOrderShipped: { type: Boolean, default: true },
   notifyOrderDelivered: { type: Boolean, default: true },
   notifyOrderRefund: { type: Boolean, default: true },
+  emailTemplates: {
+    type: Object,
+    default: {
+      orderConfirmation: {
+        subject: "Order Confirmation - {{orderId}}",
+        body: "Thank you for your order! Your order {{orderId}} has been placed successfully."
+      },
+      orderShipped: {
+        subject: "Your Order {{orderId}} Has Shipped!",
+        body: "Great news! Your order {{orderId}} is on its way."
+      },
+      orderDelivered: {
+        subject: "Your Order {{orderId}} Was Delivered",
+        body: "Your order {{orderId}} has been delivered. Thank you for shopping with us."
+      },
+      orderRefund: {
+        subject: "Refund Processed for Order {{orderId}}",
+        body: "Your refund for order {{orderId}} has been processed successfully."
+      }
+    }
+  },
 
   // Integrations & Secrets
   googleClientId: { type: String, default: "523936375845-75tjhav8ce01o9mdk325iggb1glgpi21.apps.googleusercontent.com" },

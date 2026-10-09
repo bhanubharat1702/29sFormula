@@ -9,6 +9,7 @@ import analyticsRouter from "./superadmin/analytics.js";
 import communicationsRouter from "./superadmin/communications.js";
 import domainsRouter from "./superadmin/domains.js";
 import auditLogsRouter from "./superadmin/auditLogs.js";
+import globalSettingsRouter from "./superadmin/globalSettings.js";
 
 const router = express.Router();
 
@@ -23,6 +24,7 @@ router.use(analyticsRouter);
 router.use(communicationsRouter);
 router.use(domainsRouter);
 router.use(auditLogsRouter);
+router.use(globalSettingsRouter);
 
 export default router;
 
