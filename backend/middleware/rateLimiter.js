@@ -8,6 +8,12 @@ export const generalLimiter = rateLimit({
   legacyHeaders: false, // Disable `X-RateLimit-*` headers
   validate: false,
   skip: (req) => process.env.NODE_ENV === "test" || req.ip === "127.0.0.1" || req.ip === "::1" || req.ip === "::ffff:127.0.0.1",
+  keyGenerator: (req) => {
+    if (req.storeId) {
+      return `store_${req.storeId}`;
+    }
+    return req.ip || req.headers['x-forwarded-for'] || "127.0.0.1";
+  },
   message: {
     error: "Too many requests, please try again after a minute."
   },
@@ -22,6 +28,12 @@ export const loginLimiter = rateLimit({
   legacyHeaders: false,
   validate: false,
   skip: () => process.env.NODE_ENV === "test",
+  keyGenerator: (req) => {
+    if (req.storeId) {
+      return `store_${req.storeId}_login`;
+    }
+    return req.ip || req.headers['x-forwarded-for'] || "127.0.0.1";
+  },
   message: {
     error: "Too many login attempts, please try again after a minute."
   },
