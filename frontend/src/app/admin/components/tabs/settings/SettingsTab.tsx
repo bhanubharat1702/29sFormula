@@ -2222,7 +2222,7 @@ export function DomainSubTab() {
           {/* Free Platform Subdomain */}
           <div style={cardStyle}>
             <div style={cardHeaderStyle}>
-              <h3 style={cardTitleStyle}>Store Domain & Subdomain</h3>
+              <h3 style={cardTitleStyle}>Store Domain</h3>
               <p style={cardSubTitleStyle}>Your storefront public web address configurations.</p>
             </div>
 
@@ -3565,7 +3565,7 @@ export default function SettingsTab(props: SettingsTabProps) {
   // Subnav Title Map
   const SUBTAB_TITLES: Record<string, string> = {
     general: "General",
-    domain: "Domain & Subdomain",
+    domain: "Domain",
     payments: "Payments & Checkout",
     shipping: "Shipping & Delivery",
     markets: "Global Markets",

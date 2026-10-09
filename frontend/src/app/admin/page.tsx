@@ -9,7 +9,6 @@ import OrdersTab from "./components/tabs/OrdersTab";
 import ProductsTab from "./components/tabs/ProductsTab";
 import OnlineStoreTab from "./components/tabs/OnlineStoreTab";
 import CustomersTab from "./components/tabs/CustomersTab";
-import MarketingTab from "./components/tabs/MarketingTab";
 import DiscountsTab from "./components/tabs/DiscountsTab";
 import SettingsTab from "./components/tabs/settings/SettingsTab";
 import { FaqItem, DashboardStats, Product, HeroSlideItem } from "./types";
@@ -163,7 +162,6 @@ export default function AdminDashboard() {
     { label: "Products Catalog", target: "products" },
     { label: "Orders Management", target: "orders" },
     { label: "Customers ", target: "customers" },
-    { label: "Marketing Campaigns & Promos", target: "marketing" },
     { label: "Discounts & Coupons", target: "discounts" },
     { label: "Online Store Settings", target: "online-store" },
   ];
@@ -1575,12 +1573,6 @@ export default function AdminDashboard() {
       setOnlineStoreDropdownOpen(false);
       setSettingsDropdownOpen(false);
       fetchOrders();
-    } else if (target === "marketing") {
-      setActiveTab("marketing");
-      setProductsDropdownOpen(false);
-      setOrdersDropdownOpen(false);
-      setOnlineStoreDropdownOpen(false);
-      setSettingsDropdownOpen(false);
     } else if (target === "discounts") {
       setActiveTab("discounts");
       setProductsDropdownOpen(false);
@@ -3787,12 +3779,6 @@ export default function AdminDashboard() {
             customers={customers}
             setSelectedCustomer={setSelectedCustomer}
             setDeleteCustomerTargetId={setDeleteCustomerTargetId}
-          />
-          <MarketingTab
-            activeTab={activeTab}
-            customizeSubTab={customizeSubTab}
-            setSuccessMessage={setSuccessMessage}
-            hasUnsavedChanges={hasUnsavedChanges}
           />
           <DiscountsTab
             activeTab={activeTab}
