@@ -28,7 +28,9 @@ const SavedReportSchema = new mongoose.Schema({
   createdBy: { type: String, default: 'Super Admin' },
   isScheduled: { type: Boolean, default: false },
   scheduleFrequency: { type: String, enum: ['daily', 'weekly', 'monthly'], default: 'weekly' },
-  emailRecipients: [{ type: String }]
+  emailRecipients: [{ type: String }],
+  lastSentAt: { type: Date, default: null },
+  lastError: { type: String, default: null }
 }, { timestamps: true });
 
 export const AnalyticsSnapshot = mongoose.models.AnalyticsSnapshot || mongoose.model('AnalyticsSnapshot', AnalyticsSnapshotSchema);

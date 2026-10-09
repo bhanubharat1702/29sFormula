@@ -485,3 +485,16 @@ export const createSavedReport = async (req, res) => {
     res.status(500).json({ error: "Failed to save report." });
   }
 };
+
+// POST /api/superadmin/analytics/reports/:id/run — Manually trigger execution and dispatch of a scheduled report
+export const runScheduledReportManual = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { triggerScheduledReportJob } = await import("../../workers/reportWorker.js");
+    const result = await triggerScheduledReportJob(id, true);
+    res.json({ message: "Report executed and dispatched successfully!", result });
+  } catch (err) {
+    console.error("Manual Scheduled Report Run Error:", err);
+    res.status(500).json({ error: err.message || "Failed to run scheduled report." });
+  }
+};

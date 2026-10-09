@@ -106,41 +106,49 @@ export const tenantResolver = async (req, res, next) => {
       }
     }
 
+    let explicitStoreId = null;
+
     // 2. Fallback to token storeId or explicitly authenticated context if domain was generic
     if (!store) {
-      let storeId = req.headers["x-tenant-id"] || req.headers["x-store-id"] || req.body?.storeId || req.query?.storeId;
+      explicitStoreId = req.headers["x-tenant-id"] || req.headers["x-store-id"] || req.body?.storeId || req.query?.storeId;
 
-      if (!storeId && (req.headers.authorization || req.headers.Authorization)) {
+      if (!explicitStoreId && (req.headers.authorization || req.headers.Authorization)) {
         const authHeader = req.headers.authorization || req.headers.Authorization;
         if (authHeader && authHeader.startsWith("Bearer ")) {
           const token = authHeader.split(" ")[1];
           try {
             const decoded = jwt.decode(token);
             if (decoded && decoded.storeId) {
-              storeId = decoded.storeId;
+              explicitStoreId = decoded.storeId;
             }
           } catch (e) { }
         }
       }
 
-      if (storeId) {
-        if (domainStoreCache.has(String(storeId))) {
-          store = domainStoreCache.get(String(storeId));
-        } else if (mongoose.Types.ObjectId.isValid(storeId)) {
-          store = await Store.findById(storeId).lean();
-          if (store) domainStoreCache.set(String(storeId), store);
+      if (explicitStoreId) {
+        if (domainStoreCache.has(String(explicitStoreId))) {
+          store = domainStoreCache.get(String(explicitStoreId));
+        } else if (mongoose.Types.ObjectId.isValid(explicitStoreId)) {
+          store = await Store.findById(explicitStoreId).lean();
+          if (store) domainStoreCache.set(String(explicitStoreId), store);
         }
       }
     }
 
-    // 3. Fallback to Default Store if no specific tenant domain matched
-    if (!store) {
+    // 3. Fallback to Default Store ONLY if no specific tenant domain or explicit header was provided
+    if (!store && !explicitStoreId) {
       if (domainStoreCache.has("default")) {
         store = domainStoreCache.get("default");
       } else {
         store = await Store.findOne({ subdomain: "default" }).lean() || await Store.findOne({ status: "active" }).lean() || await Store.findOne().lean();
         if (store) domainStoreCache.set("default", store);
       }
+    }
+
+    if (!store && explicitStoreId) {
+      req.storeId = explicitStoreId;
+      req.store = null;
+      req.isStoreSuspended = false;
     }
 
     if (store) {
