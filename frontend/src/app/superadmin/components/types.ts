@@ -7,8 +7,10 @@ export interface StoreItem {
   ownerId?: { _id?: string; name?: string; email?: string; phone?: string } | string;
   ownerName?: string;
   ownerEmail?: string;
+  ownerEmailVerified?: boolean;
   ownerPhone?: string;
   supportEmail?: string;
+  supportEmailVerified?: boolean;
   supportPhone?: string;
   businessName?: string;
   businessType?: string;
@@ -18,31 +20,83 @@ export interface StoreItem {
     isPrimary?: boolean;
     dnsStatus?: string;
     sslStatus?: string;
+    lastDnsCheckAt?: string;
+    sslIssuedAt?: string;
+    sslExpiresAt?: string;
   }[];
   country?: string;
   state?: string;
   city?: string;
+  address1?: string;
+  address2?: string;
+  postalCode?: string;
   currency?: string;
   timezone?: string;
   productCount?: number;
   orderCount?: number;
   plan?: string;
   status?: string;
+  suspensionReason?: string;
+  suspendedAt?: string;
   billing?: {
     billingCycle?: "monthly" | "annual";
     subscriptionId?: string;
     paymentMethod?: string;
+    credits?: number;
+    discountPercent?: number;
+    invoices?: {
+      invoiceId: string;
+      amount: number;
+      date?: string;
+      status?: string;
+      downloadUrl?: string;
+    }[];
+  };
+  limitOverrides?: {
+    maxProducts?: number | null;
+    maxOrders?: number | null;
+    maxStaff?: number | null;
+    maxStorageMB?: number | null;
+  };
+  featureFlags?: {
+    customDomain?: boolean | null;
+    advancedAnalytics?: boolean | null;
+    aiTools?: boolean | null;
+    loyaltyProgram?: boolean | null;
+    multiCurrency?: boolean | null;
+    betaCheckout?: boolean | null;
   };
   isActive?: boolean;
   internalNotes?: string;
   createdAt?: string;
   updatedAt?: string;
+  lastActiveAt?: string;
   mrr?: number;
   healthScore?: number;
   trialDays?: number;
   trialEndsAt?: string;
   isolationTier?: string;
   provisionedBy?: string;
+  notes?: {
+    _id?: string;
+    text: string;
+    author?: string;
+    createdAt?: string;
+  }[];
+  auditTrail?: {
+    _id?: string;
+    action: string;
+    performedBy?: string;
+    details?: string;
+    timestamp?: string;
+  }[];
+  impersonationLogs?: {
+    _id?: string;
+    superAdminEmail: string;
+    reason: string;
+    timestamp?: string;
+    expiresAt?: string;
+  }[];
 }
 
 export interface TimelineItem {

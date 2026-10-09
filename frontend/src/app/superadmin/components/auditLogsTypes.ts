@@ -20,6 +20,13 @@ export interface AuditLogItem {
   result: 'success' | 'failed' | 'blocked';
   isSuspicious: boolean;
   suspiciousReason?: string;
+  isImpersonated?: boolean;
+  impersonatorId?: string;
+  impersonatorEmail?: string;
+  impersonatedTenantId?: string;
+  impersonatedTenantName?: string;
+  impersonationGrantId?: string;
+  attributionStatement?: string;
 }
 
 export interface AuditLogsResponse {

@@ -8,6 +8,7 @@ import { deleteFromCloudinary } from "../utils/cloudinary.js";
 import { getPaginationParams, buildPaginatedResponse, setPaginationHeaders } from "../utils/paginationHelper.js";
 import { redisCache } from "../middleware/cacheMiddleware.js";
 import { getTenantStoreId, withTenantFilter } from "../utils/tenantHelper.js";
+import { verifyToken, isAdmin, impersonationAuditTrail, logImpersonationAction } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
@@ -17,7 +18,7 @@ const enforceLatestArrivalsLimit = async () => {
     const latestProducts = await Product.find({ category: "Latest Arrivals" })
       .sort({ createdAt: -1 })
       .select('_id');
-    
+
     if (latestProducts.length > limit) {
       const idsToRemove = latestProducts.slice(limit).map(p => p._id);
       await Product.updateMany(
@@ -67,7 +68,7 @@ router.get("/api/products", redisCache("products", 300), async (req, res) => {
 
     const productIds = products.map(p => p._id);
     const variants = await ProductVariant.find({ productId: { $in: productIds } }).lean();
-    
+
     const variantsMap = {};
     variants.forEach(v => {
       const pid = String(v.productId);
@@ -80,7 +81,7 @@ router.get("/api/products", redisCache("products", 300), async (req, res) => {
       // Sort variants by price ascending so the cheapest is first
       prodVariants.sort((a, b) => (Number(a.price) || 0) - (Number(b.price) || 0));
       p.variants = prodVariants;
-      
+
       if (prodVariants.length > 0) {
         p.price = prodVariants[0].price;
         p.strikePrice = prodVariants[0].strikePrice;
@@ -112,7 +113,7 @@ router.post("/api/products", async (req, res) => {
     if (typeof variants === 'string') {
       try {
         variants = JSON.parse(variants);
-      } catch (e) {}
+      } catch (e) { }
     }
 
     // Compute global properties
@@ -189,7 +190,7 @@ router.post("/api/products", async (req, res) => {
 router.put("/api/products/:id", async (req, res) => {
   try {
     let { name, description, additionalInformation, imageFront, imageBack, images, variants } = req.body;
-    
+
     // Fetch the existing product to check for deleted images
     const oldProduct = await Product.findById(req.params.id);
     if (!oldProduct) {
@@ -201,7 +202,7 @@ router.put("/api/products/:id", async (req, res) => {
 
     // Find images that are in oldImages but not in newImages
     const removedImages = oldImages.filter(img => !newImages.includes(img));
-    
+
     // Check if imageFront or imageBack changed and was a Cloudinary URL not present in new images list
     if (oldProduct.imageFront && oldProduct.imageFront !== imageFront && !newImages.includes(oldProduct.imageFront)) {
       removedImages.push(oldProduct.imageFront);
@@ -213,7 +214,7 @@ router.put("/api/products/:id", async (req, res) => {
     if (typeof variants === 'string') {
       try {
         variants = JSON.parse(variants);
-      } catch (e) {}
+      } catch (e) { }
     }
 
     // Compute global properties
@@ -269,9 +270,9 @@ router.put("/api/products/:id", async (req, res) => {
           price: Number(v.price) || 0,
           strikePrice: v.strikePrice ? Number(v.strikePrice) : undefined,
           makingPrice: Number(v.makingPrice) || 0,
-          category: (oldProduct.category && oldProduct.category.includes("Latest Arrivals")) 
-                      ? [...new Set([...(Array.isArray(v.category) ? v.category : (v.category ? [v.category] : [])), "Latest Arrivals"])] 
-                      : (Array.isArray(v.category) ? v.category : (v.category ? [v.category] : []))
+          category: (oldProduct.category && oldProduct.category.includes("Latest Arrivals"))
+            ? [...new Set([...(Array.isArray(v.category) ? v.category : (v.category ? [v.category] : [])), "Latest Arrivals"])]
+            : (Array.isArray(v.category) ? v.category : (v.category ? [v.category] : []))
         });
         savedVariants.push(variantDoc);
       }
@@ -296,7 +297,7 @@ router.put("/api/products/:id", async (req, res) => {
   }
 });
 
-router.delete("/api/products/:id", async (req, res) => {
+router.delete("/api/products/:id", verifyToken, isAdmin, impersonationAuditTrail, async (req, res) => {
   try {
     const product = await Product.findById(req.params.id);
     if (!product) {
@@ -358,6 +359,20 @@ router.delete("/api/products/:id", async (req, res) => {
       await deleteFromCloudinary(url);
     }
 
+    // Strict attribution: if this deletion happened during a Super Admin
+    // impersonation session, record exactly who did it on whose behalf.
+    await logImpersonationAction(req, {
+      action: "Delete Product",
+      actionCategory: "tenant",
+      target: deletedProduct?.name || `Product ${req.params.id}`,
+      targetId: String(req.params.id),
+      storeName: req.user?.storeName || "",
+      beforeValue: deletedProduct
+        ? { id: String(deletedProduct._id), name: deletedProduct.name, price: deletedProduct.price }
+        : null,
+      reason: "Product catalogue deletion during support session"
+    });
+
     res.json({ message: "Product deleted successfully", id: req.params.id });
   } catch (error) {
     console.error("Error deleting product:", error);
@@ -405,7 +420,7 @@ router.get("/api/products/:id", async (req, res) => {
 
     const query = { _id: id };
     let product = await Product.findOne(query).lean();
-    
+
     if (!product) {
       return res.status(404).json({ error: "Product not found" });
     }
@@ -413,7 +428,7 @@ router.get("/api/products/:id", async (req, res) => {
     let variants = await ProductVariant.find({ productId: id }).lean();
     variants.sort((a, b) => (Number(a.price) || 0) - (Number(b.price) || 0));
     product.variants = variants;
-    
+
     if (variants.length > 0) {
       product.price = variants[0].price;
       product.strikePrice = variants[0].strikePrice;

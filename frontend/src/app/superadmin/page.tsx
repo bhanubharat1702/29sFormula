@@ -1216,6 +1216,10 @@ export default function SuperAdminPage() {
           handleToggleStatus(store);
           setSelectedDetailStore((prev) => (prev ? { ...prev, isActive: !prev.isActive } : null));
         }}
+        onDeleteStore={(store) => {
+          setSelectedDetailStore(null);
+          handleDeleteStore(store);
+        }}
       />
 
       <DemoRequestDetailModal

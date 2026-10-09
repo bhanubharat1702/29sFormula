@@ -45,6 +45,18 @@ export const AuditLogDiffModal: React.FC<AuditLogDiffModalProps> = ({ log, onClo
             </div>
           )}
 
+          {log.isImpersonated && log.attributionStatement && (
+            <div style={{ background: "#fffbeb", border: "1px solid #fcd34d", color: "#b45309", padding: "12px", borderRadius: "8px", marginBottom: "16px", fontSize: "13px" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "4px", fontWeight: "700" }}>
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" style={{ width: "16px", height: "16px" }}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z" />
+                </svg>
+                Dual-Identity Provenance (Impersonation)
+              </div>
+              {log.attributionStatement}
+            </div>
+          )}
+
           <h4 style={{ fontSize: "14px", fontWeight: "700", marginBottom: "8px", color: "#374151" }}>Before vs After State Diff</h4>
 
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>

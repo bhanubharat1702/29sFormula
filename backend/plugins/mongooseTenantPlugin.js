@@ -91,22 +91,36 @@ export const mongooseTenantPlugin = (schema) => {
       return;
     }
 
-    const storeId = getTenantStoreIdFromContext() || new mongoose.Types.ObjectId("000000000000000000000000");
+    const rawStoreId = getTenantStoreIdFromContext() || new mongoose.Types.ObjectId("000000000000000000000000");
+    const typedStoreId = (typeof rawStoreId === "string" && mongoose.Types.ObjectId.isValid(rawStoreId))
+      ? new mongoose.Types.ObjectId(rawStoreId)
+      : rawStoreId;
 
     const pipeline = this.pipeline();
     if (pipeline.length > 0 && pipeline[0].$match) {
-      pipeline[0].$match.storeId = storeId;
+      pipeline[0].$match.storeId = typedStoreId;
     } else {
-      pipeline.unshift({ $match: { storeId } });
+      pipeline.unshift({ $match: { storeId: typedStoreId } });
     }
     if (typeof next === "function") next();
   });
 
-  // Pre-save document hook: automatically assign storeId on creation & validate context
+  // Block estimatedDocumentCount in tenant context to prevent global count leaks
+  schema.pre("estimatedDocumentCount", function (next) {
+    if (!isTenantBypassed()) {
+      const err = new Error("Tenant Isolation Error: estimatedDocumentCount is prohibited in tenant context.");
+      if (typeof next === "function") return next(err);
+      throw err;
+    }
+    if (typeof next === "function") next();
+  });
+
+  // Pre-save document hook: automatically assign & enforce storeId on creation/save
   schema.pre("save", function (next) {
     if (!isTenantBypassed()) {
       const storeId = getTenantStoreIdFromContext();
-      if (storeId && !this.storeId) {
+      if (storeId) {
+        // Enforce active tenant context to prevent cross-tenant writes/tampering
         this.storeId = storeId;
       } else if (!storeId && !this.storeId) {
         const err = new Error("Tenant Isolation Error: Cannot save document without storeId context.");
@@ -117,7 +131,7 @@ export const mongooseTenantPlugin = (schema) => {
     if (typeof next === "function") next();
   });
 
-  // Pre-insertMany hook
+  // Pre-insertMany hook: enforce storeId context on bulk inserts
   schema.pre("insertMany", function (next, docs) {
     let actualDocs = docs;
     if (Array.isArray(next)) {
@@ -127,9 +141,7 @@ export const mongooseTenantPlugin = (schema) => {
       const storeId = getTenantStoreIdFromContext();
       if (storeId && Array.isArray(actualDocs)) {
         actualDocs.forEach((doc) => {
-          if (doc && !doc.storeId) {
-            doc.storeId = storeId;
-          }
+          if (doc) doc.storeId = storeId;
         });
       } else if (!storeId && Array.isArray(actualDocs)) {
         const hasMissingStoreId = actualDocs.some(doc => doc && !doc.storeId);
@@ -146,3 +158,4 @@ export const mongooseTenantPlugin = (schema) => {
 
 // Register plugin globally with Mongoose so all newly compiled schemas inherit tenant isolation
 mongoose.plugin(mongooseTenantPlugin);
+

@@ -1,6 +1,29 @@
 import AuditLog from "../models/AuditLog.js";
 
 /**
+ * Builds a human-readable, compliance-grade attribution statement.
+ * e.g. Action "Delete Product" was performed by Super Admin Y <y@x.com> on behalf of Merchant Z <store>
+ */
+export const buildAttributionStatement = ({
+  action = "",
+  impersonatorName = "",
+  impersonatorEmail = "",
+  impersonatedTenantName = "",
+  adminUser = "",
+  adminEmail = "",
+  storeName = ""
+}) => {
+  const actionText = action || "Action";
+  if (impersonatorEmail || impersonatorName) {
+    const superAdminLabel = `${impersonatorName || "Super Admin"}${impersonatorEmail ? ` <${impersonatorEmail}>` : ""}`;
+    const merchantLabel = `${impersonatedTenantName || storeName || "Merchant"}${storeName ? ` <${storeName}>` : ""}`;
+    return `Action "${actionText}" was performed by Super Admin ${superAdminLabel} on behalf of Merchant ${merchantLabel}`;
+  }
+  const adminLabel = `${adminUser || "Super Admin"}${adminEmail ? ` <${adminEmail}>` : ""}`;
+  return `Action "${actionText}" was performed by ${adminLabel}`;
+};
+
+/**
  * Helper utility to create append-only audit log entry
  */
 export const recordAuditLog = async ({
@@ -22,14 +45,38 @@ export const recordAuditLog = async ({
   reason = "",
   result = "success",
   isSuspicious = false,
-  suspiciousReason = ""
+  suspiciousReason = "",
+  // ── Impersonation provenance (dual identity) ─────────────────
+  isImpersonated = false,
+  impersonatorId = "",
+  impersonatorEmail = "",
+  impersonatedTenantId = null,
+  impersonatedTenantName = "",
+  impersonationGrantId = null,
+  attributionStatement = ""
 }) => {
   try {
+    const normalizedImpersonatorEmail = impersonatorEmail ? impersonatorEmail.toLowerCase().trim() : "";
+    const normalizedAdminEmail = adminEmail ? adminEmail.toLowerCase().trim() : "";
+    const normalizedRole = isImpersonated ? "Super Admin (Impersonating)" : role;
+
+    const statement =
+      attributionStatement ||
+      buildAttributionStatement({
+        action,
+        impersonatorName: isImpersonated ? adminUser : "",
+        impersonatorEmail: normalizedImpersonatorEmail,
+        impersonatedTenantName: impersonatedTenantName || storeName,
+        adminUser,
+        adminEmail: normalizedAdminEmail,
+        storeName
+      });
+
     const entry = await AuditLog.create({
       timestamp: new Date(),
       adminUser,
-      adminEmail: adminEmail.toLowerCase().trim(),
-      role,
+      adminEmail: normalizedAdminEmail,
+      role: normalizedRole,
       action,
       actionCategory,
       target,
@@ -45,7 +92,14 @@ export const recordAuditLog = async ({
       reason,
       result,
       isSuspicious,
-      suspiciousReason
+      suspiciousReason,
+      isImpersonated,
+      impersonatorId: impersonatorId ? String(impersonatorId) : "",
+      impersonatorEmail: normalizedImpersonatorEmail,
+      impersonatedTenantId: impersonatedTenantId || (isImpersonated ? storeId : null),
+      impersonatedTenantName: impersonatedTenantName || (isImpersonated ? storeName : ""),
+      impersonationGrantId: impersonationGrantId || null,
+      attributionStatement: statement
     });
     return entry;
   } catch (err) {

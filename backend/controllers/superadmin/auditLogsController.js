@@ -119,6 +119,7 @@ export const getAuditLogs = async (req, res) => {
       result,
       adminEmail,
       isSuspicious,
+      isImpersonated,
       startDate,
       endDate,
       page = 1,
@@ -131,6 +132,7 @@ export const getAuditLogs = async (req, res) => {
     if (result && result !== "all") query.result = result;
     if (adminEmail && adminEmail !== "all") query.adminEmail = adminEmail.toLowerCase().trim();
     if (isSuspicious === "true") query.isSuspicious = true;
+    if (isImpersonated === "true") query.isImpersonated = true;
 
     if (startDate || endDate) {
       query.timestamp = {};
@@ -151,7 +153,10 @@ export const getAuditLogs = async (req, res) => {
         { target: { $regex: q, $options: "i" } },
         { storeName: { $regex: q, $options: "i" } },
         { reason: { $regex: q, $options: "i" } },
-        { ipAddress: { $regex: q, $options: "i" } }
+        { ipAddress: { $regex: q, $options: "i" } },
+        { attributionStatement: { $regex: q, $options: "i" } },
+        { impersonatorEmail: { $regex: q, $options: "i" } },
+        { impersonatedTenantName: { $regex: q, $options: "i" } }
       ];
     }
 

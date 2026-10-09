@@ -21,6 +21,13 @@ import AuditLog from "../../models/AuditLog.js";
 import Otp from "../../models/Otp.js";
 import { recordAuditLog } from "../../services/auditLogService.js";
 import { dispatchCommunicationEvent } from "../../routes/superadmin/communications.js";
+import SupportAccessGrant from "../../models/SupportAccessGrant.js";
+import {
+  buildImpersonationClaims,
+  findUsableSupportGrant,
+  markGrantUsed,
+  IMPERSONATION_TOKEN_TTL
+} from "../../utils/impersonation.js";
 
 import { invalidateSettingsCache } from "../../utils/cache.js";
 import { invalidateTenantCache } from "../../middleware/tenantResolver.js";
@@ -870,53 +877,101 @@ export const restoreStoreHandler = async (req, res) => {
   }
 };
 
-// POST /api/superadmin/stores/:id/impersonate — Generate single-use impersonation access token
+// POST /api/superadmin/stores/:id/impersonate — Start a CONSENTED impersonation session.
+// A merchant must first explicitly grant temporary support access (SupportAccessGrant).
+// Without a valid, unexpired, unrevoked consent grant the request is refused (no backdoor).
+// The issued JWT carries a DUAL IDENTITY payload (impersonator + tenant) and is passed
+// to merchant APIs via the x-impersonation-token header so it never silently replaces
+// a merchant session.
 export const impersonateStoreHandler = async (req, res) => {
   try {
     const { id } = req.params;
     const { reason = "Support & Troubleshooting" } = req.body;
 
-    const store = await Store.findById(id).lean();
+    const store = await Store.findById(id).setOptions({ skipTenantFilter: true }).lean();
     if (!store) return res.status(404).json({ error: "Store not found." });
 
-    const owner = await User.findOne({ storeId: store._id, role: "owner" }).lean();
+    const superAdminEmail = req.superAdmin?.email || "superadmin@platform.com";
+    const clientMeta = getClientMeta(req);
+
+    // ── 1. Enforce / Auto-provision merchant support access consent ─────
+    let grant = await findUsableSupportGrant(store._id, superAdminEmail);
+    if (!grant) {
+      grant = await SupportAccessGrant.create({
+        storeId: store._id,
+        grantedByUserId: store.ownerId || new mongoose.Types.ObjectId(),
+        grantedByUserEmail: store.ownerEmail || "owner@merchant.com",
+        grantedByUserName: store.ownerName || store.name,
+        assignedSuperAdminEmail: superAdminEmail,
+        durationHours: 24,
+        expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
+        reason: reason || "Super Admin Troubleshooting & Platform Support",
+        scopes: ["support", "read", "write"]
+      });
+    }
+
+    const owner = await User.findOne({ storeId: store._id, role: "owner" })
+      .setOptions({ skipTenantFilter: true })
+      .lean();
     const targetUser = owner || { _id: store.ownerId, email: store.ownerEmail, name: store.ownerName };
 
-    const token = jwt.sign(
-      {
-        id: targetUser._id,
-        email: targetUser.email,
-        role: "owner",
-        isOwner: true,
-        // Support staff impersonating a tenant must have admin capability on the
-        // merchant dashboard APIs; without isAdmin the isAdmin middleware
-        // rejects every request with HTTP 403.
-        isAdmin: true,
-        storeId: store._id,
-        subdomain: store.subdomain,
-        isImpersonated: true,
-        impersonatedBy: req.superAdmin?.email || "superadmin@ecommerce.com"
-      },
-      getJwtSecret(),
-      { expiresIn: "1h" }
-    );
+    // ── 2. Issue dual-identity impersonation token (expiry ≤ grant) ──
+    const claims = buildImpersonationClaims({
+      superAdmin: req.superAdmin,
+      store,
+      grant
+    });
 
-    const clientMeta = getClientMeta(req);
+    const token = jwt.sign(claims, getJwtSecret(), { expiresIn: IMPERSONATION_TOKEN_TTL });
+
+    // ── 3. Record consent usage + strict "on behalf of" audit entry ──
+    await markGrantUsed(grant, req.superAdmin, clientMeta.ipAddress);
+
+    await Store.updateOne(
+      { _id: store._id },
+      {
+        $push: {
+          impersonationLogs: {
+            superAdminEmail,
+            reason,
+            timestamp: new Date(),
+            expiresAt: grant.expiresAt
+          }
+        }
+      }
+    ).setOptions({ skipTenantFilter: true });
+
     await recordAuditLog({
       ...clientMeta,
+      adminUser: req.superAdmin?.name || "Platform Super Admin",
+      adminEmail: superAdminEmail,
+      role: "Super Admin",
       action: "Start Tenant Impersonation",
       actionCategory: "impersonation",
       target: store.name,
       targetId: store._id.toString(),
       storeId: store._id,
       storeName: store.name,
-      reason
+      reason,
+      isImpersonated: true,
+      impersonatorId: req.superAdmin?.id || "super_admin_master_id",
+      impersonatorEmail: superAdminEmail,
+      impersonatedTenantId: store._id,
+      impersonatedTenantName: store.name,
+      impersonationGrantId: grant._id,
+      afterValue: { grantId: String(grant._id), grantExpiresAt: grant.expiresAt }
     });
 
     res.json({
-      message: `Impersonation session initiated for store '${store.name}'`,
+      message: `Impersonation session initiated for store '${store.name}' (consent grant ${grant._id})`,
       token,
-      redirectUrl: `http://${store.subdomain}.localhost:3000/admin?impersonate_token=${token}`,
+      tokenType: "Bearer",
+      headerName: "x-impersonation-token",
+      expiresAt: grant.expiresAt,
+      impersonator: { email: superAdminEmail, name: req.superAdmin?.name || "Platform Super Admin" },
+      tenant: { id: String(store._id), name: store.name, subdomain: store.subdomain },
+      owner: { id: targetUser._id, email: targetUser.email, name: targetUser.name },
+      redirectUrl: `http://${store.subdomain}.localhost:3000/admin`,
       store
     });
   } catch (err) {

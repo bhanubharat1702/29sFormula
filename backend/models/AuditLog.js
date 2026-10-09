@@ -2,45 +2,45 @@ import mongoose from 'mongoose';
 
 // Immutable, Append-Only System Audit Log Model (SOC 2, GDPR Compliant)
 const auditLogSchema = new mongoose.Schema({
-  timestamp: { 
-    type: Date, 
+  timestamp: {
+    type: Date,
     default: Date.now,
-    index: true 
+    index: true
   },
-  adminUser: { 
-    type: String, 
+  adminUser: {
+    type: String,
     required: true,
-    index: true 
+    index: true
   },
-  adminEmail: { 
-    type: String, 
+  adminEmail: {
+    type: String,
     default: '',
     lowercase: true,
     trim: true,
-    index: true 
+    index: true
   },
-  role: { 
-    type: String, 
-    default: 'Super Admin' 
+  role: {
+    type: String,
+    default: 'Super Admin'
   },
-  action: { 
-    type: String, 
+  action: {
+    type: String,
     required: true,
-    index: true 
+    index: true
   },
   actionCategory: {
     type: String,
     enum: [
-      'auth', 'impersonation', 'tenant', 'billing', 'domain', 
+      'auth', 'impersonation', 'tenant', 'billing', 'domain',
       'settings', 'role', 'export', 'communication', 'security'
     ],
     default: 'auth',
     index: true
   },
-  target: { 
-    type: String, 
+  target: {
+    type: String,
     default: '',
-    index: true 
+    index: true
   },
   targetId: {
     type: String,
@@ -68,25 +68,25 @@ const auditLogSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.Mixed,
     default: null
   },
-  ipAddress: { 
-    type: String, 
-    default: '127.0.0.1' 
+  ipAddress: {
+    type: String,
+    default: '127.0.0.1'
   },
   country: {
     type: String,
     default: 'India'
   },
-  userAgent: { 
-    type: String, 
-    default: 'Chrome / macOS' 
+  userAgent: {
+    type: String,
+    default: 'Chrome / macOS'
   },
-  reason: { 
-    type: String, 
-    default: '' 
+  reason: {
+    type: String,
+    default: ''
   },
-  result: { 
-    type: String, 
-    enum: ['success', 'failed', 'blocked'], 
+  result: {
+    type: String,
+    enum: ['success', 'failed', 'blocked'],
     default: 'success',
     index: true
   },
@@ -98,8 +98,50 @@ const auditLogSchema = new mongoose.Schema({
   suspiciousReason: {
     type: String,
     default: ''
+  },
+  // ── Impersonation / Dual-Identity Provenance ─────────────────
+  // Populated when an action is performed by a Super Admin while
+  // impersonating a merchant during a consented support session.
+  // Records "Action X was performed by Super Admin Y on behalf of Merchant Z".
+  isImpersonated: {
+    type: Boolean,
+    default: false,
+    index: true
+  },
+  impersonatorId: {
+    type: String,
+    default: '',
+    index: true
+  },
+  impersonatorEmail: {
+    type: String,
+    default: '',
+    lowercase: true,
+    trim: true,
+    index: true
+  },
+  impersonatedTenantId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Store',
+    default: null,
+    index: true
+  },
+  impersonatedTenantName: {
+    type: String,
+    default: ''
+  },
+  impersonationGrantId: {
+    type: mongoose.Schema.Types.ObjectId,
+    default: null,
+    index: true
+  },
+  // Human-readable provenance string, e.g.
+  // "Performed by Super Admin Y (y@x.com) on behalf of Merchant Z (store)"
+  attributionStatement: {
+    type: String,
+    default: ''
   }
-}, { 
+}, {
   timestamps: false // Manual timestamp field for append-only log integrity
 });
 
