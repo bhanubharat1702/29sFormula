@@ -824,7 +824,42 @@ export default function AdminDashboard() {
       videoAutoPlaySpeed: data.videoAutoPlaySpeed || 5,
       lifestyleSlides: Array.isArray(data.lifestyleSlides) ? data.lifestyleSlides : [],
       lifestyleAutoPlay: data.lifestyleAutoPlay !== undefined ? data.lifestyleAutoPlay : true,
-      lifestyleAutoPlaySpeed: data.lifestyleAutoPlaySpeed || 5
+      lifestyleAutoPlaySpeed: data.lifestyleAutoPlaySpeed || 5,
+      storeBusinessName: data.storeDetails?.businessName || data.businessName || "",
+      storeBusinessType: data.storeDetails?.businessType || data.businessType || "Retail",
+      storeCurrency: data.storeDetails?.currency || data.currency || "INR",
+      storeTimezone: data.storeDetails?.timezone || data.timezone || "Asia/Kolkata",
+      storeCountry: data.storeDetails?.country || data.country || "India",
+      storeOwnerPhone: data.storeDetails?.ownerPhone || data.ownerPhone || "",
+      storeOwnerEmail: data.storeDetails?.ownerEmail || data.ownerEmail || "",
+      storeSupportEmail: data.storeDetails?.supportEmail || data.supportEmail || "",
+      storeSupportPhone: data.storeDetails?.supportPhone || data.supportPhone || "",
+      activePaymentGateway: data.activePaymentGateway || "razorpay",
+      razorpayKeyId: data.razorpayKeyId || "",
+      razorpayKeySecret: data.razorpayKeySecret || "",
+      razorpayMode: data.razorpayMode || "test",
+      stripePublishableKey: data.stripePublishableKey || "",
+      stripeSecretKey: data.stripeSecretKey || "",
+      stripeMode: data.stripeMode || "test",
+      paypalClientId: data.paypalClientId || "",
+      paypalClientSecret: data.paypalClientSecret || "",
+      paypalMode: data.paypalMode || "sandbox",
+      phonepeMerchantId: data.phonepeMerchantId || "",
+      phonepeSaltKey: data.phonepeSaltKey || "",
+      phonepeSaltIndex: data.phonepeSaltIndex || "1",
+      phonepeMode: data.phonepeMode || "uat",
+      paytmMerchantId: data.paytmMerchantId || "",
+      paytmMerchantKey: data.paytmMerchantKey || "",
+      paytmWebsite: data.paytmWebsite || "WEBSTAGING",
+      paytmMode: data.paytmMode || "staging",
+      codEnabled: data.codEnabled !== undefined ? data.codEnabled : true,
+      codExtraFee: data.codExtraFee || 0,
+      minOrderAmount: data.minOrderAmount || 0,
+      maxItemQuantity: data.maxItemQuantity || 0,
+      customerAccounts: data.customerAccounts || "optional",
+      taxInclusive: data.taxInclusive || false,
+      taxRate: data.taxRate || 0,
+      taxNumber: data.taxNumber || ""
     };
   };
 
@@ -996,7 +1031,47 @@ export default function AdminDashboard() {
     JSON.stringify(lifestyleSlides) !== JSON.stringify(originalSettings.lifestyleSlides || []) ||
     lifestyleAutoPlay !== originalSettings.lifestyleAutoPlay ||
     lifestyleAutoPlaySpeed !== originalSettings.lifestyleAutoPlaySpeed ||
-    JSON.stringify(cleanFaqs(faqs)) !== JSON.stringify(originalSettings.faqs)
+    JSON.stringify(cleanFaqs(faqs)) !== JSON.stringify(originalSettings.faqs) ||
+    storeBusinessName !== (originalSettings.storeBusinessName || "") ||
+    storeBusinessType !== (originalSettings.storeBusinessType || "Retail") ||
+    storeCurrency !== (originalSettings.storeCurrency || "INR") ||
+    storeTimezone !== (originalSettings.storeTimezone || "Asia/Kolkata") ||
+    storeCountry !== (originalSettings.storeCountry || "India") ||
+    storeOwnerPhone !== (originalSettings.storeOwnerPhone || "") ||
+    storeOwnerEmail !== (originalSettings.storeOwnerEmail || "") ||
+    storeSupportEmail !== (originalSettings.storeSupportEmail || "") ||
+    storeSupportPhone !== (originalSettings.storeSupportPhone || "") ||
+    storeAddress1 !== (originalSettings.storeAddress1 || "") ||
+    storeAddress2 !== (originalSettings.storeAddress2 || "") ||
+    storeCity !== (originalSettings.storeCity || "") ||
+    storeState !== (originalSettings.storeState || "") ||
+    storePostalCode !== (originalSettings.storePostalCode || "") ||
+    activePaymentGateway !== (originalSettings.activePaymentGateway || "razorpay") ||
+    razorpayKeyId !== (originalSettings.razorpayKeyId || "") ||
+    razorpayKeySecret !== (originalSettings.razorpayKeySecret || "") ||
+    razorpayMode !== (originalSettings.razorpayMode || "test") ||
+    stripePublishableKey !== (originalSettings.stripePublishableKey || "") ||
+    stripeSecretKey !== (originalSettings.stripeSecretKey || "") ||
+    stripeMode !== (originalSettings.stripeMode || "test") ||
+    paypalClientId !== (originalSettings.paypalClientId || "") ||
+    paypalClientSecret !== (originalSettings.paypalClientSecret || "") ||
+    paypalMode !== (originalSettings.paypalMode || "sandbox") ||
+    phonepeMerchantId !== (originalSettings.phonepeMerchantId || "") ||
+    phonepeSaltKey !== (originalSettings.phonepeSaltKey || "") ||
+    phonepeSaltIndex !== (originalSettings.phonepeSaltIndex || "1") ||
+    phonepeMode !== (originalSettings.phonepeMode || "uat") ||
+    paytmMerchantId !== (originalSettings.paytmMerchantId || "") ||
+    paytmMerchantKey !== (originalSettings.paytmMerchantKey || "") ||
+    paytmWebsite !== (originalSettings.paytmWebsite || "WEBSTAGING") ||
+    paytmMode !== (originalSettings.paytmMode || "staging") ||
+    codEnabled !== (originalSettings.codEnabled !== undefined ? originalSettings.codEnabled : true) ||
+    codExtraFee !== (originalSettings.codExtraFee || 0) ||
+    minOrderAmount !== (originalSettings.minOrderAmount || 0) ||
+    maxItemQuantity !== (originalSettings.maxItemQuantity || 0) ||
+    customerAccounts !== (originalSettings.customerAccounts || "optional") ||
+    taxInclusive !== (originalSettings.taxInclusive || false) ||
+    taxRate !== (originalSettings.taxRate || 0) ||
+    taxNumber !== (originalSettings.taxNumber || "")
   ) : false;
 
   const getChangedFieldsList = () => {
@@ -1952,16 +2027,11 @@ export default function AdminDashboard() {
     setPendingTabChange(null);
   };
 
-  const handleRequestSaveSettings = (e?: any) => {
+  const handleRequestSaveSettings = async (e?: any) => {
     if (e && typeof e.preventDefault === 'function') {
       e.preventDefault();
     }
-    const changed = getChangedFieldsList();
-    if (changed.length > 0) {
-      setShowSaveConfirmModal(true);
-    } else {
-      executeSaveSettings();
-    }
+    return executeSaveSettings();
   };
 
   const executeSaveSettings = async () => {

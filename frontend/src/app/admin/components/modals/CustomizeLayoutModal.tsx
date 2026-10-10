@@ -4590,14 +4590,14 @@ export default function CustomizeLayoutModal({
             <button
               type="button"
               onClick={handleApply}
-              disabled={!hasModalChanges}
+              disabled={!hasModalChanges || uploadingMedia}
               className={styles.primaryActionBtn}
               style={{
                 padding: "8px 24px",
                 fontSize: "0.85rem",
                 fontWeight: 700,
-                opacity: !hasModalChanges ? 0.5 : 1,
-                cursor: !hasModalChanges ? "not-allowed" : "pointer",
+                opacity: (!hasModalChanges || uploadingMedia) ? 0.5 : 1,
+                cursor: (!hasModalChanges || uploadingMedia) ? "not-allowed" : "pointer",
                 backgroundColor: !hasModalChanges ? "#9ca3af" : undefined
               }}
             >
