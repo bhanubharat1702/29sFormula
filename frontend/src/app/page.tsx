@@ -647,13 +647,22 @@ export default function Home() {
           }
           if (data.heroSlides !== undefined && Array.isArray(data.heroSlides)) {
             localStorage.setItem("settings_heroSlides", JSON.stringify(data.heroSlides));
+            setGlobalSettings((prev: any) => ({ ...prev, heroSlides: data.heroSlides }));
           }
           if (data.videoSlides !== undefined && Array.isArray(data.videoSlides)) {
             localStorage.setItem("settings_videoSlides", JSON.stringify(data.videoSlides));
+            setGlobalSettings((prev: any) => ({ ...prev, videoSlides: data.videoSlides }));
           }
           if (data.lifestyleSlides !== undefined && Array.isArray(data.lifestyleSlides)) {
             localStorage.setItem("settings_lifestyleSlides", JSON.stringify(data.lifestyleSlides));
+            setGlobalSettings((prev: any) => ({ ...prev, lifestyleSlides: data.lifestyleSlides }));
           }
+          if (data.heroAutoPlay !== undefined) setGlobalSettings((prev: any) => ({ ...prev, heroAutoPlay: data.heroAutoPlay }));
+          if (data.heroAutoPlaySpeed !== undefined) setGlobalSettings((prev: any) => ({ ...prev, heroAutoPlaySpeed: data.heroAutoPlaySpeed }));
+          if (data.videoAutoPlay !== undefined) setGlobalSettings((prev: any) => ({ ...prev, videoAutoPlay: data.videoAutoPlay }));
+          if (data.videoAutoPlaySpeed !== undefined) setGlobalSettings((prev: any) => ({ ...prev, videoAutoPlaySpeed: data.videoAutoPlaySpeed }));
+          if (data.lifestyleAutoPlay !== undefined) setGlobalSettings((prev: any) => ({ ...prev, lifestyleAutoPlay: data.lifestyleAutoPlay }));
+          if (data.lifestyleAutoPlaySpeed !== undefined) setGlobalSettings((prev: any) => ({ ...prev, lifestyleAutoPlaySpeed: data.lifestyleAutoPlaySpeed }));
           if (data.faqs !== undefined && Array.isArray(data.faqs)) setFaqs(data.faqs);
         }
       })
@@ -751,6 +760,22 @@ export default function Home() {
     }
 
     loadData();
+  }, [loadData]);
+
+  useEffect(() => {
+    const handleSettingsUpdated = () => {
+      loadData();
+    };
+    if (typeof window !== "undefined") {
+      window.addEventListener("settingsUpdated", handleSettingsUpdated);
+      window.addEventListener("storage", handleSettingsUpdated);
+    }
+    return () => {
+      if (typeof window !== "undefined") {
+        window.removeEventListener("settingsUpdated", handleSettingsUpdated);
+        window.removeEventListener("storage", handleSettingsUpdated);
+      }
+    };
   }, [loadData]);
 
   const toggleFaq = (index: number) => {

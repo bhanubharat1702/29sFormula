@@ -2197,6 +2197,9 @@ export default function AdminDashboard() {
         if (brandLogoType) localStorage.setItem("settings_brandLogoType", brandLogoType);
         if (brandLogoValue) localStorage.setItem("settings_brandLogoValue", brandLogoValue);
         if (storeBusinessName) localStorage.setItem("settings_storeBusinessName", storeBusinessName);
+        if (Array.isArray(heroSlides)) localStorage.setItem("settings_heroSlides", JSON.stringify(heroSlides));
+        if (Array.isArray(videoSlides)) localStorage.setItem("settings_videoSlides", JSON.stringify(videoSlides));
+        if (Array.isArray(lifestyleSlides)) localStorage.setItem("settings_lifestyleSlides", JSON.stringify(lifestyleSlides));
         window.dispatchEvent(new Event("settingsUpdated"));
       }
 
