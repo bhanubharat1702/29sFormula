@@ -13,7 +13,8 @@ out/
 build/
 coverage/
 
-# Agent/AI tooling files (not part of project source)
-.agents/
-openspec/
-*.md
+# Agent/AI tooling files
+!.agents/KNOWLEDGE_BASE.md
+!SYSTEM_CHANGES_AND_ARCHITECTURE.md
+!functional_issues_audit.md
+!tenant_issues_audit.md

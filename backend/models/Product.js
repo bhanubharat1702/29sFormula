@@ -27,6 +27,9 @@ const productSchema = new mongoose.Schema({
 }, { timestamps: true });
 
 // ─── Indexes ────────────────────────────────────────────────────────────────
+// Storefront & Admin: filter by storeId with _id descending pagination
+productSchema.index({ storeId: 1, _id: -1 });
+
 // Storefront: filter by storeId and category, show newest first
 productSchema.index({ storeId: 1, category: 1, createdAt: -1 });
 
