@@ -10,10 +10,12 @@ import cors from "cors";
 import { generalLimiter } from "./middleware/rateLimiter.js";
 import { initSentry, captureException } from "./config/sentry.js";
 import { startStatsCron } from "./cron/statsCron.js";
+import { startSslPollingCron } from "./cron/sslPollingCron.js";
 import { startReportScheduler } from "./workers/reportWorker.js";
 
 // Initialize cron jobs & background report workers
 startStatsCron();
+startSslPollingCron();
 startReportScheduler();
 
 // Import Routers

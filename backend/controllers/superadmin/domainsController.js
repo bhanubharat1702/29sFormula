@@ -3,6 +3,7 @@ import Store from "../../models/Store.js";
 import { ReservedSubdomain, DomainSettings, RESERVED_SUBDOMAINS } from "../../models/Domain.js";
 import { dispatchCommunicationEvent } from "../../routes/superadmin/communications.js";
 import { invalidateTenantCache } from "../../middleware/tenantResolver.js";
+import { requestSslCertificate, pollSslCertificateStatus, renewSslCertificate } from "../../services/edgeProviderService.js";
 
 // Helper to seed reserved subdomains and default domain settings
 export const seedDomainDefaults = async () => {
@@ -325,10 +326,43 @@ export const recheckDomain = async (req, res) => {
     if (targetDomain) {
       targetDomain.lastDnsCheckAt = new Date();
       targetDomain.dnsStatus = "dns_verified";
-      targetDomain.sslStatus = "active";
       targetDomain.dnsFailureReason = "";
-      targetDomain.sslIssuedAt = new Date();
-      targetDomain.sslExpiresAt = new Date(Date.now() + 90 * 24 * 60 * 60 * 1000);
+
+      const settings = await DomainSettings.findOne().lean();
+      const providerOptions = {
+        provider: settings?.edgeProvider || "cloudflare",
+        cloudflareZoneId: settings?.cloudflareZoneId,
+        cloudflareApiToken: settings?.cloudflareApiToken,
+        vercelProjectId: settings?.vercelProjectId,
+        vercelTeamId: settings?.vercelTeamId,
+        vercelAuthToken: settings?.vercelAuthToken
+      };
+
+      if (!targetDomain.sslProviderHostnameId || targetDomain.sslStatus === "pending" || targetDomain.sslStatus === "failed") {
+        const sslRes = await requestSslCertificate(targetDomain.domain, providerOptions);
+        targetDomain.sslProvider = sslRes.provider;
+        targetDomain.sslProviderHostnameId = sslRes.providerHostnameId || "";
+        targetDomain.sslStatus = sslRes.sslStatus;
+        targetDomain.sslIssuedAt = sslRes.sslIssuedAt || null;
+        targetDomain.sslExpiresAt = sslRes.sslExpiresAt || null;
+        targetDomain.sslFailureReason = sslRes.sslFailureReason || "";
+        targetDomain.sslLastPolledAt = new Date();
+
+        if (sslRes.sslStatus === "active") {
+          targetDomain.dnsStatus = "active";
+        }
+      } else {
+        const pollRes = await pollSslCertificateStatus(targetDomain.domain, targetDomain, providerOptions);
+        targetDomain.sslStatus = pollRes.sslStatus;
+        if (pollRes.sslIssuedAt) targetDomain.sslIssuedAt = pollRes.sslIssuedAt;
+        if (pollRes.sslExpiresAt) targetDomain.sslExpiresAt = pollRes.sslExpiresAt;
+        targetDomain.sslFailureReason = pollRes.sslFailureReason || "";
+        targetDomain.sslLastPolledAt = new Date();
+
+        if (pollRes.sslStatus === "active") {
+          targetDomain.dnsStatus = "active";
+        }
+      }
 
       await store.save();
       invalidateTenantCache(store._id);
@@ -349,7 +383,7 @@ export const recheckDomain = async (req, res) => {
     }
 
     res.json({
-      message: `DNS check completed for '${domain}'. Status: Active (SSL Issued)`,
+      message: `DNS check completed for '${domain}'. SSL status: ${targetDomain?.sslStatus || "unknown"}.`,
       domain: targetDomain
     });
   } catch (err) {
@@ -369,14 +403,34 @@ export const forceSslRenewal = async (req, res) => {
 
     const target = store.domains.find(d => d.domain === domain.toLowerCase().trim());
     if (target) {
-      target.sslStatus = "active";
-      target.sslIssuedAt = new Date();
-      target.sslExpiresAt = new Date(Date.now() + 90 * 24 * 60 * 60 * 1000);
+      const settings = await DomainSettings.findOne().lean();
+      const providerOptions = {
+        provider: target.sslProvider || settings?.edgeProvider || "cloudflare",
+        cloudflareZoneId: settings?.cloudflareZoneId,
+        cloudflareApiToken: settings?.cloudflareApiToken,
+        vercelProjectId: settings?.vercelProjectId,
+        vercelTeamId: settings?.vercelTeamId,
+        vercelAuthToken: settings?.vercelAuthToken
+      };
+
+      const renewRes = await renewSslCertificate(domain, target, providerOptions);
+      target.sslProvider = renewRes.provider;
+      target.sslProviderHostnameId = renewRes.providerHostnameId || target.sslProviderHostnameId || "";
+      target.sslStatus = renewRes.sslStatus;
+      target.sslIssuedAt = renewRes.sslIssuedAt || null;
+      target.sslExpiresAt = renewRes.sslExpiresAt || null;
+      target.sslFailureReason = renewRes.sslFailureReason || "";
+      target.sslLastPolledAt = new Date();
+
+      if (renewRes.sslStatus === "active") {
+        target.dnsStatus = "active";
+      }
+
       await store.save();
     }
 
     res.json({
-      message: `SSL Certificate forcibly renewed for '${domain}'. Valid for next 90 days.`,
+      message: `SSL renewal initiated via edge provider for '${domain}'. SSL status: ${target?.sslStatus}.`,
       domain: target
     });
   } catch (err) {
@@ -528,25 +582,45 @@ export const bulkReverifyDomains = async (req, res) => {
 
     for (const store of stores) {
       let modified = false;
-      store.domains.forEach(d => {
-        if (d.dnsStatus === "pending" || d.dnsStatus === "failed") {
+      const settings = await DomainSettings.findOne().lean();
+      const providerOptions = {
+        provider: settings?.edgeProvider || "cloudflare",
+        cloudflareZoneId: settings?.cloudflareZoneId,
+        cloudflareApiToken: settings?.cloudflareApiToken,
+        vercelProjectId: settings?.vercelProjectId,
+        vercelTeamId: settings?.vercelTeamId,
+        vercelAuthToken: settings?.vercelAuthToken
+      };
+
+      for (const d of store.domains) {
+        if (d.dnsStatus === "pending" || d.dnsStatus === "failed" || d.sslStatus === "pending") {
           d.dnsStatus = "dns_verified";
-          d.sslStatus = "active";
           d.dnsFailureReason = "";
-          d.sslIssuedAt = new Date();
-          d.sslExpiresAt = new Date(Date.now() + 90 * 24 * 60 * 60 * 1000);
           d.lastDnsCheckAt = new Date();
+
+          const sslRes = await requestSslCertificate(d.domain, providerOptions);
+          d.sslProvider = sslRes.provider;
+          d.sslProviderHostnameId = sslRes.providerHostnameId || "";
+          d.sslStatus = sslRes.sslStatus;
+          d.sslIssuedAt = sslRes.sslIssuedAt || null;
+          d.sslExpiresAt = sslRes.sslExpiresAt || null;
+          d.sslFailureReason = sslRes.sslFailureReason || "";
+          d.sslLastPolledAt = new Date();
+
+          if (sslRes.sslStatus === "active") {
+            d.dnsStatus = "active";
+          }
           modified = true;
           count++;
         }
-      });
+      }
       if (modified) {
         await store.save();
         invalidateTenantCache(store._id);
       }
     }
 
-    res.json({ message: `Bulk re-verification completed. ${count} domains updated to Active (SSL Issued).` });
+    res.json({ message: `Bulk re-verification completed. ${count} domains processed with edge provider.` });
   } catch (err) {
     res.status(500).json({ error: "Failed to perform bulk re-verification." });
   }
@@ -555,7 +629,19 @@ export const bulkReverifyDomains = async (req, res) => {
 // PUT /api/superadmin/domains/settings — Update global domain settings & plan limits
 export const updateDomainSettings = async (req, res) => {
   try {
-    const { manualApprovalRequired, cnameTargetHost, aRecordTargetIp, platformOwnDomain, planDomainLimits } = req.body;
+    const {
+      manualApprovalRequired,
+      cnameTargetHost,
+      aRecordTargetIp,
+      platformOwnDomain,
+      planDomainLimits,
+      edgeProvider,
+      cloudflareZoneId,
+      cloudflareApiToken,
+      vercelProjectId,
+      vercelTeamId,
+      vercelAuthToken
+    } = req.body;
 
     let settings = await DomainSettings.findOne();
     if (!settings) {
@@ -567,6 +653,12 @@ export const updateDomainSettings = async (req, res) => {
     if (aRecordTargetIp) settings.aRecordTargetIp = aRecordTargetIp.trim();
     if (platformOwnDomain) settings.platformOwnDomain = platformOwnDomain.trim();
     if (planDomainLimits) settings.planDomainLimits = { ...settings.planDomainLimits, ...planDomainLimits };
+    if (edgeProvider) settings.edgeProvider = edgeProvider;
+    if (cloudflareZoneId !== undefined) settings.cloudflareZoneId = cloudflareZoneId;
+    if (cloudflareApiToken !== undefined) settings.cloudflareApiToken = cloudflareApiToken;
+    if (vercelProjectId !== undefined) settings.vercelProjectId = vercelProjectId;
+    if (vercelTeamId !== undefined) settings.vercelTeamId = vercelTeamId;
+    if (vercelAuthToken !== undefined) settings.vercelAuthToken = vercelAuthToken;
 
     await settings.save();
     res.json({ message: "Global Domain Settings updated.", settings });

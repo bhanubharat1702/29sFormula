@@ -55,6 +55,10 @@ const domainItemSchema = new mongoose.Schema({
   dnsFailureReason: { type: String, default: '' },
   sslIssuedAt: { type: Date, default: null },
   sslExpiresAt: { type: Date, default: null },
+  sslProvider: { type: String, enum: ['cloudflare', 'vercel', 'aws', 'acme', 'mock'], default: 'cloudflare' },
+  sslProviderHostnameId: { type: String, default: '' },
+  sslLastPolledAt: { type: Date, default: null },
+  sslFailureReason: { type: String, default: '' },
   createdAt: { type: Date, default: Date.now }
 }, { _id: true });
 

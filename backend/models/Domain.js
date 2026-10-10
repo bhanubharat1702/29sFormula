@@ -87,6 +87,23 @@ const domainSchema = new mongoose.Schema({
     type: Date, 
     default: null 
   },
+  sslProvider: {
+    type: String,
+    enum: ['cloudflare', 'vercel', 'aws', 'acme', 'mock'],
+    default: 'cloudflare'
+  },
+  sslProviderHostnameId: {
+    type: String,
+    default: ''
+  },
+  sslLastPolledAt: {
+    type: Date,
+    default: null
+  },
+  sslFailureReason: {
+    type: String,
+    default: ''
+  },
   createdAt: { 
     type: Date, 
     default: Date.now 
@@ -142,6 +159,16 @@ const domainSettingsSchema = new mongoose.Schema({
     type: Number, 
     default: 30 
   },
+  edgeProvider: {
+    type: String,
+    enum: ['cloudflare', 'vercel', 'aws', 'acme', 'mock'],
+    default: 'cloudflare'
+  },
+  cloudflareZoneId: { type: String, default: '' },
+  cloudflareApiToken: { type: String, default: '' },
+  vercelProjectId: { type: String, default: '' },
+  vercelTeamId: { type: String, default: '' },
+  vercelAuthToken: { type: String, default: '' },
   planDomainLimits: {
     starter: { type: Number, default: 0 },
     growth: { type: Number, default: 2 },

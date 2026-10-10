@@ -6,6 +6,7 @@ import {
     assignPlatformSubdomain,
     addMerchantDomain,
     recheckMerchantDomain,
+    pollMerchantDomainSsl,
     setPrimaryMerchantDomain,
     removeMerchantDomain
 } from "../controllers/merchantDomainController.js";
@@ -20,6 +21,7 @@ router.get("/api/merchant/domains/availability", verifyToken, isAdmin, checkSubd
 
 router.post("/api/merchant/domains/subdomain", verifyToken, isAdmin, assignPlatformSubdomain);
 router.post("/api/merchant/domains/recheck", verifyToken, isAdmin, recheckMerchantDomain);
+router.post("/api/merchant/domains/poll-ssl", verifyToken, isAdmin, pollMerchantDomainSsl);
 router.post("/api/merchant/domains", verifyToken, isAdmin, addMerchantDomain);
 
 router.put("/api/merchant/domains/set-primary", verifyToken, isAdmin, setPrimaryMerchantDomain);

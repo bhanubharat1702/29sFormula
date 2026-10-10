@@ -5,6 +5,7 @@ import { DomainSettings, ReservedSubdomain, RESERVED_SUBDOMAINS } from "../model
 import { invalidateTenantCache } from "../middleware/tenantResolver.js";
 import { getPlanDomainLimit, countCustomDomains } from "./superadmin/domainsController.js";
 import { subdomainBloomFilter, customDomainBloomFilter, reservedSubdomainBloomFilter } from "../utils/bloomFilter.js";
+import { requestSslCertificate, pollSslCertificateStatus } from "../services/edgeProviderService.js";
 
 const DEFAULT_PLATFORM_DOMAIN = "29sformula.com";
 
@@ -71,6 +72,10 @@ const serializeCustomDomain = (d, settings) => ({
     isPrimary: Boolean(d.isPrimary),
     dnsStatus: d.dnsStatus || "pending",
     sslStatus: d.sslStatus || "pending",
+    sslProvider: d.sslProvider || "cloudflare",
+    sslProviderHostnameId: d.sslProviderHostnameId || "",
+    sslLastPolledAt: d.sslLastPolledAt || null,
+    sslFailureReason: d.sslFailureReason || "",
     verificationToken: d.verificationToken || "",
     targetCname: d.targetCname || settings?.cnameTargetHost || "store.29sformula.com",
     targetA: d.targetA || settings?.aRecordTargetIp || "192.0.2.1",
@@ -474,11 +479,46 @@ export const recheckMerchantDomain = async (req, res) => {
             && target.approvedByAdmin === false;
 
         if (ownershipVerified && !awaitingApproval) {
-            target.dnsStatus = "active";
-            target.sslStatus = "active";
+            target.dnsStatus = "dns_verified";
             target.dnsFailureReason = "";
-            target.sslIssuedAt = new Date();
-            target.sslExpiresAt = new Date(Date.now() + 90 * 24 * 60 * 60 * 1000);
+
+            let settings = await DomainSettings.findOne().lean();
+            const providerOptions = {
+                provider: settings?.edgeProvider || "cloudflare",
+                cloudflareZoneId: settings?.cloudflareZoneId,
+                cloudflareApiToken: settings?.cloudflareApiToken,
+                vercelProjectId: settings?.vercelProjectId,
+                vercelTeamId: settings?.vercelTeamId,
+                vercelAuthToken: settings?.vercelAuthToken
+            };
+
+            // If SSL is not requested yet, physically call Edge Provider API to provision
+            if (!target.sslProviderHostnameId || target.sslStatus === "pending" || target.sslStatus === "failed") {
+                const sslRes = await requestSslCertificate(cleanDomain, providerOptions);
+                target.sslProvider = sslRes.provider;
+                target.sslProviderHostnameId = sslRes.providerHostnameId || "";
+                target.sslStatus = sslRes.sslStatus;
+                target.sslIssuedAt = sslRes.sslIssuedAt || null;
+                target.sslExpiresAt = sslRes.sslExpiresAt || null;
+                target.sslFailureReason = sslRes.sslFailureReason || "";
+                target.sslLastPolledAt = new Date();
+
+                if (sslRes.sslStatus === "active") {
+                    target.dnsStatus = "active";
+                }
+            } else {
+                // Otherwise poll the Edge Provider for the actual active status
+                const pollRes = await pollSslCertificateStatus(cleanDomain, target, providerOptions);
+                target.sslStatus = pollRes.sslStatus;
+                if (pollRes.sslIssuedAt) target.sslIssuedAt = pollRes.sslIssuedAt;
+                if (pollRes.sslExpiresAt) target.sslExpiresAt = pollRes.sslExpiresAt;
+                target.sslFailureReason = pollRes.sslFailureReason || "";
+                target.sslLastPolledAt = new Date();
+
+                if (pollRes.sslStatus === "active") {
+                    target.dnsStatus = "active";
+                }
+            }
         } else if (awaitingApproval) {
             target.dnsStatus = "dns_verified";
             target.sslStatus = "pending";
@@ -494,20 +534,27 @@ export const recheckMerchantDomain = async (req, res) => {
         store.auditTrail.push({
             action: "Domain Recheck",
             performedBy: req.user?.email || "Merchant",
-            details: `DNS recheck for '${cleanDomain}'. Result: ${target.dnsStatus}.`
+            details: `DNS recheck for '${cleanDomain}'. DNS: ${target.dnsStatus}, SSL: ${target.sslStatus}.`
         });
 
         await store.save();
         invalidateTenantCache(store._id);
 
+        const statusMessage = target.sslStatus === "active"
+            ? `'${cleanDomain}' verified and TLS certificate is active!`
+            : target.sslStatus === "issuing"
+                ? `'${cleanDomain}' ownership verified. TLS certificate provisioning is in progress.`
+                : `'${cleanDomain}' DNS verified. SSL status: ${target.sslStatus}.`;
+
         res.json({
             message: awaitingApproval
                 ? `'${cleanDomain}' ownership verified. It will go live once a platform admin approves it.`
                 : ownershipVerified
-                    ? `'${cleanDomain}' verified successfully. SSL is now active.`
+                    ? statusMessage
                     : `'${cleanDomain}' is not verified yet. Apply the DNS records and try again after propagation.`,
             verified: ownershipVerified,
             awaitingApproval,
+            sslStatus: target.sslStatus,
             domain: serializeCustomDomain(target, null),
             dnsInstructions: buildDnsInstructions(
                 cleanDomain,
@@ -519,6 +566,53 @@ export const recheckMerchantDomain = async (req, res) => {
     } catch (err) {
         console.error("Recheck Merchant Domain Error:", err);
         res.status(500).json({ error: "Failed to recheck domain." });
+    }
+};
+
+// POST /api/merchant/domains/poll-ssl — Poll actual SSL status from edge provider
+export const pollMerchantDomainSsl = async (req, res) => {
+    try {
+        const store = await resolveMerchantStore(req);
+        if (!store) return res.status(404).json({ error: "Merchant store not found." });
+
+        const cleanDomain = cleanDomainInput(req.body.domain || "");
+        if (!cleanDomain) return res.status(400).json({ error: "Domain is required." });
+
+        const target = (store.domains || []).find(d => d.domain === cleanDomain);
+        if (!target) return res.status(404).json({ error: `Domain '${cleanDomain}' is not connected to your store.` });
+
+        let settings = await DomainSettings.findOne().lean();
+        const providerOptions = {
+            provider: target.sslProvider || settings?.edgeProvider || "cloudflare",
+            cloudflareZoneId: settings?.cloudflareZoneId,
+            cloudflareApiToken: settings?.cloudflareApiToken,
+            vercelProjectId: settings?.vercelProjectId,
+            vercelTeamId: settings?.vercelTeamId,
+            vercelAuthToken: settings?.vercelAuthToken
+        };
+
+        const pollRes = await pollSslCertificateStatus(cleanDomain, target, providerOptions);
+        target.sslStatus = pollRes.sslStatus;
+        if (pollRes.sslIssuedAt) target.sslIssuedAt = pollRes.sslIssuedAt;
+        if (pollRes.sslExpiresAt) target.sslExpiresAt = pollRes.sslExpiresAt;
+        target.sslFailureReason = pollRes.sslFailureReason || "";
+        target.sslLastPolledAt = new Date();
+
+        if (pollRes.sslStatus === "active" && target.dnsStatus === "dns_verified") {
+            target.dnsStatus = "active";
+        }
+
+        await store.save();
+        invalidateTenantCache(store._id);
+
+        res.json({
+            message: `SSL status for '${cleanDomain}' is now: ${target.sslStatus}.`,
+            sslStatus: target.sslStatus,
+            domain: serializeCustomDomain(target, settings)
+        });
+    } catch (err) {
+        console.error("Poll SSL Error:", err);
+        res.status(500).json({ error: "Failed to poll SSL status." });
     }
 };
 
